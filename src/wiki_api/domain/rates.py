@@ -39,6 +39,12 @@ def rewarding_rolls(rolls: Sequence[DropRoll]) -> tuple[DropRoll, ...]:
     return tuple(roll for roll in rolls if roll.is_reward)
 
 
+def drop_order_key(weight: float, denominator: float) -> int:
+    if weight <= 0.0 or denominator <= 0.0:
+        raise ValueError("a drop needs a positive weight and denominator")
+    return round(denominator / weight)
+
+
 def test_the_denominator_includes_the_nothing_roll() -> None:
     rolls = [
         DropRoll(item_id=7980, weight=1.0, min_amount=1, max_amount=1),
@@ -77,3 +83,26 @@ def test_a_roll_needs_a_positive_weight() -> None:
 
     with pytest.raises(ValueError):
         DropRoll(item_id=995, weight=0.0, min_amount=1, max_amount=1)
+
+
+def test_the_order_key_ranks_a_drop_by_rarity_in_both_directions() -> None:
+    common = drop_order_key(64.0, 128.0)
+    rare = drop_order_key(1.0, 128.0)
+    assert common == 2
+    assert rare == 128
+    assert common < rare
+
+
+def test_the_order_key_is_comparable_across_two_different_tables() -> None:
+    kbd_heads = drop_order_key(1.0, 128.0)
+    kbd_main = drop_order_key(50.0, 1020.20404)
+    assert kbd_main == 20
+    assert kbd_main < kbd_heads
+
+
+def test_an_impossible_drop_has_no_order_key() -> None:
+    import pytest
+
+    for weight, denominator in ((0.0, 128.0), (1.0, 0.0)):
+        with pytest.raises(ValueError):
+            drop_order_key(weight, denominator)

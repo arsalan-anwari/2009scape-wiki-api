@@ -5,7 +5,7 @@ from typing import Final
 
 from pydantic import BaseModel, ConfigDict, Field
 
-SCHEMA_VERSION: Final = 2
+SCHEMA_VERSION: Final = 3
 
 
 class Manifest(BaseModel):

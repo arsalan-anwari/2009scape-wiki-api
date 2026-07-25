@@ -50,12 +50,22 @@ class KnowledgeRepository(Protocol):
     ) -> Page[SearchHit]: ...
 
     def edges_from(
-        self, key: EntityKey, *, rel: RelationshipType | None = None
-    ) -> tuple[Edge, ...]: ...
+        self,
+        key: EntityKey,
+        *,
+        rel: RelationshipType | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Edge]: ...
 
     def edges_to(
-        self, key: EntityKey, *, rel: RelationshipType | None = None
-    ) -> tuple[Edge, ...]: ...
+        self,
+        key: EntityKey,
+        *,
+        rel: RelationshipType | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Edge]: ...
 
     def variants_of(self, key: EntityKey) -> tuple[Entity, ...]: ...
 
@@ -82,6 +92,15 @@ def test_the_protocol_describes_the_whole_read_surface() -> None:
         "price_history",
         "close",
     }
+
+
+def test_every_listing_operation_is_paginated() -> None:
+    import inspect
+
+    for name in ("list_entities", "search", "edges_from", "edges_to"):
+        signature = inspect.signature(getattr(KnowledgeRepository, name))
+        assert {"limit", "offset"} <= set(signature.parameters)
+        assert signature.return_annotation.startswith("Page[")
 
 
 def test_the_protocol_is_read_only() -> None:

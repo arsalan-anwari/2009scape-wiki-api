@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "location",
+      "id": 1,
+      "name": "King Black Dragon Lair",
+      "description": "A lava-filled cavern beneath the Wilderness.",
+      "source_key": "wilderness/kbd_lair",
+      "source_ref": "overlay/locations/kbd_lair",
+      "attributes": {
+        "kind": "dungeon",
+        "centre": { "x": 2273, "y": 4698, "plane": 0 },
+        "region_id": 9033,
+        "members": true,
+        "multicombat": true
+      }
+    },
+    {
+      "type": "location",
+      "id": 2,
+      "name": "Wilderness",
+      "description": "The lawless lands north of the Kingdom of Misthalin.",
+      "source_key": "wilderness",
+      "source_ref": "overlay/locations/wilderness",
+      "attributes": {
+        "kind": "area",
+        "bounds": {
+          "min_x": 2944,
+          "min_y": 3525,
+          "max_x": 3392,
+          "max_y": 3968,
+          "plane": 0
+        },
+        "multicombat": true
+      }
+    },
+    {
+      "type": "location",
+      "id": 3,
+      "name": "White Wolf Mountain",
+      "description": "The pass between Taverley and Catherby.",
+      "source_key": "asgarnia/white_wolf_mountain",
+      "source_ref": "overlay/locations/white_wolf_mountain",
+      "attributes": {
+        "kind": "area",
+        "members": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "npc:50",
+      "rel": "located_in",
+      "dst": "location:1",
+      "discriminator": "2273:4698:0",
+      "order_key": 0,
+      "source_ref": "npc_spawns.json#50",
+      "attributes": {
+        "at": { "x": 2273, "y": 4698, "plane": 0 },
+        "spawn_kind": "npc_spawn",
+        "amount": 1
+      }
+    },
+    {
+      "src": "location:1",
+      "rel": "part_of",
+      "dst": "location:2",
+      "order_key": 0,
+      "source_ref": "overlay/locations/kbd_lair"
+    },
+    {
+      "src": "shop:53",
+      "rel": "located_in",
+      "dst": "location:3",
+      "order_key": 0,
+      "source_ref": "overlay/locations/white_wolf_mountain",
+      "attributes": { "spawn_kind": "shop_front" }
+    },
+    {
+      "src": "npc:4559",
+      "rel": "located_in",
+      "dst": "location:3",
+      "order_key": 10,
+      "source_ref": "overlay/locations/white_wolf_mountain",
+      "attributes": { "spawn_kind": "shop_front" }
+    }
+  ]
+}

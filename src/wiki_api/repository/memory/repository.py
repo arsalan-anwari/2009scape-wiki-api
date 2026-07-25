@@ -14,6 +14,7 @@ from wiki_api.domain.errors import (
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.manifest import SCHEMA_VERSION
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
+from wiki_api.domain.relationships import Edge
 from wiki_api.domain.search import SearchHit
 
 if TYPE_CHECKING:
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
     from wiki_api.domain.alias import EntityAlias
     from wiki_api.domain.manifest import Manifest
     from wiki_api.domain.prices import PricePoint
-    from wiki_api.domain.relationships import Edge, RelationshipType
+    from wiki_api.domain.relationships import RelationshipType
 
 NAME_WEIGHT = 10.0
 ALIAS_WEIGHT = 5.0
@@ -148,8 +149,13 @@ class InMemoryKnowledgeRepository:
         )
 
     def edges_from(
-        self, key: EntityKey, *, rel: RelationshipType | None = None
-    ) -> tuple[Edge, ...]:
+        self,
+        key: EntityKey,
+        *,
+        rel: RelationshipType | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Edge]:
         matched = [
             edge
             for edge in self._edges
@@ -164,11 +170,16 @@ class InMemoryKnowledgeRepository:
                 edge.discriminator,
             )
         )
-        return tuple(matched)
+        return _edge_page(matched, limit, offset)
 
     def edges_to(
-        self, key: EntityKey, *, rel: RelationshipType | None = None
-    ) -> tuple[Edge, ...]:
+        self,
+        key: EntityKey,
+        *,
+        rel: RelationshipType | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Edge]:
         matched = [
             edge
             for edge in self._edges
@@ -183,7 +194,7 @@ class InMemoryKnowledgeRepository:
                 edge.discriminator,
             )
         )
-        return tuple(matched)
+        return _edge_page(matched, limit, offset)
 
     def variants_of(self, key: EntityKey) -> tuple[Entity, ...]:
         variants = [
@@ -226,6 +237,15 @@ class InMemoryKnowledgeRepository:
                 return None
             total += weight
         return total
+
+
+def _edge_page(matched: Sequence[Edge], limit: int, offset: int) -> Page[Edge]:
+    return Page[Edge](
+        items=tuple(matched[offset : offset + limit]),
+        total=len(matched),
+        limit=limit,
+        offset=offset,
+    )
 
 
 def _fold(value: str) -> str:

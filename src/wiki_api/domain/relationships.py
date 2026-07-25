@@ -13,6 +13,7 @@ from wiki_api.domain.attributes import (
 )
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.provenance import Provenance
+from wiki_api.domain.space import Coordinate, SpawnKind
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -24,6 +25,14 @@ class RelationshipType(StrEnum):
     STAFFED_BY = "staffed_by"
     REWARDS = "rewards"
     USES_AMMUNITION = "uses_ammunition"
+    LOCATED_IN = "located_in"
+    PART_OF = "part_of"
+
+
+def spawn_discriminator(at: Coordinate | None) -> str:
+    if at is None:
+        return ""
+    return str(at)
 
 
 class DropTableKind(StrEnum):
@@ -116,12 +125,39 @@ class AmmunitionEdgeAttributes(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
+class LocatedInEdgeAttributes(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    at: Annotated[
+        Coordinate | None,
+        AttributeMeta("Position", "map", 10, AttributeFormat.COORD),
+    ] = None
+    spawn_kind: Annotated[
+        SpawnKind,
+        AttributeMeta("Kind", "map", 20, AttributeFormat.TEXT),
+    ] = SpawnKind.NPC_SPAWN
+    respawn_ticks: Annotated[
+        int | None,
+        AttributeMeta("Respawn", "map", 30, AttributeFormat.INT, unit="ticks"),
+    ] = None
+    amount: Annotated[
+        int,
+        AttributeMeta("Amount", "map", 40, AttributeFormat.INT),
+    ] = Field(default=1, ge=1)
+
+
+class PartOfEdgeAttributes(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+
 EdgeAttributes = (
     DropEdgeAttributes
     | SellEdgeAttributes
     | StaffedByEdgeAttributes
     | RewardEdgeAttributes
     | AmmunitionEdgeAttributes
+    | LocatedInEdgeAttributes
+    | PartOfEdgeAttributes
 )
 
 EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = {
@@ -130,6 +166,8 @@ EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = 
     RelationshipType.STAFFED_BY: StaffedByEdgeAttributes,
     RelationshipType.REWARDS: RewardEdgeAttributes,
     RelationshipType.USES_AMMUNITION: AmmunitionEdgeAttributes,
+    RelationshipType.LOCATED_IN: LocatedInEdgeAttributes,
+    RelationshipType.PART_OF: PartOfEdgeAttributes,
 }
 
 
@@ -213,6 +251,24 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "equipment",
         50,
     ),
+    RelationshipType.LOCATED_IN: _spec(
+        RelationshipType.LOCATED_IN,
+        "Found in",
+        "Found here",
+        frozenset({EntityType.NPC, EntityType.SHOP, EntityType.ITEM, EntityType.QUEST}),
+        frozenset({EntityType.LOCATION}),
+        "map",
+        60,
+    ),
+    RelationshipType.PART_OF: _spec(
+        RelationshipType.PART_OF,
+        "Part of",
+        "Contains",
+        frozenset({EntityType.LOCATION}),
+        frozenset({EntityType.LOCATION}),
+        "map",
+        70,
+    ),
 }
 
 
@@ -249,6 +305,18 @@ class Edge(BaseModel):
         expected = EDGE_ATTRIBUTE_MODELS[self.rel]
         if type(self.attributes) is not expected:
             raise ValueError(f"{self.rel.value} needs {expected.__name__}")
+        return self
+
+    @model_validator(mode="after")
+    def _check_the_spatial_rules(self) -> Self:
+        if isinstance(self.attributes, LocatedInEdgeAttributes):
+            expected = spawn_discriminator(self.attributes.at)
+            if self.discriminator != expected:
+                raise ValueError(
+                    f"a spawn is keyed by its position, expected {expected!r}"
+                )
+        if self.rel is RelationshipType.PART_OF and self.src == self.dst:
+            raise ValueError("a location cannot be part of itself")
         return self
 
     @property
@@ -391,5 +459,84 @@ def test_a_same_type_relationship_still_rejects_the_wrong_types() -> None:
             rel=RelationshipType.USES_AMMUNITION,
             dst=EntityKey(type=EntityType.ITEM, id=877),
             attributes=AmmunitionEdgeAttributes(),
+            provenance=_provenance(),
+        )
+
+
+def _spawn(**overrides: Any) -> Edge:
+    at = Coordinate(x=2273, y=4698, plane=0)
+    payload: dict[str, Any] = {
+        "src": EntityKey(type=EntityType.NPC, id=50),
+        "rel": RelationshipType.LOCATED_IN,
+        "dst": EntityKey(type=EntityType.LOCATION, id=1),
+        "attributes": LocatedInEdgeAttributes(at=at),
+        "discriminator": spawn_discriminator(at),
+        "provenance": _provenance(),
+    }
+    payload.update(overrides)
+    return Edge(**payload)
+
+
+def test_a_spawn_edge_places_an_entity_on_the_map() -> None:
+    edge = _spawn()
+    assert isinstance(edge.attributes, LocatedInEdgeAttributes)
+    assert edge.attributes.at is not None
+    assert edge.attributes.at.region_id == 9033
+    assert edge.spec.inverse_label == "Found here"
+
+
+def test_two_spawns_in_one_place_stay_distinct_without_a_counter() -> None:
+    first = Coordinate(x=3093, y=3509, plane=0)
+    second = Coordinate(x=3098, y=3508, plane=0)
+    assert spawn_discriminator(first) != spawn_discriminator(second)
+
+
+def test_a_spawn_is_keyed_by_its_position_so_a_reorder_cannot_move_it() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        _spawn(discriminator="0")
+
+
+def test_a_placement_without_an_exact_tile_needs_no_discriminator() -> None:
+    edge = _spawn(
+        src=EntityKey(type=EntityType.SHOP, id=53),
+        attributes=LocatedInEdgeAttributes(spawn_kind=SpawnKind.SHOP_FRONT),
+        discriminator="",
+    )
+    assert isinstance(edge.attributes, LocatedInEdgeAttributes)
+    assert edge.attributes.at is None
+    assert edge.attributes.spawn_kind is SpawnKind.SHOP_FRONT
+
+
+def test_only_a_location_can_be_the_place_something_is_found_in() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        _spawn(dst=EntityKey(type=EntityType.NPC, id=51))
+
+
+def test_a_location_hierarchy_reads_naturally_in_both_directions() -> None:
+    edge = Edge(
+        src=EntityKey(type=EntityType.LOCATION, id=2),
+        rel=RelationshipType.PART_OF,
+        dst=EntityKey(type=EntityType.LOCATION, id=1),
+        attributes=PartOfEdgeAttributes(),
+        provenance=_provenance(),
+    )
+    assert edge.spec.forward_label == "Part of"
+    assert edge.spec.inverse_label == "Contains"
+
+
+def test_a_location_cannot_be_part_of_itself() -> None:
+    import pytest
+
+    place = EntityKey(type=EntityType.LOCATION, id=1)
+    with pytest.raises(ValueError):
+        Edge(
+            src=place,
+            rel=RelationshipType.PART_OF,
+            dst=place,
+            attributes=PartOfEdgeAttributes(),
             provenance=_provenance(),
         )

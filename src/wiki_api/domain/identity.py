@@ -13,6 +13,7 @@ class EntityType(StrEnum):
     NPC = "npc"
     SHOP = "shop"
     QUEST = "quest"
+    LOCATION = "location"
 
 
 class EntityKey(BaseModel):

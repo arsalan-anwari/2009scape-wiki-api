@@ -14,6 +14,7 @@ from wiki_api.domain.errors import (
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.manifest import SCHEMA_VERSION
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
+from wiki_api.domain.relationships import Edge
 from wiki_api.domain.search import SearchHit
 from wiki_api.repository.errors import ArtifactUnreadable
 from wiki_api.repository.sqlite import queries
@@ -33,7 +34,7 @@ if TYPE_CHECKING:
 
     from wiki_api.domain.manifest import Manifest
     from wiki_api.domain.prices import PricePoint
-    from wiki_api.domain.relationships import Edge, RelationshipType
+    from wiki_api.domain.relationships import RelationshipType
 
 
 class SqliteKnowledgeRepository:
@@ -143,14 +144,38 @@ class SqliteKnowledgeRepository:
         return Page[SearchHit](items=hits, total=total, limit=limit, offset=offset)
 
     def edges_from(
-        self, key: EntityKey, *, rel: RelationshipType | None = None
-    ) -> tuple[Edge, ...]:
-        return self._edges(queries.SELECT_EDGES_FROM, key, rel)
+        self,
+        key: EntityKey,
+        *,
+        rel: RelationshipType | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Edge]:
+        return self._edges(
+            queries.SELECT_EDGES_FROM,
+            queries.COUNT_EDGES_FROM,
+            key,
+            rel,
+            limit,
+            offset,
+        )
 
     def edges_to(
-        self, key: EntityKey, *, rel: RelationshipType | None = None
-    ) -> tuple[Edge, ...]:
-        return self._edges(queries.SELECT_EDGES_TO, key, rel)
+        self,
+        key: EntityKey,
+        *,
+        rel: RelationshipType | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Edge]:
+        return self._edges(
+            queries.SELECT_EDGES_TO,
+            queries.COUNT_EDGES_TO,
+            key,
+            rel,
+            limit,
+            offset,
+        )
 
     def variants_of(self, key: EntityKey) -> tuple[Entity, ...]:
         rows = self._all(
@@ -171,17 +196,26 @@ class SqliteKnowledgeRepository:
         self._connections.close()
 
     def _edges(
-        self, statement: str, key: EntityKey, rel: RelationshipType | None
-    ) -> tuple[Edge, ...]:
-        rows = self._all(
-            statement,
-            {
-                "type": key.type.value,
-                "id": key.id,
-                "rel": rel.value if rel else None,
-            },
+        self,
+        statement: str,
+        counter: str,
+        key: EntityKey,
+        rel: RelationshipType | None,
+        limit: int,
+        offset: int,
+    ) -> Page[Edge]:
+        parameters = {
+            "type": key.type.value,
+            "id": key.id,
+            "rel": rel.value if rel else None,
+        }
+        rows = self._all(statement, {**parameters, "limit": limit, "offset": offset})
+        return Page[Edge](
+            items=tuple(edge_from_row(row) for row in rows),
+            total=self._total(counter, parameters),
+            limit=limit,
+            offset=offset,
         )
-        return tuple(edge_from_row(row) for row in rows)
 
     def _read_manifest(self) -> Manifest:
         return manifest_from_rows(self._all(queries.SELECT_META, {}))

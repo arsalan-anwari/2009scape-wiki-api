@@ -25,6 +25,8 @@ SEARCH_ENTITIES: Final = load("search_entities.sql")
 COUNT_SEARCH_ENTITIES: Final = load("count_search_entities.sql")
 SELECT_EDGES_FROM: Final = load("select_edges_from.sql")
 SELECT_EDGES_TO: Final = load("select_edges_to.sql")
+COUNT_EDGES_FROM: Final = load("count_edges_from.sql")
+COUNT_EDGES_TO: Final = load("count_edges_to.sql")
 SELECT_VARIANTS: Final = load("select_variants.sql")
 SELECT_PRICE_HISTORY: Final = load("select_price_history.sql")
 
@@ -55,11 +57,21 @@ def test_no_query_writes_to_the_artifact() -> None:
         COUNT_SEARCH_ENTITIES,
         SELECT_EDGES_FROM,
         SELECT_EDGES_TO,
+        COUNT_EDGES_FROM,
+        COUNT_EDGES_TO,
         SELECT_VARIANTS,
         SELECT_PRICE_HISTORY,
     )
     for statement in statements:
         assert not any(word in statement.upper() for word in forbidden)
+
+
+def test_every_walk_of_the_graph_is_bounded_and_countable() -> None:
+    for statement in (SELECT_EDGES_FROM, SELECT_EDGES_TO):
+        assert "LIMIT :limit" in statement
+        assert "OFFSET :offset" in statement
+    for statement in (COUNT_EDGES_FROM, COUNT_EDGES_TO):
+        assert "COUNT(*) AS total" in statement
 
 
 def test_the_listing_queries_exclude_variants_and_unpublished_entities() -> None:
