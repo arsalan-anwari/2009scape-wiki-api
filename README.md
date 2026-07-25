@@ -10,8 +10,6 @@ interfaces:
 
 ## How it works
 
-This is a data pipeline, not a hand-edited wiki. The flow is:
-
 1. Read the raw game sources.
 2. Clean them into entities (items, NPCs, quests, shops, locations) and the
    relationships between them (dropped by, sold in, rewarded by).
@@ -37,7 +35,7 @@ committed to this repo.
 
 ## The knowledge model
 
-Everything the API serves is an **entity** — an item, NPC, shop or quest — with
+Everything the API serves is an **entity**: an item, NPC, shop or quest with
 one identity, one shape, and typed **relationships** to other entities.
 
 - Identity is `(type, id)` and never changes. Numeric ids overlap between types,
@@ -50,8 +48,8 @@ one identity, one shape, and typed **relationships** to other entities.
 - Type-specific values (buy limit, lifepoints, quest length) are declared once in
   an **attribute registry** that carries their label, group and units, so pages
   and API payloads can be rendered without any code knowing the field names.
-- Relationships carry their own data — a drop keeps its weight *and* its
-  denominator, so a rate renders exactly as `1/128`.
+- Relationships carry their own data meaning a drop keeps its weight *and* its
+  denominator, so a rate renders exactly (ex: `1/128`).
 - Every fact records where it came from and which game version it reflects.
 
 ## Development
@@ -62,5 +60,6 @@ Requires uv, which installs and manages the pinned Python version for you.
 uv sync --all-extras       // install all dependencies
 uv run poe check           // run linting, type checks, boundary checks and tests
 uv run poe fix             // auto fix formatting and simple lint issues
+scripts/test_ci.sh --fix --no-act   // fix, run the checks, ignore CI workflow
 scripts/test_ci.sh --fix   // fix, run the checks, then run the CI workflow locally
 ```
