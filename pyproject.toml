@@ -1,0 +1,122 @@
+[project]
+name = "scape2009-wiki-api"
+version = "0.0.0"
+description = "Derived-data pipeline turning 2009scape game sources into a queryable knowledge base, exposed over HTTP-JSON and MCP."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Arsalan Anwari", email = "arsalan@anwari.nl" }]
+keywords = ["2009scape", "runescape", "wiki", "fastapi", "mcp", "knowledge-graph"]
+dependencies = [
+    "fastapi>=0.140.0",
+    "fastmcp>=3.4.4",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.2",
+    "uvicorn[standard]>=0.51.0",
+    "huggingface-hub>=1.24.0",
+]
+
+[project.optional-dependencies]
+pipeline = [
+    "httpx>=0.28.1",
+    "lxml>=6.1.1",
+]
+
+[project.urls]
+Repository = "https://github.com/arsalan-anwari/2009scape-wiki-api"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.0",
+    "mypy>=2.3.0",
+    "import-linter>=2.13",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "poethepoet>=0.48.0",
+    "httpx>=0.28.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.0,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "wiki_api"
+module-root = "src"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["src", "tests"]
+python_files = ["*.py"]
+python_functions = ["test_*"]
+addopts = "--import-mode=importlib --cov=wiki_api --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src/wiki_api"]
+branch = true
+
+[tool.coverage.report]
+exclude_also = ["def test_.*", "if __name__ == .__main__.:"]
+
+[tool.importlinter]
+root_packages = ["wiki_api"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Layered architecture: surfaces > core > repository > domain"
+type = "layers"
+layers = [
+    "wiki_api.surfaces",
+    "wiki_api.core",
+    "wiki_api.repository",
+    "wiki_api.domain",
+]
+
+[[tool.importlinter.contracts]]
+name = "Runtime never imports the offline pipeline"
+type = "forbidden"
+source_modules = [
+    "wiki_api.surfaces",
+    "wiki_api.core",
+    "wiki_api.repository",
+    "wiki_api.domain",
+]
+forbidden_modules = ["wiki_api.pipeline"]
+
+[[tool.importlinter.contracts]]
+name = "Domain is pure: no transport, storage, or ingestion libraries"
+type = "forbidden"
+source_modules = ["wiki_api.domain"]
+forbidden_modules = [
+    "fastapi",
+    "fastmcp",
+    "starlette",
+    "sqlite3",
+    "httpx",
+    "lxml",
+]
+
+[tool.poe.tasks]
+lint = "ruff check ."
+lint-fix = "ruff check --fix ."
+format-check = "ruff format --check ."
+format = "ruff format ."
+typecheck = "mypy"
+imports = "lint-imports"
+test = "pytest"
+fix = ["lint-fix", "format"]
+check = ["lint", "format-check", "typecheck", "imports", "test"]

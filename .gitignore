@@ -1,0 +1,33 @@
+# Ignore the data being uploaded to Huggingface
+data/
+
+# Ignore the seed data used from the game server and other resources
+# This is updated by the developer and the clean data will be in `data/` and huggingface datasets
+game_data/
+
+# Ignore the roadmap and custom notes for the project
+roadmap/
+
+# Ignore the VSCode settings folder
+.vscode/
+
+# Python tooling
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.env
+
+# Local metadata cache
+.metadata_cache/
+.import_linter_cache/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
