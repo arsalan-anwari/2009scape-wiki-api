@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "quest",
+      "id": 1,
+      "name": "Death Plateau",
+      "description": "Help the Imperial Guard find a route up Death Plateau.",
+      "source_key": "DEATH_PLATEAU",
+      "source_ref": "overlay/quests/death_plateau",
+      "attributes": {
+        "difficulty": "Novice",
+        "length": "Short",
+        "quest_points": 1,
+        "members": true,
+        "series": "Troll",
+        "start_location": "Burthorpe"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "quest:1",
+      "rel": "rewards",
+      "dst": "item:3105",
+      "order_key": 0,
+      "source_ref": "overlay/quests/death_plateau",
+      "attributes": { "amount": 1 }
+    }
+  ]
+}

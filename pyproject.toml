@@ -59,6 +59,11 @@ strict = true
 files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 
+[tool.pydantic-mypy]
+init_typed = true
+init_forbid_extra = true
+warn_required_dynamic_aliases = true
+
 [tool.pytest.ini_options]
 testpaths = ["src", "tests"]
 python_files = ["*.py"]
@@ -118,5 +123,6 @@ format = "ruff format ."
 typecheck = "mypy"
 imports = "lint-imports"
 test = "pytest"
+fetch-ge = { script = "wiki_api.pipeline.sources.grand_exchange:main" }
 fix = ["lint-fix", "format"]
 check = ["lint", "format-check", "typecheck", "imports", "test"]

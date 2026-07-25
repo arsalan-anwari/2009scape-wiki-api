@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "source": "npc_configs.json",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "npc",
+      "id": 50,
+      "name": "King Black Dragon",
+      "description": "The biggest, meanest dragon around.",
+      "source_ref": "npc_configs.json#50",
+      "attributes": {
+        "lifepoints": 240,
+        "attack_level": 240,
+        "strength_level": 240,
+        "defence_level": 240,
+        "magic_level": 240,
+        "range_level": 1,
+        "bonuses": [0, 0, 0, 0, 0, 70, 90, 90, 80, 70, 0, 0, 0, 0, 0],
+        "weakness": 4,
+        "slayer_exp": 258.0,
+        "aggressive": true,
+        "agg_radius": 64,
+        "respawn_delay": 50,
+        "clue_level": 2,
+        "combat_audio": [408, 410, 409],
+        "death_animation": 92,
+        "defence_animation": 89,
+        "melee_animation": 80,
+        "magic_animation": 80,
+        "range_animation": 80
+      }
+    },
+    {
+      "type": "npc",
+      "id": 4559,
+      "name": "Holoy",
+      "source_ref": "npc_configs.json#4559"
+    },
+    {
+      "type": "npc",
+      "id": 3089,
+      "name": "",
+      "source_ref": "npc_configs.json#3089",
+      "attributes": {
+        "lifepoints": 10,
+        "attack_level": 1,
+        "strength_level": 1,
+        "defence_level": 1,
+        "range_level": 1,
+        "combat_audio": [511, 513, 512]
+      }
+    }
+  ]
+}

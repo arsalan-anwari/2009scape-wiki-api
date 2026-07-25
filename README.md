@@ -26,14 +26,33 @@ committed to this repo.
 
 - src/wiki_api: the installable package
   - domain: the core data model (entities and relationships)
-  - repository: data access behind one interface
+  - repository: data access behind one interface (SQLite/FTS5 and in-memory)
   - core: the query logic shared by both interfaces
   - surfaces/http: the FastAPI HTTP API
   - surfaces/mcp: the MCP server
-  - pipeline: the offline code that builds the dataset
-- tests: integration tests
+  - pipeline/artifact: the offline code that builds the dataset
+- tests: integration tests and the hand-made knowledge fixtures
 - scripts: helper scripts for development and publishing
 - docs: public API documentation
+
+## The knowledge model
+
+Everything the API serves is an **entity** — an item, NPC, shop or quest — with
+one identity, one shape, and typed **relationships** to other entities.
+
+- Identity is `(type, id)` and never changes. Numeric ids overlap between types,
+  so an id alone is never an identity.
+- Each entity also has a readable `slug`, unique within its type. Retired slugs
+  and community shorthand live on as **aliases** that redirect, so links do not
+  rot.
+- Duplicate ids for the same thing (noted, bound or placeholder items) point at a
+  canonical entity and stay out of search and index listings.
+- Type-specific values (buy limit, lifepoints, quest length) are declared once in
+  an **attribute registry** that carries their label, group and units, so pages
+  and API payloads can be rendered without any code knowing the field names.
+- Relationships carry their own data — a drop keeps its weight *and* its
+  denominator, so a rate renders exactly as `1/128`.
+- Every fact records where it came from and which game version it reflects.
 
 ## Development
 

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "source": "shops.json",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "shop",
+      "id": 53,
+      "name": "Crossbow Shop (white Wolf Mountain)",
+      "source_ref": "shops.json#53",
+      "attributes": {
+        "general_store": false,
+        "currency_item_id": 995,
+        "high_alch": false
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "shop:53",
+      "rel": "staffed_by",
+      "dst": "npc:4559",
+      "source_ref": "shops.json#53.npcs",
+      "order_key": 0
+    },
+    {
+      "src": "shop:53",
+      "rel": "sells",
+      "dst": "item:9440",
+      "source_ref": "shops.json#53.stock",
+      "order_key": 0,
+      "attributes": {
+        "stock_amount": 10,
+        "restock_rate": 100,
+        "price": 8,
+        "currency_item_id": 995,
+        "slot": 0
+      }
+    }
+  ]
+}

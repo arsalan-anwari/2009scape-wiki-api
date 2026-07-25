@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "source": "ranged_weapon_configs.json",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "edges": [
+    {
+      "src": "item:767",
+      "rel": "uses_ammunition",
+      "dst": "item:877",
+      "order_key": 0,
+      "source_ref": "ranged_weapon_configs.json#767.ammunition"
+    },
+    {
+      "src": "item:732",
+      "rel": "uses_ammunition",
+      "dst": "item:732",
+      "order_key": 0,
+      "source_ref": "ranged_weapon_configs.json#732.ammunition"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 10,
+  "entities": [
+    {
+      "type": "item",
+      "id": 14422,
+      "name": "Sacred clay pouch (class 1)",
+      "description": "This scroll will make your familiar deposit its items at your base.",
+      "source_ref": "overlay/items/duplicate_id_14422",
+      "attributes": {
+        "tradeable": true,
+        "shop_price": 30,
+        "destroy": true,
+        "destroy_message": "Drop",
+        "attack_speed": 4,
+        "bonuses": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "absorb": [0, 0, 0],
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "shop",
+      "id": 53,
+      "mode": "patch",
+      "name": "Crossbow Shop (White Wolf Mountain)",
+      "source_ref": "overlay/shops/53_title_case"
+    }
+  ],
+  "aliases": [
+    {
+      "type": "item",
+      "slug": "dragon-scimitar",
+      "id": 4587,
+      "kind": "alternate_name"
+    },
+    { "type": "item", "slug": "dscim", "id": 4587, "kind": "shorthand" },
+    { "type": "item", "slug": "dragon-scimmy", "id": 4587, "kind": "retired_slug" },
+    {
+      "type": "item",
+      "slug": "dragon-scimitar-noted",
+      "id": 4588,
+      "kind": "alternate_name"
+    },
+    { "type": "npc", "slug": "kbd", "id": 50, "kind": "shorthand" }
+  ]
+}

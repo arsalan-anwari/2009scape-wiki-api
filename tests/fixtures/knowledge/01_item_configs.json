@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "source": "item_configs.json",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "item",
+      "id": 995,
+      "name": "Coins",
+      "description": "Lovely money!",
+      "source_ref": "item_configs.json#995",
+      "attributes": {
+        "tradeable": true,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 536,
+      "name": "Dragon bones",
+      "description": "These would feed a dog for months!",
+      "source_ref": "item_configs.json#536",
+      "attributes": {
+        "tradeable": true,
+        "ge_buy_limit": 10000,
+        "weight": 1.5,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 732,
+      "name": "Holy water",
+      "description": "A vial of holy water, good against certain demons.",
+      "source_ref": "item_configs.json#732",
+      "attributes": {
+        "equipment_slot": 3,
+        "bonuses": [0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24],
+        "weapon_interface": 18,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 767,
+      "name": "Phoenix crossbow",
+      "description": "Second-rate crossbow, former property of the Phoenix Gang.",
+      "source_ref": "item_configs.json#767",
+      "attributes": {
+        "tradeable": true,
+        "weight": 3.0,
+        "equipment_slot": 3,
+        "attack_speed": 6,
+        "bonuses": [0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "weapon_interface": 17,
+        "render_anim": 175,
+        "equip_audio": 2244,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 877,
+      "name": "Bronze bolts",
+      "description": "Bronze crossbow bolts.",
+      "source_ref": "item_configs.json#877",
+      "attributes": {
+        "tradeable": true,
+        "ge_buy_limit": 10000,
+        "shop_price": 3,
+        "equipment_slot": 13,
+        "bonuses": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10],
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 1065,
+      "name": "Green d'hide vambraces",
+      "description": "Made from 100% real dragonhide.",
+      "source_ref": "item_configs.json#1065",
+      "attributes": {
+        "tradeable": true,
+        "lendable": true,
+        "ge_buy_limit": 5000,
+        "shop_price": 2500,
+        "weight": 0.28,
+        "equipment_slot": 9,
+        "bonuses": [0, 0, 0, -10, 8, 3, 2, 4, 2, 0, 0, 0, 0, 0, 0],
+        "requirements": [{ "skill_id": 4, "level": 40 }],
+        "equip_audio": 2241,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 3105,
+      "name": "Climbing boots",
+      "description": "Boots made for general climbing; rocks a speciality.",
+      "source_ref": "item_configs.json#3105",
+      "attributes": {
+        "tradeable": true,
+        "ge_buy_limit": 100,
+        "shop_price": 1900,
+        "weight": 0.3,
+        "destroy": true,
+        "equipment_slot": 10,
+        "bonuses": [0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0, 0, 0],
+        "equip_audio": 2237,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 4587,
+      "name": "Dragon scimitar",
+      "description": "A vicious, curved sword.",
+      "source_ref": "item_configs.json#4587",
+      "attributes": {
+        "tradeable": true,
+        "lendable": true,
+        "ge_buy_limit": 10,
+        "shop_price": 100000,
+        "weight": 1.8,
+        "equipment_slot": 3,
+        "attack_speed": 4,
+        "has_special": true,
+        "bonuses": [8, 67, -2, 0, 0, 0, 1, 0, 0, 0, 0, 66, 0, 0, 0],
+        "requirements": [{ "skill_id": 0, "level": 60 }],
+        "weapon_interface": 6,
+        "render_anim": 1,
+        "equip_audio": 2248,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 4588,
+      "name": "Dragon scimitar",
+      "canonical_id": 4587,
+      "variant_kind": "noted",
+      "source_ref": "item_configs.json#4588",
+      "attributes": {
+        "tradeable": true,
+        "ge_buy_limit": 10,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 7980,
+      "name": "Kbd heads",
+      "description": "I should get it stuffed!",
+      "source_ref": "item_configs.json#7980",
+      "attributes": {
+        "tradeable": false,
+        "destroy": true,
+        "weight": 10.0,
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 9440,
+      "name": "Wooden stock",
+      "description": "A wooden crossbow stock",
+      "source_ref": "item_configs.json#9440",
+      "attributes": {
+        "tradeable": true,
+        "ge_buy_limit": 1000,
+        "shop_price": 8,
+        "equipment_slot": 3,
+        "requirements": [{ "skill_id": 9, "level": 9 }],
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 14422,
+      "name": "USDT Slot",
+      "description": "You should not have this.",
+      "source_ref": "item_configs.json#14422"
+    }
+  ]
+}
