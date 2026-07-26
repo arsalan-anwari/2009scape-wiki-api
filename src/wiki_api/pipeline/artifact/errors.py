@@ -1,3 +1,5 @@
+"""The errors a build raises, each naming the document at fault."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -9,10 +11,14 @@ if TYPE_CHECKING:
 
 
 class BuildError(KnowledgeError):
+    """Base class for anything that stops a build."""
+
     pass
 
 
 class OverlaySchemaMismatch(BuildError):
+    """The document was written for a different overlay schema than this build reads."""
+
     def __init__(self, origin: str, found: int, expected: int) -> None:
         super().__init__(
             f"{origin} declares overlay schema {found}, this build reads {expected}"
@@ -22,7 +28,22 @@ class OverlaySchemaMismatch(BuildError):
         self.expected = expected
 
 
+class InvalidOverlayDocument(BuildError):
+    """A document is malformed in a way the overlay models reject on load.
+
+    Catching it here keeps the filename and the offending field with the error, instead
+    of a bare ValueError surfacing later from inside the merge.
+    """
+
+    def __init__(self, origin: str, detail: str) -> None:
+        super().__init__(f"{origin} is not a readable overlay: {detail}")
+        self.origin = origin
+        self.detail = detail
+
+
 class DuplicateEntity(BuildError):
+    """Two documents at the same precedence both define one entity."""
+
     def __init__(self, key: EntityKey, first: str, second: str) -> None:
         super().__init__(
             f"{key} is defined twice at the same precedence, by {first} and {second}; "
@@ -34,6 +55,8 @@ class DuplicateEntity(BuildError):
 
 
 class UnknownEntity(BuildError):
+    """A document points at an entity that nothing defines."""
+
     def __init__(self, key: EntityKey, referenced_by: str) -> None:
         super().__init__(f"{referenced_by} references unknown entity {key}")
         self.key = key
@@ -41,12 +64,16 @@ class UnknownEntity(BuildError):
 
 
 class DuplicateEdge(BuildError):
+    """One relationship between one pair is declared twice."""
+
     def __init__(self, description: str) -> None:
         super().__init__(f"edge defined twice: {description}")
         self.description = description
 
 
 class DuplicateSourceKey(BuildError):
+    """Two entities of one type claim the same stable key from the sources."""
+
     def __init__(
         self, entity_type: str, source_key: str, first: str, second: str
     ) -> None:
@@ -61,6 +88,8 @@ class DuplicateSourceKey(BuildError):
 
 
 class InvalidEntity(BuildError):
+    """A document defines an entity the domain rejects."""
+
     def __init__(self, key: EntityKey, origin: str, detail: str) -> None:
         super().__init__(f"{origin} defines an invalid {key}: {detail}")
         self.key = key
@@ -69,6 +98,8 @@ class InvalidEntity(BuildError):
 
 
 class InvalidEdge(BuildError):
+    """A document defines a relationship the domain rejects."""
+
     def __init__(self, origin: str, description: str, detail: str) -> None:
         super().__init__(f"{origin} defines an invalid edge {description}: {detail}")
         self.origin = origin
@@ -77,6 +108,8 @@ class InvalidEdge(BuildError):
 
 
 class AliasConflict(BuildError):
+    """An alias collides with a real slug or with another alias."""
+
     def __init__(self, slug: str, detail: str) -> None:
         super().__init__(f"alias {slug!r} conflicts: {detail}")
         self.slug = slug
@@ -84,10 +117,15 @@ class AliasConflict(BuildError):
 
 
 class PatchWithoutTarget(BuildError):
+    """A document corrects an entity that nothing defines."""
+
     def __init__(self, key: EntityKey, origin: str) -> None:
         super().__init__(f"{origin} patches {key}, which nothing defines")
         self.key = key
         self.origin = origin
+
+
+# test cases
 
 
 def test_build_errors_are_knowledge_errors() -> None:
@@ -96,6 +134,7 @@ def test_build_errors_are_knowledge_errors() -> None:
     key = EntityKey(type=EntityType.ITEM, id=14422)
     errors = (
         OverlaySchemaMismatch("items.json", 2, 1),
+        InvalidOverlayDocument("items.json", "edges.0.src: malformed entity key"),
         DuplicateEntity(key, "items.json", "placeholders.json"),
         UnknownEntity(key, "edges.json"),
         DuplicateEdge("npc:50 drops item:536"),

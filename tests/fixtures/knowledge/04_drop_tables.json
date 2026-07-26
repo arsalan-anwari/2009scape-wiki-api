@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "source": "drop_tables.json",
+  "source": "game_config",
+  "source_file": "drop_tables.json",
   "game_version": "2009scape@5a37f2f8",
   "precedence": 0,
   "edges": [
@@ -8,7 +9,6 @@
       "src": "npc:50",
       "rel": "drops",
       "dst": "item:536",
-      "discriminator": "default",
       "order_key": 0,
       "source_ref": "drop_tables.json#ids=50,2642.default",
       "attributes": {
@@ -23,7 +23,6 @@
       "src": "npc:50",
       "rel": "drops",
       "dst": "item:7980",
-      "discriminator": "tertiary",
       "order_key": 10,
       "source_ref": "drop_tables.json#ids=50,2642.tertiary",
       "attributes": {

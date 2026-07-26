@@ -1,9 +1,12 @@
+"""Positions and areas on the game map."""
+
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Final, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from wiki_api.domain.vocabulary import GameEnum
 
 REGION_SHIFT: Final = 6
 REGION_STRIDE: Final = 8
@@ -11,7 +14,9 @@ MAX_PLANE: Final = 3
 COORDINATE_SEPARATOR: Final = ":"
 
 
-class LocationKind(StrEnum):
+class LocationKind(GameEnum):
+    """What sort of place a location is."""
+
     CITY = "city"
     TOWN = "town"
     VILLAGE = "village"
@@ -21,7 +26,9 @@ class LocationKind(StrEnum):
     ISLAND = "island"
 
 
-class SpawnKind(StrEnum):
+class SpawnKind(GameEnum):
+    """Why something stands where it stands."""
+
     NPC_SPAWN = "npc_spawn"
     GROUND_SPAWN = "ground_spawn"
     SHOP_FRONT = "shop_front"
@@ -29,6 +36,8 @@ class SpawnKind(StrEnum):
 
 
 class Coordinate(BaseModel):
+    """One tile on the map."""
+
     model_config = ConfigDict(frozen=True)
 
     x: int = Field(ge=0)
@@ -47,6 +56,8 @@ class Coordinate(BaseModel):
 
 
 class Area(BaseModel):
+    """A rectangle of tiles on a single plane."""
+
     model_config = ConfigDict(frozen=True)
 
     min_x: int = Field(ge=0)
@@ -75,6 +86,9 @@ class Area(BaseModel):
             and self.min_x <= point.x <= self.max_x
             and self.min_y <= point.y <= self.max_y
         )
+
+
+# test cases
 
 
 def test_a_coordinate_renders_the_stable_form_a_spawn_edge_is_keyed_by() -> None:

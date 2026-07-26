@@ -14,6 +14,7 @@ INSERT INTO entity (
     icon_ref,
     attributes,
     source,
+    source_file,
     source_ref,
     game_version
 ) VALUES (
@@ -32,6 +33,7 @@ INSERT INTO entity (
     :icon_ref,
     :attributes,
     :source,
+    :source_file,
     :source_ref,
     :game_version
 );

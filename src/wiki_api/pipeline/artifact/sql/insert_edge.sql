@@ -8,6 +8,7 @@ INSERT INTO edge (
     attributes,
     order_key,
     source,
+    source_file,
     source_ref,
     game_version
 ) VALUES (
@@ -20,6 +21,7 @@ INSERT INTO edge (
     :attributes,
     :order_key,
     :source,
+    :source_file,
     :source_ref,
     :game_version
 );

@@ -1,3 +1,5 @@
+"""Writing a snapshot out as the SQLite artifact."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -14,6 +16,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from wiki_api.domain.identity import EntityKey
+    from wiki_api.domain.provenance import GameVersion
     from wiki_api.pipeline.artifact.snapshot import KnowledgeSnapshot
 
 PAGE_SIZE = 4096
@@ -24,17 +27,18 @@ def write_artifact(
     destination: Path,
     *,
     data_version: str,
-    game_version: str,
+    game_version: GameVersion | str,
     built_at: datetime,
-    game_commit: str | None = None,
 ) -> Manifest:
-    manifest = Manifest(
-        data_version=data_version,
-        schema_version=SCHEMA_VERSION,
-        content_hash=content_hash(snapshot),
-        built_at=built_at,
-        game_version=game_version,
-        game_commit=game_commit,
+    """Write the snapshot to a fresh database and give back its manifest."""
+    manifest = Manifest.model_validate(
+        {
+            "data_version": data_version,
+            "schema_version": SCHEMA_VERSION,
+            "content_hash": content_hash(snapshot),
+            "built_at": built_at,
+            "game_version": game_version,
+        }
     )
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.unlink(missing_ok=True)
@@ -80,9 +84,10 @@ def _write_entities(
                 "hidden_reason": entity.hidden_reason,
                 "icon_ref": entity.icon_ref,
                 "attributes": entity.attributes.model_dump_json(exclude_none=True),
-                "source": entity.provenance.source,
+                "source": entity.provenance.source.value,
+                "source_file": entity.provenance.source_file,
                 "source_ref": entity.provenance.source_ref,
-                "game_version": entity.provenance.game_version,
+                "game_version": str(entity.provenance.game_version),
             },
         )
         if _is_indexed(entity):
@@ -121,9 +126,10 @@ def _write_edges(connection: sqlite3.Connection, snapshot: KnowledgeSnapshot) ->
                 "discriminator": edge.discriminator,
                 "attributes": edge.attributes.model_dump_json(exclude_none=True),
                 "order_key": edge.order_key,
-                "source": edge.provenance.source,
+                "source": edge.provenance.source.value,
+                "source_file": edge.provenance.source_file,
                 "source_ref": edge.provenance.source_ref,
-                "game_version": edge.provenance.game_version,
+                "game_version": str(edge.provenance.game_version),
             },
         )
 
@@ -159,12 +165,13 @@ def _write_meta(connection: sqlite3.Connection, manifest: Manifest) -> None:
         "schema_version": str(manifest.schema_version),
         "content_hash": manifest.content_hash,
         "built_at": manifest.built_at.isoformat(),
-        "game_version": manifest.game_version,
+        "game_version": str(manifest.game_version),
     }
-    if manifest.game_commit is not None:
-        rows["game_commit"] = manifest.game_commit
     for key in sorted(rows):
         connection.execute(statements.INSERT_META, {"key": key, "value": rows[key]})
+
+
+# test cases
 
 
 def _snapshot() -> KnowledgeSnapshot:
@@ -174,7 +181,8 @@ def _snapshot() -> KnowledgeSnapshot:
     document = {
         "schema": 1,
         "source": "fixture",
-        "game_version": "test",
+        "source_file": "item_configs.json",
+        "game_version": "2009scape@test",
         "entities": [
             {"type": "item", "id": 4587, "name": "Dragon scimitar"},
             {
@@ -206,6 +214,21 @@ def _built(destination: Path) -> Manifest:
         game_version="2009scape@test",
         built_at=datetime(2026, 7, 25, tzinfo=UTC),
     )
+
+
+def test_provenance_keeps_the_kind_of_source_apart_from_the_file(
+    tmp_path: Path,
+) -> None:
+    destination = tmp_path / "knowledge.sqlite3"
+    _built(destination)
+    connection = sqlite3.connect(destination)
+    try:
+        row = connection.execute(
+            "SELECT source, source_file FROM entity WHERE id = 4587"
+        ).fetchone()
+    finally:
+        connection.close()
+    assert row == ("fixture", "item_configs.json")
 
 
 def test_the_artifact_holds_every_entity(tmp_path: Path) -> None:
@@ -242,7 +265,57 @@ def test_the_manifest_is_written_into_the_artifact(tmp_path: Path) -> None:
     assert rows["data_version"] == "test"
     assert rows["schema_version"] == str(SCHEMA_VERSION)
     assert rows["content_hash"] == manifest.content_hash
+    assert rows["game_version"] == "2009scape@test"
     assert "game_commit" not in rows
+
+
+def test_the_schema_rejects_a_value_outside_its_own_vocabulary(tmp_path: Path) -> None:
+    import pytest
+
+    destination = tmp_path / "knowledge.sqlite3"
+    _built(destination)
+    connection = sqlite3.connect(destination)
+    try:
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute("UPDATE entity SET type = 'banana' WHERE id = 4587")
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute("UPDATE entity SET searchable = 7 WHERE id = 4587")
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute("UPDATE price_history SET snapshot_date = 'soon'")
+    finally:
+        connection.close()
+
+
+def test_the_schema_vocabularies_do_not_drift_from_the_domain() -> None:
+    import re
+
+    from wiki_api.domain.alias import AliasKind
+    from wiki_api.domain.entity import VariantKind, Visibility
+    from wiki_api.domain.identity import EntityType
+    from wiki_api.domain.relationships import RelationshipType
+    from wiki_api.domain.vocabulary import HiddenReason, SourceKind
+
+    declared: dict[str, set[str]] = {}
+    for column, values in re.findall(
+        r"CHECK \((\w+) IN\s*\(([^)]*)\)\)", statements.SCHEMA
+    ):
+        members = set(re.findall(r"'([^']*)'", values))
+        if members:
+            declared.setdefault(column, set()).update(members)
+
+    expected = {
+        "type": EntityType,
+        "src_type": EntityType,
+        "dst_type": EntityType,
+        "visibility": Visibility,
+        "variant_kind": VariantKind,
+        "hidden_reason": HiddenReason,
+        "kind": AliasKind,
+        "rel": RelationshipType,
+        "source": SourceKind,
+    }
+    for column, vocabulary in expected.items():
+        assert declared[column] == {member.value for member in vocabulary}, column
 
 
 def test_aliases_are_indexed_alongside_the_name(tmp_path: Path) -> None:

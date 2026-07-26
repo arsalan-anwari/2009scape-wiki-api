@@ -1,3 +1,5 @@
+"""A repository backed by objects in memory, used for tests and small tools."""
+
 from __future__ import annotations
 
 import re
@@ -34,6 +36,8 @@ _TOKENS = re.compile(r"[0-9a-z]+")
 
 
 class InMemoryKnowledgeRepository:
+    """The same read interface as SQLite, answered straight from a snapshot."""
+
     def __init__(
         self,
         manifest: Manifest,
@@ -268,6 +272,9 @@ def _alias_terms(aliases: Sequence[EntityAlias]) -> dict[EntityKey, str]:
     return {key: " ".join(terms) for key, terms in grouped.items()}
 
 
+# test cases
+
+
 def test_folding_matches_the_search_index_rules() -> None:
     assert _fold("Café AU Lait") == "cafe au lait"
     assert _fold("Green d'hide") == "green d'hide"
@@ -292,12 +299,14 @@ def test_an_artifact_from_another_schema_version_is_refused() -> None:
 
     from wiki_api.domain.manifest import Manifest
 
-    manifest = Manifest(
-        data_version="future",
-        schema_version=SCHEMA_VERSION + 1,
-        content_hash="0" * 64,
-        built_at=datetime(2027, 1, 1, tzinfo=UTC),
-        game_version="2009scape@ffffff",
+    manifest = Manifest.model_validate(
+        {
+            "data_version": "future",
+            "schema_version": SCHEMA_VERSION + 1,
+            "content_hash": "0" * 64,
+            "built_at": datetime(2027, 1, 1, tzinfo=UTC),
+            "game_version": "2009scape@ffffff",
+        }
     )
     with pytest.raises(IncompatibleArtifact):
         InMemoryKnowledgeRepository(manifest)

@@ -16,8 +16,7 @@
         "length": "Short",
         "quest_points": 1,
         "members": true,
-        "series": "Troll",
-        "start_location": "Burthorpe"
+        "series": "Troll"
       }
     }
   ],
@@ -28,7 +27,19 @@
       "dst": "item:3105",
       "order_key": 0,
       "source_ref": "overlay/quests/death_plateau",
-      "attributes": { "amount": 1 }
+      "attributes": {
+        "amount": 1
+      }
+    },
+    {
+      "src": "quest:1",
+      "rel": "located_in",
+      "dst": "location:4",
+      "order_key": 0,
+      "source_ref": "overlay/quests/death_plateau",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
     }
   ]
 }

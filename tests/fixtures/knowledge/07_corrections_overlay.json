@@ -16,8 +16,28 @@
         "destroy": true,
         "destroy_message": "Drop",
         "attack_speed": 4,
-        "bonuses": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "absorb": [0, 0, 0],
+        "bonuses": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "absorb": [
+          0,
+          0,
+          0
+        ],
         "archery_ticket_price": 0
       }
     },
@@ -36,14 +56,29 @@
       "id": 4587,
       "kind": "alternate_name"
     },
-    { "type": "item", "slug": "dscim", "id": 4587, "kind": "shorthand" },
-    { "type": "item", "slug": "dragon-scimmy", "id": 4587, "kind": "retired_slug" },
+    {
+      "type": "item",
+      "slug": "dscim",
+      "id": 4587,
+      "kind": "shorthand"
+    },
+    {
+      "type": "item",
+      "slug": "dragon-scimmy",
+      "id": 4587,
+      "kind": "retired_slug"
+    },
     {
       "type": "item",
       "slug": "dragon-scimitar-noted",
       "id": 4588,
       "kind": "alternate_name"
     },
-    { "type": "npc", "slug": "kbd", "id": 50, "kind": "shorthand" }
+    {
+      "type": "npc",
+      "slug": "kbd",
+      "id": 50,
+      "kind": "shorthand"
+    }
   ]
 }

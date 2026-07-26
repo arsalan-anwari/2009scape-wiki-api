@@ -1,3 +1,5 @@
+"""Turning what a reader typed into something FTS5 will accept."""
+
 from __future__ import annotations
 
 import re
@@ -7,12 +9,16 @@ _TOKENS = re.compile(r"[0-9A-Za-z]+")
 
 
 def to_match_query(query: str) -> str | None:
+    """Build a prefix match query from a phrase, or None if nothing is searchable."""
     folded = unicodedata.normalize("NFKD", query)
     ascii_only = folded.encode("ascii", "ignore").decode("ascii")
     tokens = _TOKENS.findall(ascii_only)
     if not tokens:
         return None
     return " ".join(f'"{token}"*' for token in tokens)
+
+
+# test cases
 
 
 def test_each_token_becomes_a_quoted_prefix_term() -> None:

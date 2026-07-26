@@ -1,22 +1,79 @@
 {
   "schema": 1,
-  "source": "gedata",
+  "source": "grand_exchange",
+  "source_file": "gedata",
   "game_version": "2009scape@5a37f2f8",
   "precedence": 0,
   "prices": [
-    { "item_id": 1065, "snapshot_date": "2024-06-08", "value": 2891 },
-    { "item_id": 1065, "snapshot_date": "2026-07-25", "value": 2777 },
-    { "item_id": 536, "snapshot_date": "2024-06-08", "value": 1999 },
-    { "item_id": 536, "snapshot_date": "2026-07-18", "value": 2477 },
-    { "item_id": 536, "snapshot_date": "2026-07-25", "value": 2479 },
-    { "item_id": 3105, "snapshot_date": "2024-06-08", "value": 42550 },
-    { "item_id": 3105, "snapshot_date": "2026-07-18", "value": 13913 },
-    { "item_id": 3105, "snapshot_date": "2026-07-25", "value": 13797 },
-    { "item_id": 4587, "snapshot_date": "2024-06-08", "value": 106049 },
-    { "item_id": 4587, "snapshot_date": "2024-06-15", "value": 106049 },
-    { "item_id": 4587, "snapshot_date": "2026-07-18", "value": 108601 },
-    { "item_id": 4587, "snapshot_date": "2026-07-25", "value": 108590 },
-    { "item_id": 4588, "snapshot_date": "2024-06-08", "value": 100000 },
-    { "item_id": 4588, "snapshot_date": "2026-07-25", "value": 100000 }
+    {
+      "item_id": 1065,
+      "snapshot_date": "2024-06-08",
+      "value": 2891
+    },
+    {
+      "item_id": 1065,
+      "snapshot_date": "2026-07-25",
+      "value": 2777
+    },
+    {
+      "item_id": 536,
+      "snapshot_date": "2024-06-08",
+      "value": 1999
+    },
+    {
+      "item_id": 536,
+      "snapshot_date": "2026-07-18",
+      "value": 2477
+    },
+    {
+      "item_id": 536,
+      "snapshot_date": "2026-07-25",
+      "value": 2479
+    },
+    {
+      "item_id": 3105,
+      "snapshot_date": "2024-06-08",
+      "value": 42550
+    },
+    {
+      "item_id": 3105,
+      "snapshot_date": "2026-07-18",
+      "value": 13913
+    },
+    {
+      "item_id": 3105,
+      "snapshot_date": "2026-07-25",
+      "value": 13797
+    },
+    {
+      "item_id": 4587,
+      "snapshot_date": "2024-06-08",
+      "value": 106049
+    },
+    {
+      "item_id": 4587,
+      "snapshot_date": "2024-06-15",
+      "value": 106049
+    },
+    {
+      "item_id": 4587,
+      "snapshot_date": "2026-07-18",
+      "value": 108601
+    },
+    {
+      "item_id": 4587,
+      "snapshot_date": "2026-07-25",
+      "value": 108590
+    },
+    {
+      "item_id": 4588,
+      "snapshot_date": "2024-06-08",
+      "value": 100000
+    },
+    {
+      "item_id": 4588,
+      "snapshot_date": "2026-07-25",
+      "value": 100000
+    }
   ]
 }

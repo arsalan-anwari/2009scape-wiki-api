@@ -1,3 +1,5 @@
+"""The SQL the repository reads with, kept in files rather than in strings here."""
+
 from __future__ import annotations
 
 from importlib import resources
@@ -9,6 +11,7 @@ _PACKAGE: Final = "wiki_api.repository.sqlite.sql"
 
 
 def load(name: str) -> str:
+    """Read one query file out of the package."""
     return resources.files(_PACKAGE).joinpath(name).read_text(encoding="utf-8")
 
 
@@ -34,6 +37,9 @@ LIST_BY_ORDER: Final[dict[SortOrder, str]] = {
     SortOrder.NAME: SELECT_ENTITIES_BY_NAME,
     SortOrder.ID: SELECT_ENTITIES_BY_ID,
 }
+
+
+# test cases
 
 
 def test_every_sort_order_has_a_statement() -> None:

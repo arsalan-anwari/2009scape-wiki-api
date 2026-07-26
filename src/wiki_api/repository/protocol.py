@@ -1,3 +1,5 @@
+"""The one read interface every storage backend satisfies."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
@@ -19,6 +21,11 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class KnowledgeRepository(Protocol):
+    """Everything the query core can ask of storage.
+
+    It is read only, and every listing pages.
+    """
+
     def manifest(self) -> Manifest: ...
 
     def get_entity(self, key: EntityKey, *, include_hidden: bool = False) -> Entity: ...
@@ -74,6 +81,9 @@ class KnowledgeRepository(Protocol):
     ) -> tuple[PricePoint, ...]: ...
 
     def close(self) -> None: ...
+
+
+# test cases
 
 
 def test_the_protocol_describes_the_whole_read_surface() -> None:

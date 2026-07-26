@@ -1,9 +1,11 @@
+"""The typed links between entities, and the data each link carries."""
+
 from __future__ import annotations
 
 from enum import StrEnum
 from typing import TYPE_CHECKING, Annotated, Any, Final, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 from wiki_api.domain.attributes import (
     AttributeFormat,
@@ -14,12 +16,22 @@ from wiki_api.domain.attributes import (
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.provenance import Provenance
 from wiki_api.domain.space import Coordinate, SpawnKind
+from wiki_api.domain.vocabulary import (
+    COINS,
+    AttributeGroup,
+    GameEnum,
+    RelationshipGroup,
+    Unit,
+    coerce_item_ref,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 
 class RelationshipType(StrEnum):
+    """The kinds of link two entities can have."""
+
     DROPS = "drops"
     SELLS = "sells"
     STAFFED_BY = "staffed_by"
@@ -29,13 +41,9 @@ class RelationshipType(StrEnum):
     PART_OF = "part_of"
 
 
-def spawn_discriminator(at: Coordinate | None) -> str:
-    if at is None:
-        return ""
-    return str(at)
+class DropTableKind(GameEnum):
+    """Which table inside a drop list a roll came from."""
 
-
-class DropTableKind(StrEnum):
     DEFAULT = "default"
     MAIN = "main"
     CHARM = "charm"
@@ -43,27 +51,33 @@ class DropTableKind(StrEnum):
 
 
 class DropEdgeAttributes(BaseModel):
+    """What an npc dropping an item is worth.
+
+    The weight and the denominator are both kept so a rate renders exactly.
+    """
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     weight: Annotated[
         float,
-        AttributeMeta("Weight", "rate", 10, AttributeFormat.FLOAT),
+        AttributeMeta("Weight", AttributeGroup.RATE, 10, AttributeFormat.FLOAT),
     ] = Field(gt=0.0)
     denominator: Annotated[
         float,
-        AttributeMeta("Out of", "rate", 20, AttributeFormat.FLOAT),
+        AttributeMeta("Out of", AttributeGroup.RATE, 20, AttributeFormat.FLOAT),
     ] = Field(gt=0.0)
     table_kind: Annotated[
         DropTableKind,
-        AttributeMeta("Drop table", "rate", 30, AttributeFormat.TEXT),
+        BeforeValidator(DropTableKind.coerce),
+        AttributeMeta("Drop table", AttributeGroup.RATE, 30, AttributeFormat.ENUM),
     ] = DropTableKind.MAIN
     min_amount: Annotated[
         int,
-        AttributeMeta("Minimum amount", "amount", 40, AttributeFormat.INT),
+        AttributeMeta("Minimum amount", AttributeGroup.AMOUNT, 40, AttributeFormat.INT),
     ] = Field(default=1, ge=1)
     max_amount: Annotated[
         int,
-        AttributeMeta("Maximum amount", "amount", 50, AttributeFormat.INT),
+        AttributeMeta("Maximum amount", AttributeGroup.AMOUNT, 50, AttributeFormat.INT),
     ] = Field(default=1, ge=1)
 
     @model_validator(mode="after")
@@ -84,69 +98,87 @@ class DropEdgeAttributes(BaseModel):
 
 
 class SellEdgeAttributes(BaseModel):
+    """What a shop asks for one line of its stock."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     stock_amount: Annotated[
         int,
-        AttributeMeta("Stock", "shop", 10, AttributeFormat.INT),
+        AttributeMeta("Stock", AttributeGroup.SHOP, 10, AttributeFormat.INT),
     ] = Field(ge=0)
     restock_rate: Annotated[
         int,
-        AttributeMeta("Restock rate", "shop", 20, AttributeFormat.INT),
+        AttributeMeta("Restock rate", AttributeGroup.SHOP, 20, AttributeFormat.INT),
     ] = Field(default=100, ge=0)
     price: Annotated[
         int | None,
-        AttributeMeta("Price", "shop", 30, AttributeFormat.GP),
+        AttributeMeta("Price", AttributeGroup.SHOP, 30, AttributeFormat.GP),
     ] = None
-    currency_item_id: Annotated[
-        int,
-        AttributeMeta("Currency", "shop", 40, AttributeFormat.ID),
-    ] = Field(default=995, ge=0)
+    currency: Annotated[
+        EntityKey,
+        BeforeValidator(coerce_item_ref),
+        AttributeMeta("Currency", AttributeGroup.SHOP, 40, AttributeFormat.REF),
+    ] = COINS
     slot: Annotated[
         int,
-        AttributeMeta("Slot", "shop", 50, AttributeFormat.INT, display=False),
+        AttributeMeta(
+            "Slot", AttributeGroup.SHOP, 50, AttributeFormat.INT, display=False
+        ),
     ] = Field(default=0, ge=0)
 
 
 class StaffedByEdgeAttributes(BaseModel):
+    """Nothing. Running a shop is the whole fact."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
 class RewardEdgeAttributes(BaseModel):
+    """How much of an item a quest hands over."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     amount: Annotated[
         int,
-        AttributeMeta("Amount", "reward", 10, AttributeFormat.INT),
+        AttributeMeta("Amount", AttributeGroup.REWARD, 10, AttributeFormat.INT),
     ] = Field(default=1, ge=1)
 
 
 class AmmunitionEdgeAttributes(BaseModel):
+    """Nothing. Taking the ammunition is the whole fact."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
 class LocatedInEdgeAttributes(BaseModel):
+    """Where inside a place something stands, and why it is there."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     at: Annotated[
         Coordinate | None,
-        AttributeMeta("Position", "map", 10, AttributeFormat.COORD),
+        AttributeMeta("Position", AttributeGroup.MAP, 10, AttributeFormat.COORD),
     ] = None
     spawn_kind: Annotated[
         SpawnKind,
-        AttributeMeta("Kind", "map", 20, AttributeFormat.TEXT),
+        BeforeValidator(SpawnKind.coerce),
+        AttributeMeta("Kind", AttributeGroup.MAP, 20, AttributeFormat.ENUM),
     ] = SpawnKind.NPC_SPAWN
     respawn_ticks: Annotated[
         int | None,
-        AttributeMeta("Respawn", "map", 30, AttributeFormat.INT, unit="ticks"),
+        AttributeMeta(
+            "Respawn", AttributeGroup.MAP, 30, AttributeFormat.INT, unit=Unit.TICKS
+        ),
     ] = None
     amount: Annotated[
         int,
-        AttributeMeta("Amount", "map", 40, AttributeFormat.INT),
+        AttributeMeta("Amount", AttributeGroup.MAP, 40, AttributeFormat.INT),
     ] = Field(default=1, ge=1)
 
 
 class PartOfEdgeAttributes(BaseModel):
+    """Nothing. Sitting inside another place is the whole fact."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
@@ -172,6 +204,11 @@ EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = 
 
 
 class RelationshipSpec(BaseModel):
+    """One relationship as the registry publishes it.
+
+    It carries a label for reading the link in either direction.
+    """
+
     model_config = ConfigDict(frozen=True)
 
     rel: RelationshipType
@@ -180,7 +217,7 @@ class RelationshipSpec(BaseModel):
     src_types: frozenset[EntityType]
     dst_types: frozenset[EntityType]
     edge_attributes: tuple[AttributeSpec, ...]
-    group: str
+    group: RelationshipGroup
     order: int
 
 
@@ -190,7 +227,7 @@ def _spec(
     inverse_label: str,
     src_types: frozenset[EntityType],
     dst_types: frozenset[EntityType],
-    group: str,
+    group: RelationshipGroup,
     order: int,
 ) -> RelationshipSpec:
     return RelationshipSpec(
@@ -212,7 +249,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "Dropped by",
         frozenset({EntityType.NPC}),
         frozenset({EntityType.ITEM}),
-        "drops",
+        RelationshipGroup.DROPS,
         10,
     ),
     RelationshipType.SELLS: _spec(
@@ -221,7 +258,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "Sold in",
         frozenset({EntityType.SHOP}),
         frozenset({EntityType.ITEM}),
-        "trade",
+        RelationshipGroup.TRADE,
         20,
     ),
     RelationshipType.STAFFED_BY: _spec(
@@ -230,7 +267,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "Runs shop",
         frozenset({EntityType.SHOP}),
         frozenset({EntityType.NPC}),
-        "trade",
+        RelationshipGroup.TRADE,
         30,
     ),
     RelationshipType.REWARDS: _spec(
@@ -239,7 +276,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "Reward from",
         frozenset({EntityType.QUEST}),
         frozenset({EntityType.ITEM}),
-        "quests",
+        RelationshipGroup.QUESTS,
         40,
     ),
     RelationshipType.USES_AMMUNITION: _spec(
@@ -248,7 +285,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "Used by",
         frozenset({EntityType.ITEM}),
         frozenset({EntityType.ITEM}),
-        "equipment",
+        RelationshipGroup.EQUIPMENT,
         50,
     ),
     RelationshipType.LOCATED_IN: _spec(
@@ -257,7 +294,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "Found here",
         frozenset({EntityType.NPC, EntityType.SHOP, EntityType.ITEM, EntityType.QUEST}),
         frozenset({EntityType.LOCATION}),
-        "map",
+        RelationshipGroup.MAP,
         60,
     ),
     RelationshipType.PART_OF: _spec(
@@ -266,13 +303,28 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         "Contains",
         frozenset({EntityType.LOCATION}),
         frozenset({EntityType.LOCATION}),
-        "map",
+        RelationshipGroup.MAP,
         70,
     ),
 }
 
 
+def discriminator_of(attributes: EdgeAttributes) -> str:
+    """What tells apart two edges joining the same pair under the same relationship.
+
+    It is read off the edge's own attributes rather than written by hand, so the two can
+    never disagree. A spawn is keyed by its tile and a drop by its table.
+    """
+    if isinstance(attributes, LocatedInEdgeAttributes):
+        return "" if attributes.at is None else str(attributes.at)
+    if isinstance(attributes, DropEdgeAttributes):
+        return attributes.table_kind.value
+    return ""
+
+
 class Edge(BaseModel):
+    """One typed link between two entities."""
+
     model_config = ConfigDict(frozen=True)
 
     src: EntityKey
@@ -285,15 +337,26 @@ class Edge(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _coerce_attributes(cls, data: Any) -> Any:
+    def _coerce_attributes_and_key_the_edge(cls, data: Any) -> Any:
         if not isinstance(data, dict):
             return data
-        raw = data.get("attributes")
         rel = data.get("rel")
-        if isinstance(raw, dict) and rel is not None:
-            model = EDGE_ATTRIBUTE_MODELS[RelationshipType(rel)]
-            return {**data, "attributes": model.model_validate(raw)}
-        return data
+        attributes = data.get("attributes")
+        if rel is None or attributes is None:
+            return data
+        model = EDGE_ATTRIBUTE_MODELS[RelationshipType(rel)]
+        if isinstance(attributes, dict):
+            attributes = model.model_validate(attributes)
+        if not isinstance(attributes, model):
+            return data
+        expected = discriminator_of(attributes)
+        declared = data.get("discriminator")
+        if declared is not None and declared != expected:
+            raise ValueError(
+                f"discriminator {declared!r} disagrees with the edge attributes, "
+                f"which key this edge as {expected!r}"
+            )
+        return {**data, "attributes": attributes, "discriminator": expected}
 
     @model_validator(mode="after")
     def _check_against_the_registry(self) -> Self:
@@ -305,16 +368,8 @@ class Edge(BaseModel):
         expected = EDGE_ATTRIBUTE_MODELS[self.rel]
         if type(self.attributes) is not expected:
             raise ValueError(f"{self.rel.value} needs {expected.__name__}")
-        return self
-
-    @model_validator(mode="after")
-    def _check_the_spatial_rules(self) -> Self:
-        if isinstance(self.attributes, LocatedInEdgeAttributes):
-            expected = spawn_discriminator(self.attributes.at)
-            if self.discriminator != expected:
-                raise ValueError(
-                    f"a spawn is keyed by its position, expected {expected!r}"
-                )
+        if self.discriminator != discriminator_of(self.attributes):
+            raise ValueError("an edge must be keyed by its own attributes")
         if self.rel is RelationshipType.PART_OF and self.src == self.dst:
             raise ValueError("a location cannot be part of itself")
         return self
@@ -324,8 +379,11 @@ class Edge(BaseModel):
         return RELATIONSHIP_SPECS[self.rel]
 
 
+# test cases
+
+
 def _provenance() -> Provenance:
-    return Provenance(source="fixture", game_version="test")
+    return Provenance.model_validate({"source": "fixture", "game_version": "test"})
 
 
 def test_every_relationship_type_is_registered_with_both_labels() -> None:
@@ -334,6 +392,7 @@ def test_every_relationship_type_is_registered_with_both_labels() -> None:
         assert spec.forward_label and spec.inverse_label
         assert spec.forward_label != spec.inverse_label
         assert rel in EDGE_ATTRIBUTE_MODELS
+        assert isinstance(spec.group, RelationshipGroup)
 
 
 def test_edge_attribute_specs_come_from_the_edge_models() -> None:
@@ -404,7 +463,15 @@ def test_raw_edge_attributes_are_coerced_by_relationship() -> None:
         }
     )
     assert isinstance(edge.attributes, SellEdgeAttributes)
-    assert edge.attributes.currency_item_id == 995
+    assert edge.attributes.currency == COINS
+
+
+def test_a_shop_may_price_its_stock_in_something_other_than_coins() -> None:
+    tokkul = EntityKey(type=EntityType.ITEM, id=6529)
+    attributes = SellEdgeAttributes.model_validate(
+        {"stock_amount": 5, "currency": 6529}
+    )
+    assert attributes.currency == tokkul
 
 
 def test_a_relationship_without_attributes_is_still_valid() -> None:
@@ -470,7 +537,6 @@ def _spawn(**overrides: Any) -> Edge:
         "rel": RelationshipType.LOCATED_IN,
         "dst": EntityKey(type=EntityType.LOCATION, id=1),
         "attributes": LocatedInEdgeAttributes(at=at),
-        "discriminator": spawn_discriminator(at),
         "provenance": _provenance(),
     }
     payload.update(overrides)
@@ -486,27 +552,76 @@ def test_a_spawn_edge_places_an_entity_on_the_map() -> None:
 
 
 def test_two_spawns_in_one_place_stay_distinct_without_a_counter() -> None:
-    first = Coordinate(x=3093, y=3509, plane=0)
-    second = Coordinate(x=3098, y=3508, plane=0)
-    assert spawn_discriminator(first) != spawn_discriminator(second)
+    first = _spawn(attributes=LocatedInEdgeAttributes(at=Coordinate(x=3093, y=3509)))
+    second = _spawn(attributes=LocatedInEdgeAttributes(at=Coordinate(x=3098, y=3508)))
+    assert first.discriminator != second.discriminator
 
 
 def test_a_spawn_is_keyed_by_its_position_so_a_reorder_cannot_move_it() -> None:
+    edge = _spawn()
+    assert edge.discriminator == "2273:4698:0"
+
+
+def test_a_key_that_disagrees_with_the_edge_is_rejected() -> None:
     import pytest
 
     with pytest.raises(ValueError):
         _spawn(discriminator="0")
 
 
+def test_a_drop_is_keyed_by_the_table_it_rolls_from() -> None:
+    edge = Edge(
+        src=EntityKey(type=EntityType.NPC, id=50),
+        rel=RelationshipType.DROPS,
+        dst=EntityKey(type=EntityType.ITEM, id=536),
+        attributes=DropEdgeAttributes(
+            weight=1.0, denominator=128.0, table_kind=DropTableKind.TERTIARY
+        ),
+        provenance=_provenance(),
+    )
+    assert edge.discriminator == "tertiary"
+
+
+def test_a_drop_key_can_no_longer_contradict_its_table() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        Edge.model_validate(
+            {
+                "src": {"type": "npc", "id": 50},
+                "rel": "drops",
+                "dst": {"type": "item", "id": 536},
+                "discriminator": "main",
+                "attributes": {
+                    "weight": 1.0,
+                    "denominator": 128.0,
+                    "table_kind": "tertiary",
+                },
+                "provenance": {"source": "fixture", "game_version": "test"},
+            }
+        )
+
+
+def test_a_relationship_that_needs_no_key_carries_none() -> None:
+    edge = Edge(
+        src=EntityKey(type=EntityType.SHOP, id=53),
+        rel=RelationshipType.STAFFED_BY,
+        dst=EntityKey(type=EntityType.NPC, id=4559),
+        attributes=StaffedByEdgeAttributes(),
+        provenance=_provenance(),
+    )
+    assert edge.discriminator == ""
+
+
 def test_a_placement_without_an_exact_tile_needs_no_discriminator() -> None:
     edge = _spawn(
         src=EntityKey(type=EntityType.SHOP, id=53),
         attributes=LocatedInEdgeAttributes(spawn_kind=SpawnKind.SHOP_FRONT),
-        discriminator="",
     )
     assert isinstance(edge.attributes, LocatedInEdgeAttributes)
     assert edge.attributes.at is None
     assert edge.attributes.spawn_kind is SpawnKind.SHOP_FRONT
+    assert edge.discriminator == ""
 
 
 def test_only_a_location_can_be_the_place_something_is_found_in() -> None:

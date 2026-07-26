@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "source": "ranged_weapon_configs.json",
+  "source": "game_config",
+  "source_file": "ranged_weapon_configs.json",
   "game_version": "2009scape@5a37f2f8",
   "precedence": 0,
   "edges": [

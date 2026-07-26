@@ -1,3 +1,5 @@
+"""Folding the overlay documents into one snapshot, deterministically."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -10,9 +12,10 @@ from wiki_api.domain.attributes import ATTRIBUTE_MODELS
 from wiki_api.domain.entity import Entity, VariantKind, Visibility
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.prices import PricePoint
-from wiki_api.domain.provenance import Provenance
+from wiki_api.domain.provenance import GameVersion, Provenance
 from wiki_api.domain.relationships import Edge
 from wiki_api.domain.slug import derive_slugs
+from wiki_api.domain.vocabulary import HiddenReason, SourceKind
 from wiki_api.pipeline.artifact.errors import (
     AliasConflict,
     DuplicateEdge,
@@ -32,18 +35,17 @@ from wiki_api.pipeline.artifact.snapshot import KnowledgeSnapshot
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
-
-UNNAMED_REASON = "unnamed"
-SUPPRESSED_REASON = "suppressed"
+    from datetime import date
 
 
 @dataclass
 class _Draft:
     origin: str
     precedence: int
-    source: str
-    game_version: str
+    source: SourceKind
+    game_version: GameVersion
     name: str
+    source_file: str | None = None
     source_ref: str | None = None
     source_key: str | None = None
     description: str | None = None
@@ -51,7 +53,7 @@ class _Draft:
     canonical_id: int | None = None
     variant_kind: VariantKind | None = None
     visibility: Visibility | None = None
-    hidden_reason: str | None = None
+    hidden_reason: HiddenReason | None = None
     searchable: bool | None = None
     icon_ref: str | None = None
 
@@ -59,6 +61,7 @@ class _Draft:
 def merge(
     sources: Sequence[OverlaySource], *, strict: bool = True
 ) -> KnowledgeSnapshot:
+    """Build a snapshot from the given documents, with later precedence winning."""
     ordered = sorted(sources, key=lambda source: source.sort_key)
     drafts = _collect_definitions(ordered)
     _apply_patches(ordered, drafts)
@@ -91,6 +94,7 @@ def _collect_definitions(
                 source=document.source,
                 game_version=document.game_version,
                 name=overlay.name or "",
+                source_file=document.source_file,
                 source_ref=overlay.source_ref,
                 source_key=overlay.source_key,
                 description=overlay.description,
@@ -121,6 +125,7 @@ def _apply_patches(
 def _patch(draft: _Draft, overlay: OverlayEntity, source: OverlaySource) -> None:
     draft.origin = source.origin
     draft.source = source.document.source
+    draft.source_file = source.document.source_file
     draft.game_version = source.document.game_version
     if overlay.name is not None:
         draft.name = overlay.name
@@ -183,14 +188,14 @@ def _visibility_of(draft: _Draft) -> Visibility:
     return Visibility.PUBLISHED
 
 
-def _hidden_reason_of(draft: _Draft, visibility: Visibility) -> str | None:
+def _hidden_reason_of(draft: _Draft, visibility: Visibility) -> HiddenReason | None:
     if visibility is Visibility.PUBLISHED:
         return None
-    if draft.hidden_reason:
+    if draft.hidden_reason is not None:
         return draft.hidden_reason
     if not draft.name.strip():
-        return UNNAMED_REASON
-    return SUPPRESSED_REASON
+        return HiddenReason.UNNAMED
+    return HiddenReason.SUPPRESSED
 
 
 def _searchable_of(draft: _Draft, visibility: Visibility) -> bool:
@@ -220,6 +225,7 @@ def _entity_of(
             provenance=Provenance(
                 source=draft.source,
                 game_version=draft.game_version,
+                source_file=draft.source_file,
                 source_ref=draft.source_ref,
             ),
         )
@@ -234,41 +240,41 @@ def _build_edges(
     for source in sources:
         document = source.document
         for overlay in document.edges:
-            src, dst = overlay.src_key, overlay.dst_key
-            description = f"{src} {overlay.rel.value} {dst}"
+            src, dst = overlay.src, overlay.dst
             for endpoint in (src, dst):
                 if endpoint not in by_key:
                     raise UnknownEntity(endpoint, source.origin)
-            identity = (
-                src.type.value,
-                src.id,
-                overlay.rel.value,
-                dst.type.value,
-                dst.id,
-                overlay.discriminator,
-            )
-            if identity in edges:
-                raise DuplicateEdge(description)
             try:
-                edges[identity] = Edge.model_validate(
+                edge = Edge.model_validate(
                     {
                         "src": src,
                         "rel": overlay.rel,
                         "dst": dst,
                         "attributes": overlay.attributes,
-                        "discriminator": overlay.discriminator,
                         "order_key": overlay.order_key,
                         "provenance": Provenance(
                             source=document.source,
                             game_version=document.game_version,
+                            source_file=document.source_file,
                             source_ref=overlay.source_ref,
                         ),
                     }
                 )
             except ValidationError as error:
                 raise InvalidEdge(
-                    source.origin, description, _first_message(error)
+                    source.origin, str(overlay), _first_message(error)
                 ) from error
+            identity = (
+                src.type.value,
+                src.id,
+                overlay.rel.value,
+                dst.type.value,
+                dst.id,
+                edge.discriminator,
+            )
+            if identity in edges:
+                raise DuplicateEdge(str(overlay))
+            edges[identity] = edge
     return tuple(edges[identity] for identity in sorted(edges))
 
 
@@ -306,7 +312,7 @@ def _build_prices(
     *,
     strict: bool,
 ) -> tuple[PricePoint, ...]:
-    points: dict[tuple[int, str], PricePoint] = {}
+    points: dict[tuple[int, date], PricePoint] = {}
     for source in sources:
         for overlay in source.document.prices:
             key = EntityKey(type=EntityType.ITEM, id=overlay.item_id)
@@ -314,14 +320,11 @@ def _build_prices(
                 if strict:
                     raise UnknownEntity(key, source.origin)
                 continue
-            point = PricePoint.model_validate(
-                {
-                    "item_id": overlay.item_id,
-                    "snapshot_date": overlay.snapshot_date,
-                    "value": overlay.value,
-                }
+            points[(overlay.item_id, overlay.snapshot_date)] = PricePoint(
+                item_id=overlay.item_id,
+                snapshot_date=overlay.snapshot_date,
+                value=overlay.value,
             )
-            points[(overlay.item_id, overlay.snapshot_date)] = point
     return tuple(points[identity] for identity in sorted(points))
 
 
@@ -330,6 +333,9 @@ def _first_message(error: ValidationError) -> str:
     if not errors:
         return str(error)
     return str(errors[0].get("msg", error))
+
+
+# test cases
 
 
 def _source(origin: str, **overrides: Any) -> OverlaySource:
@@ -360,7 +366,7 @@ def test_definitions_become_entities_with_derived_slugs() -> None:
     assert entity.slug == "dragon-scimitar"
     assert entity.is_published is True
     assert entity.searchable is True
-    assert entity.provenance.source == "fixture"
+    assert entity.provenance.source is SourceKind.FIXTURE
 
 
 def test_a_higher_precedence_document_wins() -> None:
@@ -467,7 +473,7 @@ def test_an_unnamed_entity_is_hidden_and_left_out_of_search() -> None:
     snapshot = merge([_source("npcs.json", entities=[_npc(3089, "")])])
     entity = snapshot.entities[0]
     assert entity.is_published is False
-    assert entity.hidden_reason == UNNAMED_REASON
+    assert entity.hidden_reason is HiddenReason.UNNAMED
     assert entity.searchable is False
     assert entity.slug == "npc-3089"
 
@@ -529,7 +535,6 @@ def test_edges_are_built_between_existing_entities() -> None:
                         "src": "npc:50",
                         "rel": "drops",
                         "dst": "item:536",
-                        "discriminator": "default",
                         "attributes": {
                             "weight": 100.0,
                             "denominator": 200.0,
@@ -543,7 +548,8 @@ def test_edges_are_built_between_existing_entities() -> None:
     assert len(snapshot.edges) == 1
     edge = snapshot.edges[0]
     assert edge.attributes.model_dump()["denominator"] == 200.0
-    assert edge.provenance.game_version == "test"
+    assert str(edge.provenance.game_version) == "test"
+    assert edge.discriminator == "default"
 
 
 def test_an_edge_pointing_at_nothing_fails_the_build() -> None:
@@ -568,7 +574,7 @@ def test_an_edge_pointing_at_nothing_fails_the_build() -> None:
         )
 
 
-def test_the_same_pair_may_be_related_twice_under_different_discriminators() -> None:
+def test_the_same_pair_may_be_related_twice_from_different_tables() -> None:
     snapshot = merge(
         [
             _source(
@@ -582,21 +588,28 @@ def test_the_same_pair_may_be_related_twice_under_different_discriminators() -> 
                         "src": "npc:50",
                         "rel": "drops",
                         "dst": "item:536",
-                        "discriminator": "main",
-                        "attributes": {"weight": 1.0, "denominator": 128.0},
+                        "attributes": {
+                            "weight": 1.0,
+                            "denominator": 128.0,
+                            "table_kind": "main",
+                        },
                     },
                     {
                         "src": "npc:50",
                         "rel": "drops",
                         "dst": "item:536",
-                        "discriminator": "tertiary",
-                        "attributes": {"weight": 1.0, "denominator": 512.0},
+                        "attributes": {
+                            "weight": 1.0,
+                            "denominator": 512.0,
+                            "table_kind": "tertiary",
+                        },
                     },
                 ],
             )
         ]
     )
     assert len(snapshot.edges) == 2
+    assert {edge.discriminator for edge in snapshot.edges} == {"main", "tertiary"}
 
 
 def test_the_same_edge_twice_fails_the_build() -> None:
@@ -660,6 +673,8 @@ def test_aliases_resolve_to_entities_that_exist() -> None:
 
 
 def test_prices_attach_to_items_that_exist() -> None:
+    from datetime import date
+
     snapshot = merge(
         [
             _source(
@@ -673,6 +688,30 @@ def test_prices_attach_to_items_that_exist() -> None:
         ]
     )
     assert [point.value for point in snapshot.prices] == [106000, 106049]
+    assert snapshot.prices[0].snapshot_date == date(2024, 6, 8)
+
+
+def test_prices_are_ordered_by_date_rather_than_by_how_it_was_written() -> None:
+    from datetime import date
+
+    snapshot = merge(
+        [
+            _source(
+                "items.json",
+                entities=[_item(4587, "Dragon scimitar")],
+                prices=[
+                    {"item_id": 4587, "snapshot_date": "2024-12-07", "value": 3},
+                    {"item_id": 4587, "snapshot_date": "2024-06-08", "value": 1},
+                    {"item_id": 4587, "snapshot_date": "2024-09-14", "value": 2},
+                ],
+            )
+        ]
+    )
+    assert [point.snapshot_date for point in snapshot.prices] == [
+        date(2024, 6, 8),
+        date(2024, 9, 14),
+        date(2024, 12, 7),
+    ]
 
 
 def test_prices_for_unknown_items_are_skipped_outside_strict_mode() -> None:

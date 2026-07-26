@@ -85,5 +85,4 @@ def build_fixture_artifact(
         data_version=data_version,
         game_version=FIXTURE_GAME_VERSION,
         built_at=built_at,
-        game_commit="5a37f2f8",
     )

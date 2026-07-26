@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "source": "shops.json",
+  "source": "game_config",
+  "source_file": "shops.json",
   "game_version": "2009scape@5a37f2f8",
   "precedence": 0,
   "entities": [
@@ -11,8 +12,8 @@
       "source_ref": "shops.json#53",
       "attributes": {
         "general_store": false,
-        "currency_item_id": 995,
-        "high_alch": false
+        "high_alch": false,
+        "currency": 995
       }
     }
   ],
@@ -34,8 +35,8 @@
         "stock_amount": 10,
         "restock_rate": 100,
         "price": 8,
-        "currency_item_id": 995,
-        "slot": 0
+        "slot": 0,
+        "currency": 995
       }
     }
   ]

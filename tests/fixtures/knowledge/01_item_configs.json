@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "source": "item_configs.json",
+  "source": "game_config",
+  "source_file": "item_configs.json",
   "game_version": "2009scape@5a37f2f8",
   "precedence": 0,
   "entities": [
@@ -36,7 +37,23 @@
       "source_ref": "item_configs.json#732",
       "attributes": {
         "equipment_slot": 3,
-        "bonuses": [0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24],
+        "bonuses": [
+          0,
+          0,
+          0,
+          0,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          24
+        ],
         "weapon_interface": 18,
         "archery_ticket_price": 0
       }
@@ -52,7 +69,23 @@
         "weight": 3.0,
         "equipment_slot": 3,
         "attack_speed": 6,
-        "bonuses": [0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "bonuses": [
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
         "weapon_interface": 17,
         "render_anim": 175,
         "equip_audio": 2244,
@@ -70,7 +103,23 @@
         "ge_buy_limit": 10000,
         "shop_price": 3,
         "equipment_slot": 13,
-        "bonuses": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10],
+        "bonuses": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ],
         "archery_ticket_price": 0
       }
     },
@@ -87,8 +136,29 @@
         "shop_price": 2500,
         "weight": 0.28,
         "equipment_slot": 9,
-        "bonuses": [0, 0, 0, -10, 8, 3, 2, 4, 2, 0, 0, 0, 0, 0, 0],
-        "requirements": [{ "skill_id": 4, "level": 40 }],
+        "bonuses": [
+          0,
+          0,
+          0,
+          -10,
+          8,
+          3,
+          2,
+          4,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "requirements": [
+          {
+            "level": 40,
+            "skill": 4
+          }
+        ],
         "equip_audio": 2241,
         "archery_ticket_price": 0
       }
@@ -106,7 +176,23 @@
         "weight": 0.3,
         "destroy": true,
         "equipment_slot": 10,
-        "bonuses": [0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0, 0, 0],
+        "bonuses": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          2,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
         "equip_audio": 2237,
         "archery_ticket_price": 0
       }
@@ -126,8 +212,29 @@
         "equipment_slot": 3,
         "attack_speed": 4,
         "has_special": true,
-        "bonuses": [8, 67, -2, 0, 0, 0, 1, 0, 0, 0, 0, 66, 0, 0, 0],
-        "requirements": [{ "skill_id": 0, "level": 60 }],
+        "bonuses": [
+          8,
+          67,
+          -2,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          66,
+          0,
+          0,
+          0
+        ],
+        "requirements": [
+          {
+            "level": 60,
+            "skill": 0
+          }
+        ],
         "weapon_interface": 6,
         "render_anim": 1,
         "equip_audio": 2248,
@@ -171,7 +278,12 @@
         "ge_buy_limit": 1000,
         "shop_price": 8,
         "equipment_slot": 3,
-        "requirements": [{ "skill_id": 9, "level": 9 }],
+        "requirements": [
+          {
+            "level": 9,
+            "skill": 9
+          }
+        ],
         "archery_ticket_price": 0
       }
     },

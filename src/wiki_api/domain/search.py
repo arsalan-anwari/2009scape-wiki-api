@@ -1,3 +1,5 @@
+"""What a search gives back."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -7,6 +9,8 @@ from wiki_api.domain.identity import Link
 
 
 class SearchHit(BaseModel):
+    """One entity a search matched, with the score it matched at."""
+
     model_config = ConfigDict(frozen=True)
 
     entity: Entity
@@ -15,6 +19,9 @@ class SearchHit(BaseModel):
     @property
     def link(self) -> Link:
         return self.entity.to_link()
+
+
+# test cases
 
 
 def test_a_hit_carries_the_entity_and_a_non_negative_score() -> None:

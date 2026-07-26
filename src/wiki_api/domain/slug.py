@@ -1,3 +1,5 @@
+"""Readable slugs, derived once and stable across rebuilds so links do not rot."""
+
 from __future__ import annotations
 
 import re
@@ -16,12 +18,14 @@ _MAX_PASSES = 4
 
 
 def slugify(value: str) -> str:
+    """Fold a name down to lowercase letters and digits joined by separators."""
     folded = unicodedata.normalize("NFKD", value)
     ascii_only = folded.encode("ascii", "ignore").decode("ascii")
     return _SEPARATORS.sub("-", ascii_only.lower()).strip("-")
 
 
 def derive_slugs(names: Mapping[EntityKey, str]) -> dict[EntityKey, str]:
+    """Give every entity a slug that is unique within its own type."""
     slugs = {
         key: slugify(names[key]) or _fallback(key)
         for key in sorted(names, key=lambda key: (key.type.value, key.id))
@@ -48,6 +52,9 @@ def _collisions(
     for key, slug in slugs.items():
         grouped[(key.type, slug)].append(key)
     return {group: keys for group, keys in grouped.items() if len(keys) > 1}
+
+
+# test cases
 
 
 def test_slugify_folds_case_punctuation_and_accents() -> None:

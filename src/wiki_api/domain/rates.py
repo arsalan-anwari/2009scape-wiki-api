@@ -1,3 +1,5 @@
+"""Turning the weights in a drop table into rates a reader can understand."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final, Self
@@ -11,6 +13,8 @@ NOTHING_ITEM_ID: Final = 0
 
 
 class DropRoll(BaseModel):
+    """One line of a drop table, before it becomes an edge."""
+
     model_config = ConfigDict(frozen=True)
 
     item_id: int = Field(ge=0)
@@ -30,19 +34,25 @@ class DropRoll(BaseModel):
 
 
 def drop_denominator(rolls: Sequence[DropRoll]) -> float:
+    """The total weight of a table, which is what every roll is out of."""
     if not rolls:
         raise ValueError("a drop table needs at least one roll")
     return sum(roll.weight for roll in rolls)
 
 
 def rewarding_rolls(rolls: Sequence[DropRoll]) -> tuple[DropRoll, ...]:
+    """The rolls that actually give something, dropping the filler that pads a table."""
     return tuple(roll for roll in rolls if roll.is_reward)
 
 
 def drop_order_key(weight: float, denominator: float) -> int:
+    """A sort key that puts the common drops before the rare ones."""
     if weight <= 0.0 or denominator <= 0.0:
         raise ValueError("a drop needs a positive weight and denominator")
     return round(denominator / weight)
+
+
+# test cases
 
 
 def test_the_denominator_includes_the_nothing_roll() -> None:

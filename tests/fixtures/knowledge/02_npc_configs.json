@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "source": "npc_configs.json",
+  "source": "game_config",
+  "source_file": "npc_configs.json",
   "game_version": "2009scape@5a37f2f8",
   "precedence": 0,
   "entities": [
@@ -17,14 +18,34 @@
         "defence_level": 240,
         "magic_level": 240,
         "range_level": 1,
-        "bonuses": [0, 0, 0, 0, 0, 70, 90, 90, 80, 70, 0, 0, 0, 0, 0],
+        "bonuses": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          70,
+          90,
+          90,
+          80,
+          70,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
         "weakness": 4,
         "slayer_exp": 258.0,
         "aggressive": true,
         "agg_radius": 64,
         "respawn_delay": 50,
         "clue_level": 2,
-        "combat_audio": [408, 410, 409],
+        "combat_audio": [
+          408,
+          410,
+          409
+        ],
         "death_animation": 92,
         "defence_animation": 89,
         "melee_animation": 80,
@@ -49,7 +70,11 @@
         "strength_level": 1,
         "defence_level": 1,
         "range_level": 1,
-        "combat_audio": [511, 513, 512]
+        "combat_audio": [
+          511,
+          513,
+          512
+        ]
       }
     }
   ]

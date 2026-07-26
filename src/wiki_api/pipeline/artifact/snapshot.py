@@ -1,3 +1,5 @@
+"""The whole knowledge base in memory, before it is written to disk."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict
@@ -10,6 +12,8 @@ from wiki_api.domain.relationships import Edge
 
 
 class KnowledgeSnapshot(BaseModel):
+    """Everything a build produced, ready to be hashed or written."""
+
     model_config = ConfigDict(frozen=True)
 
     entities: tuple[Entity, ...] = ()
@@ -20,6 +24,9 @@ class KnowledgeSnapshot(BaseModel):
     @property
     def keys(self) -> tuple[EntityKey, ...]:
         return tuple(entity.key for entity in self.entities)
+
+
+# test cases
 
 
 def test_an_empty_snapshot_is_valid() -> None:

@@ -1,3 +1,5 @@
+"""The errors storage raises when the artifact is missing or unreadable."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -9,16 +11,23 @@ if TYPE_CHECKING:
 
 
 class ArtifactUnavailable(KnowledgeError):
+    """There is no artifact at the path we were pointed at."""
+
     def __init__(self, path: Path) -> None:
         super().__init__(f"no knowledge artifact at {path}")
         self.path = path
 
 
 class ArtifactUnreadable(KnowledgeError):
+    """The artifact is there but could not be opened."""
+
     def __init__(self, path: Path, detail: str) -> None:
         super().__init__(f"the artifact at {path} could not be read: {detail}")
         self.path = path
         self.detail = detail
+
+
+# test cases
 
 
 def test_a_missing_artifact_names_the_path_it_looked_for() -> None:

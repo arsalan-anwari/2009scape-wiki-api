@@ -1,9 +1,10 @@
+"""The entity, which is the single shape everything this API serves takes."""
+
 from __future__ import annotations
 
-from enum import StrEnum
-from typing import Any, Self
+from typing import Annotated, Any, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 from wiki_api.domain.attributes import (
     ATTRIBUTE_MODELS,
@@ -11,14 +12,19 @@ from wiki_api.domain.attributes import (
 )
 from wiki_api.domain.identity import EntityKey, EntityType, Link
 from wiki_api.domain.provenance import Provenance
+from wiki_api.domain.vocabulary import GameEnum, HiddenReason
 
 
-class Visibility(StrEnum):
+class Visibility(GameEnum):
+    """Whether an entity is served to readers or kept out of sight."""
+
     PUBLISHED = "published"
     HIDDEN = "hidden"
 
 
-class VariantKind(StrEnum):
+class VariantKind(GameEnum):
+    """Why a duplicate of another entity exists."""
+
     NOTED = "noted"
     BOUND = "bound"
     PLACEHOLDER = "placeholder"
@@ -26,6 +32,8 @@ class VariantKind(StrEnum):
 
 
 class Entity(BaseModel):
+    """One item, npc, shop, quest or location, with its identity and its attributes."""
+
     model_config = ConfigDict(frozen=True)
 
     key: EntityKey
@@ -39,7 +47,9 @@ class Entity(BaseModel):
     variant_kind: VariantKind | None = None
     searchable: bool = True
     visibility: Visibility = Visibility.PUBLISHED
-    hidden_reason: str | None = None
+    hidden_reason: Annotated[
+        HiddenReason | None, BeforeValidator(HiddenReason.coerce)
+    ] = None
     icon_ref: str | None = None
 
     @model_validator(mode="before")
@@ -112,6 +122,9 @@ class Entity(BaseModel):
             label=self.name,
             icon_ref=self.icon_ref,
         )
+
+
+# test cases
 
 
 def _item(**overrides: Any) -> Entity:
@@ -207,6 +220,21 @@ def test_hidden_entities_need_a_reason_and_leave_search() -> None:
         _item(visibility="hidden", hidden_reason="unnamed")
     with pytest.raises(ValueError):
         _item(hidden_reason="unnamed")
+
+
+def test_a_hidden_reason_comes_from_a_closed_set() -> None:
+    import pytest
+
+    entity = _item(
+        visibility="hidden", hidden_reason="unnamed", searchable=False, name=""
+    )
+    assert entity.hidden_reason is HiddenReason.UNNAMED
+    with pytest.raises(ValueError):
+        _item(
+            visibility="hidden",
+            hidden_reason="because I said so",
+            searchable=False,
+        )
 
 
 def test_a_numbered_entity_needs_no_source_key() -> None:

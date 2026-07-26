@@ -1,19 +1,41 @@
+"""The registry that says what every entity attribute means and how to show it.
+
+A page walks this registry instead of naming fields, so a new attribute shows up in
+the wiki without any front end change.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TYPE_CHECKING, Annotated, Final, Self
+from typing import TYPE_CHECKING, Annotated, Any, Final, Self, get_args
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
-from wiki_api.domain.identity import EntityType
+from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.space import Area, Coordinate, LocationKind
+from wiki_api.domain.vocabulary import (
+    COINS,
+    AbsorbBonuses,
+    AttributeGroup,
+    ClueLevel,
+    CombatBonuses,
+    CombatStyle,
+    EquipmentSlot,
+    QuestDifficulty,
+    QuestLength,
+    Skill,
+    Unit,
+    coerce_item_ref,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 
 class AttributeFormat(StrEnum):
+    """How a reader should render an attribute value."""
+
     INT = "int"
     FLOAT = "float"
     BOOL = "bool"
@@ -21,44 +43,72 @@ class AttributeFormat(StrEnum):
     GP = "gp"
     ID = "id"
     IDS = "ids"
-    INTS = "ints"
+    REF = "ref"
+    ENUM = "enum"
     SKILLS = "skills"
+    BONUSES = "bonuses"
+    ABSORB = "absorb"
     COORD = "coord"
     AREA = "area"
 
 
 @dataclass(frozen=True)
 class AttributeMeta:
+    """The presentation facts attached to one attribute field."""
+
     label: str
-    group: str
+    group: AttributeGroup
     order: int
     format: AttributeFormat
-    unit: str | None = None
+    unit: Unit | None = None
     display: bool = True
     derived: bool = False
 
 
 class AttributeSpec(BaseModel):
+    """One attribute as the registry publishes it."""
+
     model_config = ConfigDict(frozen=True)
 
     key: str
     label: str
-    group: str
+    group: AttributeGroup
     order: int
     format: AttributeFormat
-    unit: str | None = None
+    unit: Unit | None = None
     display: bool = True
     derived: bool = False
+    choices: tuple[str, ...] | None = None
 
 
 class MissingAttributeMeta(TypeError):
+    """Raised when an attribute field forgets to declare what it means."""
+
     def __init__(self, model: type[BaseModel], field: str) -> None:
         super().__init__(f"{model.__name__}.{field} declares no AttributeMeta")
         self.model = model
         self.field = field
 
 
+class MisdeclaredAttribute(TypeError):
+    """Raised when the format a field declares does not match the value it holds."""
+
+    def __init__(self, model: type[BaseModel], field: str, problem: str) -> None:
+        super().__init__(f"{model.__name__}.{field} {problem}")
+        self.model = model
+        self.field = field
+
+
+def choices_of(annotation: Any) -> tuple[str, ...] | None:
+    """The vocabulary behind a field, so a page can render it without naming it."""
+    for candidate in get_args(annotation) or (annotation,):
+        if isinstance(candidate, type) and issubclass(candidate, StrEnum):
+            return tuple(member.value for member in candidate)
+    return None
+
+
 def specs_of(model: type[BaseModel]) -> tuple[AttributeSpec, ...]:
+    """Read the registry entries off a model, in the order a page shows them."""
     specs: list[AttributeSpec] = []
     for name, field in model.model_fields.items():
         meta = next(
@@ -67,6 +117,15 @@ def specs_of(model: type[BaseModel]) -> tuple[AttributeSpec, ...]:
         )
         if meta is None:
             raise MissingAttributeMeta(model, name)
+        choices = choices_of(field.annotation)
+        if choices is not None and meta.format is not AttributeFormat.ENUM:
+            raise MisdeclaredAttribute(
+                model, name, "holds a vocabulary but is not declared as an enum"
+            )
+        if choices is None and meta.format is AttributeFormat.ENUM:
+            raise MisdeclaredAttribute(
+                model, name, "is declared as an enum but holds no vocabulary"
+            )
         specs.append(
             AttributeSpec(
                 key=name,
@@ -77,506 +136,748 @@ def specs_of(model: type[BaseModel]) -> tuple[AttributeSpec, ...]:
                 unit=meta.unit,
                 display=meta.display,
                 derived=meta.derived,
+                choices=choices,
             )
         )
     return tuple(sorted(specs, key=lambda spec: (spec.order, spec.key)))
 
 
 class SkillRequirement(BaseModel):
+    """A skill level something needs before it can be used."""
+
     model_config = ConfigDict(frozen=True)
 
-    skill_id: int = Field(ge=0)
+    skill: Annotated[Skill, BeforeValidator(Skill.coerce)]
     level: int = Field(ge=1, le=99)
 
 
 class ItemAttributes(BaseModel):
+    """Everything the sources say about an item."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     tradeable: Annotated[
         bool | None,
-        AttributeMeta("Tradeable", "trade", 10, AttributeFormat.BOOL),
+        AttributeMeta("Tradeable", AttributeGroup.TRADE, 10, AttributeFormat.BOOL),
     ] = None
     ge_buy_limit: Annotated[
         int | None,
-        AttributeMeta("Buy limit", "trade", 20, AttributeFormat.INT),
+        AttributeMeta("Buy limit", AttributeGroup.TRADE, 20, AttributeFormat.INT),
     ] = None
     shop_price: Annotated[
         int | None,
-        AttributeMeta("Shop price", "trade", 30, AttributeFormat.GP),
+        AttributeMeta("Shop price", AttributeGroup.TRADE, 30, AttributeFormat.GP),
     ] = None
     alchemizable: Annotated[
         bool | None,
-        AttributeMeta("Alchemizable", "trade", 32, AttributeFormat.BOOL),
+        AttributeMeta("Alchemizable", AttributeGroup.TRADE, 32, AttributeFormat.BOOL),
     ] = None
     high_alch_value: Annotated[
         int | None,
-        AttributeMeta("High alchemy", "trade", 34, AttributeFormat.GP, derived=True),
+        AttributeMeta(
+            "High alchemy", AttributeGroup.TRADE, 34, AttributeFormat.GP, derived=True
+        ),
     ] = None
     low_alch_value: Annotated[
         int | None,
-        AttributeMeta("Low alchemy", "trade", 36, AttributeFormat.GP, derived=True),
+        AttributeMeta(
+            "Low alchemy", AttributeGroup.TRADE, 36, AttributeFormat.GP, derived=True
+        ),
     ] = None
     lendable: Annotated[
         bool | None,
-        AttributeMeta("Lendable", "trade", 40, AttributeFormat.BOOL),
+        AttributeMeta("Lendable", AttributeGroup.TRADE, 40, AttributeFormat.BOOL),
     ] = None
     archery_ticket_price: Annotated[
         int | None,
-        AttributeMeta("Archery ticket price", "trade", 50, AttributeFormat.INT),
+        AttributeMeta(
+            "Archery ticket price", AttributeGroup.TRADE, 50, AttributeFormat.INT
+        ),
     ] = None
     tokkul_price: Annotated[
         int | None,
-        AttributeMeta("Tokkul price", "trade", 52, AttributeFormat.INT),
+        AttributeMeta("Tokkul price", AttributeGroup.TRADE, 52, AttributeFormat.INT),
     ] = None
     castle_wars_ticket_price: Annotated[
         int | None,
-        AttributeMeta("Castle Wars ticket price", "trade", 54, AttributeFormat.INT),
+        AttributeMeta(
+            "Castle Wars ticket price", AttributeGroup.TRADE, 54, AttributeFormat.INT
+        ),
     ] = None
     point_price: Annotated[
         int | None,
-        AttributeMeta("Point price", "trade", 56, AttributeFormat.INT),
+        AttributeMeta("Point price", AttributeGroup.TRADE, 56, AttributeFormat.INT),
     ] = None
     weight: Annotated[
         float | None,
-        AttributeMeta("Weight", "general", 60, AttributeFormat.FLOAT, unit="kg"),
+        AttributeMeta(
+            "Weight",
+            AttributeGroup.GENERAL,
+            60,
+            AttributeFormat.FLOAT,
+            unit=Unit.KILOGRAMS,
+        ),
     ] = None
     bankable: Annotated[
         bool | None,
-        AttributeMeta("Bankable", "general", 62, AttributeFormat.BOOL),
+        AttributeMeta("Bankable", AttributeGroup.GENERAL, 62, AttributeFormat.BOOL),
     ] = None
     rare_item: Annotated[
         bool | None,
-        AttributeMeta("Rare item", "general", 64, AttributeFormat.BOOL),
+        AttributeMeta("Rare item", AttributeGroup.GENERAL, 64, AttributeFormat.BOOL),
     ] = None
     destroy: Annotated[
         bool | None,
-        AttributeMeta("Destroyed on drop", "general", 70, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Destroyed on drop", AttributeGroup.GENERAL, 70, AttributeFormat.BOOL
+        ),
     ] = None
     destroy_message: Annotated[
         str | None,
-        AttributeMeta("Destroy option", "general", 80, AttributeFormat.TEXT),
+        AttributeMeta(
+            "Destroy option", AttributeGroup.GENERAL, 80, AttributeFormat.TEXT
+        ),
     ] = None
     equipment_slot: Annotated[
-        int | None,
-        AttributeMeta("Equipment slot", "equipment", 90, AttributeFormat.INT),
+        EquipmentSlot | None,
+        BeforeValidator(EquipmentSlot.coerce),
+        AttributeMeta(
+            "Equipment slot", AttributeGroup.EQUIPMENT, 90, AttributeFormat.ENUM
+        ),
     ] = None
     two_handed: Annotated[
         bool | None,
-        AttributeMeta("Two-handed", "equipment", 92, AttributeFormat.BOOL),
+        AttributeMeta("Two-handed", AttributeGroup.EQUIPMENT, 92, AttributeFormat.BOOL),
     ] = None
     attack_speed: Annotated[
         int | None,
         AttributeMeta(
-            "Attack speed", "equipment", 100, AttributeFormat.INT, unit="ticks"
+            "Attack speed",
+            AttributeGroup.EQUIPMENT,
+            100,
+            AttributeFormat.INT,
+            unit=Unit.TICKS,
         ),
     ] = None
     has_special: Annotated[
         bool | None,
-        AttributeMeta("Special attack", "equipment", 110, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Special attack", AttributeGroup.EQUIPMENT, 110, AttributeFormat.BOOL
+        ),
     ] = None
     bonuses: Annotated[
-        tuple[int, ...] | None,
-        AttributeMeta("Combat bonuses", "equipment", 120, AttributeFormat.INTS),
+        CombatBonuses | None,
+        BeforeValidator(CombatBonuses.coerce),
+        AttributeMeta(
+            "Combat bonuses", AttributeGroup.EQUIPMENT, 120, AttributeFormat.BONUSES
+        ),
     ] = None
     absorb: Annotated[
-        tuple[int, ...] | None,
-        AttributeMeta("Absorption", "equipment", 130, AttributeFormat.INTS),
+        AbsorbBonuses | None,
+        BeforeValidator(AbsorbBonuses.coerce),
+        AttributeMeta(
+            "Absorption", AttributeGroup.EQUIPMENT, 130, AttributeFormat.ABSORB
+        ),
     ] = None
     requirements: Annotated[
         tuple[SkillRequirement, ...] | None,
-        AttributeMeta("Requirements", "equipment", 140, AttributeFormat.SKILLS),
+        AttributeMeta(
+            "Requirements", AttributeGroup.EQUIPMENT, 140, AttributeFormat.SKILLS
+        ),
     ] = None
     fun_weapon: Annotated[
         bool | None,
-        AttributeMeta("Fun weapon", "equipment", 145, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Fun weapon", AttributeGroup.EQUIPMENT, 145, AttributeFormat.BOOL
+        ),
     ] = None
     weapon_interface: Annotated[
         int | None,
         AttributeMeta(
-            "Weapon interface", "internal", 200, AttributeFormat.ID, display=False
+            "Weapon interface",
+            AttributeGroup.INTERNAL,
+            200,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     render_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Render animation", "internal", 210, AttributeFormat.ID, display=False
+            "Render animation",
+            AttributeGroup.INTERNAL,
+            210,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     equip_audio: Annotated[
         int | None,
         AttributeMeta(
-            "Equip audio", "internal", 220, AttributeFormat.ID, display=False
+            "Equip audio",
+            AttributeGroup.INTERNAL,
+            220,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     hat: Annotated[
         bool | None,
-        AttributeMeta("Hat", "internal", 230, AttributeFormat.BOOL, display=False),
+        AttributeMeta(
+            "Hat", AttributeGroup.INTERNAL, 230, AttributeFormat.BOOL, display=False
+        ),
     ] = None
     remove_head: Annotated[
         bool | None,
         AttributeMeta(
-            "Hides head", "internal", 232, AttributeFormat.BOOL, display=False
+            "Hides head",
+            AttributeGroup.INTERNAL,
+            232,
+            AttributeFormat.BOOL,
+            display=False,
         ),
     ] = None
     remove_sleeves: Annotated[
         bool | None,
         AttributeMeta(
-            "Hides sleeves", "internal", 234, AttributeFormat.BOOL, display=False
+            "Hides sleeves",
+            AttributeGroup.INTERNAL,
+            234,
+            AttributeFormat.BOOL,
+            display=False,
         ),
     ] = None
     remove_beard: Annotated[
         bool | None,
         AttributeMeta(
-            "Hides beard", "internal", 236, AttributeFormat.BOOL, display=False
+            "Hides beard",
+            AttributeGroup.INTERNAL,
+            236,
+            AttributeFormat.BOOL,
+            display=False,
         ),
     ] = None
     attack_anims: Annotated[
         tuple[int, ...] | None,
         AttributeMeta(
-            "Attack animations", "internal", 240, AttributeFormat.IDS, display=False
+            "Attack animations",
+            AttributeGroup.INTERNAL,
+            240,
+            AttributeFormat.IDS,
+            display=False,
         ),
     ] = None
     defence_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Defence animation", "internal", 242, AttributeFormat.ID, display=False
+            "Defence animation",
+            AttributeGroup.INTERNAL,
+            242,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     walk_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Walk animation", "internal", 244, AttributeFormat.ID, display=False
+            "Walk animation",
+            AttributeGroup.INTERNAL,
+            244,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     run_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Run animation", "internal", 246, AttributeFormat.ID, display=False
+            "Run animation",
+            AttributeGroup.INTERNAL,
+            246,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     stand_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Stand animation", "internal", 248, AttributeFormat.ID, display=False
+            "Stand animation",
+            AttributeGroup.INTERNAL,
+            248,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     stand_turn_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Stand-turn animation", "internal", 250, AttributeFormat.ID, display=False
+            "Stand-turn animation",
+            AttributeGroup.INTERNAL,
+            250,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     turn90cw_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Turn 90 clockwise", "internal", 252, AttributeFormat.ID, display=False
+            "Turn 90 clockwise",
+            AttributeGroup.INTERNAL,
+            252,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     turn90ccw_anim: Annotated[
         int | None,
         AttributeMeta(
-            "Turn 90 anticlockwise", "internal", 254, AttributeFormat.ID, display=False
+            "Turn 90 anticlockwise",
+            AttributeGroup.INTERNAL,
+            254,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     turn180_anim: Annotated[
         int | None,
-        AttributeMeta("Turn 180", "internal", 256, AttributeFormat.ID, display=False),
+        AttributeMeta(
+            "Turn 180",
+            AttributeGroup.INTERNAL,
+            256,
+            AttributeFormat.ID,
+            display=False,
+        ),
     ] = None
     attack_audios: Annotated[
         tuple[int, ...] | None,
         AttributeMeta(
-            "Attack audio", "internal", 258, AttributeFormat.IDS, display=False
+            "Attack audio",
+            AttributeGroup.INTERNAL,
+            258,
+            AttributeFormat.IDS,
+            display=False,
         ),
     ] = None
 
 
 class NpcAttributes(BaseModel):
+    """Everything the sources say about an npc."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     combat_level: Annotated[
         int | None,
-        AttributeMeta("Combat level", "combat", 5, AttributeFormat.INT, derived=True),
+        AttributeMeta(
+            "Combat level", AttributeGroup.COMBAT, 5, AttributeFormat.INT, derived=True
+        ),
     ] = None
     lifepoints: Annotated[
         int | None,
-        AttributeMeta("Lifepoints", "combat", 10, AttributeFormat.INT),
+        AttributeMeta("Lifepoints", AttributeGroup.COMBAT, 10, AttributeFormat.INT),
     ] = None
     attack_level: Annotated[
         int | None,
-        AttributeMeta("Attack level", "combat", 20, AttributeFormat.INT),
+        AttributeMeta("Attack level", AttributeGroup.COMBAT, 20, AttributeFormat.INT),
     ] = None
     strength_level: Annotated[
         int | None,
-        AttributeMeta("Strength level", "combat", 30, AttributeFormat.INT),
+        AttributeMeta("Strength level", AttributeGroup.COMBAT, 30, AttributeFormat.INT),
     ] = None
     defence_level: Annotated[
         int | None,
-        AttributeMeta("Defence level", "combat", 40, AttributeFormat.INT),
+        AttributeMeta("Defence level", AttributeGroup.COMBAT, 40, AttributeFormat.INT),
     ] = None
     magic_level: Annotated[
         int | None,
-        AttributeMeta("Magic level", "combat", 50, AttributeFormat.INT),
+        AttributeMeta("Magic level", AttributeGroup.COMBAT, 50, AttributeFormat.INT),
     ] = None
     range_level: Annotated[
         int | None,
-        AttributeMeta("Ranged level", "combat", 60, AttributeFormat.INT),
+        AttributeMeta("Ranged level", AttributeGroup.COMBAT, 60, AttributeFormat.INT),
     ] = None
     attack_speed: Annotated[
         int | None,
-        AttributeMeta("Attack speed", "combat", 65, AttributeFormat.INT, unit="ticks"),
+        AttributeMeta(
+            "Attack speed",
+            AttributeGroup.COMBAT,
+            65,
+            AttributeFormat.INT,
+            unit=Unit.TICKS,
+        ),
     ] = None
     bonuses: Annotated[
-        tuple[int, ...] | None,
-        AttributeMeta("Combat bonuses", "combat", 70, AttributeFormat.INTS),
+        CombatBonuses | None,
+        BeforeValidator(CombatBonuses.coerce),
+        AttributeMeta(
+            "Combat bonuses", AttributeGroup.COMBAT, 70, AttributeFormat.BONUSES
+        ),
     ] = None
     combat_style: Annotated[
-        int | None,
-        AttributeMeta("Combat style", "combat", 75, AttributeFormat.INT),
+        CombatStyle | None,
+        BeforeValidator(CombatStyle.coerce),
+        AttributeMeta("Combat style", AttributeGroup.COMBAT, 75, AttributeFormat.ENUM),
     ] = None
     weakness: Annotated[
         int | None,
-        AttributeMeta("Weakness", "combat", 80, AttributeFormat.INT),
+        AttributeMeta("Weakness", AttributeGroup.COMBAT, 80, AttributeFormat.INT),
     ] = None
     protect_style: Annotated[
-        int | None,
-        AttributeMeta("Protection style", "combat", 85, AttributeFormat.INT),
+        CombatStyle | None,
+        BeforeValidator(CombatStyle.coerce),
+        AttributeMeta(
+            "Protection style", AttributeGroup.COMBAT, 85, AttributeFormat.ENUM
+        ),
     ] = None
     slayer_exp: Annotated[
         float | None,
-        AttributeMeta("Slayer experience", "combat", 90, AttributeFormat.FLOAT),
+        AttributeMeta(
+            "Slayer experience", AttributeGroup.COMBAT, 90, AttributeFormat.FLOAT
+        ),
     ] = None
     aggressive: Annotated[
         bool | None,
-        AttributeMeta("Aggressive", "behaviour", 100, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Aggressive", AttributeGroup.BEHAVIOUR, 100, AttributeFormat.BOOL
+        ),
     ] = None
     agg_radius: Annotated[
         int | None,
         AttributeMeta(
-            "Aggression radius", "behaviour", 110, AttributeFormat.INT, unit="tiles"
+            "Aggression radius",
+            AttributeGroup.BEHAVIOUR,
+            110,
+            AttributeFormat.INT,
+            unit=Unit.TILES,
         ),
     ] = None
     respawn_delay: Annotated[
         int | None,
         AttributeMeta(
-            "Respawn delay", "behaviour", 120, AttributeFormat.INT, unit="ticks"
+            "Respawn delay",
+            AttributeGroup.BEHAVIOUR,
+            120,
+            AttributeFormat.INT,
+            unit=Unit.TICKS,
         ),
     ] = None
     safespot: Annotated[
         bool | None,
-        AttributeMeta("Safespottable", "behaviour", 130, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Safespottable", AttributeGroup.BEHAVIOUR, 130, AttributeFormat.BOOL
+        ),
     ] = None
     poisonous: Annotated[
         bool | None,
-        AttributeMeta("Poisonous", "behaviour", 132, AttributeFormat.BOOL),
+        AttributeMeta("Poisonous", AttributeGroup.BEHAVIOUR, 132, AttributeFormat.BOOL),
     ] = None
     poison_amount: Annotated[
         int | None,
-        AttributeMeta("Poison damage", "behaviour", 134, AttributeFormat.INT),
+        AttributeMeta(
+            "Poison damage", AttributeGroup.BEHAVIOUR, 134, AttributeFormat.INT
+        ),
     ] = None
     poison_immune: Annotated[
         bool | None,
-        AttributeMeta("Immune to poison", "behaviour", 136, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Immune to poison", AttributeGroup.BEHAVIOUR, 136, AttributeFormat.BOOL
+        ),
     ] = None
     movement_radius: Annotated[
         int | None,
         AttributeMeta(
-            "Movement radius", "behaviour", 138, AttributeFormat.INT, unit="tiles"
+            "Movement radius",
+            AttributeGroup.BEHAVIOUR,
+            138,
+            AttributeFormat.INT,
+            unit=Unit.TILES,
         ),
     ] = None
     can_tolerate: Annotated[
         bool | None,
-        AttributeMeta("Becomes tolerant", "behaviour", 139, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Becomes tolerant", AttributeGroup.BEHAVIOUR, 139, AttributeFormat.BOOL
+        ),
     ] = None
     clue_level: Annotated[
-        int | None,
-        AttributeMeta("Clue scroll level", "drops", 140, AttributeFormat.INT),
+        ClueLevel | None,
+        BeforeValidator(ClueLevel.coerce),
+        AttributeMeta(
+            "Clue scroll level", AttributeGroup.DROPS, 140, AttributeFormat.ENUM
+        ),
     ] = None
     slayer_task: Annotated[
         int | None,
-        AttributeMeta("Slayer task", "drops", 145, AttributeFormat.ID),
+        AttributeMeta("Slayer task", AttributeGroup.DROPS, 145, AttributeFormat.ID),
     ] = None
     combat_audio: Annotated[
         tuple[int, ...] | None,
         AttributeMeta(
-            "Combat audio", "internal", 200, AttributeFormat.IDS, display=False
+            "Combat audio",
+            AttributeGroup.INTERNAL,
+            200,
+            AttributeFormat.IDS,
+            display=False,
         ),
     ] = None
     death_animation: Annotated[
         int | None,
         AttributeMeta(
-            "Death animation", "internal", 210, AttributeFormat.ID, display=False
+            "Death animation",
+            AttributeGroup.INTERNAL,
+            210,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     defence_animation: Annotated[
         int | None,
         AttributeMeta(
-            "Defence animation", "internal", 220, AttributeFormat.ID, display=False
+            "Defence animation",
+            AttributeGroup.INTERNAL,
+            220,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     melee_animation: Annotated[
         int | None,
         AttributeMeta(
-            "Melee animation", "internal", 230, AttributeFormat.ID, display=False
+            "Melee animation",
+            AttributeGroup.INTERNAL,
+            230,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     magic_animation: Annotated[
         int | None,
         AttributeMeta(
-            "Magic animation", "internal", 240, AttributeFormat.ID, display=False
+            "Magic animation",
+            AttributeGroup.INTERNAL,
+            240,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     range_animation: Annotated[
         int | None,
         AttributeMeta(
-            "Ranged animation", "internal", 250, AttributeFormat.ID, display=False
+            "Ranged animation",
+            AttributeGroup.INTERNAL,
+            250,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     spawn_animation: Annotated[
         int | None,
         AttributeMeta(
-            "Spawn animation", "internal", 260, AttributeFormat.ID, display=False
+            "Spawn animation",
+            AttributeGroup.INTERNAL,
+            260,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     death_gfx: Annotated[
         int | None,
         AttributeMeta(
-            "Death graphic", "internal", 262, AttributeFormat.ID, display=False
+            "Death graphic",
+            AttributeGroup.INTERNAL,
+            262,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     start_gfx: Annotated[
         int | None,
         AttributeMeta(
-            "Start graphic", "internal", 264, AttributeFormat.ID, display=False
+            "Start graphic",
+            AttributeGroup.INTERNAL,
+            264,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     end_gfx: Annotated[
         int | None,
         AttributeMeta(
-            "End graphic", "internal", 266, AttributeFormat.ID, display=False
+            "End graphic",
+            AttributeGroup.INTERNAL,
+            266,
+            AttributeFormat.ID,
+            display=False,
         ),
     ] = None
     projectile: Annotated[
         int | None,
-        AttributeMeta("Projectile", "internal", 268, AttributeFormat.ID, display=False),
+        AttributeMeta(
+            "Projectile",
+            AttributeGroup.INTERNAL,
+            268,
+            AttributeFormat.ID,
+            display=False,
+        ),
     ] = None
     prj_height: Annotated[
         int | None,
         AttributeMeta(
-            "Projectile height", "internal", 270, AttributeFormat.INT, display=False
+            "Projectile height",
+            AttributeGroup.INTERNAL,
+            270,
+            AttributeFormat.INT,
+            display=False,
         ),
     ] = None
     start_height: Annotated[
         int | None,
         AttributeMeta(
-            "Start height", "internal", 272, AttributeFormat.INT, display=False
+            "Start height",
+            AttributeGroup.INTERNAL,
+            272,
+            AttributeFormat.INT,
+            display=False,
         ),
     ] = None
     end_height: Annotated[
         int | None,
         AttributeMeta(
-            "End height", "internal", 274, AttributeFormat.INT, display=False
+            "End height",
+            AttributeGroup.INTERNAL,
+            274,
+            AttributeFormat.INT,
+            display=False,
         ),
     ] = None
     spell_id: Annotated[
         int | None,
-        AttributeMeta("Spell", "internal", 276, AttributeFormat.ID, display=False),
+        AttributeMeta(
+            "Spell", AttributeGroup.INTERNAL, 276, AttributeFormat.ID, display=False
+        ),
     ] = None
     water_npc: Annotated[
         bool | None,
         AttributeMeta(
-            "Lives in water", "internal", 278, AttributeFormat.BOOL, display=False
+            "Lives in water",
+            AttributeGroup.INTERNAL,
+            278,
+            AttributeFormat.BOOL,
+            display=False,
         ),
     ] = None
     facing_booth: Annotated[
         bool | None,
         AttributeMeta(
-            "Faces a booth", "internal", 280, AttributeFormat.BOOL, display=False
+            "Faces a booth",
+            AttributeGroup.INTERNAL,
+            280,
+            AttributeFormat.BOOL,
+            display=False,
         ),
     ] = None
     force_talk: Annotated[
         str | None,
         AttributeMeta(
-            "Forced dialogue", "internal", 282, AttributeFormat.TEXT, display=False
+            "Forced dialogue",
+            AttributeGroup.INTERNAL,
+            282,
+            AttributeFormat.TEXT,
+            display=False,
         ),
     ] = None
 
 
 class ShopAttributes(BaseModel):
+    """Everything the sources say about a shop."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     general_store: Annotated[
         bool | None,
-        AttributeMeta("General store", "shop", 10, AttributeFormat.BOOL),
+        AttributeMeta("General store", AttributeGroup.SHOP, 10, AttributeFormat.BOOL),
     ] = None
-    currency_item_id: Annotated[
-        int | None,
-        AttributeMeta("Currency", "shop", 20, AttributeFormat.ID),
+    currency: Annotated[
+        EntityKey | None,
+        BeforeValidator(coerce_item_ref),
+        AttributeMeta("Currency", AttributeGroup.SHOP, 20, AttributeFormat.REF),
     ] = None
     high_alch: Annotated[
         bool | None,
-        AttributeMeta("Buys alchemy products", "shop", 30, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Buys alchemy products", AttributeGroup.SHOP, 30, AttributeFormat.BOOL
+        ),
     ] = None
 
 
 class QuestAttributes(BaseModel):
+    """Everything we record about a quest."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     difficulty: Annotated[
-        str | None,
-        AttributeMeta("Difficulty", "overview", 10, AttributeFormat.TEXT),
+        QuestDifficulty | None,
+        BeforeValidator(QuestDifficulty.coerce),
+        AttributeMeta("Difficulty", AttributeGroup.OVERVIEW, 10, AttributeFormat.ENUM),
     ] = None
     length: Annotated[
-        str | None,
-        AttributeMeta("Length", "overview", 20, AttributeFormat.TEXT),
+        QuestLength | None,
+        BeforeValidator(QuestLength.coerce),
+        AttributeMeta("Length", AttributeGroup.OVERVIEW, 20, AttributeFormat.ENUM),
     ] = None
     quest_points: Annotated[
         int | None,
-        AttributeMeta("Quest points", "overview", 30, AttributeFormat.INT),
+        AttributeMeta("Quest points", AttributeGroup.OVERVIEW, 30, AttributeFormat.INT),
     ] = None
     members: Annotated[
         bool | None,
-        AttributeMeta("Members only", "overview", 40, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Members only", AttributeGroup.OVERVIEW, 40, AttributeFormat.BOOL
+        ),
     ] = None
     series: Annotated[
         str | None,
-        AttributeMeta("Series", "overview", 50, AttributeFormat.TEXT),
-    ] = None
-    start_location: Annotated[
-        str | None,
-        AttributeMeta("Start point", "overview", 60, AttributeFormat.TEXT),
+        AttributeMeta("Series", AttributeGroup.OVERVIEW, 50, AttributeFormat.TEXT),
     ] = None
 
 
 class LocationAttributes(BaseModel):
+    """Everything we record about a place on the map."""
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     kind: Annotated[
         LocationKind | None,
-        AttributeMeta("Kind", "overview", 10, AttributeFormat.TEXT),
+        BeforeValidator(LocationKind.coerce),
+        AttributeMeta("Kind", AttributeGroup.OVERVIEW, 10, AttributeFormat.ENUM),
     ] = None
     centre: Annotated[
         Coordinate | None,
-        AttributeMeta("Centre", "map", 20, AttributeFormat.COORD),
+        AttributeMeta("Centre", AttributeGroup.MAP, 20, AttributeFormat.COORD),
     ] = None
     bounds: Annotated[
         Area | None,
-        AttributeMeta("Extent", "map", 30, AttributeFormat.AREA),
+        AttributeMeta("Extent", AttributeGroup.MAP, 30, AttributeFormat.AREA),
     ] = None
     region_id: Annotated[
         int | None,
-        AttributeMeta("Region", "map", 40, AttributeFormat.ID, derived=True),
+        AttributeMeta(
+            "Region", AttributeGroup.MAP, 40, AttributeFormat.ID, derived=True
+        ),
     ] = None
     members: Annotated[
         bool | None,
-        AttributeMeta("Members only", "overview", 50, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Members only", AttributeGroup.OVERVIEW, 50, AttributeFormat.BOOL
+        ),
     ] = None
     multicombat: Annotated[
         bool | None,
-        AttributeMeta("Multicombat", "overview", 60, AttributeFormat.BOOL),
+        AttributeMeta("Multicombat", AttributeGroup.OVERVIEW, 60, AttributeFormat.BOOL),
     ] = None
     wilderness_level: Annotated[
         int | None,
-        AttributeMeta("Wilderness level", "overview", 70, AttributeFormat.INT),
+        AttributeMeta(
+            "Wilderness level", AttributeGroup.OVERVIEW, 70, AttributeFormat.INT
+        ),
     ] = None
 
     @model_validator(mode="after")
@@ -621,7 +922,11 @@ ATTRIBUTE_SPECS: Final[Mapping[EntityType, tuple[AttributeSpec, ...]]] = {
 
 
 def empty_attributes(entity_type: EntityType) -> EntityAttributes:
+    """An attribute set for the given type with nothing filled in."""
     return ATTRIBUTE_MODELS[entity_type]()
+
+
+# test cases
 
 
 def test_every_entity_type_has_a_model_and_a_spec_set() -> None:
@@ -651,6 +956,139 @@ def test_a_field_without_metadata_is_rejected() -> None:
 
     with pytest.raises(MissingAttributeMeta):
         specs_of(Bad)
+
+
+def test_every_vocabulary_field_declares_its_choices() -> None:
+    for specs in ATTRIBUTE_SPECS.values():
+        for spec in specs:
+            if spec.format is AttributeFormat.ENUM:
+                assert spec.choices, f"{spec.key} declares no choices"
+            else:
+                assert spec.choices is None
+
+
+def test_a_vocabulary_the_front_end_cannot_render_is_rejected() -> None:
+    import pytest
+
+    class SaysText(BaseModel):
+        kind: Annotated[
+            LocationKind | None,
+            AttributeMeta("Kind", AttributeGroup.OVERVIEW, 10, AttributeFormat.TEXT),
+        ] = None
+
+    class SaysEnum(BaseModel):
+        count: Annotated[
+            int | None,
+            AttributeMeta("Count", AttributeGroup.OVERVIEW, 10, AttributeFormat.ENUM),
+        ] = None
+
+    for model in (SaysText, SaysEnum):
+        with pytest.raises(MisdeclaredAttribute):
+            specs_of(model)
+
+
+def test_the_choices_carry_the_whole_vocabulary() -> None:
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    slot = item_specs["equipment_slot"]
+    assert slot.format is AttributeFormat.ENUM
+    assert slot.choices is not None
+    assert "weapon" in slot.choices
+    assert len(slot.choices) == len(list(EquipmentSlot))
+
+
+def test_a_raw_game_ordinal_becomes_a_named_slot() -> None:
+    attributes = ItemAttributes.model_validate({"equipment_slot": 3})
+    assert attributes.equipment_slot is EquipmentSlot.WEAPON
+    assert attributes.model_dump(exclude_none=True) == {"equipment_slot": "weapon"}
+
+
+def test_the_clean_name_and_the_raw_ordinal_agree() -> None:
+    from_ordinal = ItemAttributes.model_validate({"equipment_slot": 3})
+    from_name = ItemAttributes.model_validate({"equipment_slot": "weapon"})
+    assert from_ordinal == from_name
+
+
+def test_packed_bonuses_arrive_as_named_values() -> None:
+    packed = "20,29,-2,0,0,0,3,2,1,0,0,25,0,0,0"
+    attributes = ItemAttributes.model_validate({"bonuses": packed})
+    assert attributes.bonuses is not None
+    assert attributes.bonuses.attack_slash == 29
+    assert attributes.bonuses.strength == 25
+
+
+def test_bonuses_survive_a_round_trip_through_json() -> None:
+    attributes = ItemAttributes.model_validate({"bonuses": [0] * 14 + [49]})
+    restored = ItemAttributes.model_validate_json(
+        attributes.model_dump_json(exclude_none=True)
+    )
+    assert restored == attributes
+    assert restored.bonuses is not None
+    assert restored.bonuses.ranged_strength == 49
+
+
+def test_absorption_arrives_as_named_values() -> None:
+    attributes = ItemAttributes.model_validate({"absorb": "1,0,1"})
+    assert attributes.absorb is not None
+    assert attributes.absorb.melee == 1
+    assert attributes.absorb.magic == 0
+
+
+def test_a_requirement_names_its_skill() -> None:
+    attributes = ItemAttributes.model_validate(
+        {"requirements": [{"skill": 0, "level": 60}, {"skill": "magic", "level": 55}]}
+    )
+    assert attributes.requirements is not None
+    assert attributes.requirements[0].skill is Skill.ATTACK
+    assert attributes.requirements[1].skill is Skill.MAGIC
+
+
+def test_npc_styles_and_clue_tiers_come_back_named() -> None:
+    attributes = NpcAttributes.model_validate(
+        {"combat_style": 1, "protect_style": 2, "clue_level": 2}
+    )
+    assert attributes.combat_style is CombatStyle.RANGE
+    assert attributes.protect_style is CombatStyle.MAGIC
+    assert attributes.clue_level is ClueLevel.HARD
+
+
+def test_an_npc_weakness_stays_the_opaque_number_the_server_uses() -> None:
+    npc_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.NPC]}
+    assert npc_specs["weakness"].format is AttributeFormat.INT
+    assert npc_specs["weakness"].choices is None
+
+
+def test_a_shop_currency_is_an_item_reference_not_a_number() -> None:
+    attributes = ShopAttributes.model_validate({"currency": 995})
+    assert attributes.currency == COINS
+    assert ShopAttributes.model_validate({"currency": "item:995"}).currency == COINS
+
+
+def test_quest_difficulty_and_length_are_closed_vocabularies() -> None:
+    import pytest
+
+    attributes = QuestAttributes.model_validate(
+        {"difficulty": "Novice", "length": "Short"}
+    )
+    assert attributes.difficulty is QuestDifficulty.NOVICE
+    assert attributes.length is QuestLength.SHORT
+    with pytest.raises(ValueError):
+        QuestAttributes.model_validate({"difficulty": "quite hard actually"})
+
+
+def test_a_quest_start_point_is_a_relationship_not_an_attribute() -> None:
+    assert "start_location" not in QuestAttributes.model_fields
+
+
+def test_units_are_declared_from_a_closed_set() -> None:
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    assert item_specs["weight"].unit is Unit.KILOGRAMS
+    assert item_specs["attack_speed"].unit is Unit.TICKS
+    assert item_specs["ge_buy_limit"].unit is None
+
+
+def test_groups_are_declared_from_a_closed_set() -> None:
+    for specs in ATTRIBUTE_SPECS.values():
+        assert all(isinstance(spec.group, AttributeGroup) for spec in specs)
 
 
 def test_internal_attributes_are_stored_but_not_displayed() -> None:

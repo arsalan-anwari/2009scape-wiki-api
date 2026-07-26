@@ -1,3 +1,5 @@
+"""Paging, because nothing this API returns is unbounded."""
+
 from __future__ import annotations
 
 from enum import StrEnum
@@ -10,11 +12,15 @@ MAX_PAGE_SIZE: Final = 200
 
 
 class SortOrder(StrEnum):
+    """How a listing is ordered."""
+
     NAME = "name"
     ID = "id"
 
 
 class Page[T](BaseModel):
+    """One page of results, and enough information to ask for the next."""
+
     model_config = ConfigDict(frozen=True)
 
     items: tuple[T, ...]
@@ -39,6 +45,9 @@ class Page[T](BaseModel):
         if not self.has_more:
             return None
         return self.offset + len(self.items)
+
+
+# test cases
 
 
 def test_a_page_reports_whether_more_results_follow() -> None:

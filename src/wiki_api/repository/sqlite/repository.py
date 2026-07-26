@@ -1,3 +1,5 @@
+"""The repository backed by the SQLite artifact."""
+
 from __future__ import annotations
 
 import json
@@ -38,6 +40,11 @@ if TYPE_CHECKING:
 
 
 class SqliteKnowledgeRepository:
+    """Reads the built artifact.
+
+    Nothing above this class knows the storage is SQLite.
+    """
+
     def __init__(self, path: Path) -> None:
         self._connections = ReadOnlyConnections(path)
         try:

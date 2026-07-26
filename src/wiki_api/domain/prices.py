@@ -1,3 +1,5 @@
+"""Grand Exchange price history."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -10,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class PricePoint(BaseModel):
+    """What one item was worth on one snapshot day."""
+
     model_config = ConfigDict(frozen=True)
 
     item_id: int = Field(ge=0)
@@ -18,9 +22,13 @@ class PricePoint(BaseModel):
 
 
 def latest_price(points: Sequence[PricePoint]) -> PricePoint | None:
+    """The newest of the given points, or None when there are none."""
     if not points:
         return None
     return max(points, key=lambda point: point.snapshot_date)
+
+
+# test cases
 
 
 def test_a_price_point_pins_a_value_to_a_date() -> None:

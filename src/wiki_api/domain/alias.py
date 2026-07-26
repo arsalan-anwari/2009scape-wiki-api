@@ -1,3 +1,5 @@
+"""Alternate slugs that redirect to an entity so old links keep working."""
+
 from __future__ import annotations
 
 from enum import StrEnum
@@ -8,12 +10,16 @@ from wiki_api.domain.identity import EntityKey, EntityType
 
 
 class AliasKind(StrEnum):
+    """Why an alias exists."""
+
     RETIRED_SLUG = "retired_slug"
     SHORTHAND = "shorthand"
     ALTERNATE_NAME = "alternate_name"
 
 
 class EntityAlias(BaseModel):
+    """A slug that resolves to an entity it is not the main name for."""
+
     model_config = ConfigDict(frozen=True)
 
     type: EntityType
@@ -24,6 +30,9 @@ class EntityAlias(BaseModel):
     @property
     def key(self) -> EntityKey:
         return EntityKey(type=self.type, id=self.entity_id)
+
+
+# test cases
 
 
 def test_an_alias_points_at_the_entity_that_replaced_it() -> None:

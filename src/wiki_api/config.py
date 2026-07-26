@@ -1,3 +1,5 @@
+"""Settings for the service, read from the environment."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,6 +12,11 @@ if TYPE_CHECKING:
 
 
 class Settings(BaseSettings):
+    """Runtime configuration.
+
+    Every field can be overridden with a WIKI_API_ prefixed environment variable.
+    """
+
     model_config = SettingsConfigDict(
         env_prefix="WIKI_API_",
         env_file=".env",
@@ -34,7 +41,11 @@ class Settings(BaseSettings):
 
 
 def get_settings() -> Settings:
+    """Read the settings fresh from the environment."""
     return Settings()
+
+
+# test cases
 
 
 def test_settings_defaults(monkeypatch: pytest.MonkeyPatch) -> None:

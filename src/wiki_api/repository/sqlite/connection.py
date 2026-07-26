@@ -1,3 +1,5 @@
+"""Handing out read only SQLite connections, one per thread."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -11,6 +13,8 @@ if TYPE_CHECKING:
 
 
 class ReadOnlyConnections:
+    """A pool of connections to one artifact, opened read only and never written to."""
+
     def __init__(self, path: Path) -> None:
         if not path.is_file():
             raise ArtifactUnavailable(path)
@@ -41,6 +45,9 @@ class ReadOnlyConnections:
         for connection in opened:
             connection.close()
         self._local = threading.local()
+
+
+# test cases
 
 
 def test_a_missing_artifact_is_reported_before_any_query(tmp_path: Path) -> None:

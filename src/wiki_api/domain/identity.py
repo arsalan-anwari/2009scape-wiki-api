@@ -1,3 +1,5 @@
+"""How an entity is identified and how one entity points at another."""
+
 from __future__ import annotations
 
 from enum import StrEnum
@@ -9,6 +11,8 @@ KEY_SEPARATOR = ":"
 
 
 class EntityType(StrEnum):
+    """The kinds of thing this knowledge base holds."""
+
     ITEM = "item"
     NPC = "npc"
     SHOP = "shop"
@@ -17,6 +21,8 @@ class EntityType(StrEnum):
 
 
 class EntityKey(BaseModel):
+    """The identity of an entity, which is its type together with its numeric id."""
+
     model_config = ConfigDict(frozen=True)
 
     type: EntityType
@@ -37,6 +43,8 @@ class EntityKey(BaseModel):
 
 
 class Link(BaseModel):
+    """A reference to an entity carrying identity and a label, never a url."""
+
     model_config = ConfigDict(frozen=True)
 
     type: EntityType
@@ -48,6 +56,9 @@ class Link(BaseModel):
     @property
     def key(self) -> EntityKey:
         return EntityKey(type=self.type, id=self.id)
+
+
+# test cases
 
 
 def test_entity_key_round_trips_through_its_string_form() -> None:

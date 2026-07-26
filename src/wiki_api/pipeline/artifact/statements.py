@@ -1,3 +1,5 @@
+"""The SQL a build writes with, kept in files rather than in strings here."""
+
 from __future__ import annotations
 
 from importlib import resources
@@ -7,6 +9,7 @@ _PACKAGE: Final = "wiki_api.pipeline.artifact.sql"
 
 
 def load(name: str) -> str:
+    """Read one statement file out of the package."""
     return resources.files(_PACKAGE).joinpath(name).read_text(encoding="utf-8")
 
 
@@ -17,6 +20,9 @@ INSERT_ALIAS: Final = load("insert_alias.sql")
 INSERT_PRICE: Final = load("insert_price.sql")
 INSERT_META: Final = load("insert_meta.sql")
 INSERT_SEARCH_ROW: Final = load("insert_search_row.sql")
+
+
+# test cases
 
 
 def test_every_statement_is_loaded_from_its_own_file() -> None:

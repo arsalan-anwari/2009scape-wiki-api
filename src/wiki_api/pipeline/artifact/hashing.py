@@ -1,3 +1,5 @@
+"""Hashing a snapshot so two builds of the same sources can be compared."""
+
 from __future__ import annotations
 
 import hashlib
@@ -9,11 +11,15 @@ if TYPE_CHECKING:
 
 
 def content_hash(snapshot: KnowledgeSnapshot) -> str:
+    """A hash of the snapshot content that ignores when the build ran."""
     payload = snapshot.model_dump(mode="json")
     canonical = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+# test cases
 
 
 def test_the_same_content_always_hashes_the_same() -> None:

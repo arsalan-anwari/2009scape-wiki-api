@@ -13,7 +13,11 @@
       "source_ref": "overlay/locations/kbd_lair",
       "attributes": {
         "kind": "dungeon",
-        "centre": { "x": 2273, "y": 4698, "plane": 0 },
+        "centre": {
+          "x": 2273,
+          "y": 4698,
+          "plane": 0
+        },
         "region_id": 9033,
         "members": true,
         "multicombat": true
@@ -49,6 +53,23 @@
         "kind": "area",
         "members": true
       }
+    },
+    {
+      "type": "location",
+      "id": 4,
+      "name": "Burthorpe",
+      "description": "A town on the edge of the troll lands.",
+      "source_key": "asgarnia/burthorpe",
+      "source_ref": "overlay/locations/burthorpe",
+      "attributes": {
+        "kind": "town",
+        "centre": {
+          "x": 2899,
+          "y": 3545,
+          "plane": 0
+        },
+        "members": true
+      }
     }
   ],
   "edges": [
@@ -56,11 +77,14 @@
       "src": "npc:50",
       "rel": "located_in",
       "dst": "location:1",
-      "discriminator": "2273:4698:0",
       "order_key": 0,
       "source_ref": "npc_spawns.json#50",
       "attributes": {
-        "at": { "x": 2273, "y": 4698, "plane": 0 },
+        "at": {
+          "x": 2273,
+          "y": 4698,
+          "plane": 0
+        },
         "spawn_kind": "npc_spawn",
         "amount": 1
       }
@@ -78,7 +102,9 @@
       "dst": "location:3",
       "order_key": 0,
       "source_ref": "overlay/locations/white_wolf_mountain",
-      "attributes": { "spawn_kind": "shop_front" }
+      "attributes": {
+        "spawn_kind": "shop_front"
+      }
     },
     {
       "src": "npc:4559",
@@ -86,7 +112,9 @@
       "dst": "location:3",
       "order_key": 10,
       "source_ref": "overlay/locations/white_wolf_mountain",
-      "attributes": { "spawn_kind": "shop_front" }
+      "attributes": {
+        "spawn_kind": "shop_front"
+      }
     }
   ]
 }

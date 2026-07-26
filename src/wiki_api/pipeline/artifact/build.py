@@ -1,3 +1,5 @@
+"""Running a whole build, from the documents on disk to the finished artifact."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -11,10 +13,12 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from wiki_api.domain.manifest import Manifest
+    from wiki_api.domain.provenance import GameVersion
     from wiki_api.pipeline.artifact.snapshot import KnowledgeSnapshot
 
 
 def build_snapshot(source_dir: Path, *, strict: bool = True) -> KnowledgeSnapshot:
+    """Read every document under the given directory and merge them."""
     return merge(load_documents(source_dir), strict=strict)
 
 
@@ -23,11 +27,11 @@ def build_artifact(
     destination: Path,
     *,
     data_version: str,
-    game_version: str,
+    game_version: GameVersion | str,
     built_at: datetime,
-    game_commit: str | None = None,
     strict: bool = True,
 ) -> Manifest:
+    """Build a snapshot and write it out in one step."""
     snapshot = build_snapshot(source_dir, strict=strict)
     return write_artifact(
         snapshot,
@@ -35,5 +39,4 @@ def build_artifact(
         data_version=data_version,
         game_version=game_version,
         built_at=built_at,
-        game_commit=game_commit,
     )

@@ -14,6 +14,7 @@ from wiki_api.domain.relationships import (
     DropEdgeAttributes,
     RelationshipType,
 )
+from wiki_api.domain.vocabulary import COINS, Skill, SourceKind
 
 if TYPE_CHECKING:
     from wiki_api.repository.protocol import KnowledgeRepository
@@ -36,6 +37,7 @@ DEATH_PLATEAU = EntityKey(type=EntityType.QUEST, id=1)
 KBD_LAIR = EntityKey(type=EntityType.LOCATION, id=1)
 WILDERNESS = EntityKey(type=EntityType.LOCATION, id=2)
 WHITE_WOLF_MOUNTAIN = EntityKey(type=EntityType.LOCATION, id=3)
+BURTHORPE = EntityKey(type=EntityType.LOCATION, id=4)
 
 
 def test_the_repository_satisfies_the_protocol(
@@ -50,7 +52,8 @@ def test_the_manifest_describes_the_artifact(repository: KnowledgeRepository) ->
     manifest = repository.manifest()
     assert manifest.is_readable is True
     assert manifest.data_version == "fixture-0001"
-    assert manifest.game_version == "2009scape@5a37f2f8"
+    assert str(manifest.game_version) == "2009scape@5a37f2f8"
+    assert manifest.game_commit == "5a37f2f8"
     assert len(manifest.content_hash) == 64
 
 
@@ -59,7 +62,8 @@ def test_an_entity_is_fetched_by_identity(repository: KnowledgeRepository) -> No
     assert entity.name == "Dragon scimitar"
     assert entity.description == "A vicious, curved sword."
     assert entity.slug == "dragon-scimitar-4587"
-    assert entity.provenance.source == "item_configs.json"
+    assert entity.provenance.source is SourceKind.GAME_CONFIG
+    assert entity.provenance.source_file == "item_configs.json"
 
 
 def test_type_specific_attributes_survive_the_round_trip(
@@ -70,7 +74,12 @@ def test_type_specific_attributes_survive_the_round_trip(
     item = repository.get_entity(SCIMITAR)
     assert isinstance(item.attributes, ItemAttributes)
     assert item.attributes.ge_buy_limit == 10
-    assert item.attributes.bonuses == (8, 67, -2, 0, 0, 0, 1, 0, 0, 0, 0, 66, 0, 0, 0)
+    assert item.attributes.bonuses is not None
+    assert item.attributes.bonuses.attack_slash == 67
+    assert item.attributes.bonuses.attack_crush == -2
+    assert item.attributes.bonuses.strength == 66
+    assert item.attributes.requirements is not None
+    assert item.attributes.requirements[0].skill is Skill.ATTACK
     assert item.attributes.requirements is not None
     assert item.attributes.requirements[0].level == 60
 
@@ -343,7 +352,7 @@ def test_a_shop_relationship_carries_price_and_stock(
     assert isinstance(sells.attributes, SellEdgeAttributes)
     assert sells.attributes.stock_amount == 10
     assert sells.attributes.price == 8
-    assert sells.attributes.currency_item_id == 995
+    assert sells.attributes.currency == COINS
 
 
 def test_a_quest_reward_is_a_reverse_lookup_from_the_item(
@@ -419,7 +428,7 @@ def test_an_overlay_correction_is_what_the_repository_serves(
 ) -> None:
     corrected = repository.get_entity(EntityKey(type=EntityType.ITEM, id=14422))
     assert corrected.name == "Sacred clay pouch (class 1)"
-    assert corrected.provenance.source == "overlay"
+    assert corrected.provenance.source is SourceKind.OVERLAY
     shop = repository.get_entity(CROSSBOW_SHOP)
     assert shop.name == "Crossbow Shop (White Wolf Mountain)"
 
@@ -502,7 +511,7 @@ def test_the_natural_key_survives_a_rebuild_that_reassigns_nothing(
     key = repository.resolve_source_key(EntityType.QUEST, "DEATH_PLATEAU")
     entity = repository.get_entity(key)
     assert entity.slug == "death-plateau"
-    assert entity.provenance.source == "overlay"
+    assert entity.provenance.source is SourceKind.OVERLAY
 
 
 def test_where_an_npc_is_found_on_the_map(repository: KnowledgeRepository) -> None:
@@ -592,6 +601,7 @@ def test_places_are_listed_and_resolved_like_every_other_type(
         KBD_LAIR,
         WILDERNESS,
         WHITE_WOLF_MOUNTAIN,
+        BURTHORPE,
     }
     assert repository.resolve_slug(EntityType.LOCATION, "wilderness") == WILDERNESS
     assert repository.resolve_source_key(EntityType.LOCATION, "wilderness") == (
