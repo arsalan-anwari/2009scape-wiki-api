@@ -1,4 +1,4 @@
-> This repo is a WIP, please wait for official release
+> This project is a WIP, please wait for official release
 
 # 2009scape-wiki-api
 
