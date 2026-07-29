@@ -1,3 +1,5 @@
+> This repo is a WIP, please wait for official release
+
 # 2009scape-wiki-api
 
 A backend service that turns the 2009scape game data into a clean, searchable
