@@ -80,6 +80,26 @@ def test_every_walk_of_the_graph_is_bounded_and_countable() -> None:
         assert "COUNT(*) AS total" in statement
 
 
+def test_a_walk_and_its_count_agree_on_which_edges_they_mean() -> None:
+    pairs = (
+        (SELECT_EDGES_FROM, COUNT_EDGES_FROM),
+        (SELECT_EDGES_TO, COUNT_EDGES_TO),
+    )
+    for walk, counter in pairs:
+        for clause in ("json_each(:keys)", ":include_hidden", "target.visibility"):
+            assert clause in walk
+            assert clause in counter
+
+
+def test_a_walk_orders_by_enough_columns_to_be_unambiguous() -> None:
+    for statement in (SELECT_EDGES_FROM, SELECT_EDGES_TO):
+        ordering = statement.split("ORDER BY")[1]
+        for column in ("rel", "order_key", "discriminator"):
+            assert column in ordering
+        assert "src_type" in ordering
+        assert "dst_type" in ordering
+
+
 def test_the_listing_queries_exclude_variants_and_unpublished_entities() -> None:
     for statement in (SELECT_ENTITIES_BY_NAME, SELECT_ENTITIES_BY_ID, COUNT_ENTITIES):
         assert "canonical_id IS NULL" in statement

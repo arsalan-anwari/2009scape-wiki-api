@@ -1,9 +1,24 @@
 SELECT
-    *
-FROM edge
-WHERE src_type = :type
-  AND src_id = :id
-  AND (:rel IS NULL OR rel = :rel)
-ORDER BY rel, order_key, dst_type, dst_id, discriminator
+    e.*
+FROM edge AS e
+JOIN json_each(:keys) AS requested
+  ON e.src_type = json_extract(requested.value, '$.type')
+ AND e.src_id = json_extract(requested.value, '$.id')
+WHERE (:rel IS NULL OR e.rel = :rel)
+  AND (:include_hidden OR NOT EXISTS (
+        SELECT 1
+        FROM entity AS target
+        WHERE target.type = e.dst_type
+          AND target.id = e.dst_id
+          AND target.visibility = :hidden
+      ))
+ORDER BY
+    e.rel,
+    e.order_key,
+    e.dst_type,
+    e.dst_id,
+    e.discriminator,
+    e.src_type,
+    e.src_id
 LIMIT :limit
 OFFSET :offset;

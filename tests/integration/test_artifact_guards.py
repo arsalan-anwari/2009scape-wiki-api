@@ -69,7 +69,7 @@ def test_a_full_read_workload_leaves_the_artifact_untouched(
         repository.search("dragon", limit=50)
         repository.list_entities(EntityType.ITEM, limit=50)
         repository.get_entity(EntityKey(type=EntityType.ITEM, id=4587))
-        repository.edges_from(EntityKey(type=EntityType.NPC, id=50))
+        repository.edges_from((EntityKey(type=EntityType.NPC, id=50),))
         repository.price_history(4587)
     finally:
         repository.close()

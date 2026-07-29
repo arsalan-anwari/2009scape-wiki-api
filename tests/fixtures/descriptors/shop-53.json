@@ -1,0 +1,244 @@
+{
+  "entity": {
+    "type": "shop",
+    "id": 53,
+    "slug": "crossbow-shop-white-wolf-mountain",
+    "label": "Crossbow Shop (White Wolf Mountain)",
+    "icon_ref": null
+  },
+  "type": "shop",
+  "description": null,
+  "canonical": null,
+  "variants": [],
+  "infobox": [],
+  "sections": [
+    {
+      "group": "shop",
+      "label": "Shop",
+      "placement": "section",
+      "order": 90,
+      "attributes": [
+        {
+          "key": "general_store",
+          "value": false,
+          "label": "General store",
+          "group": "shop",
+          "order": 10,
+          "format": "bool",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "currency",
+          "value": {
+            "type": "item",
+            "id": 995
+          },
+          "label": "Currency",
+          "group": "shop",
+          "order": 20,
+          "format": "ref",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "high_alch",
+          "value": false,
+          "label": "Buys alchemy products",
+          "group": "shop",
+          "order": 30,
+          "format": "bool",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "shop",
+          "id": 53
+        },
+        "rel": "sells",
+        "direction": "forward"
+      },
+      "label": "Sells",
+      "group": "trade",
+      "order": 20,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "item",
+              "id": 9440,
+              "slug": "wooden-stock",
+              "label": "Wooden stock",
+              "icon_ref": null
+            },
+            "type": "item",
+            "attributes": [
+              {
+                "key": "stock_amount",
+                "value": 10,
+                "label": "Stock",
+                "group": "shop",
+                "order": 10,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "restock_rate",
+                "value": 100,
+                "label": "Restock rate",
+                "group": "shop",
+                "order": 20,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "price",
+                "value": 8,
+                "label": "Price",
+                "group": "shop",
+                "order": 30,
+                "format": "gp",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "currency",
+                "value": {
+                  "type": "item",
+                  "id": 995
+                },
+                "label": "Currency",
+                "group": "shop",
+                "order": 40,
+                "format": "ref",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "shop",
+          "id": 53
+        },
+        "rel": "staffed_by",
+        "direction": "forward"
+      },
+      "label": "Staffed by",
+      "group": "trade",
+      "order": 30,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "npc",
+              "id": 4559,
+              "slug": "holoy",
+              "label": "Holoy",
+              "icon_ref": null
+            },
+            "type": "npc",
+            "attributes": []
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "shop",
+          "id": 53
+        },
+        "rel": "located_in",
+        "direction": "forward"
+      },
+      "label": "Found in",
+      "group": "map",
+      "order": 60,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "location",
+              "id": 3,
+              "slug": "white-wolf-mountain",
+              "label": "White Wolf Mountain",
+              "icon_ref": null
+            },
+            "type": "location",
+            "attributes": [
+              {
+                "key": "spawn_kind",
+                "value": "shop_front",
+                "label": "Kind",
+                "group": "map",
+                "order": 20,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "npc_spawn",
+                  "ground_spawn",
+                  "shop_front",
+                  "quest_start"
+                ]
+              },
+              {
+                "key": "amount",
+                "value": 1,
+                "label": "Amount",
+                "group": "map",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

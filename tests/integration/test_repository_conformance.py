@@ -12,6 +12,7 @@ from wiki_api.domain.page import SortOrder
 from wiki_api.domain.relationships import (
     RELATIONSHIP_SPECS,
     DropEdgeAttributes,
+    Edge,
     RelationshipType,
 )
 from wiki_api.domain.vocabulary import COINS, Skill, SourceKind
@@ -286,20 +287,100 @@ def test_search_requires_every_token_to_match(
 
 
 def test_a_relationship_is_walked_forwards(repository: KnowledgeRepository) -> None:
-    drops = repository.edges_from(KBD, rel=RelationshipType.DROPS)
-    assert [edge.dst for edge in drops.items] == [DRAGON_BONES, KBD_HEADS]
+    drops = repository.edges_from((KBD,), rel=RelationshipType.DROPS)
+    assert [edge.dst for edge in drops.items] == [
+        DRAGON_BONES,
+        KBD_HEADS,
+        NOTED_SCIMITAR,
+    ]
 
 
 def test_a_relationship_is_walked_backwards(repository: KnowledgeRepository) -> None:
-    dropped_by = repository.edges_to(KBD_HEADS, rel=RelationshipType.DROPS)
+    dropped_by = repository.edges_to((KBD_HEADS,), rel=RelationshipType.DROPS)
     assert [edge.src for edge in dropped_by.items] == [KBD]
     assert RELATIONSHIP_SPECS[dropped_by.items[0].rel].inverse_label == "Dropped by"
+
+
+def test_a_walk_over_a_key_set_gathers_every_key_into_one_page(
+    repository: KnowledgeRepository,
+) -> None:
+    dropped_by = repository.edges_to(
+        (SCIMITAR, NOTED_SCIMITAR), rel=RelationshipType.DROPS
+    )
+    assert [edge.src for edge in dropped_by.items] == [KBD]
+    assert dropped_by.total == 1
+
+
+def test_a_walk_from_one_key_alone_misses_what_the_variant_carries(
+    repository: KnowledgeRepository,
+) -> None:
+    assert repository.edges_to((SCIMITAR,), rel=RelationshipType.DROPS).total == 0
+    assert repository.edges_to((NOTED_SCIMITAR,), rel=RelationshipType.DROPS).total == 1
+
+
+def test_a_repeated_key_does_not_double_a_walk(
+    repository: KnowledgeRepository,
+) -> None:
+    once = repository.edges_from((KBD,), rel=RelationshipType.DROPS)
+    twice = repository.edges_from((KBD, KBD), rel=RelationshipType.DROPS)
+    assert twice.total == once.total
+    assert twice.items == once.items
+
+
+def test_a_walk_over_no_keys_at_all_is_empty(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.edges_from(())
+    assert page.items == ()
+    assert page.total == 0
+
+
+def test_a_walk_hides_a_neighbour_the_reader_may_not_see(
+    repository: KnowledgeRepository,
+) -> None:
+    here = repository.edges_to((WHITE_WOLF_MOUNTAIN,), rel=RelationshipType.LOCATED_IN)
+    assert UNNAMED_NPC not in {edge.src for edge in here.items}
+    assert here.total == 2
+
+
+def test_the_hidden_neighbour_is_still_there_when_asked_for(
+    repository: KnowledgeRepository,
+) -> None:
+    here = repository.edges_to(
+        (WHITE_WOLF_MOUNTAIN,),
+        rel=RelationshipType.LOCATED_IN,
+        include_hidden=True,
+    )
+    assert UNNAMED_NPC in {edge.src for edge in here.items}
+    assert here.total == 3
+
+
+def test_a_filtered_walk_pages_without_gaps_or_repeats(
+    repository: KnowledgeRepository,
+) -> None:
+    located_in = RelationshipType.LOCATED_IN
+    walked = repository.edges_to((WHITE_WOLF_MOUNTAIN,), rel=located_in)
+    collected: list[Edge] = []
+    offset = 0
+    while True:
+        page = repository.edges_to(
+            (WHITE_WOLF_MOUNTAIN,),
+            rel=RelationshipType.LOCATED_IN,
+            limit=1,
+            offset=offset,
+        )
+        collected.extend(page.items)
+        if page.next_offset is None:
+            break
+        offset = page.next_offset
+    assert len(collected) == walked.total
+    assert len({edge.src for edge in collected}) == walked.total
 
 
 def test_edge_attributes_survive_the_round_trip(
     repository: KnowledgeRepository,
 ) -> None:
-    tertiary = repository.edges_to(KBD_HEADS, rel=RelationshipType.DROPS).items[0]
+    tertiary = repository.edges_to((KBD_HEADS,), rel=RelationshipType.DROPS).items[0]
     assert isinstance(tertiary.attributes, DropEdgeAttributes)
     assert tertiary.attributes.weight == 1.0
     assert tertiary.attributes.denominator == 128.0
@@ -310,7 +391,7 @@ def test_edge_attributes_survive_the_round_trip(
 def test_walking_without_a_relationship_filter_returns_every_edge(
     repository: KnowledgeRepository,
 ) -> None:
-    walked = repository.edges_from(CROSSBOW_SHOP)
+    walked = repository.edges_from((CROSSBOW_SHOP,))
     assert walked.total == 3
     assert {edge.rel for edge in walked.items} == {
         RelationshipType.SELLS,
@@ -322,21 +403,21 @@ def test_walking_without_a_relationship_filter_returns_every_edge(
 def test_a_reverse_lookup_is_paginated_so_a_common_item_cannot_flood_a_caller(
     repository: KnowledgeRepository,
 ) -> None:
-    first = repository.edges_from(CROSSBOW_SHOP, limit=1, offset=0)
+    first = repository.edges_from((CROSSBOW_SHOP,), limit=1, offset=0)
     assert len(first.items) == 1
     assert first.total == 3
     assert first.has_more is True
     assert first.next_offset == 1
-    second = repository.edges_from(CROSSBOW_SHOP, limit=1, offset=1)
+    second = repository.edges_from((CROSSBOW_SHOP,), limit=1, offset=1)
     assert second.items[0] != first.items[0]
-    last = repository.edges_from(CROSSBOW_SHOP, limit=1, offset=2)
+    last = repository.edges_from((CROSSBOW_SHOP,), limit=1, offset=2)
     assert last.has_more is False
 
 
 def test_a_walk_past_the_end_is_empty_but_still_reports_the_total(
     repository: KnowledgeRepository,
 ) -> None:
-    page = repository.edges_to(KBD_HEADS, rel=RelationshipType.DROPS, offset=50)
+    page = repository.edges_to((KBD_HEADS,), rel=RelationshipType.DROPS, offset=50)
     assert page.items == ()
     assert page.total == 1
     assert page.next_offset is None
@@ -347,7 +428,7 @@ def test_a_shop_relationship_carries_price_and_stock(
 ) -> None:
     from wiki_api.domain.relationships import SellEdgeAttributes
 
-    sells = repository.edges_from(CROSSBOW_SHOP, rel=RelationshipType.SELLS).items[0]
+    sells = repository.edges_from((CROSSBOW_SHOP,), rel=RelationshipType.SELLS).items[0]
     assert sells.dst == WOODEN_STOCK
     assert isinstance(sells.attributes, SellEdgeAttributes)
     assert sells.attributes.stock_amount == 10
@@ -358,7 +439,7 @@ def test_a_shop_relationship_carries_price_and_stock(
 def test_a_quest_reward_is_a_reverse_lookup_from_the_item(
     repository: KnowledgeRepository,
 ) -> None:
-    rewards = repository.edges_to(CLIMBING_BOOTS, rel=RelationshipType.REWARDS)
+    rewards = repository.edges_to((CLIMBING_BOOTS,), rel=RelationshipType.REWARDS)
     assert [edge.src for edge in rewards.items] == [DEATH_PLATEAU]
     assert RELATIONSHIP_SPECS[rewards.items[0].rel].inverse_label == "Reward from"
 
@@ -366,7 +447,7 @@ def test_a_quest_reward_is_a_reverse_lookup_from_the_item(
 def test_an_entity_with_no_relationships_returns_nothing(
     repository: KnowledgeRepository,
 ) -> None:
-    page = repository.edges_from(EntityKey(type=EntityType.ITEM, id=995))
+    page = repository.edges_from((EntityKey(type=EntityType.ITEM, id=995),))
     assert page.items == ()
     assert page.total == 0
 
@@ -449,11 +530,11 @@ def test_a_link_carries_identity_and_a_label(
 def test_a_same_type_relationship_is_walked_in_both_directions(
     repository: KnowledgeRepository,
 ) -> None:
-    forward = repository.edges_from(CROSSBOW, rel=RelationshipType.USES_AMMUNITION)
+    forward = repository.edges_from((CROSSBOW,), rel=RelationshipType.USES_AMMUNITION)
     assert [edge.dst for edge in forward.items] == [BRONZE_BOLTS]
     assert RELATIONSHIP_SPECS[forward.items[0].rel].forward_label == "Uses ammunition"
 
-    inverse = repository.edges_to(BRONZE_BOLTS, rel=RelationshipType.USES_AMMUNITION)
+    inverse = repository.edges_to((BRONZE_BOLTS,), rel=RelationshipType.USES_AMMUNITION)
     assert [edge.src for edge in inverse.items] == [CROSSBOW]
     assert RELATIONSHIP_SPECS[inverse.items[0].rel].inverse_label == "Used by"
 
@@ -462,15 +543,15 @@ def test_a_same_type_relationship_does_not_leak_between_directions(
     repository: KnowledgeRepository,
 ) -> None:
     ammunition = RelationshipType.USES_AMMUNITION
-    assert repository.edges_to(CROSSBOW, rel=ammunition).items == ()
-    assert repository.edges_from(BRONZE_BOLTS, rel=ammunition).items == ()
+    assert repository.edges_to((CROSSBOW,), rel=ammunition).items == ()
+    assert repository.edges_from((BRONZE_BOLTS,), rel=ammunition).items == ()
 
 
 def test_an_entity_related_to_itself_appears_in_both_directions(
     repository: KnowledgeRepository,
 ) -> None:
-    forward = repository.edges_from(HOLY_WATER, rel=RelationshipType.USES_AMMUNITION)
-    inverse = repository.edges_to(HOLY_WATER, rel=RelationshipType.USES_AMMUNITION)
+    forward = repository.edges_from((HOLY_WATER,), rel=RelationshipType.USES_AMMUNITION)
+    inverse = repository.edges_to((HOLY_WATER,), rel=RelationshipType.USES_AMMUNITION)
     assert [edge.dst for edge in forward.items] == [HOLY_WATER]
     assert [edge.src for edge in inverse.items] == [HOLY_WATER]
     assert forward == inverse
@@ -518,7 +599,7 @@ def test_where_an_npc_is_found_on_the_map(repository: KnowledgeRepository) -> No
     from wiki_api.domain.relationships import LocatedInEdgeAttributes
     from wiki_api.domain.space import SpawnKind
 
-    found = repository.edges_from(KBD, rel=RelationshipType.LOCATED_IN)
+    found = repository.edges_from((KBD,), rel=RelationshipType.LOCATED_IN)
     assert [edge.dst for edge in found.items] == [KBD_LAIR]
     spawn = found.items[0]
     assert isinstance(spawn.attributes, LocatedInEdgeAttributes)
@@ -529,7 +610,7 @@ def test_where_an_npc_is_found_on_the_map(repository: KnowledgeRepository) -> No
 
 
 def test_where_a_shop_is_found_on_the_map(repository: KnowledgeRepository) -> None:
-    found = repository.edges_from(CROSSBOW_SHOP, rel=RelationshipType.LOCATED_IN)
+    found = repository.edges_from((CROSSBOW_SHOP,), rel=RelationshipType.LOCATED_IN)
     assert [edge.dst for edge in found.items] == [WHITE_WOLF_MOUNTAIN]
     place = repository.get_entity(found.items[0].dst)
     assert place.name == "White Wolf Mountain"
@@ -544,7 +625,7 @@ def test_a_place_whose_exact_tile_is_unknown_is_still_a_place(
     place = repository.get_entity(WHITE_WOLF_MOUNTAIN)
     assert isinstance(place.attributes, LocationAttributes)
     assert place.attributes.anchor is None
-    found = repository.edges_from(CROSSBOW_SHOP, rel=RelationshipType.LOCATED_IN)
+    found = repository.edges_from((CROSSBOW_SHOP,), rel=RelationshipType.LOCATED_IN)
     edge = found.items[0]
     assert isinstance(edge.attributes, LocatedInEdgeAttributes)
     assert edge.attributes.at is None
@@ -554,7 +635,7 @@ def test_a_place_whose_exact_tile_is_unknown_is_still_a_place(
 def test_what_is_found_in_a_place_is_the_reverse_walk(
     repository: KnowledgeRepository,
 ) -> None:
-    here = repository.edges_to(WHITE_WOLF_MOUNTAIN, rel=RelationshipType.LOCATED_IN)
+    here = repository.edges_to((WHITE_WOLF_MOUNTAIN,), rel=RelationshipType.LOCATED_IN)
     assert {edge.src for edge in here.items} == {CROSSBOW_SHOP, SHOPKEEPER}
     assert RELATIONSHIP_SPECS[here.items[0].rel].inverse_label == "Found here"
 
@@ -586,9 +667,9 @@ def test_a_place_carries_an_extent_when_a_single_tile_would_lie(
 def test_places_nest_so_a_question_can_be_answered_at_any_zoom(
     repository: KnowledgeRepository,
 ) -> None:
-    upward = repository.edges_from(KBD_LAIR, rel=RelationshipType.PART_OF)
+    upward = repository.edges_from((KBD_LAIR,), rel=RelationshipType.PART_OF)
     assert [edge.dst for edge in upward.items] == [WILDERNESS]
-    downward = repository.edges_to(WILDERNESS, rel=RelationshipType.PART_OF)
+    downward = repository.edges_to((WILDERNESS,), rel=RelationshipType.PART_OF)
     assert [edge.src for edge in downward.items] == [KBD_LAIR]
     assert RELATIONSHIP_SPECS[downward.items[0].rel].inverse_label == "Contains"
 

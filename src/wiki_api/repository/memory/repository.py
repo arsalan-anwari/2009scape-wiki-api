@@ -154,16 +154,20 @@ class InMemoryKnowledgeRepository:
 
     def edges_from(
         self,
-        key: EntityKey,
+        keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]:
+        wanted = frozenset(keys)
         matched = [
             edge
             for edge in self._edges
-            if edge.src == key and (rel is None or edge.rel is rel)
+            if edge.src in wanted
+            and (rel is None or edge.rel is rel)
+            and (include_hidden or not self._is_hidden(edge.dst))
         ]
         matched.sort(
             key=lambda edge: (
@@ -172,22 +176,28 @@ class InMemoryKnowledgeRepository:
                 edge.dst.type.value,
                 edge.dst.id,
                 edge.discriminator,
+                edge.src.type.value,
+                edge.src.id,
             )
         )
         return _edge_page(matched, limit, offset)
 
     def edges_to(
         self,
-        key: EntityKey,
+        keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]:
+        wanted = frozenset(keys)
         matched = [
             edge
             for edge in self._edges
-            if edge.dst == key and (rel is None or edge.rel is rel)
+            if edge.dst in wanted
+            and (rel is None or edge.rel is rel)
+            and (include_hidden or not self._is_hidden(edge.src))
         ]
         matched.sort(
             key=lambda edge: (
@@ -196,6 +206,8 @@ class InMemoryKnowledgeRepository:
                 edge.src.type.value,
                 edge.src.id,
                 edge.discriminator,
+                edge.dst.type.value,
+                edge.dst.id,
             )
         )
         return _edge_page(matched, limit, offset)
@@ -223,6 +235,10 @@ class InMemoryKnowledgeRepository:
 
     def close(self) -> None:
         return None
+
+    def _is_hidden(self, key: EntityKey) -> bool:
+        entity = self._entities.get(key)
+        return entity is not None and not entity.is_published
 
     def _score(self, entity: Entity, tokens: Sequence[str]) -> float | None:
         total = 0.0

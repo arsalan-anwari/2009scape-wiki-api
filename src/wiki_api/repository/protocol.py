@@ -23,7 +23,9 @@ if TYPE_CHECKING:
 class KnowledgeRepository(Protocol):
     """Everything the query core can ask of storage.
 
-    It is read only, and every listing pages.
+    It is read only, and every listing pages. A walk takes a set of keys rather than
+    one, because an entity and its variants are asked about together and merging
+    several pages afterwards cannot keep honesty.
     """
 
     def manifest(self) -> Manifest: ...
@@ -58,18 +60,20 @@ class KnowledgeRepository(Protocol):
 
     def edges_from(
         self,
-        key: EntityKey,
+        keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]: ...
 
     def edges_to(
         self,
-        key: EntityKey,
+        keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]: ...
@@ -111,6 +115,24 @@ def test_every_listing_operation_is_paginated() -> None:
         signature = inspect.signature(getattr(KnowledgeRepository, name))
         assert {"limit", "offset"} <= set(signature.parameters)
         assert signature.return_annotation.startswith("Page[")
+
+
+def test_a_walk_takes_a_set_of_keys_so_variants_travel_with_the_canonical() -> None:
+    import inspect
+
+    for name in ("edges_from", "edges_to"):
+        signature = inspect.signature(getattr(KnowledgeRepository, name))
+        assert signature.parameters["keys"].annotation == "Sequence[EntityKey]"
+
+
+def test_a_walk_can_be_asked_to_keep_unpublished_neighbours() -> None:
+    import inspect
+
+    for name in ("edges_from", "edges_to"):
+        signature = inspect.signature(getattr(KnowledgeRepository, name))
+        parameter = signature.parameters["include_hidden"]
+        assert parameter.default is False
+        assert parameter.kind is inspect.Parameter.KEYWORD_ONLY
 
 
 def test_the_protocol_is_read_only() -> None:

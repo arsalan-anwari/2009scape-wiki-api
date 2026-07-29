@@ -75,11 +75,7 @@ class SqliteKnowledgeRepository:
     def get_entities(self, keys: Sequence[EntityKey]) -> Mapping[EntityKey, Entity]:
         if not keys:
             return {}
-        requested = json.dumps(
-            [{"type": key.type.value, "id": key.id} for key in keys],
-            separators=(",", ":"),
-        )
-        rows = self._all(queries.SELECT_ENTITIES, {"keys": requested})
+        rows = self._all(queries.SELECT_ENTITIES, {"keys": _as_json_keys(keys)})
         entities = [entity_from_row(row) for row in rows]
         return {entity.key: entity for entity in entities}
 
@@ -152,34 +148,38 @@ class SqliteKnowledgeRepository:
 
     def edges_from(
         self,
-        key: EntityKey,
+        keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]:
         return self._edges(
             queries.SELECT_EDGES_FROM,
             queries.COUNT_EDGES_FROM,
-            key,
+            keys,
             rel,
+            include_hidden,
             limit,
             offset,
         )
 
     def edges_to(
         self,
-        key: EntityKey,
+        keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]:
         return self._edges(
             queries.SELECT_EDGES_TO,
             queries.COUNT_EDGES_TO,
-            key,
+            keys,
             rel,
+            include_hidden,
             limit,
             offset,
         )
@@ -206,15 +206,17 @@ class SqliteKnowledgeRepository:
         self,
         statement: str,
         counter: str,
-        key: EntityKey,
+        keys: Sequence[EntityKey],
         rel: RelationshipType | None,
+        include_hidden: bool,
         limit: int,
         offset: int,
     ) -> Page[Edge]:
-        parameters = {
-            "type": key.type.value,
-            "id": key.id,
+        parameters: dict[str, object] = {
+            "keys": _as_json_keys(keys),
             "rel": rel.value if rel else None,
+            "include_hidden": include_hidden,
+            "hidden": Visibility.HIDDEN.value,
         }
         rows = self._all(statement, {**parameters, "limit": limit, "offset": offset})
         return Page[Edge](
@@ -251,3 +253,38 @@ class SqliteKnowledgeRepository:
         if row is None:
             return 0
         return int(row["total"])
+
+
+def _as_json_keys(keys: Sequence[EntityKey]) -> str:
+    """The keys a statement joins against, each one listed once.
+
+    A repeated key would be joined more than once and would show its edges twice.
+    """
+    unique = dict.fromkeys(keys)
+    return json.dumps(
+        [{"type": key.type.value, "id": key.id} for key in unique],
+        separators=(",", ":"),
+    )
+
+
+# test cases
+
+
+def test_a_repeated_key_is_only_joined_once() -> None:
+    scimitar = EntityKey(type=EntityType.ITEM, id=4587)
+    noted = EntityKey(type=EntityType.ITEM, id=4588)
+    assert _as_json_keys([scimitar, noted, scimitar]) == (
+        '[{"type":"item","id":4587},{"type":"item","id":4588}]'
+    )
+
+
+def test_the_key_order_a_caller_asked_for_survives() -> None:
+    noted = EntityKey(type=EntityType.ITEM, id=4588)
+    scimitar = EntityKey(type=EntityType.ITEM, id=4587)
+    assert _as_json_keys([noted, scimitar]).index("4588") < _as_json_keys(
+        [noted, scimitar]
+    ).index("4587")
+
+
+def test_no_keys_serialise_to_an_empty_list() -> None:
+    assert _as_json_keys([]) == "[]"

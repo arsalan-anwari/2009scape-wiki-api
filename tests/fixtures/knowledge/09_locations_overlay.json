@@ -115,6 +115,22 @@
       "attributes": {
         "spawn_kind": "shop_front"
       }
+    },
+    {
+      "src": "npc:3089",
+      "rel": "located_in",
+      "dst": "location:3",
+      "order_key": 20,
+      "source_ref": "npc_spawns.json#3089",
+      "attributes": {
+        "at": {
+          "x": 2846,
+          "y": 3499,
+          "plane": 0
+        },
+        "spawn_kind": "npc_spawn",
+        "amount": 1
+      }
     }
   ]
 }

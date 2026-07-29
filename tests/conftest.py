@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from wiki_api.config import Settings
+from wiki_api.core import KnowledgeService
 from wiki_api.pipeline.artifact import build_snapshot, write_artifact
 from wiki_api.repository.memory import InMemoryKnowledgeRepository
 from wiki_api.repository.sqlite import SqliteKnowledgeRepository
@@ -71,6 +72,11 @@ def repository(
         yield built
     finally:
         built.close()
+
+
+@pytest.fixture
+def service(repository: KnowledgeRepository) -> KnowledgeService:
+    return KnowledgeService(repository)
 
 
 def build_fixture_artifact(

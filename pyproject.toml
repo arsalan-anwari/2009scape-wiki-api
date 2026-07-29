@@ -103,6 +103,16 @@ source_modules = [
 forbidden_modules = ["wiki_api.pipeline"]
 
 [[tool.importlinter.contracts]]
+name = "Storage stays invisible above the repository"
+type = "forbidden"
+source_modules = ["wiki_api.core", "wiki_api.surfaces"]
+forbidden_modules = [
+    "wiki_api.repository.sqlite",
+    "wiki_api.repository.memory",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
 name = "Domain is pure: no transport, storage, or ingestion libraries"
 type = "forbidden"
 source_modules = ["wiki_api.domain"]

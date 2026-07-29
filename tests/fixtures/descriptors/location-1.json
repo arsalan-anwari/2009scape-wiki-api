@@ -1,0 +1,201 @@
+{
+  "entity": {
+    "type": "location",
+    "id": 1,
+    "slug": "king-black-dragon-lair",
+    "label": "King Black Dragon Lair",
+    "icon_ref": null
+  },
+  "type": "location",
+  "description": "A lava-filled cavern beneath the Wilderness.",
+  "canonical": null,
+  "variants": [],
+  "infobox": [
+    {
+      "key": "kind",
+      "value": "dungeon",
+      "label": "Kind",
+      "group": "overview",
+      "order": 10,
+      "format": "enum",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": [
+        "city",
+        "town",
+        "village",
+        "building",
+        "dungeon",
+        "area",
+        "island"
+      ]
+    },
+    {
+      "key": "members",
+      "value": true,
+      "label": "Members only",
+      "group": "overview",
+      "order": 50,
+      "format": "bool",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "multicombat",
+      "value": true,
+      "label": "Multicombat",
+      "group": "overview",
+      "order": 60,
+      "format": "bool",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    },
+    {
+      "key": "centre",
+      "value": {
+        "x": 2273,
+        "y": 4698,
+        "plane": 0
+      },
+      "label": "Centre",
+      "group": "map",
+      "order": 20,
+      "format": "coord",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    },
+    {
+      "key": "region_id",
+      "value": 9033,
+      "label": "Region",
+      "group": "map",
+      "order": 40,
+      "format": "id",
+      "unit": null,
+      "derived": true,
+      "prominent": false,
+      "choices": null
+    }
+  ],
+  "sections": [],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "location",
+          "id": 1
+        },
+        "rel": "located_in",
+        "direction": "reverse"
+      },
+      "label": "Found here",
+      "group": "map",
+      "order": 60,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "npc",
+              "id": 50,
+              "slug": "king-black-dragon",
+              "label": "King Black Dragon",
+              "icon_ref": null
+            },
+            "type": "npc",
+            "attributes": [
+              {
+                "key": "at",
+                "value": {
+                  "x": 2273,
+                  "y": 4698,
+                  "plane": 0
+                },
+                "label": "Position",
+                "group": "map",
+                "order": 10,
+                "format": "coord",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "spawn_kind",
+                "value": "npc_spawn",
+                "label": "Kind",
+                "group": "map",
+                "order": 20,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "npc_spawn",
+                  "ground_spawn",
+                  "shop_front",
+                  "quest_start"
+                ]
+              },
+              {
+                "key": "amount",
+                "value": 1,
+                "label": "Amount",
+                "group": "map",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "location",
+          "id": 1
+        },
+        "rel": "part_of",
+        "direction": "forward"
+      },
+      "label": "Part of",
+      "group": "map",
+      "order": 70,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "location",
+              "id": 2,
+              "slug": "wilderness",
+              "label": "Wilderness",
+              "icon_ref": null
+            },
+            "type": "location",
+            "attributes": []
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

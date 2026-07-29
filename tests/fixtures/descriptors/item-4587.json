@@ -1,0 +1,310 @@
+{
+  "entity": {
+    "type": "item",
+    "id": 4587,
+    "slug": "dragon-scimitar-4587",
+    "label": "Dragon scimitar",
+    "icon_ref": null
+  },
+  "type": "item",
+  "description": "A vicious, curved sword.",
+  "canonical": null,
+  "variants": [
+    {
+      "type": "item",
+      "id": 4588,
+      "slug": "dragon-scimitar-4588",
+      "label": "Dragon scimitar",
+      "icon_ref": null
+    }
+  ],
+  "infobox": [
+    {
+      "key": "weight",
+      "value": 1.8,
+      "label": "Weight",
+      "group": "general",
+      "order": 60,
+      "format": "float",
+      "unit": "kg",
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    }
+  ],
+  "sections": [
+    {
+      "group": "equipment",
+      "label": "Equipment",
+      "placement": "section",
+      "order": 50,
+      "attributes": [
+        {
+          "key": "equipment_slot",
+          "value": "weapon",
+          "label": "Equipment slot",
+          "group": "equipment",
+          "order": 90,
+          "format": "enum",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": [
+            "head",
+            "cape",
+            "neck",
+            "weapon",
+            "chest",
+            "shield",
+            "hidden_1",
+            "legs",
+            "hidden_2",
+            "hands",
+            "feet",
+            "hidden_3",
+            "ring",
+            "ammo"
+          ]
+        },
+        {
+          "key": "attack_speed",
+          "value": 4,
+          "label": "Attack speed",
+          "group": "equipment",
+          "order": 100,
+          "format": "int",
+          "unit": "ticks",
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "has_special",
+          "value": true,
+          "label": "Special attack",
+          "group": "equipment",
+          "order": 110,
+          "format": "bool",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "bonuses",
+          "value": {
+            "attack_stab": 8,
+            "attack_slash": 67,
+            "attack_crush": -2,
+            "attack_magic": 0,
+            "attack_ranged": 0,
+            "defence_stab": 0,
+            "defence_slash": 1,
+            "defence_crush": 0,
+            "defence_magic": 0,
+            "defence_ranged": 0,
+            "defence_summoning": 0,
+            "strength": 66,
+            "prayer": 0,
+            "magic_damage": 0,
+            "ranged_strength": 0
+          },
+          "label": "Combat bonuses",
+          "group": "equipment",
+          "order": 120,
+          "format": "bonuses",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "requirements",
+          "value": [
+            {
+              "skill": "attack",
+              "level": 60
+            }
+          ],
+          "label": "Requirements",
+          "group": "equipment",
+          "order": 140,
+          "format": "skills",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        }
+      ]
+    },
+    {
+      "group": "trade",
+      "label": "Trade",
+      "placement": "section",
+      "order": 60,
+      "attributes": [
+        {
+          "key": "tradeable",
+          "value": true,
+          "label": "Tradeable",
+          "group": "trade",
+          "order": 10,
+          "format": "bool",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "ge_buy_limit",
+          "value": 10,
+          "label": "Buy limit",
+          "group": "trade",
+          "order": 20,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "shop_price",
+          "value": 100000,
+          "label": "Shop price",
+          "group": "trade",
+          "order": 30,
+          "format": "gp",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "lendable",
+          "value": true,
+          "label": "Lendable",
+          "group": "trade",
+          "order": 40,
+          "format": "bool",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "archery_ticket_price",
+          "value": 0,
+          "label": "Archery ticket price",
+          "group": "trade",
+          "order": 50,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "item",
+          "id": 4587
+        },
+        "rel": "drops",
+        "direction": "reverse"
+      },
+      "label": "Dropped by",
+      "group": "drops",
+      "order": 10,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "npc",
+              "id": 50,
+              "slug": "king-black-dragon",
+              "label": "King Black Dragon",
+              "icon_ref": null
+            },
+            "type": "npc",
+            "attributes": [
+              {
+                "key": "weight",
+                "value": 1.0,
+                "label": "Weight",
+                "group": "rate",
+                "order": 10,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "denominator",
+                "value": 512.0,
+                "label": "Out of",
+                "group": "rate",
+                "order": 20,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "table_kind",
+                "value": "main",
+                "label": "Drop table",
+                "group": "rate",
+                "order": 30,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "default",
+                  "main",
+                  "charm",
+                  "tertiary"
+                ]
+              },
+              {
+                "key": "min_amount",
+                "value": 1,
+                "label": "Minimum amount",
+                "group": "amount",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "max_amount",
+                "value": 1,
+                "label": "Maximum amount",
+                "group": "amount",
+                "order": 50,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

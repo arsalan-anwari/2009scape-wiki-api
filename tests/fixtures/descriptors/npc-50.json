@@ -1,0 +1,550 @@
+{
+  "entity": {
+    "type": "npc",
+    "id": 50,
+    "slug": "king-black-dragon",
+    "label": "King Black Dragon",
+    "icon_ref": null
+  },
+  "type": "npc",
+  "description": "The biggest, meanest dragon around.",
+  "canonical": null,
+  "variants": [],
+  "infobox": [],
+  "sections": [
+    {
+      "group": "combat",
+      "label": "Combat",
+      "placement": "section",
+      "order": 40,
+      "attributes": [
+        {
+          "key": "lifepoints",
+          "value": 240,
+          "label": "Lifepoints",
+          "group": "combat",
+          "order": 10,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "attack_level",
+          "value": 240,
+          "label": "Attack level",
+          "group": "combat",
+          "order": 20,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "strength_level",
+          "value": 240,
+          "label": "Strength level",
+          "group": "combat",
+          "order": 30,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "defence_level",
+          "value": 240,
+          "label": "Defence level",
+          "group": "combat",
+          "order": 40,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "magic_level",
+          "value": 240,
+          "label": "Magic level",
+          "group": "combat",
+          "order": 50,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "range_level",
+          "value": 1,
+          "label": "Ranged level",
+          "group": "combat",
+          "order": 60,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "bonuses",
+          "value": {
+            "attack_stab": 0,
+            "attack_slash": 0,
+            "attack_crush": 0,
+            "attack_magic": 0,
+            "attack_ranged": 0,
+            "defence_stab": 70,
+            "defence_slash": 90,
+            "defence_crush": 90,
+            "defence_magic": 80,
+            "defence_ranged": 70,
+            "defence_summoning": 0,
+            "strength": 0,
+            "prayer": 0,
+            "magic_damage": 0,
+            "ranged_strength": 0
+          },
+          "label": "Combat bonuses",
+          "group": "combat",
+          "order": 70,
+          "format": "bonuses",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "weakness",
+          "value": 4,
+          "label": "Weakness",
+          "group": "combat",
+          "order": 80,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "slayer_exp",
+          "value": 258.0,
+          "label": "Slayer experience",
+          "group": "combat",
+          "order": 90,
+          "format": "float",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        }
+      ]
+    },
+    {
+      "group": "behaviour",
+      "label": "Behaviour",
+      "placement": "section",
+      "order": 70,
+      "attributes": [
+        {
+          "key": "aggressive",
+          "value": true,
+          "label": "Aggressive",
+          "group": "behaviour",
+          "order": 100,
+          "format": "bool",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "agg_radius",
+          "value": 64,
+          "label": "Aggression radius",
+          "group": "behaviour",
+          "order": 110,
+          "format": "int",
+          "unit": "tiles",
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        },
+        {
+          "key": "respawn_delay",
+          "value": 50,
+          "label": "Respawn delay",
+          "group": "behaviour",
+          "order": 120,
+          "format": "int",
+          "unit": "ticks",
+          "derived": false,
+          "prominent": false,
+          "choices": null
+        }
+      ]
+    },
+    {
+      "group": "drops",
+      "label": "Drops",
+      "placement": "section",
+      "order": 80,
+      "attributes": [
+        {
+          "key": "clue_level",
+          "value": "hard",
+          "label": "Clue scroll level",
+          "group": "drops",
+          "order": 140,
+          "format": "enum",
+          "unit": null,
+          "derived": false,
+          "prominent": false,
+          "choices": [
+            "easy",
+            "medium",
+            "hard",
+            "unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "npc",
+          "id": 50
+        },
+        "rel": "drops",
+        "direction": "forward"
+      },
+      "label": "Drops",
+      "group": "drops",
+      "order": 10,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "item",
+              "id": 536,
+              "slug": "dragon-bones",
+              "label": "Dragon bones",
+              "icon_ref": null
+            },
+            "type": "item",
+            "attributes": [
+              {
+                "key": "weight",
+                "value": 100.0,
+                "label": "Weight",
+                "group": "rate",
+                "order": 10,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "denominator",
+                "value": 200.0,
+                "label": "Out of",
+                "group": "rate",
+                "order": 20,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "table_kind",
+                "value": "default",
+                "label": "Drop table",
+                "group": "rate",
+                "order": 30,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "default",
+                  "main",
+                  "charm",
+                  "tertiary"
+                ]
+              },
+              {
+                "key": "min_amount",
+                "value": 1,
+                "label": "Minimum amount",
+                "group": "amount",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "max_amount",
+                "value": 1,
+                "label": "Maximum amount",
+                "group": "amount",
+                "order": 50,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          },
+          {
+            "link": {
+              "type": "item",
+              "id": 7980,
+              "slug": "kbd-heads",
+              "label": "Kbd heads",
+              "icon_ref": null
+            },
+            "type": "item",
+            "attributes": [
+              {
+                "key": "weight",
+                "value": 1.0,
+                "label": "Weight",
+                "group": "rate",
+                "order": 10,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "denominator",
+                "value": 128.0,
+                "label": "Out of",
+                "group": "rate",
+                "order": 20,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "table_kind",
+                "value": "tertiary",
+                "label": "Drop table",
+                "group": "rate",
+                "order": 30,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "default",
+                  "main",
+                  "charm",
+                  "tertiary"
+                ]
+              },
+              {
+                "key": "min_amount",
+                "value": 1,
+                "label": "Minimum amount",
+                "group": "amount",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "max_amount",
+                "value": 1,
+                "label": "Maximum amount",
+                "group": "amount",
+                "order": 50,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          },
+          {
+            "link": {
+              "type": "item",
+              "id": 4588,
+              "slug": "dragon-scimitar-4588",
+              "label": "Dragon scimitar",
+              "icon_ref": null
+            },
+            "type": "item",
+            "attributes": [
+              {
+                "key": "weight",
+                "value": 1.0,
+                "label": "Weight",
+                "group": "rate",
+                "order": 10,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "denominator",
+                "value": 512.0,
+                "label": "Out of",
+                "group": "rate",
+                "order": 20,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "table_kind",
+                "value": "main",
+                "label": "Drop table",
+                "group": "rate",
+                "order": 30,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "default",
+                  "main",
+                  "charm",
+                  "tertiary"
+                ]
+              },
+              {
+                "key": "min_amount",
+                "value": 1,
+                "label": "Minimum amount",
+                "group": "amount",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "max_amount",
+                "value": 1,
+                "label": "Maximum amount",
+                "group": "amount",
+                "order": 50,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 3,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "npc",
+          "id": 50
+        },
+        "rel": "located_in",
+        "direction": "forward"
+      },
+      "label": "Found in",
+      "group": "map",
+      "order": 60,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "location",
+              "id": 1,
+              "slug": "king-black-dragon-lair",
+              "label": "King Black Dragon Lair",
+              "icon_ref": null
+            },
+            "type": "location",
+            "attributes": [
+              {
+                "key": "at",
+                "value": {
+                  "x": 2273,
+                  "y": 4698,
+                  "plane": 0
+                },
+                "label": "Position",
+                "group": "map",
+                "order": 10,
+                "format": "coord",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "spawn_kind",
+                "value": "npc_spawn",
+                "label": "Kind",
+                "group": "map",
+                "order": 20,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "npc_spawn",
+                  "ground_spawn",
+                  "shop_front",
+                  "quest_start"
+                ]
+              },
+              {
+                "key": "amount",
+                "value": 1,
+                "label": "Amount",
+                "group": "map",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

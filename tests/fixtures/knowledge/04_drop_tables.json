@@ -32,6 +32,20 @@
         "min_amount": 1,
         "max_amount": 1
       }
+    },
+    {
+      "src": "npc:50",
+      "rel": "drops",
+      "dst": "item:4588",
+      "order_key": 512,
+      "source_ref": "drop_tables.json#ids=50,2642.main",
+      "attributes": {
+        "weight": 1.0,
+        "denominator": 512.0,
+        "table_kind": "main",
+        "min_amount": 1,
+        "max_amount": 1
+      }
     }
   ]
 }

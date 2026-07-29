@@ -54,7 +54,11 @@ class AttributeFormat(StrEnum):
 
 @dataclass(frozen=True)
 class AttributeMeta:
-    """The presentation facts attached to one attribute field."""
+    """The presentation facts attached to one attribute field.
+
+    A prominent attribute is one worth showing on hover, which is what lets a tooltip
+    be built without anything naming a field.
+    """
 
     label: str
     group: AttributeGroup
@@ -63,6 +67,7 @@ class AttributeMeta:
     unit: Unit | None = None
     display: bool = True
     derived: bool = False
+    prominent: bool = False
 
 
 class AttributeSpec(BaseModel):
@@ -78,6 +83,7 @@ class AttributeSpec(BaseModel):
     unit: Unit | None = None
     display: bool = True
     derived: bool = False
+    prominent: bool = False
     choices: tuple[str, ...] | None = None
 
 
@@ -126,6 +132,10 @@ def specs_of(model: type[BaseModel]) -> tuple[AttributeSpec, ...]:
             raise MisdeclaredAttribute(
                 model, name, "is declared as an enum but holds no vocabulary"
             )
+        if meta.prominent and not meta.display:
+            raise MisdeclaredAttribute(
+                model, name, "is prominent but is never displayed"
+            )
         specs.append(
             AttributeSpec(
                 key=name,
@@ -136,6 +146,7 @@ def specs_of(model: type[BaseModel]) -> tuple[AttributeSpec, ...]:
                 unit=meta.unit,
                 display=meta.display,
                 derived=meta.derived,
+                prominent=meta.prominent,
                 choices=choices,
             )
         )
@@ -158,7 +169,13 @@ class ItemAttributes(BaseModel):
 
     tradeable: Annotated[
         bool | None,
-        AttributeMeta("Tradeable", AttributeGroup.TRADE, 10, AttributeFormat.BOOL),
+        AttributeMeta(
+            "Tradeable",
+            AttributeGroup.TRADE,
+            10,
+            AttributeFormat.BOOL,
+            prominent=True,
+        ),
     ] = None
     ge_buy_limit: Annotated[
         int | None,
@@ -166,7 +183,13 @@ class ItemAttributes(BaseModel):
     ] = None
     shop_price: Annotated[
         int | None,
-        AttributeMeta("Shop price", AttributeGroup.TRADE, 30, AttributeFormat.GP),
+        AttributeMeta(
+            "Shop price",
+            AttributeGroup.TRADE,
+            30,
+            AttributeFormat.GP,
+            prominent=True,
+        ),
     ] = None
     alchemizable: Annotated[
         bool | None,
@@ -216,6 +239,7 @@ class ItemAttributes(BaseModel):
             60,
             AttributeFormat.FLOAT,
             unit=Unit.KILOGRAMS,
+            prominent=True,
         ),
     ] = None
     bankable: Annotated[
@@ -242,7 +266,11 @@ class ItemAttributes(BaseModel):
         EquipmentSlot | None,
         BeforeValidator(EquipmentSlot.coerce),
         AttributeMeta(
-            "Equipment slot", AttributeGroup.EQUIPMENT, 90, AttributeFormat.ENUM
+            "Equipment slot",
+            AttributeGroup.EQUIPMENT,
+            90,
+            AttributeFormat.ENUM,
+            prominent=True,
         ),
     ] = None
     two_handed: Annotated[
@@ -467,12 +495,23 @@ class NpcAttributes(BaseModel):
     combat_level: Annotated[
         int | None,
         AttributeMeta(
-            "Combat level", AttributeGroup.COMBAT, 5, AttributeFormat.INT, derived=True
+            "Combat level",
+            AttributeGroup.COMBAT,
+            5,
+            AttributeFormat.INT,
+            derived=True,
+            prominent=True,
         ),
     ] = None
     lifepoints: Annotated[
         int | None,
-        AttributeMeta("Lifepoints", AttributeGroup.COMBAT, 10, AttributeFormat.INT),
+        AttributeMeta(
+            "Lifepoints",
+            AttributeGroup.COMBAT,
+            10,
+            AttributeFormat.INT,
+            prominent=True,
+        ),
     ] = None
     attack_level: Annotated[
         int | None,
@@ -514,7 +553,13 @@ class NpcAttributes(BaseModel):
     combat_style: Annotated[
         CombatStyle | None,
         BeforeValidator(CombatStyle.coerce),
-        AttributeMeta("Combat style", AttributeGroup.COMBAT, 75, AttributeFormat.ENUM),
+        AttributeMeta(
+            "Combat style",
+            AttributeGroup.COMBAT,
+            75,
+            AttributeFormat.ENUM,
+            prominent=True,
+        ),
     ] = None
     weakness: Annotated[
         int | None,
@@ -536,7 +581,11 @@ class NpcAttributes(BaseModel):
     aggressive: Annotated[
         bool | None,
         AttributeMeta(
-            "Aggressive", AttributeGroup.BEHAVIOUR, 100, AttributeFormat.BOOL
+            "Aggressive",
+            AttributeGroup.BEHAVIOUR,
+            100,
+            AttributeFormat.BOOL,
+            prominent=True,
         ),
     ] = None
     agg_radius: Annotated[
@@ -793,12 +842,24 @@ class ShopAttributes(BaseModel):
 
     general_store: Annotated[
         bool | None,
-        AttributeMeta("General store", AttributeGroup.SHOP, 10, AttributeFormat.BOOL),
+        AttributeMeta(
+            "General store",
+            AttributeGroup.SHOP,
+            10,
+            AttributeFormat.BOOL,
+            prominent=True,
+        ),
     ] = None
     currency: Annotated[
         EntityKey | None,
         BeforeValidator(coerce_item_ref),
-        AttributeMeta("Currency", AttributeGroup.SHOP, 20, AttributeFormat.REF),
+        AttributeMeta(
+            "Currency",
+            AttributeGroup.SHOP,
+            20,
+            AttributeFormat.REF,
+            prominent=True,
+        ),
     ] = None
     high_alch: Annotated[
         bool | None,
@@ -816,21 +877,43 @@ class QuestAttributes(BaseModel):
     difficulty: Annotated[
         QuestDifficulty | None,
         BeforeValidator(QuestDifficulty.coerce),
-        AttributeMeta("Difficulty", AttributeGroup.OVERVIEW, 10, AttributeFormat.ENUM),
+        AttributeMeta(
+            "Difficulty",
+            AttributeGroup.OVERVIEW,
+            10,
+            AttributeFormat.ENUM,
+            prominent=True,
+        ),
     ] = None
     length: Annotated[
         QuestLength | None,
         BeforeValidator(QuestLength.coerce),
-        AttributeMeta("Length", AttributeGroup.OVERVIEW, 20, AttributeFormat.ENUM),
+        AttributeMeta(
+            "Length",
+            AttributeGroup.OVERVIEW,
+            20,
+            AttributeFormat.ENUM,
+            prominent=True,
+        ),
     ] = None
     quest_points: Annotated[
         int | None,
-        AttributeMeta("Quest points", AttributeGroup.OVERVIEW, 30, AttributeFormat.INT),
+        AttributeMeta(
+            "Quest points",
+            AttributeGroup.OVERVIEW,
+            30,
+            AttributeFormat.INT,
+            prominent=True,
+        ),
     ] = None
     members: Annotated[
         bool | None,
         AttributeMeta(
-            "Members only", AttributeGroup.OVERVIEW, 40, AttributeFormat.BOOL
+            "Members only",
+            AttributeGroup.OVERVIEW,
+            40,
+            AttributeFormat.BOOL,
+            prominent=True,
         ),
     ] = None
     series: Annotated[
@@ -847,7 +930,13 @@ class LocationAttributes(BaseModel):
     kind: Annotated[
         LocationKind | None,
         BeforeValidator(LocationKind.coerce),
-        AttributeMeta("Kind", AttributeGroup.OVERVIEW, 10, AttributeFormat.ENUM),
+        AttributeMeta(
+            "Kind",
+            AttributeGroup.OVERVIEW,
+            10,
+            AttributeFormat.ENUM,
+            prominent=True,
+        ),
     ] = None
     centre: Annotated[
         Coordinate | None,
@@ -866,7 +955,11 @@ class LocationAttributes(BaseModel):
     members: Annotated[
         bool | None,
         AttributeMeta(
-            "Members only", AttributeGroup.OVERVIEW, 50, AttributeFormat.BOOL
+            "Members only",
+            AttributeGroup.OVERVIEW,
+            50,
+            AttributeFormat.BOOL,
+            prominent=True,
         ),
     ] = None
     multicombat: Annotated[
@@ -876,7 +969,11 @@ class LocationAttributes(BaseModel):
     wilderness_level: Annotated[
         int | None,
         AttributeMeta(
-            "Wilderness level", AttributeGroup.OVERVIEW, 70, AttributeFormat.INT
+            "Wilderness level",
+            AttributeGroup.OVERVIEW,
+            70,
+            AttributeFormat.INT,
+            prominent=True,
         ),
     ] = None
 
@@ -1121,6 +1218,37 @@ def test_a_derived_attribute_is_declared_as_such() -> None:
     npc_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.NPC]}
     assert npc_specs["combat_level"].derived is True
     assert npc_specs["lifepoints"].derived is False
+
+
+def test_every_type_declares_something_worth_showing_on_hover() -> None:
+    for entity_type, specs in ATTRIBUTE_SPECS.items():
+        prominent = [spec for spec in specs if spec.prominent]
+        assert prominent, f"{entity_type.value} declares no prominent attribute"
+
+
+def test_a_tooltip_stays_small_enough_to_hover_over() -> None:
+    for specs in ATTRIBUTE_SPECS.values():
+        assert len([spec for spec in specs if spec.prominent]) <= 5
+
+
+def test_a_prominent_attribute_is_one_the_reader_can_see() -> None:
+    import pytest
+
+    class Invisible(BaseModel):
+        secret: Annotated[
+            int | None,
+            AttributeMeta(
+                "Secret",
+                AttributeGroup.INTERNAL,
+                10,
+                AttributeFormat.INT,
+                display=False,
+                prominent=True,
+            ),
+        ] = None
+
+    with pytest.raises(MisdeclaredAttribute):
+        specs_of(Invisible)
 
 
 def test_the_registry_declares_every_attribute_the_sources_populate() -> None:

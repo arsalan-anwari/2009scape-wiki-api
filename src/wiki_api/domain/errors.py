@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from wiki_api.domain.identity import EntityKey
+    from wiki_api.domain.vocabulary import HiddenReason
 
 
 class KnowledgeError(Exception):
@@ -25,7 +26,7 @@ class EntityNotFound(KnowledgeError):
 class EntityHidden(KnowledgeError):
     """The entity exists but is not published."""
 
-    def __init__(self, key: EntityKey, reason: str | None = None) -> None:
+    def __init__(self, key: EntityKey, reason: HiddenReason | None = None) -> None:
         super().__init__(f"entity {key} is not published: {reason or 'unspecified'}")
         self.key = key
         self.reason = reason
@@ -101,11 +102,12 @@ def test_incompatible_artifact_names_both_versions() -> None:
 
 def test_every_knowledge_error_shares_one_base() -> None:
     from wiki_api.domain.identity import EntityKey, EntityType
+    from wiki_api.domain.vocabulary import HiddenReason
 
     key = EntityKey(type=EntityType.NPC, id=50)
     errors = (
         EntityNotFound("item:1"),
-        EntityHidden(key, "unnamed"),
+        EntityHidden(key, HiddenReason.UNNAMED),
         EntityMoved("old", key),
         SlugCollision("clue-scroll"),
         IncompatibleArtifact(None, 1),

@@ -1,0 +1,199 @@
+{
+  "entity": {
+    "type": "quest",
+    "id": 1,
+    "slug": "death-plateau",
+    "label": "Death Plateau",
+    "icon_ref": null
+  },
+  "type": "quest",
+  "description": "Help the Imperial Guard find a route up Death Plateau.",
+  "canonical": null,
+  "variants": [],
+  "infobox": [
+    {
+      "key": "difficulty",
+      "value": "novice",
+      "label": "Difficulty",
+      "group": "overview",
+      "order": 10,
+      "format": "enum",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": [
+        "novice",
+        "intermediate",
+        "experienced",
+        "master",
+        "grandmaster",
+        "special"
+      ]
+    },
+    {
+      "key": "length",
+      "value": "short",
+      "label": "Length",
+      "group": "overview",
+      "order": 20,
+      "format": "enum",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": [
+        "very_short",
+        "short",
+        "medium",
+        "long",
+        "very_long"
+      ]
+    },
+    {
+      "key": "quest_points",
+      "value": 1,
+      "label": "Quest points",
+      "group": "overview",
+      "order": 30,
+      "format": "int",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "members",
+      "value": true,
+      "label": "Members only",
+      "group": "overview",
+      "order": 40,
+      "format": "bool",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "series",
+      "value": "Troll",
+      "label": "Series",
+      "group": "overview",
+      "order": 50,
+      "format": "text",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    }
+  ],
+  "sections": [],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "quest",
+          "id": 1
+        },
+        "rel": "rewards",
+        "direction": "forward"
+      },
+      "label": "Rewards",
+      "group": "quests",
+      "order": 40,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "item",
+              "id": 3105,
+              "slug": "climbing-boots",
+              "label": "Climbing boots",
+              "icon_ref": null
+            },
+            "type": "item",
+            "attributes": [
+              {
+                "key": "amount",
+                "value": 1,
+                "label": "Amount",
+                "group": "reward",
+                "order": 10,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "quest",
+          "id": 1
+        },
+        "rel": "located_in",
+        "direction": "forward"
+      },
+      "label": "Found in",
+      "group": "map",
+      "order": 60,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "location",
+              "id": 4,
+              "slug": "burthorpe",
+              "label": "Burthorpe",
+              "icon_ref": null
+            },
+            "type": "location",
+            "attributes": [
+              {
+                "key": "spawn_kind",
+                "value": "quest_start",
+                "label": "Kind",
+                "group": "map",
+                "order": 20,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "npc_spawn",
+                  "ground_spawn",
+                  "shop_front",
+                  "quest_start"
+                ]
+              },
+              {
+                "key": "amount",
+                "value": 1,
+                "label": "Amount",
+                "group": "map",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

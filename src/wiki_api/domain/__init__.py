@@ -31,6 +31,14 @@ from wiki_api.domain.errors import (
 from wiki_api.domain.identity import EntityKey, EntityType, Link
 from wiki_api.domain.manifest import SCHEMA_VERSION, Manifest
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, Page, SortOrder
+from wiki_api.domain.presentation import (
+    ENTITY_TYPE_META,
+    GROUP_META,
+    EntityTypeMeta,
+    GroupMeta,
+    GroupPlacement,
+    placement_of,
+)
 from wiki_api.domain.prices import PricePoint, latest_price
 from wiki_api.domain.provenance import GameVersion, Provenance
 from wiki_api.domain.rates import (
@@ -88,6 +96,8 @@ __all__ = [
     "COINS",
     "DEFAULT_PAGE_SIZE",
     "EDGE_ATTRIBUTE_MODELS",
+    "ENTITY_TYPE_META",
+    "GROUP_META",
     "MAX_PAGE_SIZE",
     "NOTHING_ITEM_ID",
     "RELATIONSHIP_SPECS",
@@ -118,9 +128,12 @@ __all__ = [
     "EntityMoved",
     "EntityNotFound",
     "EntityType",
+    "EntityTypeMeta",
     "EquipmentSlot",
     "GameEnum",
     "GameVersion",
+    "GroupMeta",
+    "GroupPlacement",
     "HiddenReason",
     "IncompatibleArtifact",
     "ItemAttributes",
@@ -166,6 +179,7 @@ __all__ = [
     "drop_denominator",
     "empty_attributes",
     "latest_price",
+    "placement_of",
     "rewarding_rolls",
     "slugify",
     "specs_of",
