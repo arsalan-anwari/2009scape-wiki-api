@@ -11,7 +11,7 @@ KEY_SEPARATOR = ":"
 
 
 class EntityType(StrEnum):
-    """The kinds of thing this knowledge base holds."""
+    """The types of thing this knowledge base holds: items, NPCs, shops and more."""
 
     ITEM = "item"
     NPC = "npc"
@@ -21,7 +21,11 @@ class EntityType(StrEnum):
 
 
 class EntityKey(BaseModel):
-    """The identity of an entity, which is its type together with its numeric id."""
+    """What identifies an entity: its type together with its numeric id.
+
+    Ids are only unique within a type. Item 50 and NPC 50 are unrelated things, so a
+    bare number is never an identity on its own.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -43,7 +47,11 @@ class EntityKey(BaseModel):
 
 
 class Link(BaseModel):
-    """A reference to an entity carrying identity and a label, never a url."""
+    """A pointer to another entity: identity, a label to show, and no URL.
+
+    A link carries `type`, `id`, `slug` and `label`, so you build whatever address
+    your own site uses. Nothing here decides what an entity's URL looks like.
+    """
 
     model_config = ConfigDict(frozen=True)
 

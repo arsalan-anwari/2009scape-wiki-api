@@ -169,7 +169,7 @@ class QuestLength(GameEnum):
 
 
 class AttributeGroup(GameEnum):
-    """Which section of a page an attribute belongs in."""
+    """Which part of a page an attribute belongs to, such as the overview box."""
 
     OVERVIEW = "overview"
     GENERAL = "general"
@@ -187,7 +187,7 @@ class AttributeGroup(GameEnum):
 
 
 class RelationshipGroup(GameEnum):
-    """Which section of a page the rows of a relationship belong in."""
+    """Which part of a page the related entities of a relationship belong to."""
 
     DROPS = "drops"
     TRADE = "trade"
@@ -197,7 +197,7 @@ class RelationshipGroup(GameEnum):
 
 
 class Unit(GameEnum):
-    """The unit a numeric attribute is measured in."""
+    """What a numeric value is measured in, such as kilograms or game ticks."""
 
     KILOGRAMS = "kg"
     TICKS = "ticks"
@@ -205,7 +205,7 @@ class Unit(GameEnum):
 
 
 class HiddenReason(GameEnum):
-    """Why an entity is in the artifact but not served to readers."""
+    """Why an entity is kept in the build but not served to readers."""
 
     UNNAMED = "unnamed"
     SUPPRESSED = "suppressed"

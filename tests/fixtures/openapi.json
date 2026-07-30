@@ -1,0 +1,1868 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "2009scape Wiki API",
+    "description": "\nA read-only HTTP API over the 2009scape game data: the things in the game, and the\nlinks between them.\n\n### What you get back\n\nAsk for one entity and you get a page descriptor: the whole page described as data,\nin a single response. Identity, an infobox, sections of attributes, and a first page\nof every set of related entities. Each value arrives with its own label, group,\nformat, unit and `derived` flag, so one renderer can draw a type it has never seen.\n\nTwo habits keep a client working as the data grows:\n\n* **Skip what you do not recognise.** A section carries a `render` word saying how it\n  wants to be laid out. If the word is new to you, leave that section out instead of\n  failing. The same goes for any value of an open vocabulary, which is documented\n  with `x-known-values` in place of an enum.\n* **Do not switch on field names.** Everything needed to display a value travels with\n  the value, so your layout never has to know which fields a type has.\n\n### Versions and caching\n\nEvery answer comes from one immutable build named by its data-version, and every\nresponse repeats that version in the `X-Data-Version` header. A given data-version\nalways answers the same way, so you can cache hard. Add `?v=2026.07.30` to pin a\nrequest to one build. If that build is no longer being served you get a 409 naming\nthe build that is, so recovering is one retry.\n\n### Links\n\nA link to another entity carries `type`, `id`, `slug` and `label`, and never a URL.\nYou build the address, so the same item can live at `/items/dragon-scimitar` on your\nsite and `/wiki/item/4587` on somebody else's.\n",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Check whether this server can answer",
+        "description": "Say that the server is up and has a readable build of the data open.\n\nA process that failed to open its data never answers here at all, so a reply\nfrom this route means it can really serve. Point a load balancer or a container\nprobe at it. Never cached.",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "The server is up and has data open.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/about": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Find out which build of the data is being served",
+        "description": "Describe the build that every other answer comes from.\n\n`data_version` is what every response repeats in the `X-Data-Version` header,\nwhat to use as a cache key, and what `?v=` pins to. `game_version` records the\nstate of the game it was built from. Never cached itself, because this is how\nyou notice the build has changed.",
+        "operationId": "about",
+        "responses": {
+          "200": {
+            "description": "The manifest of the build currently being served.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entities/{entity_type}/{ref}": {
+      "get": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Get the whole page for one entity",
+        "description": "Get everything needed to draw one entity's page, in a single response.\n\nIdentity, the infobox, the attribute sections, and a first page of every set of\nrelated entities. The only thing that takes another request is reading further\ninto one of those sets, which the relationship route does.",
+        "operationId": "entity",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+            },
+            "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id.",
+              "title": "Ref"
+            },
+            "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The page, described as data and ready to render.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDescriptor"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "308": {
+            "description": "That reference is retired. `Location` holds the URL the same entity answers at now. Follow it, and store the new one."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entities/{entity_type}/{ref}/tooltip": {
+      "get": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Get the hover card for one entity",
+        "description": "Get identity, one sentence, and the few values worth showing on hover.\n\nWhich values those are is declared in the registry, not decided here. Call this\nwhen a reader hovers a link. The answer is a fraction of the size of the page,\nand by default it is cached for an hour where a page is cached for five minutes.",
+        "operationId": "tooltip",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+            },
+            "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id.",
+              "title": "Ref"
+            },
+            "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Just enough about the entity to fill a hover card.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tooltip"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "308": {
+            "description": "That reference is retired. `Location` holds the URL the same entity answers at now. Follow it, and store the new one."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entities/{entity_type}/{ref}/rel/{rel}": {
+      "get": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Page through one relationship of an entity",
+        "description": "Read one more page of a set of related entities the page only started.\n\nThe answer is the same block the page already carried, so the same rendering\ncode handles page one and page nine. Set `direction=reverse` to read the link\nthe other way round, which is how you ask what points at this entity instead of\nwhat it points at.",
+        "operationId": "walk",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+            },
+            "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id.",
+              "title": "Ref"
+            },
+            "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id."
+          },
+          {
+            "name": "rel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RelationshipType",
+              "description": "Which relationship to page through. `GET /v1/types` lists the relationships each type takes part in."
+            },
+            "description": "Which relationship to page through. `GET /v1/types` lists the relationships each type takes part in."
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "description": "Which way to read the relationship. `forward` for what this entity points at, `reverse` for what points at it.",
+              "default": "forward"
+            },
+            "description": "Which way to read the relationship. `forward` for what this entity points at, `reverse` for what points at it."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 200,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "How many rows this page holds. Defaults to the width a whole entity page uses for the same relationship, so continuing a list is never narrower than the list you are continuing.",
+              "title": "Limit"
+            },
+            "description": "How many rows this page holds. Defaults to the width a whole entity page uses for the same relationship, so continuing a list is never narrower than the list you are continuing."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of related entities, plus the walk that made it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Block"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "308": {
+            "description": "That reference is retired. `Location` holds the URL the same entity answers at now. Follow it, and store the new one."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entities/{entity_type}/{ref}/resolve": {
+      "get": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Check what a reference points at, without being sent there",
+        "description": "Ask what a reference points at without being redirected there.\n\nLive, retired, held back or unknown: all four come back as a 200 with an\n`outcome` in the body. A link checker walking a list of old slugs reads the\nanswer straight off, instead of following redirects and reading status codes.",
+        "operationId": "resolve",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+            },
+            "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id.",
+              "title": "Ref"
+            },
+            "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "What the reference resolves to, stated in the body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Present"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Moved"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Hidden"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Missing"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "outcome",
+                    "mapping": {
+                      "found": "#/components/schemas/Present",
+                      "moved": "#/components/schemas/Moved",
+                      "hidden": "#/components/schemas/Hidden",
+                      "missing": "#/components/schemas/Missing"
+                    }
+                  },
+                  "title": "Response Resolve"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/types": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "List every entity type and how its fields are presented",
+        "description": "Publish the registries: what each type holds, and how each field presents.\n\nFor every type you get its attributes with label, group, order, format and unit,\nand its relationships with a label for reading them each way round. Fetch this\nonce at startup and you can lay out any type without naming a single field in\nyour own code.",
+        "operationId": "types",
+        "responses": {
+          "200": {
+            "description": "Every type served, with its attributes and relationships.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TypeInfo"
+                  },
+                  "type": "array",
+                  "title": "Response Types"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/types/{entity_type}/entities": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "List all entities of one type, a page at a time",
+        "description": "List every published entity of one type, sorted and paged.\n\nThis is what sits behind an \"all items\" or \"all quests\" index. Variants such as\nthe noted form of an item are left out. They stay addressable, but the canonical\nentity is the one that gets listed.",
+        "operationId": "listing",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which type of thing to list, such as `item` or `quest`. `GET /v1/types` lists the types this build serves."
+            },
+            "description": "Which type of thing to list, such as `item` or `quest`. `GET /v1/types` lists the types this build serves."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end."
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder",
+              "description": "How to sort the listing: `name` for alphabetical, `id` for the game's own numbering.",
+              "default": "name"
+            },
+            "description": "How to sort the listing: `name` for alphabetical, `id` for the game's own numbering."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of the index for that type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySummaryPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/search": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Search the full text across every type",
+        "description": "Search names, alternative names and descriptions across every type at once.\n\nResults come back best first, each with a score, and `type` narrows the search.\nUse this behind a search box. Use `/v1/find` instead when you already have an\nexact name and want the one thing it refers to.",
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "What to search for, typed the way a reader would type it. Every word is matched as a prefix and all of them have to match, so `drag scim` finds the dragon scimitar. There is no query syntax: quotes, brackets and words like `OR` count as ordinary text.",
+              "title": "Q"
+            },
+            "description": "What to search for, typed the way a reader would type it. Every word is matched as a prefix and all of them have to match, so `drag scim` finds the dragon scimitar. There is no query syntax: quotes, brackets and words like `OR` count as ordinary text."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityType"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limit the answer to certain types of thing. Repeat the parameter for more than one, as in `?type=item&type=npc`. Leave it off to cover every type.",
+              "title": "Type"
+            },
+            "description": "Limit the answer to certain types of thing. Repeat the parameter for more than one, as in `?type=item&type=npc`. Leave it off to cover every type."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of matches, best first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResultPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/find": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Look up the one entity that goes by this name",
+        "description": "Turn a name into the one entity it means, with the runners-up for company.\n\nThe name is reduced to a slug and looked up exactly, retired slugs included, and\nthat hit takes `best_match`. Failing that the top-ranked search result takes it,\nand `best_match` is null only when nothing matched at all. Either way the ranked\ncandidates come back too, so you can second-guess the pick. This is the route to\npoint an importer or a wiki-style `[[link]]` at.",
+        "operationId": "find",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The full name of the single thing you mean, such as `Dragon scimitar`.",
+              "title": "Name"
+            },
+            "description": "The full name of the single thing you mean, such as `Dragon scimitar`."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityType"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limit the answer to certain types of thing. Repeat the parameter for more than one, as in `?type=item&type=npc`. Leave it off to cover every type.",
+              "title": "Type"
+            },
+            "description": "Limit the answer to certain types of thing. Repeat the parameter for more than one, as in `?type=item&type=npc`. Leave it off to cover every type."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The single best match, if there is one, plus the runners-up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Match"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AttributeFormat": {
+        "type": "string",
+        "title": "AttributeFormat",
+        "description": "How to draw a value: a plain number, an amount of coins, a coordinate. Published as an open string rather than a fixed enum, because new values get added as the data grows. The ones this build knows are listed under `x-known-values`. Treat anything else as a value you cannot render yet, not as an error.",
+        "x-known-values": [
+          "int",
+          "float",
+          "bool",
+          "text",
+          "gp",
+          "id",
+          "ids",
+          "ref",
+          "enum",
+          "skills",
+          "bonuses",
+          "absorb",
+          "coord",
+          "area"
+        ],
+        "examples": [
+          "int"
+        ]
+      },
+      "AttributeGroup": {
+        "type": "string",
+        "title": "AttributeGroup",
+        "description": "Which part of a page an attribute belongs to, such as the overview box. Published as an open string rather than a fixed enum, because new values get added as the data grows. The ones this build knows are listed under `x-known-values`. Treat anything else as a value you cannot render yet, not as an error.",
+        "x-known-values": [
+          "overview",
+          "general",
+          "trade",
+          "equipment",
+          "combat",
+          "behaviour",
+          "drops",
+          "map",
+          "shop",
+          "rate",
+          "amount",
+          "reward",
+          "internal"
+        ],
+        "examples": [
+          "overview"
+        ]
+      },
+      "AttributeSpec": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "group": {
+            "$ref": "#/components/schemas/AttributeGroup"
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order"
+          },
+          "format": {
+            "$ref": "#/components/schemas/AttributeFormat"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "display": {
+            "type": "boolean",
+            "title": "Display",
+            "default": true
+          },
+          "derived": {
+            "type": "boolean",
+            "title": "Derived",
+            "default": false
+          },
+          "prominent": {
+            "type": "boolean",
+            "title": "Prominent",
+            "default": false
+          },
+          "choices": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Choices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "group",
+          "order",
+          "format"
+        ],
+        "title": "AttributeSpec",
+        "description": "One attribute as the registry declares it.\n\nEverything a client needs to show the field: what to call it, which group it\nbelongs in, where it sorts, how to format it, and which values it may take when\nit comes from a fixed vocabulary."
+      },
+      "AttributeValue": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "group": {
+            "$ref": "#/components/schemas/AttributeGroup"
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order"
+          },
+          "format": {
+            "$ref": "#/components/schemas/AttributeFormat"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Unit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "derived": {
+            "type": "boolean",
+            "title": "Derived",
+            "default": false
+          },
+          "prominent": {
+            "type": "boolean",
+            "title": "Prominent",
+            "default": false
+          },
+          "choices": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Choices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "value",
+          "label",
+          "group",
+          "order",
+          "format"
+        ],
+        "title": "AttributeValue",
+        "description": "One field of an entity, with everything needed to display it.\n\nThe raw `value`, the label to put beside it, the group it belongs in, where it\nsorts, how to format it, and what it is measured in. `derived` marks a value this\nproject worked out rather than read from the game data. `prominent` marks one\nworth showing on hover. You never have to recognise `key` to draw the field."
+      },
+      "Block": {
+        "properties": {
+          "walk": {
+            "$ref": "#/components/schemas/Walk"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "group": {
+            "$ref": "#/components/schemas/RelationshipGroup"
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order"
+          },
+          "rows": {
+            "$ref": "#/components/schemas/RowPage"
+          },
+          "suppressed": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Suppressed",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "walk",
+          "label",
+          "group",
+          "order",
+          "rows"
+        ],
+        "title": "Block",
+        "description": "One relationship's worth of a page, paged like any other list.\n\nA label to head it with, a first page of rows, and the walk that produced them so\nyou can ask for the rest. `suppressed` counts rows left out because their target\nis not published. They go before the paging, so `total` stays honest."
+      },
+      "Direction": {
+        "type": "string",
+        "enum": [
+          "forward",
+          "reverse"
+        ],
+        "title": "Direction",
+        "description": "Which way a relationship was read: out of the entity, or back into it."
+      },
+      "EntityKey": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "EntityKey",
+        "description": "What identifies an entity: its type together with its numeric id.\n\nIds are only unique within a type. Item 50 and NPC 50 are unrelated things, so a\nbare number is never an identity on its own."
+      },
+      "EntitySummary": {
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "link",
+          "type"
+        ],
+        "title": "EntitySummary",
+        "description": "One entity as it appears in a list: where it points, and a line about it."
+      },
+      "EntityType": {
+        "type": "string",
+        "title": "EntityType",
+        "description": "The types of thing this knowledge base holds: items, NPCs, shops and more. Published as an open string rather than a fixed enum, because new values get added as the data grows. The ones this build knows are listed under `x-known-values`. Treat anything else as a value you cannot render yet, not as an error.",
+        "x-known-values": [
+          "item",
+          "npc",
+          "shop",
+          "quest",
+          "location"
+        ],
+        "examples": [
+          "item"
+        ]
+      },
+      "ErrorBody": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorBody",
+        "description": "The envelope every error arrives in: one `error` object and nothing else."
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorDetail",
+        "description": "What went wrong: a `code` to branch on and a `message` to read.\n\nBranch on the code, show the message. A failure worth retrying carries what you\nneed to retry with. Ask for a build that is no longer served and `data_version`\nnames the build that is, so recovering takes one retry and not a lookup first."
+      },
+      "GameVersion": {
+        "type": "string"
+      },
+      "GroupPlacement": {
+        "type": "string",
+        "enum": [
+          "infobox",
+          "section",
+          "hidden"
+        ],
+        "title": "GroupPlacement",
+        "description": "Where the attributes of one group belong: the infobox, a section, or nowhere.\n\n`hidden` means the group is kept in the data but not shown to readers."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status",
+            "default": "ok"
+          },
+          "data_version": {
+            "type": "string",
+            "title": "Data Version"
+          },
+          "schema_version": {
+            "type": "integer",
+            "title": "Schema Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_version",
+          "schema_version"
+        ],
+        "title": "Health",
+        "description": "The server is answering, and this is the build it answers from."
+      },
+      "Hidden": {
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "const": "hidden",
+            "title": "Outcome",
+            "default": "hidden"
+          },
+          "key": {
+            "$ref": "#/components/schemas/EntityKey"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HiddenReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "title": "Hidden",
+        "description": "The entity exists in this build but is deliberately not served."
+      },
+      "HiddenReason": {
+        "type": "string",
+        "enum": [
+          "unnamed",
+          "suppressed",
+          "duplicate",
+          "placeholder"
+        ],
+        "title": "HiddenReason",
+        "description": "Why an entity is kept in the build but not served to readers."
+      },
+      "JsonValue": {},
+      "Link": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Slug"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "icon_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon Ref"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "slug",
+          "label"
+        ],
+        "title": "Link",
+        "description": "A pointer to another entity: identity, a label to show, and no URL.\n\nA link carries `type`, `id`, `slug` and `label`, so you build whatever address\nyour own site uses. Nothing here decides what an entity's URL looks like."
+      },
+      "Manifest": {
+        "properties": {
+          "data_version": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Data Version"
+          },
+          "schema_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Schema Version"
+          },
+          "content_hash": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Content Hash"
+          },
+          "built_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Built At"
+          },
+          "game_version": {
+            "$ref": "#/components/schemas/GameVersion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_version",
+          "schema_version",
+          "content_hash",
+          "built_at",
+          "game_version"
+        ],
+        "title": "Manifest",
+        "description": "What a build of the data says about itself.\n\n`data_version` names the build that every answer is derived from. `game_version`\nrecords the state of the game it was built from, and `content_hash` fixes the\ncontents exactly, since the same inputs always build the same file."
+      },
+      "Match": {
+        "properties": {
+          "best_match": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Link"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "results": {
+            "$ref": "#/components/schemas/SearchResultPage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "title": "Match",
+        "description": "The answer to \"which entity is called X\".\n\n`best_match` is the single entity the name most likely meant, or null when\nnothing matched at all. `results` holds the ranked candidates either way, so you\ncan show the alternatives or pick differently."
+      },
+      "Missing": {
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "const": "missing",
+            "title": "Outcome",
+            "default": "missing"
+          },
+          "reference": {
+            "type": "string",
+            "title": "Reference"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reference"
+        ],
+        "title": "Missing",
+        "description": "Nothing in this build answers to that reference."
+      },
+      "Moved": {
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "const": "moved",
+            "title": "Outcome",
+            "default": "moved"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Link"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "title": "Moved",
+        "description": "The reference is retired. The entity answers at `target` now."
+      },
+      "PageDescriptor": {
+        "properties": {
+          "entity": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "canonical": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Link"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            },
+            "type": "array",
+            "title": "Variants",
+            "default": []
+          },
+          "infobox": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array",
+            "title": "Infobox",
+            "default": []
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/Section"
+            },
+            "type": "array",
+            "title": "Sections",
+            "default": []
+          },
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            },
+            "type": "array",
+            "title": "Blocks",
+            "default": []
+          },
+          "data_version": {
+            "type": "string",
+            "title": "Data Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity",
+          "type",
+          "data_version"
+        ],
+        "title": "PageDescriptor",
+        "description": "A whole entity page, described as data rather than drawn as HTML.\n\nIdentity, a line of description, the infobox, the attribute sections, and a first\npage of every set of related entities. Everything needed to lay out a value\ntravels with the value, so a type your renderer has never seen still comes out\nright. A variant such as the noted form of an item gets a page of its own and\npoints at its `canonical` entity."
+      },
+      "EntitySummaryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EntitySummary"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "readOnly": true
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "has_more",
+          "next_offset"
+        ],
+        "title": "Page[EntitySummary]"
+      },
+      "RowPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Row"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "readOnly": true
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "has_more",
+          "next_offset"
+        ],
+        "title": "Page[Row]"
+      },
+      "SearchResultPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "readOnly": true
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "has_more",
+          "next_offset"
+        ],
+        "title": "Page[SearchResult]"
+      },
+      "Present": {
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "const": "found",
+            "title": "Outcome",
+            "default": "found"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Link"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "title": "Present",
+        "description": "The reference points at an entity that is published right now."
+      },
+      "RelationshipGroup": {
+        "type": "string",
+        "title": "RelationshipGroup",
+        "description": "Which part of a page the related entities of a relationship belong to. Published as an open string rather than a fixed enum, because new values get added as the data grows. The ones this build knows are listed under `x-known-values`. Treat anything else as a value you cannot render yet, not as an error.",
+        "x-known-values": [
+          "drops",
+          "trade",
+          "quests",
+          "equipment",
+          "map"
+        ],
+        "examples": [
+          "drops"
+        ]
+      },
+      "RelationshipSpec": {
+        "properties": {
+          "rel": {
+            "$ref": "#/components/schemas/RelationshipType"
+          },
+          "forward_label": {
+            "type": "string",
+            "title": "Forward Label"
+          },
+          "inverse_label": {
+            "type": "string",
+            "title": "Inverse Label"
+          },
+          "src_types": {
+            "items": {
+              "$ref": "#/components/schemas/EntityType"
+            },
+            "type": "array",
+            "uniqueItems": true,
+            "title": "Src Types"
+          },
+          "dst_types": {
+            "items": {
+              "$ref": "#/components/schemas/EntityType"
+            },
+            "type": "array",
+            "uniqueItems": true,
+            "title": "Dst Types"
+          },
+          "edge_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeSpec"
+            },
+            "type": "array",
+            "title": "Edge Attributes"
+          },
+          "group": {
+            "$ref": "#/components/schemas/RelationshipGroup"
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rel",
+          "forward_label",
+          "inverse_label",
+          "src_types",
+          "dst_types",
+          "edge_attributes",
+          "group",
+          "order"
+        ],
+        "title": "RelationshipSpec",
+        "description": "One relationship as the registry declares it.\n\nIt carries a label for each direction, because the same link reads differently\neach way round, along with the types it can join and the attributes one link of\nthis type is allowed to carry."
+      },
+      "RelationshipType": {
+        "type": "string",
+        "title": "RelationshipType",
+        "description": "The types of link one entity can have to another. Published as an open string rather than a fixed enum, because new values get added as the data grows. The ones this build knows are listed under `x-known-values`. Treat anything else as a value you cannot render yet, not as an error.",
+        "x-known-values": [
+          "drops",
+          "sells",
+          "staffed_by",
+          "rewards",
+          "uses_ammunition",
+          "located_in",
+          "part_of"
+        ],
+        "examples": [
+          "drops"
+        ]
+      },
+      "Row": {
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array",
+            "title": "Attributes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "link",
+          "type",
+          "attributes"
+        ],
+        "title": "Row",
+        "description": "One entity reached over a relationship, plus what the link itself records.\n\n`link` is where you ended up. The attributes belong to the connection rather than\nto either end, so a rate, a price or a spawn coordinate lands here."
+      },
+      "SearchResult": {
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "link",
+          "type",
+          "score"
+        ],
+        "title": "SearchResult",
+        "description": "One entity a search matched, with its score. A higher score matched better."
+      },
+      "Section": {
+        "properties": {
+          "render": {
+            "type": "string",
+            "title": "Render",
+            "default": "attributes"
+          },
+          "group": {
+            "$ref": "#/components/schemas/AttributeGroup"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "placement": {
+            "$ref": "#/components/schemas/GroupPlacement"
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order"
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array",
+            "title": "Attributes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group",
+          "label",
+          "placement",
+          "order",
+          "attributes"
+        ],
+        "title": "Section",
+        "description": "A group of attributes, drawn as one block of the page body.\n\n`render` says how the section wants to be laid out. If the word is new to you,\nleave the section out instead of failing. That is what lets a differently shaped\nsection be added later without breaking clients written today."
+      },
+      "SortOrder": {
+        "type": "string",
+        "enum": [
+          "name",
+          "id"
+        ],
+        "title": "SortOrder",
+        "description": "How a listing is sorted: alphabetically by name, or by id."
+      },
+      "Tooltip": {
+        "properties": {
+          "link": {
+            "$ref": "#/components/schemas/Link"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array",
+            "title": "Attributes",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "link",
+          "type"
+        ],
+        "title": "Tooltip",
+        "description": "The short form of an entity, sized for a hover card.\n\nIdentity, one line of description, and the few values the registry marks as worth\nshowing."
+      },
+      "TypeInfo": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "plural": {
+            "type": "string",
+            "title": "Plural"
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order"
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeSpec"
+            },
+            "type": "array",
+            "title": "Attributes"
+          },
+          "relationships": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipSpec"
+            },
+            "type": "array",
+            "title": "Relationships"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "label",
+          "plural",
+          "order",
+          "attributes",
+          "relationships"
+        ],
+        "title": "TypeInfo",
+        "description": "One entity type, with every attribute and relationship declared for it.\n\nThis is what a generic renderer reads: labels, ordering, formats and units for a\ntype, published as data instead of hard-coded in a front end."
+      },
+      "Unit": {
+        "type": "string",
+        "title": "Unit",
+        "description": "What a numeric value is measured in, such as kilograms or game ticks. Published as an open string rather than a fixed enum, because new values get added as the data grows. The ones this build knows are listed under `x-known-values`. Treat anything else as a value you cannot render yet, not as an error.",
+        "x-known-values": [
+          "kg",
+          "ticks",
+          "tiles"
+        ],
+        "examples": [
+          "kg"
+        ]
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "Walk": {
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/EntityKey"
+          },
+          "rel": {
+            "$ref": "#/components/schemas/RelationshipType"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "origin",
+          "rel",
+          "direction"
+        ],
+        "title": "Walk",
+        "description": "The question a block answers: which entity, which relationship, which way.\n\nHand these three straight back to the relationship route to read further into the\nsame set, instead of rebuilding the request yourself."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "entities",
+      "description": "Look up one thing you already know the name or the id of: its page, its hover card, one set of its neighbours, or what an old reference points at now."
+    },
+    {
+      "name": "discovery",
+      "description": "Find something when you have no id yet. Browse everything of one type, search the full text, or ask which single entity a name means."
+    },
+    {
+      "name": "meta",
+      "description": "About the server rather than the game: whether it can answer, and which build of the data it is answering from."
+    }
+  ]
+}

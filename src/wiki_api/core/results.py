@@ -8,7 +8,7 @@ of.
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
@@ -28,7 +28,7 @@ from wiki_api.domain.vocabulary import (
 
 
 class Direction(GameEnum):
-    """Which way along a relationship a walk ran."""
+    """Which way a relationship was read: out of the entity, or back into it."""
 
     FORWARD = "forward"
     REVERSE = "reverse"
@@ -41,7 +41,13 @@ class Direction(GameEnum):
 
 
 class AttributeValue(BaseModel):
-    """One value together with everything needed to show it."""
+    """One field of an entity, with everything needed to display it.
+
+    The raw `value`, the label to put beside it, the group it belongs in, where it
+    sorts, how to format it, and what it is measured in. `derived` marks a value this
+    project worked out rather than read from the game data. `prominent` marks one
+    worth showing on hover. You never have to recognise `key` to draw the field.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -72,11 +78,20 @@ class AttributeValue(BaseModel):
         )
 
 
+ATTRIBUTE_SECTION: Final = "attributes"
+
+
 class Section(BaseModel):
-    """One group of attributes, shown as a block of the page body."""
+    """A group of attributes, drawn as one block of the page body.
+
+    `render` says how the section wants to be laid out. If the word is new to you,
+    leave the section out instead of failing. That is what lets a differently shaped
+    section be added later without breaking clients written today.
+    """
 
     model_config = ConfigDict(frozen=True)
 
+    render: str = ATTRIBUTE_SECTION
     group: AttributeGroup
     label: str
     placement: GroupPlacement
@@ -85,7 +100,11 @@ class Section(BaseModel):
 
 
 class Row(BaseModel):
-    """One neighbour reached by a relationship, and what the link itself records."""
+    """One entity reached over a relationship, plus what the link itself records.
+
+    `link` is where you ended up. The attributes belong to the connection rather than
+    to either end, so a rate, a price or a spawn coordinate lands here.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -95,7 +114,11 @@ class Row(BaseModel):
 
 
 class Walk(BaseModel):
-    """The question a block answers, so a reader can ask for the next page of it."""
+    """The question a block answers: which entity, which relationship, which way.
+
+    Hand these three straight back to the relationship route to read further into the
+    same set, instead of rebuilding the request yourself.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -105,7 +128,12 @@ class Walk(BaseModel):
 
 
 class Block(BaseModel):
-    """One relationship's worth of a page, which is a page in its own right."""
+    """One relationship's worth of a page, paged like any other list.
+
+    A label to head it with, a first page of rows, and the walk that produced them so
+    you can ask for the rest. `suppressed` counts rows left out because their target
+    is not published. They go before the paging, so `total` stays honest.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -122,7 +150,14 @@ class Block(BaseModel):
 
 
 class PageDescriptor(BaseModel):
-    """A whole page, described as data for a reader to render mechanically."""
+    """A whole entity page, described as data rather than drawn as HTML.
+
+    Identity, a line of description, the infobox, the attribute sections, and a first
+    page of every set of related entities. Everything needed to lay out a value
+    travels with the value, so a type your renderer has never seen still comes out
+    right. A variant such as the noted form of an item gets a page of its own and
+    points at its `canonical` entity.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -138,7 +173,11 @@ class PageDescriptor(BaseModel):
 
 
 class Tooltip(BaseModel):
-    """The smallest honest self description of an entity."""
+    """The short form of an entity, sized for a hover card.
+
+    Identity, one line of description, and the few values the registry marks as worth
+    showing.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -149,7 +188,7 @@ class Tooltip(BaseModel):
 
 
 class EntitySummary(BaseModel):
-    """One entity as it appears in a list."""
+    """One entity as it appears in a list: where it points, and a line about it."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -159,13 +198,18 @@ class EntitySummary(BaseModel):
 
 
 class SearchResult(EntitySummary):
-    """One entity a search matched, and how well it matched."""
+    """One entity a search matched, with its score. A higher score matched better."""
 
     score: float = Field(ge=0.0)
 
 
 class Match(BaseModel):
-    """What answering "the thing called X" turned up."""
+    """The answer to "which entity is called X".
+
+    `best_match` is the single entity the name most likely meant, or null when
+    nothing matched at all. `results` holds the ranked candidates either way, so you
+    can show the alternatives or pick differently.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -174,7 +218,11 @@ class Match(BaseModel):
 
 
 class TypeInfo(BaseModel):
-    """One entity type as the contract publishes it."""
+    """One entity type, with every attribute and relationship declared for it.
+
+    This is what a generic renderer reads: labels, ordering, formats and units for a
+    type, published as data instead of hard-coded in a front end.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -187,7 +235,7 @@ class TypeInfo(BaseModel):
 
 
 class Found[T](BaseModel):
-    """The question had an answer."""
+    """The lookup succeeded, and `value` holds what it found."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -196,7 +244,7 @@ class Found[T](BaseModel):
 
 
 class Moved(BaseModel):
-    """The reference was an old one, and the entity now answers to another."""
+    """The reference is retired. The entity answers at `target` now."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -205,7 +253,7 @@ class Moved(BaseModel):
 
 
 class Hidden(BaseModel):
-    """The entity is in the artifact but is not published."""
+    """The entity exists in this build but is deliberately not served."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -215,7 +263,7 @@ class Hidden(BaseModel):
 
 
 class Missing(BaseModel):
-    """Nothing in the artifact answers to that reference."""
+    """Nothing in this build answers to that reference."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -305,6 +353,29 @@ def test_a_search_result_is_a_summary_that_also_scored() -> None:
     result = SearchResult(link=_link(), type=EntityType.ITEM, score=12.5)
     assert isinstance(result, EntitySummary)
     assert result.score == 12.5
+
+
+def test_a_section_says_how_it_wants_to_be_laid_out() -> None:
+    section = Section(
+        group=AttributeGroup.EQUIPMENT,
+        label="Equipment",
+        placement=GroupPlacement.SECTION,
+        order=50,
+        attributes=(),
+    )
+    assert section.render == ATTRIBUTE_SECTION
+
+
+def test_a_section_can_be_laid_out_some_other_way_without_a_model_change() -> None:
+    section = Section(
+        render="price_series",
+        group=AttributeGroup.TRADE,
+        label="Price",
+        placement=GroupPlacement.SECTION,
+        order=60,
+        attributes=(),
+    )
+    assert section.render == "price_series"
 
 
 def test_results_are_immutable() -> None:

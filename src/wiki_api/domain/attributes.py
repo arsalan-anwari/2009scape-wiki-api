@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 
 class AttributeFormat(StrEnum):
-    """How a reader should render an attribute value."""
+    """How to draw a value: a plain number, an amount of coins, a coordinate."""
 
     INT = "int"
     FLOAT = "float"
@@ -71,7 +71,12 @@ class AttributeMeta:
 
 
 class AttributeSpec(BaseModel):
-    """One attribute as the registry publishes it."""
+    """One attribute as the registry declares it.
+
+    Everything a client needs to show the field: what to call it, which group it
+    belongs in, where it sorts, how to format it, and which values it may take when
+    it comes from a fixed vocabulary.
+    """
 
     model_config = ConfigDict(frozen=True)
 

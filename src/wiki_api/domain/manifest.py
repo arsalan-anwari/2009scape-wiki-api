@@ -12,7 +12,12 @@ SCHEMA_VERSION: Final = 4
 
 
 class Manifest(BaseModel):
-    """What a built artifact says about itself."""
+    """What a build of the data says about itself.
+
+    `data_version` names the build that every answer is derived from. `game_version`
+    records the state of the game it was built from, and `content_hash` fixes the
+    contents exactly, since the same inputs always build the same file.
+    """
 
     model_config = ConfigDict(frozen=True)
 

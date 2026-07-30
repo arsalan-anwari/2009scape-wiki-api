@@ -18,7 +18,10 @@ if TYPE_CHECKING:
 
 
 class GroupPlacement(GameEnum):
-    """Where on a page the attributes of one group are shown."""
+    """Where the attributes of one group belong: the infobox, a section, or nowhere.
+
+    `hidden` means the group is kept in the data but not shown to readers.
+    """
 
     INFOBOX = "infobox"
     SECTION = "section"

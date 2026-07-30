@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 
 class RelationshipType(StrEnum):
-    """The kinds of link two entities can have."""
+    """The types of link one entity can have to another."""
 
     DROPS = "drops"
     SELLS = "sells"
@@ -204,9 +204,11 @@ EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = 
 
 
 class RelationshipSpec(BaseModel):
-    """One relationship as the registry publishes it.
+    """One relationship as the registry declares it.
 
-    It carries a label for reading the link in either direction.
+    It carries a label for each direction, because the same link reads differently
+    each way round, along with the types it can join and the attributes one link of
+    this type is allowed to carry.
     """
 
     model_config = ConfigDict(frozen=True)

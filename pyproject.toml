@@ -35,6 +35,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "poethepoet>=0.48.0",
     "httpx>=0.28.1",
+    "httpx2>=2.9.1",
 ]
 
 [build-system]
@@ -122,6 +123,7 @@ forbidden_modules = [
     "starlette",
     "sqlite3",
     "httpx",
+    "httpx2",
     "lxml",
 ]
 
@@ -134,5 +136,7 @@ typecheck = "mypy"
 imports = "lint-imports"
 test = "pytest"
 fetch-ge = { script = "wiki_api.pipeline.sources.grand_exchange:main" }
+build-artifact = { script = "wiki_api.pipeline.artifact.cli:main" }
+serve = "uvicorn wiki_api.surfaces.http.app:create_app --factory --reload"
 fix = ["lint-fix", "format"]
 check = ["lint", "format-check", "typecheck", "imports", "test"]

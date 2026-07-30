@@ -5,12 +5,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from fastapi.testclient import TestClient
 
 from wiki_api.config import Settings
-from wiki_api.core import KnowledgeService
+from wiki_api.core import BLOCK_PAGE_SIZE, KnowledgeService
 from wiki_api.pipeline.artifact import build_snapshot, write_artifact
 from wiki_api.repository.memory import InMemoryKnowledgeRepository
 from wiki_api.repository.sqlite import SqliteKnowledgeRepository
+from wiki_api.surfaces.http import create_app
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -77,6 +79,26 @@ def repository(
 @pytest.fixture
 def service(repository: KnowledgeRepository) -> KnowledgeService:
     return KnowledgeService(repository)
+
+
+@pytest.fixture
+def http_settings(fixture_artifact: Path) -> Settings:
+    return Settings(
+        data_dir=fixture_artifact.parent, artifact_filename=fixture_artifact.name
+    )
+
+
+@pytest.fixture
+def client(http_settings: Settings) -> Iterator[TestClient]:
+    with TestClient(create_app(http_settings)) as connected:
+        yield connected
+
+
+@pytest.fixture
+def preview_client(http_settings: Settings) -> Iterator[TestClient]:
+    settings = http_settings.model_copy(update={"block_rows": BLOCK_PAGE_SIZE})
+    with TestClient(create_app(settings)) as connected:
+        yield connected
 
 
 def build_fixture_artifact(

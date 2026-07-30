@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from wiki_api.domain.page import MAX_PAGE_SIZE
 
 if TYPE_CHECKING:
     import pytest
@@ -30,6 +33,10 @@ class Settings(BaseSettings):
     artifact_filename: str = "knowledge.sqlite3"
     game_data_dir: Path = Path("game_data")
     ge_data_url: str = "https://cdn.2009scape.org/gedata/"
+    cors_origins: tuple[str, ...] = ("*",)
+    cache_seconds: int = 300
+    tooltip_cache_seconds: int = 3600
+    block_rows: int = Field(default=60, ge=1, le=MAX_PAGE_SIZE)
 
     @property
     def artifact_path(self) -> Path:
@@ -95,3 +102,48 @@ def test_the_grand_exchange_host_is_not_hardcoded_in_code(
 ) -> None:
     monkeypatch.setenv("WIKI_API_GE_DATA_URL", "https://example.test/prices/")
     assert Settings().ge_data_url == "https://example.test/prices/"
+
+
+def test_a_browser_front_end_is_allowed_in_by_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("WIKI_API_CORS_ORIGINS", raising=False)
+    assert Settings().cors_origins == ("*",)
+
+
+def test_the_origins_allowed_in_are_configurable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("WIKI_API_CORS_ORIGINS", '["https://wiki.example.test"]')
+    assert Settings().cors_origins == ("https://wiki.example.test",)
+
+
+def test_a_hover_is_held_longer_than_a_page(monkeypatch: pytest.MonkeyPatch) -> None:
+    for key in ("WIKI_API_CACHE_SECONDS", "WIKI_API_TOOLTIP_CACHE_SECONDS"):
+        monkeypatch.delenv(key, raising=False)
+    settings = Settings()
+    assert settings.tooltip_cache_seconds > settings.cache_seconds
+
+
+def test_a_page_shows_enough_rows_to_be_worth_reading(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("WIKI_API_BLOCK_ROWS", raising=False)
+    assert Settings().block_rows == 60
+
+
+def test_how_many_rows_a_page_shows_is_tunable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("WIKI_API_BLOCK_ROWS", "25")
+    assert Settings().block_rows == 25
+
+
+def test_a_page_can_never_be_configured_to_be_unbounded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import pytest as testing
+
+    monkeypatch.setenv("WIKI_API_BLOCK_ROWS", str(MAX_PAGE_SIZE + 1))
+    with testing.raises(ValueError):
+        Settings()

@@ -128,7 +128,9 @@
         ],
         "total": 1,
         "limit": 10,
-        "offset": 0
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
       },
       "suppressed": 0
     },
@@ -190,7 +192,9 @@
         ],
         "total": 1,
         "limit": 10,
-        "offset": 0
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
       },
       "suppressed": 0
     }
