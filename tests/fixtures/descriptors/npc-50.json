@@ -243,6 +243,18 @@
             "type": "item",
             "attributes": [
               {
+                "key": "chance",
+                "value": 0.5,
+                "label": "Chance",
+                "group": "rate",
+                "order": 5,
+                "format": "rate",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "choices": null
+              },
+              {
                 "key": "weight",
                 "value": 100.0,
                 "label": "Weight",
@@ -320,6 +332,18 @@
             "type": "item",
             "attributes": [
               {
+                "key": "chance",
+                "value": 0.0078125,
+                "label": "Chance",
+                "group": "rate",
+                "order": 5,
+                "format": "rate",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "choices": null
+              },
+              {
                 "key": "weight",
                 "value": 1.0,
                 "label": "Weight",
@@ -396,6 +420,18 @@
             },
             "type": "item",
             "attributes": [
+              {
+                "key": "chance",
+                "value": 0.001953125,
+                "label": "Chance",
+                "group": "rate",
+                "order": 5,
+                "format": "rate",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "choices": null
+              },
               {
                 "key": "weight",
                 "value": 1.0,
@@ -509,7 +545,7 @@
                 "format": "coord",
                 "unit": null,
                 "derived": false,
-                "prominent": false,
+                "prominent": true,
                 "choices": null
               },
               {

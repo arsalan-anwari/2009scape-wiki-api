@@ -1,7 +1,6 @@
-"""The overlay documents a build reads, which is where messy source data is cleaned.
-
-Every raw encoding the game uses is converted here, so nothing above this layer ever
-sees an ordinal, a packed string or a date written as text.
+"""The overlay documents a build reads, where every raw encoding the game uses is
+converted so nothing above this layer sees an ordinal, a packed string or a date written
+as text.
 """
 
 from __future__ import annotations

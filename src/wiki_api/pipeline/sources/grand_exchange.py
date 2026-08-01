@@ -23,10 +23,8 @@ TIMEOUT: Final = 30.0
 
 
 class SnapshotRef(BaseModel):
-    """One weekly price snapshot, named by the day it covers.
-
-    Parsing the date here means it is a date everywhere downstream, rather than a
-    filename each consumer parses again.
+    """One weekly price snapshot, named by the day it covers and parsed to a date here
+    so nothing downstream reads the filename again.
     """
 
     model_config = ConfigDict(frozen=True)

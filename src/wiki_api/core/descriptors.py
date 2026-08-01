@@ -1,10 +1,4 @@
-"""Describing a whole page as data, so a reader can render one mechanically.
-
-The layout comes from the registries: where a group of values belongs, what it is
-called, and which relationships a type can take part in. Nothing here names a field or
-a relationship, which is what keeps the promise that a new type renders with no reader
-change.
-"""
+"""Describing a whole page as data, so a reader can render one mechanically."""
 
 from __future__ import annotations
 
@@ -32,11 +26,7 @@ def describe_page(
     data_version: str,
     limit: int = BLOCK_PAGE_SIZE,
 ) -> PageDescriptor:
-    """Everything a reader needs to render this entity's page.
-
-    The variants are read once and reused by every block, because each of them asks
-    about the same set of ids.
-    """
+    """Everything a reader needs to render this entity's page."""
     canonical_key = entity.canonical_key
     variants = repository.variants_of(canonical_key)
     keys = tuple(dict.fromkeys([canonical_key, *(variant.key for variant in variants)]))

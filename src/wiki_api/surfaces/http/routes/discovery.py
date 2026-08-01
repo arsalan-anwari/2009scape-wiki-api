@@ -1,8 +1,5 @@
-"""Finding things without already knowing which one you mean.
-
-An index page, a search box and a lucky guess are three different questions, so they
-are three resources. Which types exist is a fourth, and it is the resource a generic
-front end reads to learn how every field on every page presents itself.
+"""Finding things without already knowing which one you mean: an index page, a search
+box, a lucky guess, and the registry a generic front end reads.
 """
 
 from __future__ import annotations
@@ -62,12 +59,8 @@ router = APIRouter(prefix=API_PREFIX, tags=["discovery"])
     response_description="Every type served, with its attributes and relationships.",
 )
 def read_types(service: ServiceDep) -> list[TypeInfo]:
-    """Publish the registries: what each type holds, and how each field presents.
-
-    For every type you get its attributes with label, group, order, format and unit,
-    and its relationships with a label for reading them each way round. Fetch this
-    once at startup and you can lay out any type without naming a single field in
-    your own code.
+    """Publish the registries: every type's attributes with label, group, order, format
+    and unit, and its relationships labelled for reading each way round.
     """
     return list(service.describe_types())
 
@@ -85,11 +78,8 @@ def read_listing(
     offset: OffsetQuery = 0,
     order: OrderQuery = SortOrder.NAME,
 ) -> Page[EntitySummary]:
-    """List every published entity of one type, sorted and paged.
-
-    This is what sits behind an "all items" or "all quests" index. Variants such as
-    the noted form of an item are left out. They stay addressable, but the canonical
-    entity is the one that gets listed.
+    """List every published entity of one type, sorted and paged, leaving out variants
+    such as the noted form of an item.
     """
     return service.list_type(entity_type, limit=limit, offset=offset, order=order)
 
@@ -107,11 +97,8 @@ def read_search(
     limit: LimitQuery = DEFAULT_PAGE_SIZE,
     offset: OffsetQuery = 0,
 ) -> Page[SearchResult]:
-    """Search names, alternative names and descriptions across every type at once.
-
-    Results come back best first, each with a score, and `type` narrows the search.
-    Use this behind a search box. Use `/v1/find` instead when you already have an
-    exact name and want the one thing it refers to.
+    """Search names, alternative names and descriptions across every type at once, best
+    first and each with a score.
     """
     return service.search(q, types=types, limit=limit, offset=offset)
 
@@ -128,13 +115,8 @@ def read_find(
     types: TypesQuery = None,
     limit: LimitQuery = DEFAULT_PAGE_SIZE,
 ) -> Match:
-    """Turn a name into the one entity it means, with the runners-up for company.
-
-    The name is reduced to a slug and looked up exactly, retired slugs included, and
-    that hit takes `best_match`. Failing that the top-ranked search result takes it,
-    and `best_match` is null only when nothing matched at all. Either way the ranked
-    candidates come back too, so you can second-guess the pick. This is the route to
-    point an importer or a wiki-style `[[link]]` at.
+    """Turn a name into the one entity it means, with the ranked runners-up alongside;
+    `best_match` is null only when nothing matched at all.
     """
     return service.find(name, types=types, limit=limit)
 

@@ -1,8 +1,5 @@
-"""The closed sets of names this knowledge base speaks.
-
-The game sources ship everything as text, so each type here accepts the raw form
-on the way in and stores one clean name. Every vocabulary cites the server file
-it was checked against.
+"""The closed sets of names this knowledge base speaks, each taking the raw form the
+game sources ship and storing one clean name.
 """
 
 from __future__ import annotations
@@ -63,10 +60,7 @@ class OrdinalEnum(GameEnum):
 
 
 class Skill(OrdinalEnum):
-    """The 24 skills, in the id order the server uses.
-
-    Checked against Server/src/main/core/game/node/entity/skill/Skills.java.
-    """
+    """The 24 skills, in the id order Skills.java uses."""
 
     ATTACK = "attack"
     DEFENCE = "defence"
@@ -95,10 +89,8 @@ class Skill(OrdinalEnum):
 
 
 class EquipmentSlot(OrdinalEnum):
-    """Where an item is worn.
-
-    Checked against Server/src/main/core/api/EquipmentSlot.kt. The hidden slots are real
-    positions in that enum, so removing them would shift every slot after them.
+    """Where an item is worn, in the order EquipmentSlot.kt declares, hidden slots
+    included so nothing after them shifts.
     """
 
     HEAD = "head"
@@ -118,9 +110,8 @@ class EquipmentSlot(OrdinalEnum):
 
 
 class CombatStyle(OrdinalEnum):
-    """How an npc fights, and which prayer protects against it.
-
-    Checked against Server/src/main/core/game/node/entity/combat/CombatStyle.java.
+    """How an npc fights, and which prayer protects against it, as CombatStyle.java
+    declares.
     """
 
     MELEE = "melee"
@@ -129,10 +120,7 @@ class CombatStyle(OrdinalEnum):
 
 
 class ClueLevel(OrdinalEnum):
-    """The clue scroll tier an npc drops.
-
-    Checked against Server/src/main/content/global/activity/ttrail/ClueLevel.java.
-    """
+    """The clue scroll tier an npc drops, as ClueLevel.java declares."""
 
     EASY = "easy"
     MEDIUM = "medium"
@@ -141,11 +129,7 @@ class ClueLevel(OrdinalEnum):
 
 
 class QuestDifficulty(GameEnum):
-    """How hard a quest is.
-
-    Quests.kt carries only the name, so this vocabulary is ours rather than the
-    game's.
-    """
+    """How hard a quest is, in a vocabulary of ours rather than the game's."""
 
     NOVICE = "novice"
     INTERMEDIATE = "intermediate"
@@ -156,10 +140,7 @@ class QuestDifficulty(GameEnum):
 
 
 class QuestLength(GameEnum):
-    """Roughly how long a quest takes.
-
-    Another vocabulary of ours rather than the game's.
-    """
+    """How long a quest takes, in a vocabulary of ours rather than the game's."""
 
     VERY_SHORT = "very_short"
     SHORT = "short"
@@ -230,10 +211,8 @@ def _split_packed(values: str | Sequence[int]) -> tuple[int, ...]:
 
 
 class PackedInts(BaseModel):
-    """A run of ints of fixed width that the sources ship as one comma joined string.
-
-    The order the fields are declared in is the packed order, so the model itself
-    says what each position means.
+    """A run of ints of fixed width that the sources ship as one comma joined string, in
+    the order the fields are declared.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -265,11 +244,7 @@ class PackedInts(BaseModel):
 
 
 class CombatBonuses(PackedInts):
-    """The 15 combat bonuses in the order item_configs.json packs them.
-
-    The last two positions carry real values even though the equipment interface
-    does not label them.
-    """
+    """The 15 combat bonuses in the order item_configs.json packs them."""
 
     attack_stab: int = 0
     attack_slash: int = 0

@@ -1,8 +1,5 @@
-"""How the registries present themselves, declared rather than written in code.
-
-A page needs to know where a group of attributes belongs and what to call a type.
-Both are declared here so the query core can lay out a page it has never seen the
-fields of, which is what lets a new entity type render with no front end change.
+"""Where a group of attributes belongs on a page and what an entity type is called,
+declared rather than written in code.
 """
 
 from __future__ import annotations
@@ -18,9 +15,8 @@ if TYPE_CHECKING:
 
 
 class GroupPlacement(GameEnum):
-    """Where the attributes of one group belong: the infobox, a section, or nowhere.
-
-    `hidden` means the group is kept in the data but not shown to readers.
+    """Where the attributes of one group belong: the infobox, a section, or kept in the
+    data but not shown.
     """
 
     INFOBOX = "infobox"

@@ -1,8 +1,5 @@
-"""Turning stored attributes into values a reader can show.
-
-Nothing here names a field. It walks the registry, takes whatever the record happens to
-carry, and attaches the presentation facts declared for each one, so an attribute added
-upstream appears on the page with no change here.
+"""Turning stored attributes into values a reader can show, by walking the registry
+rather than naming any field.
 """
 
 from __future__ import annotations

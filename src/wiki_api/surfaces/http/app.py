@@ -1,9 +1,5 @@
-"""Assembling the surface: open the artifact, wire the routes, fail loudly if not.
-
-Startup opens the artifact and keeps it in a holder the routes read per request. A
-process that cannot open one refuses to start, because this service has nothing useful
-to answer without data and a healthy looking process that 503s every request is harder
-to diagnose than one that never came up.
+"""Assembling the surface: open the artifact into a holder the routes read per request,
+wire the routes, and refuse to start without data.
 """
 
 from __future__ import annotations

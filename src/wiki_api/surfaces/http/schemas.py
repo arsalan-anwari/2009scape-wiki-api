@@ -1,9 +1,6 @@
-"""The few shapes this surface adds to the ones the core already answers with.
-
-Everything a reader gets back about the game itself comes from the core unchanged. What
-lives here is the transport's own vocabulary: how a failure reads, what a health check
-says, and what identity resolution looks like when a caller wants to inspect it rather
-than be redirected.
+"""The transport's own shapes, which is all this surface adds to the ones the core
+already answers with: how a failure reads, what a health check says, and what an
+inspected resolution looks like.
 """
 
 from __future__ import annotations
@@ -29,11 +26,8 @@ class ErrorCode(StrEnum):
 
 
 class ErrorDetail(BaseModel):
-    """What went wrong: a `code` to branch on and a `message` to read.
-
-    Branch on the code, show the message. A failure worth retrying carries what you
-    need to retry with. Ask for a build that is no longer served and `data_version`
-    names the build that is, so recovering takes one retry and not a lookup first.
+    """What went wrong: a `code` to branch on, a `message` to read, and the
+    `data_version` still being served when the one asked for is gone.
     """
 
     model_config = ConfigDict(frozen=True)

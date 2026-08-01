@@ -1,7 +1,5 @@
-"""The one place a question about the game is answered.
-
-Every surface calls these operations and shapes what comes back. A lookup written
-anywhere else is a lookup written twice, so it belongs here instead.
+"""The one place a question about the game is answered; every surface calls these
+operations and shapes what comes back.
 """
 
 from __future__ import annotations
@@ -12,12 +10,15 @@ from wiki_api.core import discovery
 from wiki_api.core.descriptors import describe_page
 from wiki_api.core.resolution import resolve
 from wiki_api.core.results import (
+    Block,
     BlockResolution,
     Direction,
     EntityResolution,
     EntitySummary,
     Found,
     Match,
+    Named,
+    PageDescriptor,
     PageResolution,
     SearchResult,
     TooltipResolution,
@@ -31,6 +32,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from wiki_api.core.resolution import Reference
+    from wiki_api.domain.entity import Entity
     from wiki_api.domain.identity import EntityType
     from wiki_api.domain.manifest import Manifest
     from wiki_api.domain.relationships import RelationshipType
@@ -102,6 +104,77 @@ class KnowledgeService:
             )
         )
 
+    def lookup(
+        self,
+        name: str,
+        *,
+        types: Sequence[EntityType] | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+    ) -> Named[Entity]:
+        """The thing a caller named, and what else that name could have meant."""
+        return discovery.lookup(self._repository, name, types=types, limit=limit)
+
+    def page_by_name(
+        self,
+        name: str,
+        *,
+        types: Sequence[EntityType] | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+    ) -> Named[PageDescriptor]:
+        """A whole page, for a caller who has a name rather than an identity."""
+        named = self.lookup(name, types=types, limit=limit)
+        if not isinstance(named.resolution, Found):
+            return Named[PageDescriptor](
+                resolution=named.resolution,
+                subject=named.subject,
+                alternatives=named.alternatives,
+            )
+        return Named[PageDescriptor](
+            resolution=Found(
+                value=describe_page(
+                    self._repository,
+                    named.resolution.value,
+                    data_version=self.about().data_version,
+                    limit=self._block_size,
+                )
+            ),
+            subject=named.subject,
+            alternatives=named.alternatives,
+        )
+
+    def walk_by_name(
+        self,
+        name: str,
+        rel: RelationshipType,
+        direction: Direction = Direction.FORWARD,
+        *,
+        types: Sequence[EntityType] | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Named[Block]:
+        """One relationship of the thing a caller named, one page at a time."""
+        named = self.lookup(name, types=types)
+        if not isinstance(named.resolution, Found):
+            return Named[Block](
+                resolution=named.resolution,
+                subject=named.subject,
+                alternatives=named.alternatives,
+            )
+        return Named[Block](
+            resolution=Found(
+                value=walk(
+                    self._repository,
+                    named.resolution.value,
+                    rel,
+                    direction,
+                    limit=limit,
+                    offset=offset,
+                )
+            ),
+            subject=named.subject,
+            alternatives=named.alternatives,
+        )
+
     def search(
         self,
         query: str,
@@ -154,11 +227,25 @@ def test_the_service_answers_every_question_the_phase_promised() -> None:
         "get_page",
         "tooltip",
         "walk",
+        "lookup",
+        "page_by_name",
+        "walk_by_name",
         "search",
         "find",
         "list_type",
         "describe_types",
     }
+
+
+def test_a_name_is_answered_in_one_call_rather_than_two() -> None:
+    import inspect
+
+    for operation in (
+        KnowledgeService.lookup,
+        KnowledgeService.page_by_name,
+        KnowledgeService.walk_by_name,
+    ):
+        assert "name" in inspect.signature(operation).parameters
 
 
 def test_the_service_holds_nothing_but_the_repository_it_was_given() -> None:

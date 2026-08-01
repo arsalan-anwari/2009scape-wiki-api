@@ -95,7 +95,7 @@
                 "format": "int",
                 "unit": null,
                 "derived": false,
-                "prominent": false,
+                "prominent": true,
                 "choices": null
               },
               {
@@ -119,7 +119,7 @@
                 "format": "gp",
                 "unit": null,
                 "derived": false,
-                "prominent": false,
+                "prominent": true,
                 "choices": null
               },
               {

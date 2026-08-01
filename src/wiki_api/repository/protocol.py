@@ -21,11 +21,8 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class KnowledgeRepository(Protocol):
-    """Everything the query core can ask of storage.
-
-    It is read only, and every listing pages. A walk takes a set of keys rather than
-    one, because an entity and its variants are asked about together and merging
-    several pages afterwards cannot keep honesty.
+    """Everything the query core can ask of storage: read only, every listing paged, and
+    every walk taking a set of keys rather than one.
     """
 
     def manifest(self) -> Manifest: ...

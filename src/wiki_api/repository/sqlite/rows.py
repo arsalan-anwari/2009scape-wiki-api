@@ -30,10 +30,8 @@ _Member = TypeVar("_Member", bound="StrEnum")
 def _named[Member: StrEnum](
     vocabulary: type[Member], table: str, column: str, value: object
 ) -> Member:
-    """Read a stored value as one of the names the domain knows.
-
-    A value outside the vocabulary means a bad download rather than a bug, so it becomes
-    a domain error instead of a ValueError escaping an enum constructor.
+    """Read a stored value as one of the names the domain knows, raising a domain error
+    rather than letting a ValueError escape the enum constructor.
     """
     try:
         return vocabulary(str(value))

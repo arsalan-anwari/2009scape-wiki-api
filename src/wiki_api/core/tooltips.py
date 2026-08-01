@@ -1,8 +1,4 @@
-"""The hover sized answer: what this is, in as few values as the registry allows.
-
-A tooltip is the most cached thing a reader asks for, so it stays small on purpose. It
-never counts relationships, because counting them costs a query per hover.
-"""
+"""The hover sized answer: what this is, in as few values as the registry allows."""
 
 from __future__ import annotations
 

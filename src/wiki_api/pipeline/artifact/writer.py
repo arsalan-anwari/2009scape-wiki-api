@@ -6,6 +6,7 @@ import sqlite3
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
+from wiki_api.domain.attributes import computed_keys
 from wiki_api.domain.entity import Entity, Visibility
 from wiki_api.domain.manifest import SCHEMA_VERSION, Manifest
 from wiki_api.pipeline.artifact import statements
@@ -14,6 +15,8 @@ from wiki_api.pipeline.artifact.hashing import content_hash
 if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
+
+    from pydantic import BaseModel
 
     from wiki_api.domain.identity import EntityKey
     from wiki_api.domain.provenance import GameVersion
@@ -83,7 +86,7 @@ def _write_entities(
                 "visibility": entity.visibility.value,
                 "hidden_reason": entity.hidden_reason,
                 "icon_ref": entity.icon_ref,
-                "attributes": entity.attributes.model_dump_json(exclude_none=True),
+                "attributes": _stored(entity.attributes),
                 "source": entity.provenance.source.value,
                 "source_file": entity.provenance.source_file,
                 "source_ref": entity.provenance.source_ref,
@@ -100,6 +103,15 @@ def _write_entities(
                     "description": entity.description or "",
                 },
             )
+
+
+def _stored(attributes: BaseModel) -> str:
+    """What an artifact records, which is only what a source actually said; a value the
+    model works out for itself is left out.
+    """
+    return attributes.model_dump_json(
+        exclude_none=True, exclude=computed_keys(type(attributes))
+    )
 
 
 def _is_indexed(entity: Entity) -> bool:
@@ -124,7 +136,7 @@ def _write_edges(connection: sqlite3.Connection, snapshot: KnowledgeSnapshot) ->
                 "dst_type": edge.dst.type.value,
                 "dst_id": edge.dst.id,
                 "discriminator": edge.discriminator,
-                "attributes": edge.attributes.model_dump_json(exclude_none=True),
+                "attributes": _stored(edge.attributes),
                 "order_key": edge.order_key,
                 "source": edge.provenance.source.value,
                 "source_file": edge.provenance.source_file,

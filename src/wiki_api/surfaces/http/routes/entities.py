@@ -1,8 +1,6 @@
-"""Routes for one thing you can already name, addressed by its identity.
-
-Each route picks the shape of the reference, asks the core one question, and lets the
-absence mapping decide what a non-answer looks like. Nothing here knows what an
-attribute is called or which relationships a type can take part in.
+"""Routes for one thing you can already name, addressed by its identity: each picks the
+shape of the reference, asks the core one question, and lets the absence mapping shape a
+non-answer.
 """
 
 from __future__ import annotations
@@ -96,11 +94,9 @@ router = APIRouter(prefix=ENTITIES_PREFIX, tags=["entities"])
 def read_entity(
     entity_type: TypePath, ref: RefPath, service: ServiceDep
 ) -> PageDescriptor:
-    """Get everything needed to draw one entity's page, in a single response.
-
-    Identity, the infobox, the attribute sections, and a first page of every set of
-    related entities. The only thing that takes another request is reading further
-    into one of those sets, which the relationship route does.
+    """Get everything needed to draw one entity's page in a single response: identity,
+    the infobox, the attribute sections, and a first page of every set of related
+    entities.
     """
     return delivered(service.get_page(reference(entity_type, ref)), entity_path)
 
@@ -119,11 +115,8 @@ def read_tooltip(
     settings: SettingsDep,
     response: Response,
 ) -> Tooltip:
-    """Get identity, one sentence, and the few values worth showing on hover.
-
-    Which values those are is declared in the registry, not decided here. Call this
-    when a reader hovers a link. The answer is a fraction of the size of the page,
-    and by default it is cached for an hour where a page is cached for five minutes.
+    """Get identity, one sentence, and the few values the registry marks as worth
+    showing on hover.
     """
     preview = delivered(service.tooltip(reference(entity_type, ref)), tooltip_path)
     stamp_freshness(response, settings.tooltip_cache_seconds)
@@ -146,12 +139,8 @@ def read_walk(
     direction: DirectionQuery = Direction.FORWARD,
     offset: OffsetQuery = 0,
 ) -> Block:
-    """Read one more page of a set of related entities the page only started.
-
-    The answer is the same block the page already carried, so the same rendering
-    code handles page one and page nine. Set `direction=reverse` to read the link
-    the other way round, which is how you ask what points at this entity instead of
-    what it points at.
+    """Read one more page of a set of related entities that the entity page only
+    started; `direction=reverse` reads the link the other way round.
     """
     answered = service.walk(
         reference(entity_type, ref), rel, direction, limit=limit, offset=offset
@@ -168,11 +157,8 @@ def read_walk(
 def read_resolution(
     entity_type: TypePath, ref: RefPath, service: ServiceDep
 ) -> Resolution:
-    """Ask what a reference points at without being redirected there.
-
-    Live, retired, held back or unknown: all four come back as a 200 with an
-    `outcome` in the body. A link checker walking a list of old slugs reads the
-    answer straight off, instead of following redirects and reading status codes.
+    """Ask what a reference points at without being redirected there: live, retired,
+    held back and unknown all come back as a 200 with an `outcome` in the body.
     """
     resolution = service.resolve(reference(entity_type, ref))
     if isinstance(resolution, Found):

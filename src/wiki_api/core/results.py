@@ -1,9 +1,6 @@
 """What the query core hands back, in shapes no surface has to reinterpret.
 
-These describe how a question was answered rather than what is true in the game, which
-is why they live here and not in the domain. Every value carries the presentation facts
-the registry declares for it, so a reader renders a page it has never seen the fields
-of.
+Every value carries the presentation facts the registry declares for it.
 """
 
 from __future__ import annotations
@@ -41,12 +38,8 @@ class Direction(GameEnum):
 
 
 class AttributeValue(BaseModel):
-    """One field of an entity, with everything needed to display it.
-
-    The raw `value`, the label to put beside it, the group it belongs in, where it
-    sorts, how to format it, and what it is measured in. `derived` marks a value this
-    project worked out rather than read from the game data. `prominent` marks one
-    worth showing on hover. You never have to recognise `key` to draw the field.
+    """One field of an entity, carrying the label, group, order, format and unit needed
+    to display it without recognising `key`.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -82,11 +75,8 @@ ATTRIBUTE_SECTION: Final = "attributes"
 
 
 class Section(BaseModel):
-    """A group of attributes, drawn as one block of the page body.
-
-    `render` says how the section wants to be laid out. If the word is new to you,
-    leave the section out instead of failing. That is what lets a differently shaped
-    section be added later without breaking clients written today.
+    """A group of attributes drawn as one block of the page body, with a `render` word
+    saying how it wants to be laid out.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -100,11 +90,7 @@ class Section(BaseModel):
 
 
 class Row(BaseModel):
-    """One entity reached over a relationship, plus what the link itself records.
-
-    `link` is where you ended up. The attributes belong to the connection rather than
-    to either end, so a rate, a price or a spawn coordinate lands here.
-    """
+    """One entity reached over a relationship, plus what the link itself records."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -114,11 +100,7 @@ class Row(BaseModel):
 
 
 class Walk(BaseModel):
-    """The question a block answers: which entity, which relationship, which way.
-
-    Hand these three straight back to the relationship route to read further into the
-    same set, instead of rebuilding the request yourself.
-    """
+    """The question a block answers: which entity, which relationship, which way."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -128,11 +110,8 @@ class Walk(BaseModel):
 
 
 class Block(BaseModel):
-    """One relationship's worth of a page, paged like any other list.
-
-    A label to head it with, a first page of rows, and the walk that produced them so
-    you can ask for the rest. `suppressed` counts rows left out because their target
-    is not published. They go before the paging, so `total` stays honest.
+    """One relationship's worth of a page: a label, a first page of rows, the walk that
+    produced them, and a count of rows left out because their target is unpublished.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -150,13 +129,8 @@ class Block(BaseModel):
 
 
 class PageDescriptor(BaseModel):
-    """A whole entity page, described as data rather than drawn as HTML.
-
-    Identity, a line of description, the infobox, the attribute sections, and a first
-    page of every set of related entities. Everything needed to lay out a value
-    travels with the value, so a type your renderer has never seen still comes out
-    right. A variant such as the noted form of an item gets a page of its own and
-    points at its `canonical` entity.
+    """A whole entity page described as data: identity, a line of description, the
+    infobox, the attribute sections, and a first page of every set of related entities.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -173,10 +147,8 @@ class PageDescriptor(BaseModel):
 
 
 class Tooltip(BaseModel):
-    """The short form of an entity, sized for a hover card.
-
-    Identity, one line of description, and the few values the registry marks as worth
-    showing.
+    """The short form of an entity: identity, one line of description, and the few
+    values the registry marks as worth showing.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -204,11 +176,8 @@ class SearchResult(EntitySummary):
 
 
 class Match(BaseModel):
-    """The answer to "which entity is called X".
-
-    `best_match` is the single entity the name most likely meant, or null when
-    nothing matched at all. `results` holds the ranked candidates either way, so you
-    can show the alternatives or pick differently.
+    """The single entity a name most likely meant, or null when nothing matched,
+    together with the ranked candidates either way.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -218,11 +187,7 @@ class Match(BaseModel):
 
 
 class TypeInfo(BaseModel):
-    """One entity type, with every attribute and relationship declared for it.
-
-    This is what a generic renderer reads: labels, ordering, formats and units for a
-    type, published as data instead of hard-coded in a front end.
-    """
+    """One entity type, with every attribute and relationship declared for it."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -276,6 +241,18 @@ EntityResolution = Found[Entity] | Absent
 PageResolution = Found[PageDescriptor] | Absent
 TooltipResolution = Found[Tooltip] | Absent
 BlockResolution = Found[Block] | Absent
+
+
+class Named[T](BaseModel):
+    """What a name turned out to mean, which entity it was answered about, and what else
+    the words matched.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    resolution: Found[T] | Absent
+    subject: Link | None = None
+    alternatives: tuple[Link, ...] = ()
 
 
 # test cases
@@ -376,6 +353,21 @@ def test_a_section_can_be_laid_out_some_other_way_without_a_model_change() -> No
         attributes=(),
     )
     assert section.render == "price_series"
+
+
+def test_a_name_that_meant_something_carries_what_it_meant() -> None:
+    named = Named[int](resolution=Found[int](value=7))
+    assert isinstance(named.resolution, Found)
+    assert named.resolution.value == 7
+    assert named.alternatives == ()
+
+
+def test_a_name_that_meant_nothing_still_offers_what_was_close() -> None:
+    named = Named[int](
+        resolution=Missing(reference="dragon scimtar"), alternatives=(_link(),)
+    )
+    assert isinstance(named.resolution, Missing)
+    assert named.alternatives[0].label == "Dragon scimitar"
 
 
 def test_results_are_immutable() -> None:

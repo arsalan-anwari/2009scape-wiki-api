@@ -1,8 +1,5 @@
-"""The one place a concrete repository is chosen and opened.
-
-Everything above this module speaks to the protocol, so a surface never names the
-storage it is reading. A download step slots in front of this without anything else
-learning about it.
+"""The one place a concrete repository is chosen and opened; everything above it speaks
+to the protocol instead.
 """
 
 from __future__ import annotations
@@ -18,10 +15,8 @@ if TYPE_CHECKING:
 
 
 def open_repository(path: Path) -> KnowledgeRepository:
-    """Open a built artifact for reading.
-
-    It refuses an artifact whose schema version this runtime cannot read, so version
-    skew fails on startup rather than halfway through serving a page.
+    """Open a built artifact for reading, refusing one whose schema version this runtime
+    cannot read.
     """
     return SqliteKnowledgeRepository(path)
 

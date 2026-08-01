@@ -62,11 +62,7 @@ class IncompatibleArtifact(KnowledgeError):
 
 
 class CorruptArtifact(KnowledgeError):
-    """A stored value falls outside the vocabulary the schema declares.
-
-    The artifact is downloaded at runtime rather than built by the process reading
-    it, so a value the domain cannot name means a bad download, not a bug.
-    """
+    """A stored value falls outside the vocabulary the schema declares."""
 
     def __init__(self, table: str, column: str, value: object) -> None:
         super().__init__(f"{table}.{column} holds an unreadable value: {value!r}")

@@ -1,9 +1,6 @@
-"""Holding the artifact a surface is currently reading.
-
-A surface asks for the repository per request instead of capturing one, so the
-artifact underneath can be replaced while the process keeps serving. Replacing it
-hands the old one back rather than closing it, because requests already in flight are
-still reading from it and only the caller knows when they are done.
+"""Holding the artifact a surface is currently reading, so it can be replaced while the
+process keeps serving. Replacing it hands the old one back rather than closing it, since
+requests in flight are still reading from it.
 """
 
 from __future__ import annotations

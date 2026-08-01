@@ -1,9 +1,5 @@
-"""What a route is handed, and what it is allowed to be asked for.
-
-The repository is reached through the provider on every request rather than captured
-once, so the artifact underneath can be replaced without a route ever noticing. The
-query parameters are declared here so that every listing in the contract is limited the
-same way and an over-large page is refused before it reaches the core.
+"""What a route is handed and what it may be asked for: the repository reached through
+the provider on every request, and the query parameters every listing shares.
 """
 
 from __future__ import annotations
@@ -35,11 +31,8 @@ def settings_of(request: Request) -> Settings:
 
 
 def service_of(request: Request) -> KnowledgeService:
-    """A way to ask questions of whatever is being served right now.
-
-    How many rows a page carries per relationship is a deployment's call, not the
-    core's: the core keeps a preview sized default and this surface raises it to
-    whatever the settings say, so a whole page usually arrives in one request.
+    """A way to ask questions of whatever is being served right now, widened to the page
+    size this deployment's settings ask for.
     """
     return KnowledgeService(
         provider_of(request).current(), block_size=settings_of(request).block_rows
@@ -121,11 +114,8 @@ RowsQuery = Annotated[
 
 
 def rows_of(request: Request, limit: RowsQuery = None) -> int:
-    """How many rows one page of a relationship holds.
-
-    A walk continues a block that a page has already shown, so when the caller does
-    not say, it answers at the width the page used. A continuation narrower than the
-    thing it continues reads like a mistake even when the paging is sound.
+    """How many rows one page of a relationship holds, answering at the width the entity
+    page used when the caller does not say.
     """
     return limit if limit is not None else settings_of(request).block_rows
 

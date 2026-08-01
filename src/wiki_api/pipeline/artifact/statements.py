@@ -23,10 +23,8 @@ def load(name: str) -> str:
 
 
 def declared_vocabularies(schema: str) -> Mapping[str, frozenset[str]]:
-    """The values each column of the schema will accept.
-
-    The artifact is written by one process and read by another, so these lists have to
-    stay identical to the vocabularies the domain declares.
+    """The values each column of the schema will accept, which have to stay identical to
+    the vocabularies the domain declares.
     """
     declared: dict[str, frozenset[str]] = {}
     for column, listed in _VOCABULARY_CHECK.findall(schema):

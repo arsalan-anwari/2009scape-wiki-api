@@ -1,8 +1,5 @@
-"""Following a relationship, in either direction, without losing a variant.
-
-An edge points at whichever id the sources used, and a noted or bound duplicate is one
-of those ids. A walk therefore covers an entity together with its variants, in a single
-query, because a total gathered from several pages could not be trusted.
+"""Following a relationship in either direction, over an entity together with its
+variants, so one query yields a total that can be trusted.
 """
 
 from __future__ import annotations
@@ -26,10 +23,8 @@ BLOCK_PAGE_SIZE: Final = 10
 
 
 def key_set(repository: KnowledgeRepository, entity: Entity) -> tuple[EntityKey, ...]:
-    """Every id a walk from this entity has to cover.
-
-    A variant is walked as its canonical entity, so the noted page shows the same
-    relationships the real one does.
+    """Every id a walk from this entity has to cover: the canonical entity together with
+    its variants.
     """
     canonical = entity.canonical_key
     variants = repository.variants_of(canonical)
@@ -67,11 +62,7 @@ def walk_keys(
     limit: int = BLOCK_PAGE_SIZE,
     offset: int = 0,
 ) -> Block:
-    """The same walk, over a key set the caller has already worked out.
-
-    A page asks the same question of a dozen relationships, and the key set is the
-    same for all of them, so it is read once and handed down.
-    """
+    """The same walk, over a key set the caller has already worked out."""
     if direction is Direction.FORWARD:
         edges = repository.edges_from(keys, rel=rel, limit=limit, offset=offset)
     else:
@@ -128,10 +119,8 @@ def build_block(
     edges: Page[Edge],
     neighbours: Mapping[EntityKey, Entity],
 ) -> Block:
-    """Assemble one block out of edges and the entities they point at.
-
-    An edge whose neighbour cannot be resolved is left out and counted, so a gap in the
-    data shows up as a number rather than as a quietly shorter list.
+    """Assemble one block out of edges and the entities they point at, counting rather
+    than dropping the edges whose neighbour cannot be resolved.
     """
     rows = tuple(_rows(edges.items, direction, neighbours))
     spec = RELATIONSHIP_SPECS[rel]

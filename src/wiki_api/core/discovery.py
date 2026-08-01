@@ -1,17 +1,26 @@
 """Finding things without knowing their identity, and saying what there is to find.
 
-Searching ranks; finding decides. A caller that means one particular thing gets it,
-because a name that is an exact handle beats whatever a full text score put first.
+Searching ranks; finding decides.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from wiki_api.core.results import EntitySummary, Match, SearchResult, TypeInfo
+from wiki_api.core.resolution import Reference, entity_of, resolve
+from wiki_api.core.results import (
+    EntityResolution,
+    EntitySummary,
+    Match,
+    Missing,
+    Named,
+    SearchResult,
+    TypeInfo,
+)
 from wiki_api.domain.attributes import ATTRIBUTE_SPECS
+from wiki_api.domain.entity import Entity
 from wiki_api.domain.errors import EntityMoved, EntityNotFound
-from wiki_api.domain.identity import EntityType
+from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
 from wiki_api.domain.presentation import ENTITY_TYPE_META
 from wiki_api.domain.relationships import RELATIONSHIP_SPECS
@@ -20,8 +29,7 @@ from wiki_api.domain.slug import slugify
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from wiki_api.domain.entity import Entity
-    from wiki_api.domain.identity import EntityKey, Link
+    from wiki_api.domain.identity import Link
     from wiki_api.repository.protocol import KnowledgeRepository
 
 
@@ -66,6 +74,30 @@ def find(
     return Match(best_match=exact, results=results)
 
 
+def lookup(
+    repository: KnowledgeRepository,
+    name: str,
+    *,
+    types: Sequence[EntityType] | None = None,
+    limit: int = DEFAULT_PAGE_SIZE,
+) -> Named[Entity]:
+    """The entity a caller meant by a name, or by a written identity, with whatever else
+    the words matched alongside.
+    """
+    written = _written_identity(name, types)
+    if written is not None:
+        resolved = resolve(repository, written)
+        if not isinstance(resolved, Missing):
+            return _named(resolved)
+    match = find(repository, name, types=types, limit=limit)
+    if match.best_match is None:
+        return Named[Entity](resolution=Missing(reference=name))
+    return _named(
+        resolve(repository, match.best_match.key),
+        alternatives=_besides(match, match.best_match),
+    )
+
+
 def list_type(
     repository: KnowledgeRepository,
     entity_type: EntityType,
@@ -87,9 +119,8 @@ def list_type(
 
 
 def describe_types() -> tuple[TypeInfo, ...]:
-    """What kinds of thing exist, and how each one's values present.
-
-    This is the whole registry as a reader sees it, and the only way it leaves the core.
+    """The whole registry as a reader sees it: what kinds of thing exist, and how each
+    one's values present.
     """
     described = [
         TypeInfo(
@@ -110,6 +141,42 @@ def describe_types() -> tuple[TypeInfo, ...]:
     ]
     described.sort(key=lambda info: info.order)
     return tuple(described)
+
+
+def _written_identity(
+    name: str, types: Sequence[EntityType] | None
+) -> Reference | None:
+    """An identity a caller wrote out, which counts only when they narrowed the question
+    to exactly one type.
+    """
+    text = name.strip()
+    if not text:
+        return None
+    if text.isdigit():
+        if types is not None and len(types) == 1:
+            return EntityKey(type=types[0], id=int(text))
+        return None
+    try:
+        return EntityKey.parse(text)
+    except ValueError:
+        return None
+
+
+def _named(
+    resolution: EntityResolution, alternatives: tuple[Link, ...] = ()
+) -> Named[Entity]:
+    found = entity_of(resolution)
+    return Named[Entity](
+        resolution=resolution,
+        subject=found.to_link() if found is not None else None,
+        alternatives=alternatives,
+    )
+
+
+def _besides(match: Match, chosen: Link) -> tuple[Link, ...]:
+    return tuple(
+        result.link for result in match.results.items if result.link.key != chosen.key
+    )
 
 
 def _summary(entity: Entity) -> EntitySummary:
@@ -186,6 +253,49 @@ def test_types_are_described_in_a_declared_order() -> None:
 
 def test_the_types_a_handle_is_looked_up_in_are_ordered() -> None:
     assert _in_declared_order()[0] is EntityType.ITEM
+
+
+def test_a_written_identity_is_taken_at_its_word() -> None:
+    assert _written_identity("item:4587", None) == EntityKey(
+        type=EntityType.ITEM, id=4587
+    )
+
+
+def test_a_bare_number_only_identifies_something_once_a_type_is_known() -> None:
+    assert _written_identity("4587", None) is None
+    assert _written_identity("4587", [EntityType.ITEM, EntityType.NPC]) is None
+    assert _written_identity("4587", [EntityType.ITEM]) == EntityKey(
+        type=EntityType.ITEM, id=4587
+    )
+
+
+def test_a_name_is_never_mistaken_for_an_identity() -> None:
+    assert _written_identity("Dragon scimitar", [EntityType.ITEM]) is None
+    assert _written_identity("  ", [EntityType.ITEM]) is None
+
+
+def test_the_thing_a_caller_picked_is_not_offered_back_as_an_alternative() -> None:
+    from wiki_api.domain.identity import Link as EntityLink
+
+    chosen = EntityLink(
+        type=EntityType.ITEM, id=4587, slug="dragon-scimitar", label="Dragon scimitar"
+    )
+    other = EntityLink(
+        type=EntityType.ITEM, id=4588, slug="dragon-scimitar-4588", label="Dragon scim"
+    )
+    match = Match(
+        best_match=chosen,
+        results=Page[SearchResult](
+            items=(
+                SearchResult(link=chosen, type=EntityType.ITEM, score=2.0),
+                SearchResult(link=other, type=EntityType.ITEM, score=1.0),
+            ),
+            total=2,
+            limit=DEFAULT_PAGE_SIZE,
+            offset=0,
+        ),
+    )
+    assert _besides(match, chosen) == (other,)
 
 
 def test_a_summary_carries_identity_and_nothing_a_reader_cannot_use() -> None:

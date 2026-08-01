@@ -19,10 +19,8 @@ VERSION_SEPARATOR = "@"
 
 
 class GameVersion(BaseModel):
-    """Which build of the game a fact reflects, written as repo@commit.
-
-    Parsing it once means the commit never has to be carried beside the version as a
-    second field that could disagree. A bare label with no commit is valid.
+    """Which build of the game a fact reflects, written as repo@commit and parsed once;
+    a bare label with no commit is valid.
     """
 
     model_config = ConfigDict(frozen=True)

@@ -1,5 +1,5 @@
 from wiki_api.core.descriptors import build_descriptor, describe_page
-from wiki_api.core.discovery import describe_types, find, list_type, search
+from wiki_api.core.discovery import describe_types, find, list_type, lookup, search
 from wiki_api.core.resolution import Reference, entity_of, resolve
 from wiki_api.core.results import (
     ATTRIBUTE_SECTION,
@@ -15,6 +15,7 @@ from wiki_api.core.results import (
     Match,
     Missing,
     Moved,
+    Named,
     PageDescriptor,
     PageResolution,
     Row,
@@ -52,6 +53,7 @@ __all__ = [
     "Match",
     "Missing",
     "Moved",
+    "Named",
     "PageDescriptor",
     "PageResolution",
     "Reference",
@@ -72,6 +74,7 @@ __all__ = [
     "find",
     "key_set",
     "list_type",
+    "lookup",
     "preview",
     "prominent_values",
     "resolve",

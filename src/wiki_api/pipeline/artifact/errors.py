@@ -29,10 +29,8 @@ class OverlaySchemaMismatch(BuildError):
 
 
 class InvalidOverlayDocument(BuildError):
-    """A document is malformed in a way the overlay models reject on load.
-
-    Catching it here keeps the filename and the offending field with the error, instead
-    of a bare ValueError surfacing later from inside the merge.
+    """A document is malformed in a way the overlay models reject on load, keeping the
+    filename and the offending field with the error.
     """
 
     def __init__(self, origin: str, detail: str) -> None:

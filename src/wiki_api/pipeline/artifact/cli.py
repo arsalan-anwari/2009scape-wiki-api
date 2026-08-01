@@ -1,7 +1,4 @@
-"""Turning a directory of documents into an artifact a surface can be pointed at.
-
-This is offline work: it writes the file the read-only runtime later opens.
-"""
+"""Turning a directory of documents into an artifact a surface can be pointed at."""
 
 from __future__ import annotations
 

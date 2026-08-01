@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from wiki_api.core import BLOCK_PAGE_SIZE
 from wiki_api.domain.page import MAX_PAGE_SIZE
 
 if TYPE_CHECKING:
@@ -15,9 +16,8 @@ if TYPE_CHECKING:
 
 
 class Settings(BaseSettings):
-    """Runtime configuration.
-
-    Every field can be overridden with a WIKI_API_ prefixed environment variable.
+    """Runtime configuration, every field overridable with a WIKI_API_ prefixed
+    environment variable.
     """
 
     model_config = SettingsConfigDict(
@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     cache_seconds: int = 300
     tooltip_cache_seconds: int = 3600
     block_rows: int = Field(default=60, ge=1, le=MAX_PAGE_SIZE)
+    mcp_rows: int = Field(default=BLOCK_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE)
+    mcp_transport: Literal["stdio", "http"] = "stdio"
+    mcp_host: str = "127.0.0.1"
+    mcp_port: int = Field(default=8009, ge=1, le=65535)
 
     @property
     def artifact_path(self) -> Path:
@@ -145,5 +149,32 @@ def test_a_page_can_never_be_configured_to_be_unbounded(
     import pytest as testing
 
     monkeypatch.setenv("WIKI_API_BLOCK_ROWS", str(MAX_PAGE_SIZE + 1))
+    with testing.raises(ValueError):
+        Settings()
+
+
+def test_a_reader_that_pays_per_word_gets_a_smaller_page(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for key in ("WIKI_API_BLOCK_ROWS", "WIKI_API_MCP_ROWS"):
+        monkeypatch.delenv(key, raising=False)
+    settings = Settings()
+    assert settings.mcp_rows == BLOCK_PAGE_SIZE
+    assert settings.mcp_rows < settings.block_rows
+
+
+def test_the_transport_is_chosen_rather_than_assumed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("WIKI_API_MCP_TRANSPORT", raising=False)
+    assert Settings().mcp_transport == "stdio"
+    monkeypatch.setenv("WIKI_API_MCP_TRANSPORT", "http")
+    assert Settings().mcp_transport == "http"
+
+
+def test_a_transport_nobody_serves_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    import pytest as testing
+
+    monkeypatch.setenv("WIKI_API_MCP_TRANSPORT", "carrier-pigeon")
     with testing.raises(ValueError):
         Settings()

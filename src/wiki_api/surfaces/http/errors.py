@@ -1,8 +1,5 @@
-"""Turning everything that can go wrong into one shape a client can branch on.
-
-A route raises; the handlers here decide the status and write the envelope. Nothing
-below this module knows what a status code is, and nothing a client receives carries a
-stack trace, a file path, or an internal identifier.
+"""Turning everything that can go wrong into one envelope a client can branch on,
+carrying no stack trace, file path or internal identifier.
 """
 
 from __future__ import annotations

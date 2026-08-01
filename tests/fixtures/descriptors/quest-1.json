@@ -120,7 +120,7 @@
                 "format": "int",
                 "unit": null,
                 "derived": false,
-                "prominent": false,
+                "prominent": true,
                 "choices": null
               }
             ]

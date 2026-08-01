@@ -12,7 +12,7 @@
           "meta"
         ],
         "summary": "Check whether this server can answer",
-        "description": "Say that the server is up and has a readable build of the data open.\n\nA process that failed to open its data never answers here at all, so a reply\nfrom this route means it can really serve. Point a load balancer or a container\nprobe at it. Never cached.",
+        "description": "Say that the server is up and has a readable build of the data open; a process\nthat failed to open one never answers here at all.",
         "operationId": "health",
         "responses": {
           "200": {
@@ -34,7 +34,7 @@
           "meta"
         ],
         "summary": "Find out which build of the data is being served",
-        "description": "Describe the build that every other answer comes from.\n\n`data_version` is what every response repeats in the `X-Data-Version` header,\nwhat to use as a cache key, and what `?v=` pins to. `game_version` records the\nstate of the game it was built from. Never cached itself, because this is how\nyou notice the build has changed.",
+        "description": "Describe the build every other answer comes from: `data_version` is what every\nresponse repeats in `X-Data-Version` and what `?v=` pins to.",
         "operationId": "about",
         "responses": {
           "200": {
@@ -56,7 +56,7 @@
           "entities"
         ],
         "summary": "Get the whole page for one entity",
-        "description": "Get everything needed to draw one entity's page, in a single response.\n\nIdentity, the infobox, the attribute sections, and a first page of every set of\nrelated entities. The only thing that takes another request is reading further\ninto one of those sets, which the relationship route does.",
+        "description": "Get everything needed to draw one entity's page in a single response: identity,\nthe infobox, the attribute sections, and a first page of every set of related\nentities.",
         "operationId": "entity",
         "parameters": [
           {
@@ -124,7 +124,7 @@
           "entities"
         ],
         "summary": "Get the hover card for one entity",
-        "description": "Get identity, one sentence, and the few values worth showing on hover.\n\nWhich values those are is declared in the registry, not decided here. Call this\nwhen a reader hovers a link. The answer is a fraction of the size of the page,\nand by default it is cached for an hour where a page is cached for five minutes.",
+        "description": "Get identity, one sentence, and the few values the registry marks as worth\nshowing on hover.",
         "operationId": "tooltip",
         "parameters": [
           {
@@ -192,7 +192,7 @@
           "entities"
         ],
         "summary": "Page through one relationship of an entity",
-        "description": "Read one more page of a set of related entities the page only started.\n\nThe answer is the same block the page already carried, so the same rendering\ncode handles page one and page nine. Set `direction=reverse` to read the link\nthe other way round, which is how you ask what points at this entity instead of\nwhat it points at.",
+        "description": "Read one more page of a set of related entities that the entity page only\nstarted; `direction=reverse` reads the link the other way round.",
         "operationId": "walk",
         "parameters": [
           {
@@ -314,7 +314,7 @@
           "entities"
         ],
         "summary": "Check what a reference points at, without being sent there",
-        "description": "Ask what a reference points at without being redirected there.\n\nLive, retired, held back or unknown: all four come back as a 200 with an\n`outcome` in the body. A link checker walking a list of old slugs reads the\nanswer straight off, instead of following redirects and reading status codes.",
+        "description": "Ask what a reference points at without being redirected there: live, retired,\nheld back and unknown all come back as a 200 with an `outcome` in the body.",
         "operationId": "resolve",
         "parameters": [
           {
@@ -392,7 +392,7 @@
           "discovery"
         ],
         "summary": "List every entity type and how its fields are presented",
-        "description": "Publish the registries: what each type holds, and how each field presents.\n\nFor every type you get its attributes with label, group, order, format and unit,\nand its relationships with a label for reading them each way round. Fetch this\nonce at startup and you can lay out any type without naming a single field in\nyour own code.",
+        "description": "Publish the registries: every type's attributes with label, group, order, format\nand unit, and its relationships labelled for reading each way round.",
         "operationId": "types",
         "responses": {
           "200": {
@@ -418,7 +418,7 @@
           "discovery"
         ],
         "summary": "List all entities of one type, a page at a time",
-        "description": "List every published entity of one type, sorted and paged.\n\nThis is what sits behind an \"all items\" or \"all quests\" index. Variants such as\nthe noted form of an item are left out. They stay addressable, but the canonical\nentity is the one that gets listed.",
+        "description": "List every published entity of one type, sorted and paged, leaving out variants\nsuch as the noted form of an item.",
         "operationId": "listing",
         "parameters": [
           {
@@ -500,7 +500,7 @@
           "discovery"
         ],
         "summary": "Search the full text across every type",
-        "description": "Search names, alternative names and descriptions across every type at once.\n\nResults come back best first, each with a score, and `type` narrows the search.\nUse this behind a search box. Use `/v1/find` instead when you already have an\nexact name and want the one thing it refers to.",
+        "description": "Search names, alternative names and descriptions across every type at once, best\nfirst and each with a score.",
         "operationId": "search",
         "parameters": [
           {
@@ -593,7 +593,7 @@
           "discovery"
         ],
         "summary": "Look up the one entity that goes by this name",
-        "description": "Turn a name into the one entity it means, with the runners-up for company.\n\nThe name is reduced to a slug and looked up exactly, retired slugs included, and\nthat hit takes `best_match`. Failing that the top-ranked search result takes it,\nand `best_match` is null only when nothing matched at all. Either way the ranked\ncandidates come back too, so you can second-guess the pick. This is the route to\npoint an importer or a wiki-style `[[link]]` at.",
+        "description": "Turn a name into the one entity it means, with the ranked runners-up alongside;\n`best_match` is null only when nothing matched at all.",
         "operationId": "find",
         "parameters": [
           {
@@ -688,7 +688,8 @@
           "bonuses",
           "absorb",
           "coord",
-          "area"
+          "area",
+          "rate"
         ],
         "examples": [
           "int"
@@ -786,7 +787,7 @@
           "format"
         ],
         "title": "AttributeSpec",
-        "description": "One attribute as the registry declares it.\n\nEverything a client needs to show the field: what to call it, which group it\nbelongs in, where it sorts, how to format it, and which values it may take when\nit comes from a fixed vocabulary."
+        "description": "One attribute as the registry declares it: label, group, order, format, unit, and\nany fixed set of values it may take."
       },
       "AttributeValue": {
         "properties": {
@@ -856,7 +857,7 @@
           "format"
         ],
         "title": "AttributeValue",
-        "description": "One field of an entity, with everything needed to display it.\n\nThe raw `value`, the label to put beside it, the group it belongs in, where it\nsorts, how to format it, and what it is measured in. `derived` marks a value this\nproject worked out rather than read from the game data. `prominent` marks one\nworth showing on hover. You never have to recognise `key` to draw the field."
+        "description": "One field of an entity, carrying the label, group, order, format and unit needed\nto display it without recognising `key`."
       },
       "Block": {
         "properties": {
@@ -893,7 +894,7 @@
           "rows"
         ],
         "title": "Block",
-        "description": "One relationship's worth of a page, paged like any other list.\n\nA label to head it with, a first page of rows, and the walk that produced them so\nyou can ask for the rest. `suppressed` counts rows left out because their target\nis not published. They go before the paging, so `total` stays honest."
+        "description": "One relationship's worth of a page: a label, a first page of rows, the walk that\nproduced them, and a count of rows left out because their target is unpublished."
       },
       "Direction": {
         "type": "string",
@@ -921,7 +922,7 @@
           "id"
         ],
         "title": "EntityKey",
-        "description": "What identifies an entity: its type together with its numeric id.\n\nIds are only unique within a type. Item 50 and NPC 50 are unrelated things, so a\nbare number is never an identity on its own."
+        "description": "What identifies an entity: its type together with an id that is only unique\nwithin that type."
       },
       "EntitySummary": {
         "properties": {
@@ -1007,7 +1008,7 @@
           "message"
         ],
         "title": "ErrorDetail",
-        "description": "What went wrong: a `code` to branch on and a `message` to read.\n\nBranch on the code, show the message. A failure worth retrying carries what you\nneed to retry with. Ask for a build that is no longer served and `data_version`\nnames the build that is, so recovering takes one retry and not a lookup first."
+        "description": "What went wrong: a `code` to branch on, a `message` to read, and the\n`data_version` still being served when the one asked for is gone."
       },
       "GameVersion": {
         "type": "string"
@@ -1020,7 +1021,7 @@
           "hidden"
         ],
         "title": "GroupPlacement",
-        "description": "Where the attributes of one group belong: the infobox, a section, or nowhere.\n\n`hidden` means the group is kept in the data but not shown to readers."
+        "description": "Where the attributes of one group belong: the infobox, a section, or kept in the\ndata but not shown."
       },
       "HTTPValidationError": {
         "properties": {
@@ -1140,7 +1141,7 @@
           "label"
         ],
         "title": "Link",
-        "description": "A pointer to another entity: identity, a label to show, and no URL.\n\nA link carries `type`, `id`, `slug` and `label`, so you build whatever address\nyour own site uses. Nothing here decides what an entity's URL looks like."
+        "description": "A pointer to another entity, carrying `type`, `id`, `slug` and `label` but never\na URL."
       },
       "Manifest": {
         "properties": {
@@ -1177,7 +1178,7 @@
           "game_version"
         ],
         "title": "Manifest",
-        "description": "What a build of the data says about itself.\n\n`data_version` names the build that every answer is derived from. `game_version`\nrecords the state of the game it was built from, and `content_hash` fixes the\ncontents exactly, since the same inputs always build the same file."
+        "description": "What a build says about itself: the data-version every answer derives from, the\nstate of the game it was built from, and a hash fixing its contents."
       },
       "Match": {
         "properties": {
@@ -1200,7 +1201,7 @@
           "results"
         ],
         "title": "Match",
-        "description": "The answer to \"which entity is called X\".\n\n`best_match` is the single entity the name most likely meant, or null when\nnothing matched at all. `results` holds the ranked candidates either way, so you\ncan show the alternatives or pick differently."
+        "description": "The single entity a name most likely meant, or null when nothing matched,\ntogether with the ranked candidates either way."
       },
       "Missing": {
         "properties": {
@@ -1314,7 +1315,7 @@
           "data_version"
         ],
         "title": "PageDescriptor",
-        "description": "A whole entity page, described as data rather than drawn as HTML.\n\nIdentity, a line of description, the infobox, the attribute sections, and a first\npage of every set of related entities. Everything needed to lay out a value\ntravels with the value, so a type your renderer has never seen still comes out\nright. A variant such as the noted form of an item gets a page of its own and\npoints at its `canonical` entity."
+        "description": "A whole entity page described as data: identity, a line of description, the\ninfobox, the attribute sections, and a first page of every set of related entities."
       },
       "EntitySummaryPage": {
         "properties": {
@@ -1568,7 +1569,7 @@
           "order"
         ],
         "title": "RelationshipSpec",
-        "description": "One relationship as the registry declares it.\n\nIt carries a label for each direction, because the same link reads differently\neach way round, along with the types it can join and the attributes one link of\nthis type is allowed to carry."
+        "description": "One relationship as the registry declares it: a label for each direction, the\ntypes it can join, and the attributes one link may carry."
       },
       "RelationshipType": {
         "type": "string",
@@ -1610,7 +1611,7 @@
           "attributes"
         ],
         "title": "Row",
-        "description": "One entity reached over a relationship, plus what the link itself records.\n\n`link` is where you ended up. The attributes belong to the connection rather than\nto either end, so a rate, a price or a spawn coordinate lands here."
+        "description": "One entity reached over a relationship, plus what the link itself records."
       },
       "SearchResult": {
         "properties": {
@@ -1684,7 +1685,7 @@
           "attributes"
         ],
         "title": "Section",
-        "description": "A group of attributes, drawn as one block of the page body.\n\n`render` says how the section wants to be laid out. If the word is new to you,\nleave the section out instead of failing. That is what lets a differently shaped\nsection be added later without breaking clients written today."
+        "description": "A group of attributes drawn as one block of the page body, with a `render` word\nsaying how it wants to be laid out."
       },
       "SortOrder": {
         "type": "string",
@@ -1729,7 +1730,7 @@
           "type"
         ],
         "title": "Tooltip",
-        "description": "The short form of an entity, sized for a hover card.\n\nIdentity, one line of description, and the few values the registry marks as worth\nshowing."
+        "description": "The short form of an entity: identity, one line of description, and the few\nvalues the registry marks as worth showing."
       },
       "TypeInfo": {
         "properties": {
@@ -1773,7 +1774,7 @@
           "relationships"
         ],
         "title": "TypeInfo",
-        "description": "One entity type, with every attribute and relationship declared for it.\n\nThis is what a generic renderer reads: labels, ordering, formats and units for a\ntype, published as data instead of hard-coded in a front end."
+        "description": "One entity type, with every attribute and relationship declared for it."
       },
       "Unit": {
         "type": "string",
@@ -1847,7 +1848,7 @@
           "direction"
         ],
         "title": "Walk",
-        "description": "The question a block answers: which entity, which relationship, which way.\n\nHand these three straight back to the relationship route to read further into the\nsame set, instead of rebuilding the request yourself."
+        "description": "The question a block answers: which entity, which relationship, which way."
       }
     }
   },

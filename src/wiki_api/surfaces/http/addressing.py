@@ -1,8 +1,7 @@
 """Where things live in this api, and how a caller names one.
 
-The paths are built here rather than inside a route so that a redirect can point at
-the same resource the caller asked for. Nothing built here ever reaches a client as a
-link: a link carries identity, and a consumer routes its own site however it likes.
+Paths are built here rather than inside a route so that a redirect can point at the same
+resource the caller asked for.
 """
 
 from __future__ import annotations
@@ -24,10 +23,8 @@ WALK_SEGMENT: Final = "rel"
 
 
 def reference(entity_type: EntityType, handle: str) -> Reference:
-    """What the caller meant by the last segment of the path.
-
-    A segment of nothing but digits is an id. Anything else is a handle, which the
-    core tries as a slug, then as a retired one, then as the token the source used.
+    """What the caller meant by the last segment of the path: a run of nothing but
+    digits is an id, anything else a handle.
     """
     if handle.isdigit():
         return EntityKey(type=entity_type, id=int(handle))

@@ -21,10 +21,8 @@ class EntityType(StrEnum):
 
 
 class EntityKey(BaseModel):
-    """What identifies an entity: its type together with its numeric id.
-
-    Ids are only unique within a type. Item 50 and NPC 50 are unrelated things, so a
-    bare number is never an identity on its own.
+    """What identifies an entity: its type together with an id that is only unique
+    within that type.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -47,10 +45,8 @@ class EntityKey(BaseModel):
 
 
 class Link(BaseModel):
-    """A pointer to another entity: identity, a label to show, and no URL.
-
-    A link carries `type`, `id`, `slug` and `label`, so you build whatever address
-    your own site uses. Nothing here decides what an entity's URL looks like.
+    """A pointer to another entity, carrying `type`, `id`, `slug` and `label` but never
+    a URL.
     """
 
     model_config = ConfigDict(frozen=True)

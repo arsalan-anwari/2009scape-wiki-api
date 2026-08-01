@@ -1,9 +1,6 @@
-"""Making the most of the fact that a built artifact never changes under a reader.
-
-Everything served is fixed for as long as the data-version is, so a response can be
-validated rather than re-sent, and a caller that pins itself to one build can hold the
-answer forever. A caller pinned to a build this process no longer has is told so
-outright, because quietly answering from a different one would defeat the pinning.
+"""Making the most of the fact that a built artifact never changes under a reader, so a
+response can be validated rather than re-sent and a caller pinned to one build can hold
+the answer forever.
 """
 
 from __future__ import annotations
@@ -41,9 +38,7 @@ PIN_MESSAGE: Final = (
 
 
 def validator(data_version: str, path: str, query: Iterable[tuple[str, str]]) -> str:
-    """A short word standing in for one exact response.
-
-    It is weak because a body may be compressed on the way out, and the same answer
+    """A short word standing in for one exact response, weak because the same answer
     compressed differently is still the same answer.
     """
     asked = "&".join(f"{name}={value}" for name, value in sorted(query))

@@ -1,8 +1,5 @@
-"""What this process is, as opposed to what it knows.
-
-Neither answer is about the game, so neither is held by a cache: one says whether this
-process can serve at all, and the other says exactly which build it is serving, which
-is what a consumer keys its own caching on.
+"""What this process is, as opposed to what it knows: whether it can serve at all, and
+which build it is serving. Neither answer is cached.
 """
 
 from __future__ import annotations
@@ -27,11 +24,8 @@ router = APIRouter(tags=["meta"])
     response_description="The server is up and has data open.",
 )
 def read_health(manifest: ManifestDep, response: Response) -> Health:
-    """Say that the server is up and has a readable build of the data open.
-
-    A process that failed to open its data never answers here at all, so a reply
-    from this route means it can really serve. Point a load balancer or a container
-    probe at it. Never cached.
+    """Say that the server is up and has a readable build of the data open; a process
+    that failed to open one never answers here at all.
     """
     decline_caching(response)
     return Health(
@@ -46,12 +40,8 @@ def read_health(manifest: ManifestDep, response: Response) -> Health:
     response_description="The manifest of the build currently being served.",
 )
 def read_about(manifest: ManifestDep, response: Response) -> Manifest:
-    """Describe the build that every other answer comes from.
-
-    `data_version` is what every response repeats in the `X-Data-Version` header,
-    what to use as a cache key, and what `?v=` pins to. `game_version` records the
-    state of the game it was built from. Never cached itself, because this is how
-    you notice the build has changed.
+    """Describe the build every other answer comes from: `data_version` is what every
+    response repeats in `X-Data-Version` and what `?v=` pins to.
     """
     decline_caching(response)
     return manifest

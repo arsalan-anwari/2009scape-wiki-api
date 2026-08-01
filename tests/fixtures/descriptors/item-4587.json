@@ -234,6 +234,18 @@
             "type": "npc",
             "attributes": [
               {
+                "key": "chance",
+                "value": 0.001953125,
+                "label": "Chance",
+                "group": "rate",
+                "order": 5,
+                "format": "rate",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "choices": null
+              },
+              {
                 "key": "weight",
                 "value": 1.0,
                 "label": "Weight",

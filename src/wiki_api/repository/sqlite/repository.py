@@ -40,9 +40,8 @@ if TYPE_CHECKING:
 
 
 class SqliteKnowledgeRepository:
-    """Reads the built artifact.
-
-    Nothing above this class knows the storage is SQLite.
+    """Reads the built artifact, so that nothing above this class knows the storage is
+    SQLite.
     """
 
     def __init__(self, path: Path) -> None:
@@ -256,9 +255,8 @@ class SqliteKnowledgeRepository:
 
 
 def _as_json_keys(keys: Sequence[EntityKey]) -> str:
-    """The keys a statement joins against, each one listed once.
-
-    A repeated key would be joined more than once and would show its edges twice.
+    """The keys a statement joins against, each one listed once so no edge is joined
+    twice.
     """
     unique = dict.fromkeys(keys)
     return json.dumps(

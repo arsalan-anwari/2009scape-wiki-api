@@ -2,66 +2,107 @@
 
 # 2009scape-wiki-api
 
-A backend service that turns the 2009scape game data into a clean, searchable
-knowledge base. It reads the raw game sources (items, NPCs, shops, drop tables,
-quests and more), cleans them into a uniform format, and serves them over two
-interfaces:
+Turns the raw 2009scape game sources (items, NPCs, shops, drop tables, quests,
+locations) into one immutable, searchable knowledge base, and serves it two ways:
 
-- an HTTP JSON API, meant to be used by a separate wiki website
-- an MCP server, so AI agents like Claude can answer questions about the game
+- an **HTTP JSON API** for a separate wiki front end
+- an **MCP server**, so Claude and other agents can answer questions about the game
 
-## How it works
+## How it fits together
 
-1. Read the raw game sources.
-2. Clean them into entities (items, NPCs, quests, shops, locations) and the
-   relationships between them (dropped by, sold in, rewarded by).
-3. Store the result as a build artifact (a SQLite database).
-4. Serve it through the HTTP API and the MCP server.
+```mermaid
+flowchart LR
+    SRC["game sources<br/>+ overlays"] --> PIPE["pipeline/artifact<br/>offline build"]
+    PIPE --> ART[("knowledge.sqlite3<br/>one immutable build")]
+    ART --> REPO["repository<br/>SQLite + FTS5"]
+    REPO --> CORE["core<br/>resolve · walk · search"]
+    CORE --> HTTP["surfaces/http<br/>FastAPI"]
+    CORE --> MCP["surfaces/mcp<br/>FastMCP"]
+    HTTP --> WIKI["wiki front end"]
+    MCP --> AGENT["Claude, editors,<br/>any MCP client"]
+    DOM["domain<br/>entities · relationships<br/>attribute registry"] -.-> PIPE & REPO & CORE
+```
 
-The database is always rebuilt from source and never edited by hand. The cleaned
-dataset is published to Hugging Face and downloaded at runtime, so it is not
-committed to this repo.
+The build is offline and always from source. The dataset is
+published to Hugging Face and downloaded at runtime, so it is not committed here.
+
+Prebuild docker container containing the mcp server, fast api or both will be uploaded to docker hub in the future. 
+
+Both surfaces call the same `core`, so a lookup is never written twice. `domain`
+declares what an attribute means and how it presents, which is why a payload can be
+rendered without any client knowing field names.
+
+## What comes back
+
+An agent asks in a player's words and gets a compact answer:
+
+```jsonc
+// dropped_by("dragon scimitar")
+{"outcome": "found",
+ "result": {"of": "Dragon scimitar", "label": "Dropped by", "total": 1,
+            "neighbours": [{"name": "King Black Dragon", "type": "npc", "id": 50,
+                            "facts": {"Chance": "1/512"}}]}}
+```
+
+The HTTP surface answers the same question with everything a renderer needs where each
+value carries its own label, group, format and unit:
+
+```jsonc
+// GET /v1/entities/npc/50/rel/drops?limit=2
+{"walk": {"origin": {"type": "npc", "id": 50}, "rel": "drops", "direction": "forward"},
+ "label": "Drops",
+ "rows": {"items": [{"link": {"type": "item", "id": 536, "slug": "dragon-bones",
+                              "label": "Dragon bones"},
+                     "attributes": [{"key": "chance", "value": 0.5, "label": "Chance",
+                                     "format": "rate", "derived": true},
+                                    {"key": "weight", "value": 100.0, "label": "Weight"}]}],
+          "total": 3, "limit": 2, "next_offset": 2}}
+```
+
+`GET /v1/entities/item/dragon-scimitar` returns the whole page with infobox, sections and
+a first page of every relationship in one response. Full contract at `/docs`.
 
 ## Project layout
 
-- src/wiki_api: the installable package
-  - domain: the core data model (entities and relationships)
-  - repository: data access behind one interface (SQLite/FTS5 and in-memory)
-  - core: the query logic shared by both interfaces
-  - surfaces/http: the FastAPI HTTP API
-  - surfaces/mcp: the MCP server
-  - pipeline/artifact: the offline code that builds the dataset
-- tests: integration tests and the hand-made knowledge fixtures
-- scripts: helper scripts for development and publishing
-- docs: public API documentation
+| path | what lives there |
+| --- | --- |
+| `src/wiki_api/domain` | entities, relationships, the attribute registry |
+| `src/wiki_api/pipeline` | the offline build that writes the artifact |
+| `src/wiki_api/repository` | data access behind one protocol (SQLite/FTS5, in-memory) |
+| `src/wiki_api/core` | the query logic both surfaces share |
+| `src/wiki_api/surfaces/http` | the FastAPI contract |
+| `src/wiki_api/surfaces/mcp` | the MCP server |
+| `tests` | integration tests and hand-made knowledge fixtures |
+| `demos` | worked examples, one folder each, run with `uv run poe demo <folder>` |
 
-## The knowledge model
+## Running it
 
-Everything the API serves is an **entity**: an item, NPC, shop or quest with
-one identity, one shape, and typed **relationships** to other entities.
+Requires [uv](https://docs.astral.sh/uv/), which installs the pinned Python for you.
 
-- Identity is `(type, id)` and never changes. Numeric ids overlap between types,
-  so an id alone is never an identity.
-- Each entity also has a readable `slug`, unique within its type. Retired slugs
-  and community shorthand live on as **aliases** that redirect, so links do not
-  rot.
-- Duplicate ids for the same thing (noted, bound or placeholder items) point at a
-  canonical entity and stay out of search and index listings.
-- Type-specific values (buy limit, lifepoints, quest length) are declared once in
-  an **attribute registry** that carries their label, group and units, so pages
-  and API payloads can be rendered without any code knowing the field names.
-- Relationships carry their own data meaning a drop keeps its weight *and* its
-  denominator, so a rate renders exactly (ex: `1/128`).
-- Every fact records where it came from and which game version it reflects.
-
-## Development
-
-Requires uv, which installs and manages the pinned Python version for you.
-
+```bash
+uv sync --all-extras
+uv run poe build-artifact   # both surfaces refuse to start without a dataset
+uv run poe serve            # HTTP API on :8000, docs at /docs
+uv run poe mcp              # MCP server over stdio (http comming)
+uv run poe check            # lint, types, import boundaries, tests
+uv run poe fix              # auto-fix formatting and simple lint issues
 ```
-uv sync --all-extras       // install all dependencies
-uv run poe check           // run linting, type checks, boundary checks and tests
-uv run poe fix             // auto fix formatting and simple lint issues
-scripts/test_ci.sh --fix --no-act   // fix, run the checks, ignore CI workflow
-scripts/test_ci.sh --fix   // fix, run the checks, then run the CI workflow locally
+
+### Pointing an agent at it
+
+This repository carries a `.mcp.json`, so running `claude` here offers the server and
+asks you to approve it once. Any other MCP client can spawn the console script:
+
+```json
+{"mcpServers": {"2009scape-wiki": {"type": "stdio", "command": "uv",
+  "args": ["run", "--directory", "/path/to/2009scape-wiki-api", "--quiet",
+           "scape2009-wiki-mcp"]}}}
 ```
+
+For a container or shared host, serve it over HTTP instead, currently there is no
+authentication, but this will be implemneted in the future:
+
+```bash
+WIKI_API_MCP_TRANSPORT=http WIKI_API_MCP_PORT=8009 uv run poe mcp
+```
+

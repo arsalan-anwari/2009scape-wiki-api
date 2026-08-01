@@ -1,8 +1,5 @@
-"""The one place the core's answers become transport.
-
-The core says found, moved, hidden or missing. Only this module decides that those are
-a body, a redirect and two flavours of 404. The core says "here is a link to the new
-place" and this module says "go there".
+"""The one place the core's answers become transport: found, moved, hidden and missing
+become a body, a redirect, and two flavours of 404.
 """
 
 from __future__ import annotations

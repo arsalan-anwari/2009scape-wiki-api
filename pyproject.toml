@@ -22,6 +22,13 @@ pipeline = [
     "httpx>=0.28.1",
     "lxml>=6.1.1",
 ]
+demos = [
+    "claude-agent-sdk>=0.2.128",
+    "python-dotenv>=1.2.2",
+]
+
+[project.scripts]
+scape2009-wiki-mcp = "wiki_api.surfaces.mcp.server:main"
 
 [project.urls]
 Repository = "https://github.com/arsalan-anwari/2009scape-wiki-api"
@@ -49,7 +56,7 @@ module-root = "src"
 [tool.ruff]
 target-version = "py312"
 line-length = 88
-src = ["src", "tests"]
+src = ["src", "tests", "demos"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
@@ -57,7 +64,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["src", "tests"]
+files = ["src", "tests", "demos"]
 plugins = ["pydantic.mypy"]
 
 [tool.pydantic-mypy]
@@ -138,5 +145,7 @@ test = "pytest"
 fetch-ge = { script = "wiki_api.pipeline.sources.grand_exchange:main" }
 build-artifact = { script = "wiki_api.pipeline.artifact.cli:main" }
 serve = "uvicorn wiki_api.surfaces.http.app:create_app --factory --reload"
+mcp = { script = "wiki_api.surfaces.mcp.server:main" }
+demo = "python demos/run_demo.py"
 fix = ["lint-fix", "format"]
 check = ["lint", "format-check", "typecheck", "imports", "test"]

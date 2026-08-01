@@ -1,8 +1,4 @@
-"""The registry that says what every entity attribute means and how to show it.
-
-A page walks this registry instead of naming fields, so a new attribute shows up in
-the wiki without any front end change.
-"""
+"""The registry that says what every entity attribute means and how to show it."""
 
 from __future__ import annotations
 
@@ -30,7 +26,7 @@ from wiki_api.domain.vocabulary import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterable, Mapping
 
 
 class AttributeFormat(StrEnum):
@@ -50,15 +46,12 @@ class AttributeFormat(StrEnum):
     ABSORB = "absorb"
     COORD = "coord"
     AREA = "area"
+    RATE = "rate"
 
 
 @dataclass(frozen=True)
 class AttributeMeta:
-    """The presentation facts attached to one attribute field.
-
-    A prominent attribute is one worth showing on hover, which is what lets a tooltip
-    be built without anything naming a field.
-    """
+    """The presentation facts attached to one attribute field."""
 
     label: str
     group: AttributeGroup
@@ -71,11 +64,8 @@ class AttributeMeta:
 
 
 class AttributeSpec(BaseModel):
-    """One attribute as the registry declares it.
-
-    Everything a client needs to show the field: what to call it, which group it
-    belongs in, where it sorts, how to format it, and which values it may take when
-    it comes from a fixed vocabulary.
+    """One attribute as the registry declares it: label, group, order, format, unit, and
+    any fixed set of values it may take.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -118,44 +108,68 @@ def choices_of(annotation: Any) -> tuple[str, ...] | None:
     return None
 
 
+def meta_of(entries: Iterable[Any]) -> AttributeMeta | None:
+    """The registry entry among whatever a field was annotated with."""
+    return next(
+        (entry for entry in entries if isinstance(entry, AttributeMeta)),
+        None,
+    )
+
+
 def specs_of(model: type[BaseModel]) -> tuple[AttributeSpec, ...]:
     """Read the registry entries off a model, in the order a page shows them."""
-    specs: list[AttributeSpec] = []
-    for name, field in model.model_fields.items():
-        meta = next(
-            (entry for entry in field.metadata if isinstance(entry, AttributeMeta)),
-            None,
+    specs = [
+        _spec_of(model, name, meta_of(field.metadata), field.annotation)
+        for name, field in model.model_fields.items()
+    ]
+    specs.extend(
+        _spec_of(
+            model,
+            name,
+            meta_of(get_args(computed.return_type)),
+            computed.return_type,
         )
-        if meta is None:
-            raise MissingAttributeMeta(model, name)
-        choices = choices_of(field.annotation)
-        if choices is not None and meta.format is not AttributeFormat.ENUM:
-            raise MisdeclaredAttribute(
-                model, name, "holds a vocabulary but is not declared as an enum"
-            )
-        if choices is None and meta.format is AttributeFormat.ENUM:
-            raise MisdeclaredAttribute(
-                model, name, "is declared as an enum but holds no vocabulary"
-            )
-        if meta.prominent and not meta.display:
-            raise MisdeclaredAttribute(
-                model, name, "is prominent but is never displayed"
-            )
-        specs.append(
-            AttributeSpec(
-                key=name,
-                label=meta.label,
-                group=meta.group,
-                order=meta.order,
-                format=meta.format,
-                unit=meta.unit,
-                display=meta.display,
-                derived=meta.derived,
-                prominent=meta.prominent,
-                choices=choices,
-            )
-        )
+        for name, computed in model.model_computed_fields.items()
+    )
     return tuple(sorted(specs, key=lambda spec: (spec.order, spec.key)))
+
+
+def computed_keys(model: type[BaseModel]) -> set[str]:
+    """The names a model works out rather than records."""
+    return set(model.model_computed_fields)
+
+
+def _spec_of(
+    model: type[BaseModel],
+    name: str,
+    meta: AttributeMeta | None,
+    annotation: Any,
+) -> AttributeSpec:
+    if meta is None:
+        raise MissingAttributeMeta(model, name)
+    choices = choices_of(annotation)
+    if choices is not None and meta.format is not AttributeFormat.ENUM:
+        raise MisdeclaredAttribute(
+            model, name, "holds a vocabulary but is not declared as an enum"
+        )
+    if choices is None and meta.format is AttributeFormat.ENUM:
+        raise MisdeclaredAttribute(
+            model, name, "is declared as an enum but holds no vocabulary"
+        )
+    if meta.prominent and not meta.display:
+        raise MisdeclaredAttribute(model, name, "is prominent but is never displayed")
+    return AttributeSpec(
+        key=name,
+        label=meta.label,
+        group=meta.group,
+        order=meta.order,
+        format=meta.format,
+        unit=meta.unit,
+        display=meta.display,
+        derived=meta.derived,
+        prominent=meta.prominent,
+        choices=choices,
+    )
 
 
 class SkillRequirement(BaseModel):

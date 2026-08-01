@@ -19,10 +19,8 @@ class SortOrder(StrEnum):
 
 
 class Page[T](BaseModel):
-    """One page of results, and enough about the whole to ask for the next.
-
-    `total` counts everything that matched, not what is in `items`. `next_offset` is
-    the offset to ask for next, and is null once you have reached the end.
+    """One page of results, where `total` counts everything that matched and
+    `next_offset` is null once the end is reached.
     """
 
     model_config = ConfigDict(frozen=True)

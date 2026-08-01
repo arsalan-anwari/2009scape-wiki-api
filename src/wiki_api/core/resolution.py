@@ -1,9 +1,7 @@
-"""Working out which entity a caller means, and what to say when there isn't one.
+"""Working out which entity a caller means.
 
-Absence is an answer here rather than an exception, because the three shapes it takes
-mean three different things to a reader: gone, never published, or renamed. A rename
-carries the entity it moved to, already resolved, so a caller never has to look it up
-itself.
+Absence comes back as an answer rather than as an exception, and that answer
+says whether the entity is gone, was never published, or has been renamed.
 """
 
 from __future__ import annotations
@@ -85,10 +83,8 @@ def _by_source_key(
 
 
 def _redirect(repository: KnowledgeRepository, target: EntityKey) -> EntityResolution:
-    """Turn a redirect into somewhere a reader can actually go.
-
-    The alias table stores an identity, and a link needs a name, so the target is read
-    here rather than left for a caller to fetch a second time.
+    """Turn a redirect into a link a reader can follow, reading the target's name so a
+    caller never fetches it a second time.
     """
     found = repository.get_entities([target])
     entity = found.get(target)

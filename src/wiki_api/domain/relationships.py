@@ -5,7 +5,14 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import TYPE_CHECKING, Annotated, Any, Final, Self
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    computed_field,
+    model_validator,
+)
 
 from wiki_api.domain.attributes import (
     AttributeFormat,
@@ -51,9 +58,8 @@ class DropTableKind(GameEnum):
 
 
 class DropEdgeAttributes(BaseModel):
-    """What an npc dropping an item is worth.
-
-    The weight and the denominator are both kept so a rate renders exactly.
+    """What an npc dropping an item is worth, keeping both the weight and the
+    denominator so a rate renders exactly.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -88,6 +94,24 @@ class DropEdgeAttributes(BaseModel):
             raise ValueError("weight must not exceed the denominator")
         return self
 
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def chance(
+        self,
+    ) -> Annotated[
+        float,
+        AttributeMeta(
+            "Chance",
+            AttributeGroup.RATE,
+            5,
+            AttributeFormat.RATE,
+            derived=True,
+            prominent=True,
+        ),
+    ]:
+        """How likely one roll is, declared so a reader never divides two numbers."""
+        return self.rate
+
     @property
     def rate(self) -> float:
         return self.weight / self.denominator
@@ -104,7 +128,9 @@ class SellEdgeAttributes(BaseModel):
 
     stock_amount: Annotated[
         int,
-        AttributeMeta("Stock", AttributeGroup.SHOP, 10, AttributeFormat.INT),
+        AttributeMeta(
+            "Stock", AttributeGroup.SHOP, 10, AttributeFormat.INT, prominent=True
+        ),
     ] = Field(ge=0)
     restock_rate: Annotated[
         int,
@@ -112,7 +138,9 @@ class SellEdgeAttributes(BaseModel):
     ] = Field(default=100, ge=0)
     price: Annotated[
         int | None,
-        AttributeMeta("Price", AttributeGroup.SHOP, 30, AttributeFormat.GP),
+        AttributeMeta(
+            "Price", AttributeGroup.SHOP, 30, AttributeFormat.GP, prominent=True
+        ),
     ] = None
     currency: Annotated[
         EntityKey,
@@ -140,7 +168,9 @@ class RewardEdgeAttributes(BaseModel):
 
     amount: Annotated[
         int,
-        AttributeMeta("Amount", AttributeGroup.REWARD, 10, AttributeFormat.INT),
+        AttributeMeta(
+            "Amount", AttributeGroup.REWARD, 10, AttributeFormat.INT, prominent=True
+        ),
     ] = Field(default=1, ge=1)
 
 
@@ -157,7 +187,9 @@ class LocatedInEdgeAttributes(BaseModel):
 
     at: Annotated[
         Coordinate | None,
-        AttributeMeta("Position", AttributeGroup.MAP, 10, AttributeFormat.COORD),
+        AttributeMeta(
+            "Position", AttributeGroup.MAP, 10, AttributeFormat.COORD, prominent=True
+        ),
     ] = None
     spawn_kind: Annotated[
         SpawnKind,
@@ -204,11 +236,8 @@ EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = 
 
 
 class RelationshipSpec(BaseModel):
-    """One relationship as the registry declares it.
-
-    It carries a label for each direction, because the same link reads differently
-    each way round, along with the types it can join and the attributes one link of
-    this type is allowed to carry.
+    """One relationship as the registry declares it: a label for each direction, the
+    types it can join, and the attributes one link may carry.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -312,10 +341,8 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
 
 
 def discriminator_of(attributes: EdgeAttributes) -> str:
-    """What tells apart two edges joining the same pair under the same relationship.
-
-    It is read off the edge's own attributes rather than written by hand, so the two can
-    never disagree. A spawn is keyed by its tile and a drop by its table.
+    """What tells apart two edges joining the same pair under the same relationship,
+    read off the edge's own attributes.
     """
     if isinstance(attributes, LocatedInEdgeAttributes):
         return "" if attributes.at is None else str(attributes.at)
@@ -401,7 +428,33 @@ def test_edge_attribute_specs_come_from_the_edge_models() -> None:
     spec = RELATIONSHIP_SPECS[RelationshipType.DROPS]
     assert {attribute.key for attribute in spec.edge_attributes} == set(
         DropEdgeAttributes.model_fields
-    )
+    ) | set(DropEdgeAttributes.model_computed_fields)
+
+
+def test_a_chance_is_declared_so_nobody_has_to_divide_two_numbers() -> None:
+    spec = RELATIONSHIP_SPECS[RelationshipType.DROPS]
+    declared = {attribute.key: attribute for attribute in spec.edge_attributes}
+    chance = declared["chance"]
+    assert chance.derived is True
+    assert chance.prominent is True
+    assert chance.format is AttributeFormat.RATE
+
+
+def test_a_chance_is_never_written_down_as_though_a_source_said_it() -> None:
+    from wiki_api.domain.attributes import computed_keys
+
+    attributes = DropEdgeAttributes(weight=1.0, denominator=128.0)
+    assert attributes.chance == 1 / 128
+    stored = attributes.model_dump(exclude=computed_keys(DropEdgeAttributes))
+    assert "chance" not in stored
+
+
+def test_an_edge_still_reads_back_from_what_was_written_down() -> None:
+    from wiki_api.domain.attributes import computed_keys
+
+    attributes = DropEdgeAttributes(weight=1.0, denominator=128.0)
+    stored = attributes.model_dump_json(exclude=computed_keys(DropEdgeAttributes))
+    assert DropEdgeAttributes.model_validate_json(stored) == attributes
 
 
 def test_a_drop_edge_keeps_weight_and_denominator_rather_than_a_rate() -> None:
