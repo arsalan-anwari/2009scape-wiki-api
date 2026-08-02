@@ -1,4 +1,4 @@
-"""Hashing a snapshot so two builds of the same sources can be compared."""
+"""Hash a snapshot so two builds of the same sources can be compared."""
 
 from __future__ import annotations
 

@@ -1,6 +1,5 @@
-"""The transport's own shapes, which is all this surface adds to the ones the core
-already answers with: how a failure reads, what a health check says, and what an
-inspected resolution looks like.
+"""Hold the shapes this surface adds to the core's: a failure, a health check and an
+inspected resolution.
 """
 
 from __future__ import annotations
@@ -15,19 +14,24 @@ from wiki_api.domain.identity import Link
 
 
 class ErrorCode(StrEnum):
-    """Why a request did not produce what it asked for, in a word you can branch on."""
+    """Why a request did not produce what it asked for, in a word to branch on."""
 
     NOT_FOUND = "not_found"
     NOT_PUBLISHED = "not_published"
     INVALID_REQUEST = "invalid_request"
     DATA_VERSION_MISMATCH = "data_version_mismatch"
     ARTIFACT_UNAVAILABLE = "artifact_unavailable"
+    UNAUTHENTICATED = "unauthenticated"
+    BLOCKED = "blocked"
+    THROTTLED = "throttled"
     UNEXPECTED = "unexpected"
 
 
 class ErrorDetail(BaseModel):
-    """What went wrong: a `code` to branch on, a `message` to read, and the
-    `data_version` still being served when the one asked for is gone.
+    """What went wrong: a `code` to branch on and a `message` to read.
+
+    `data_version` is the build still served when the one asked for is gone;
+    `near_names_url` is where to ask what an unmatched name might have meant.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -35,10 +39,11 @@ class ErrorDetail(BaseModel):
     code: str
     message: str
     data_version: str | None = None
+    near_names: str | None = None
 
 
 class ErrorBody(BaseModel):
-    """The envelope every error arrives in: one `error` object and nothing else."""
+    """The envelope every error arrives in: one `error` object, nothing else."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -46,17 +51,24 @@ class ErrorBody(BaseModel):
 
     @classmethod
     def of(
-        cls, code: ErrorCode, message: str, data_version: str | None = None
+        cls,
+        code: ErrorCode,
+        message: str,
+        data_version: str | None = None,
+        near_names: str | None = None,
     ) -> ErrorBody:
         return cls(
             error=ErrorDetail(
-                code=code.value, message=message, data_version=data_version
+                code=code.value,
+                message=message,
+                data_version=data_version,
+                near_names=near_names,
             )
         )
 
 
 class Health(BaseModel):
-    """The server is answering, and this is the build it answers from."""
+    """The server is answering, and the build it answers from."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -85,6 +97,20 @@ Resolution = Annotated[
 def test_a_failure_reads_the_same_way_whatever_caused_it() -> None:
     body = ErrorBody.of(ErrorCode.NOT_FOUND, "no such entity")
     assert body.model_dump(mode="json", exclude_none=True) == {
+        "error": {"code": "not_found", "message": "no such entity"}
+    }
+
+
+def test_a_name_that_meant_nothing_says_where_to_ask_what_it_might_have_meant() -> None:
+    body = ErrorBody.of(
+        ErrorCode.NOT_FOUND, "no such entity", None, "/v1/near-names?name=x&type=item"
+    )
+    assert body.error.near_names == "/v1/near-names?name=x&type=item"
+
+
+def test_a_failure_that_has_nothing_to_suggest_suggests_nothing() -> None:
+    body = ErrorBody.of(ErrorCode.NOT_FOUND, "no such entity")
+    assert body.model_dump(exclude_none=True) == {
         "error": {"code": "not_found", "message": "no such entity"}
     }
 

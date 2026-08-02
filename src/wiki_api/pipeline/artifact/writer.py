@@ -1,4 +1,4 @@
-"""Writing a snapshot out as the SQLite artifact."""
+"""Write a snapshot out as the SQLite artifact."""
 
 from __future__ import annotations
 
@@ -106,8 +106,8 @@ def _write_entities(
 
 
 def _stored(attributes: BaseModel) -> str:
-    """What an artifact records, which is only what a source actually said; a value the
-    model works out for itself is left out.
+    """Pick what the artifact records: only what a source said, never a value the model
+    works out for itself.
     """
     return attributes.model_dump_json(
         exclude_none=True, exclude=computed_keys(type(attributes))

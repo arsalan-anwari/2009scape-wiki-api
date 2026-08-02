@@ -12,7 +12,7 @@
           "meta"
         ],
         "summary": "Check whether this server can answer",
-        "description": "Say that the server is up and has a readable build of the data open; a process\nthat failed to open one never answers here at all.",
+        "description": "Say the server is up with a readable build open.\n\nA process that failed to open one never answers here at all.",
         "operationId": "health",
         "responses": {
           "200": {
@@ -34,7 +34,7 @@
           "meta"
         ],
         "summary": "Find out which build of the data is being served",
-        "description": "Describe the build every other answer comes from: `data_version` is what every\nresponse repeats in `X-Data-Version` and what `?v=` pins to.",
+        "description": "Describe the build every other answer comes from.\n\n`data_version` is what every response repeats in `X-Data-Version` and what `?v=`\npins to.",
         "operationId": "about",
         "responses": {
           "200": {
@@ -46,8 +46,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/entities/{entity_type}/{ref}": {
@@ -56,7 +70,7 @@
           "entities"
         ],
         "summary": "Get the whole page for one entity",
-        "description": "Get everything needed to draw one entity's page in a single response: identity,\nthe infobox, the attribute sections, and a first page of every set of related\nentities.",
+        "description": "Get everything needed to draw one entity's page: identity, the infobox, the\nattribute sections, and a first page of each set of related entities.",
         "operationId": "entity",
         "parameters": [
           {
@@ -93,7 +107,7 @@
             }
           },
           "404": {
-            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back.",
+            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back. A `not_found` for a name rather than an id also carries `near_names`, the address that answers what the name might have been meant to be.",
             "content": {
               "application/json": {
                 "schema": {
@@ -114,8 +128,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/entities/{entity_type}/{ref}/tooltip": {
@@ -124,7 +152,7 @@
           "entities"
         ],
         "summary": "Get the hover card for one entity",
-        "description": "Get identity, one sentence, and the few values the registry marks as worth\nshowing on hover.",
+        "description": "Get identity, one sentence, and the few values the registry marks for hover.",
         "operationId": "tooltip",
         "parameters": [
           {
@@ -161,7 +189,7 @@
             }
           },
           "404": {
-            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back.",
+            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back. A `not_found` for a name rather than an id also carries `near_names`, the address that answers what the name might have been meant to be.",
             "content": {
               "application/json": {
                 "schema": {
@@ -182,8 +210,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/entities/{entity_type}/{ref}/rel/{rel}": {
@@ -192,7 +234,7 @@
           "entities"
         ],
         "summary": "Page through one relationship of an entity",
-        "description": "Read one more page of a set of related entities that the entity page only\nstarted; `direction=reverse` reads the link the other way round.",
+        "description": "Read one more page of a set of related entities the entity page only started.\n\n`direction=reverse` reads the link the other way round.",
         "operationId": "walk",
         "parameters": [
           {
@@ -283,7 +325,7 @@
             }
           },
           "404": {
-            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back.",
+            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back. A `not_found` for a name rather than an id also carries `near_names`, the address that answers what the name might have been meant to be.",
             "content": {
               "application/json": {
                 "schema": {
@@ -304,8 +346,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/entities/{entity_type}/{ref}/resolve": {
@@ -314,7 +370,7 @@
           "entities"
         ],
         "summary": "Check what a reference points at, without being sent there",
-        "description": "Ask what a reference points at without being redirected there: live, retired,\nheld back and unknown all come back as a 200 with an `outcome` in the body.",
+        "description": "Ask what a reference points at without being redirected there.\n\nLive, retired, held back and unknown all come back as a 200 with an `outcome`.",
         "operationId": "resolve",
         "parameters": [
           {
@@ -382,8 +438,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/types": {
@@ -392,7 +462,7 @@
           "discovery"
         ],
         "summary": "List every entity type and how its fields are presented",
-        "description": "Publish the registries: every type's attributes with label, group, order, format\nand unit, and its relationships labelled for reading each way round.",
+        "description": "List every type with its attributes and its relationships, labelled for reading\neach way round.",
         "operationId": "types",
         "responses": {
           "200": {
@@ -408,8 +478,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/types/{entity_type}/entities": {
@@ -418,7 +502,7 @@
           "discovery"
         ],
         "summary": "List all entities of one type, a page at a time",
-        "description": "List every published entity of one type, sorted and paged, leaving out variants\nsuch as the noted form of an item.",
+        "description": "List every published entity of one type, sorted and paged, leaving out\nvariants.",
         "operationId": "listing",
         "parameters": [
           {
@@ -490,8 +574,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/search": {
@@ -500,7 +598,7 @@
           "discovery"
         ],
         "summary": "Search the full text across every type",
-        "description": "Search names, alternative names and descriptions across every type at once, best\nfirst and each with a score.",
+        "description": "Search names, alternative names and descriptions across every type, best first\nwith a score.",
         "operationId": "search",
         "parameters": [
           {
@@ -583,8 +681,22 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     },
     "/v1/find": {
@@ -593,7 +705,7 @@
           "discovery"
         ],
         "summary": "Look up the one entity that goes by this name",
-        "description": "Turn a name into the one entity it means, with the ranked runners-up alongside;\n`best_match` is null only when nothing matched at all.",
+        "description": "Turn a name into the one entity it means, with the ranked runners-up.\n\n`best_match` is null only when nothing matched at all.",
         "operationId": "find",
         "parameters": [
           {
@@ -663,8 +775,131 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
           }
-        }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
+      }
+    },
+    "/v1/near-names": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Ask which real names a misspelt one might have meant",
+        "description": "Turn an unmatched name into the real names it may have meant, each carrying\nidentity and nothing else.\n\nAn empty answer means nothing was close, which is an answer rather than a failure.",
+        "operationId": "near_names",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name that answered to nothing, exactly as it was typed, such as `dragon scimtar`.",
+              "title": "Name"
+            },
+            "description": "The name that answered to nothing, exactly as it was typed, such as `dragon scimtar`."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which sort of thing the name belongs to. Required: `dagon scimitar` and `dagon` are near misses for different things depending on whether an item or an npc was meant, so this question cannot be answered without it. `GET /v1/types` lists the sorts this build serves."
+            },
+            "description": "Which sort of thing the name belongs to. Required: `dagon scimitar` and `dagon` are near misses for different things depending on whether an item or an npc was meant, so this question cannot be answered without it. `GET /v1/types` lists the sorts this build serves."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 25,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "At most how many close names to offer. Deliberately small: this is a question to put to a person, not a listing to read.",
+              "title": "Limit"
+            },
+            "description": "At most how many close names to offer. Deliberately small: this is a question to put to a person, not a listing to read."
+          },
+          {
+            "name": "keep",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 1.0,
+                  "minimum": 0.0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "How close to the best candidate a name has to be to be offered alongside it, as a share of the best score. `1.0` offers only names that matched exactly as well; lower values widen the field.",
+              "title": "Keep"
+            },
+            "description": "How close to the best candidate a name has to be to be offered alongside it, as a share of the best score. `1.0` offers only names that matched exactly as well; lower values widen the field."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The closest names that exist, best first, or nothing at all when none of them is close enough to be worth offering.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResultPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
+          }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
       }
     }
   },
@@ -787,7 +1022,7 @@
           "format"
         ],
         "title": "AttributeSpec",
-        "description": "One attribute as the registry declares it: label, group, order, format, unit, and\nany fixed set of values it may take."
+        "description": "One attribute as declared: label, group, order, format, unit, and any fixed set\nof values it takes."
       },
       "AttributeValue": {
         "properties": {
@@ -857,7 +1092,7 @@
           "format"
         ],
         "title": "AttributeValue",
-        "description": "One field of an entity, carrying the label, group, order, format and unit needed\nto display it without recognising `key`."
+        "description": "One field of an entity, carrying everything needed to display it without\nrecognising `key`."
       },
       "Block": {
         "properties": {
@@ -894,7 +1129,7 @@
           "rows"
         ],
         "title": "Block",
-        "description": "One relationship's worth of a page: a label, a first page of rows, the walk that\nproduced them, and a count of rows left out because their target is unpublished."
+        "description": "One relationship's worth of a page: a label, a first page of rows, the walk\nbehind them, and a count of rows whose target is unpublished."
       },
       "Direction": {
         "type": "string",
@@ -922,7 +1157,7 @@
           "id"
         ],
         "title": "EntityKey",
-        "description": "What identifies an entity: its type together with an id that is only unique\nwithin that type."
+        "description": "What identifies an entity: its type, plus an id unique only within that type."
       },
       "EntitySummary": {
         "properties": {
@@ -978,7 +1213,7 @@
           "error"
         ],
         "title": "ErrorBody",
-        "description": "The envelope every error arrives in: one `error` object and nothing else."
+        "description": "The envelope every error arrives in: one `error` object, nothing else."
       },
       "ErrorDetail": {
         "properties": {
@@ -1000,6 +1235,17 @@
               }
             ],
             "title": "Data Version"
+          },
+          "near_names": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Near Names"
           }
         },
         "type": "object",
@@ -1008,7 +1254,7 @@
           "message"
         ],
         "title": "ErrorDetail",
-        "description": "What went wrong: a `code` to branch on, a `message` to read, and the\n`data_version` still being served when the one asked for is gone."
+        "description": "What went wrong: a `code` to branch on and a `message` to read.\n\n`data_version` is the build still served when the one asked for is gone;\n`near_names_url` is where to ask what an unmatched name might have meant."
       },
       "GameVersion": {
         "type": "string"
@@ -1059,7 +1305,7 @@
           "schema_version"
         ],
         "title": "Health",
-        "description": "The server is answering, and this is the build it answers from."
+        "description": "The server is answering, and the build it answers from."
       },
       "Hidden": {
         "properties": {
@@ -1178,7 +1424,7 @@
           "game_version"
         ],
         "title": "Manifest",
-        "description": "What a build says about itself: the data-version every answer derives from, the\nstate of the game it was built from, and a hash fixing its contents."
+        "description": "What a build says about itself: its data-version, the state of the game behind\nit, and a hash fixing its contents."
       },
       "Match": {
         "properties": {
@@ -1201,7 +1447,7 @@
           "results"
         ],
         "title": "Match",
-        "description": "The single entity a name most likely meant, or null when nothing matched,\ntogether with the ranked candidates either way."
+        "description": "The entity a name most likely meant, null when nothing matched, with the ranked\ncandidates either way."
       },
       "Missing": {
         "properties": {
@@ -1315,7 +1561,7 @@
           "data_version"
         ],
         "title": "PageDescriptor",
-        "description": "A whole entity page described as data: identity, a line of description, the\ninfobox, the attribute sections, and a first page of every set of related entities."
+        "description": "A whole entity page as data: identity, a line of description, the infobox, the\nsections, and a first page of each set of related entities."
       },
       "EntitySummaryPage": {
         "properties": {
@@ -1569,7 +1815,7 @@
           "order"
         ],
         "title": "RelationshipSpec",
-        "description": "One relationship as the registry declares it: a label for each direction, the\ntypes it can join, and the attributes one link may carry."
+        "description": "One relationship as declared: a label each direction, the types it joins, and\nthe attributes a link may carry."
       },
       "RelationshipType": {
         "type": "string",
@@ -1645,7 +1891,7 @@
           "score"
         ],
         "title": "SearchResult",
-        "description": "One entity a search matched, with its score. A higher score matched better."
+        "description": "One entity a search matched; a higher `score` matched better."
       },
       "Section": {
         "properties": {
@@ -1685,7 +1931,7 @@
           "attributes"
         ],
         "title": "Section",
-        "description": "A group of attributes drawn as one block of the page body, with a `render` word\nsaying how it wants to be laid out."
+        "description": "One block of the page body, with a `render` word saying how to lay it out."
       },
       "SortOrder": {
         "type": "string",
@@ -1730,7 +1976,7 @@
           "type"
         ],
         "title": "Tooltip",
-        "description": "The short form of an entity: identity, one line of description, and the few\nvalues the registry marks as worth showing."
+        "description": "The short form of an entity: identity, one line, and the few values the\nregistry marks as worth showing."
       },
       "TypeInfo": {
         "properties": {
@@ -1849,6 +2095,13 @@
         ],
         "title": "Walk",
         "description": "The question a block answers: which entity, which relationship, which way."
+      }
+    },
+    "securitySchemes": {
+      "issued_key": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Send the key you were issued as `Authorization: Bearer <token>`. Keys are handed out by whoever runs this deployment and do not expire; one that leaks is withdrawn by its holder's key id. A browser cannot keep one secret, so a public front end should call this through its own backend."
       }
     }
   },

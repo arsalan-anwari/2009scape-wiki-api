@@ -1,4 +1,4 @@
-"""The errors storage raises when the artifact is missing or unreadable."""
+"""Errors storage raises when the artifact is missing or unreadable."""
 
 from __future__ import annotations
 

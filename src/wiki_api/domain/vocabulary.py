@@ -1,5 +1,5 @@
-"""The closed sets of names this knowledge base speaks, each taking the raw form the
-game sources ship and storing one clean name.
+"""Declare the closed sets of names this knowledge base speaks, each taking the raw
+form the sources ship and storing one clean name.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class GameEnum(StrEnum):
-    """A vocabulary that takes the spelling the game uses and stores a clean name."""
+    """A vocabulary taking the spelling the game uses, storing a clean name."""
 
     @classmethod
     def coerce(cls, value: Any) -> Any:
@@ -211,8 +211,8 @@ def _split_packed(values: str | Sequence[int]) -> tuple[int, ...]:
 
 
 class PackedInts(BaseModel):
-    """A run of ints of fixed width that the sources ship as one comma joined string, in
-    the order the fields are declared.
+    """A fixed-width run of ints the sources ship as one comma joined string, in the
+    order the fields are declared.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")

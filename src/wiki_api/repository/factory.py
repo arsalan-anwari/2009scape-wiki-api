@@ -1,5 +1,6 @@
-"""The one place a concrete repository is chosen and opened; everything above it speaks
-to the protocol instead.
+"""Choose and open a concrete repository, the one place that names one.
+
+Everything above speaks to the protocol instead.
 """
 
 from __future__ import annotations

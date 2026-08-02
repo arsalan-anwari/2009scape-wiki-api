@@ -12,8 +12,10 @@ from wiki_api.core import BLOCK_PAGE_SIZE, Direction, KnowledgeService
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.relationships import RELATIONSHIP_SPECS, RelationshipType
 from wiki_api.surfaces.mcp import (
+    CLOSE_NAMES_TOOL,
     MOST_RESULT_CHARS,
     SERVER_NAME,
+    SORTS_TOOL,
     WRITTEN_TOOLS,
     create_server,
     followable,
@@ -23,6 +25,7 @@ from wiki_api.surfaces.mcp.answers import Outcome
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Mapping
 
+    from fastapi.testclient import TestClient
     from mcp.types import Tool
 
     from wiki_api.config import Settings
@@ -289,6 +292,104 @@ def test_a_near_miss_offers_the_names_that_were_close(mcp_settings: Settings) ->
     answered = _called(mcp_settings, "get_thing", {"name": "dragon"})
     assert answered["outcome"] == Outcome.FOUND
     assert answered["others"]
+
+
+# a misspelling is answered with candidates, and only a person chooses between them
+
+
+def test_a_name_nothing_answers_to_is_told_where_close_spellings_come_from(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(mcp_settings, "get_thing", {"name": "zzzz nothing zzzz"})
+    assert CLOSE_NAMES_TOOL in answered["note"]
+    assert SORTS_TOOL in answered["note"]
+
+
+def test_what_sorts_of_thing_can_i_ask_about(mcp_settings: Settings) -> None:
+    answered = _called(mcp_settings, SORTS_TOOL, {})
+    listed = {sort["type"]: sort for sort in answered["sorts"]}
+    assert set(listed) == {entity_type.value for entity_type in EntityType}
+    assert listed["item"]["total"] >= 1
+    assert listed["npc"]["plural"] == "NPCs"
+
+
+def test_the_sorts_answer_carries_none_of_what_a_sort_declares(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(mcp_settings, SORTS_TOOL, {})
+    for sort in answered["sorts"]:
+        assert set(sort) == {"type", "label", "plural", "total"}
+
+
+def test_what_did_i_mean_by_this_misspelling(mcp_settings: Settings) -> None:
+    answered = _called(
+        mcp_settings,
+        CLOSE_NAMES_TOOL,
+        {"name": "dragon scimtar", "type": EntityType.ITEM.value},
+    )
+    assert [found["name"] for found in answered["found"]] == [SCIMITAR]
+
+
+def test_close_names_carry_nothing_that_could_be_answered_from(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(
+        mcp_settings,
+        CLOSE_NAMES_TOOL,
+        {"name": "dragon scimtar", "type": EntityType.ITEM.value},
+    )
+    assert answered["found"]
+    for found in answered["found"]:
+        assert found["summary"] is None
+        assert set(found) == {"name", "type", "id", "summary"}
+
+
+def test_close_names_cannot_be_asked_for_without_saying_what_sort_of_thing(
+    mcp_settings: Settings,
+) -> None:
+    import pytest as testing
+    from fastmcp.exceptions import ToolError
+
+    with testing.raises(ToolError):
+        _called(mcp_settings, CLOSE_NAMES_TOOL, {"name": "dragon scimtar"})
+
+
+def test_nothing_close_enough_is_an_empty_answer_rather_than_a_guess(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(
+        mcp_settings,
+        CLOSE_NAMES_TOOL,
+        {"name": "zzzqqqwww", "type": EntityType.ITEM.value},
+    )
+    assert answered["found"] == []
+    assert answered["total"] == 0
+
+
+def test_how_many_close_names_come_back_can_be_narrowed(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(
+        mcp_settings,
+        CLOSE_NAMES_TOOL,
+        {"name": "dragon", "type": EntityType.ITEM.value, "keep": 0.1, "limit": 1},
+    )
+    assert len(answered["found"]) <= 1
+
+
+def test_the_same_question_asked_of_both_surfaces_is_answered_the_same_way(
+    mcp_settings: Settings, client: TestClient
+) -> None:
+    over_mcp = _called(
+        mcp_settings,
+        CLOSE_NAMES_TOOL,
+        {"name": "dragon", "type": EntityType.ITEM.value, "keep": 0.1},
+    )
+    over_http = client.get("/v1/near-names?name=dragon&type=item&keep=0.1").json()
+    assert [found["id"] for found in over_mcp["found"]] == [
+        result["link"]["id"] for result in over_http["items"]
+    ]
+    assert over_mcp["total"] == over_http["total"]
 
 
 # every answer carries the build it came from

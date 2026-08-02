@@ -1,4 +1,4 @@
-"""Handing out read only SQLite connections, one per thread."""
+"""Hand out read only SQLite connections, one per thread."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class ReadOnlyConnections:
-    """A pool of connections to one artifact, opened read only and never written to."""
+    """Pool connections to one artifact, opened read only and never written to."""
 
     def __init__(self, path: Path) -> None:
         if not path.is_file():

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from tests.conftest import build_fixture_artifact
+from tests.artifact import build_fixture_artifact
 from wiki_api.domain.errors import IncompatibleArtifact
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.manifest import SCHEMA_VERSION

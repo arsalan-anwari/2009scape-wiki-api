@@ -1,4 +1,4 @@
-"""The errors a build raises, each naming the document at fault."""
+"""Errors a build raises, each naming the document at fault."""
 
 from __future__ import annotations
 
@@ -29,8 +29,8 @@ class OverlaySchemaMismatch(BuildError):
 
 
 class InvalidOverlayDocument(BuildError):
-    """A document is malformed in a way the overlay models reject on load, keeping the
-    filename and the offending field with the error.
+    """A document the overlay models reject on load, carrying the filename and the
+    offending field.
     """
 
     def __init__(self, origin: str, detail: str) -> None:

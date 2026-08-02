@@ -1,7 +1,7 @@
-"""Run one demonstration by the name of the folder it lives in.
+"""Run one demonstration by the name of its folder.
 
-Every demonstration starts at a `main.py`, so this finds that folder and hands the
-rest of the command line to it, in a process of its own.
+Each starts at a `main.py`, which this runs in a process of its own, handing it the
+rest of the command line.
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Fetching the weekly Grand Exchange price snapshots."""
+"""Fetch the weekly Grand Exchange price snapshots."""
 
 from __future__ import annotations
 
@@ -23,8 +23,8 @@ TIMEOUT: Final = 30.0
 
 
 class SnapshotRef(BaseModel):
-    """One weekly price snapshot, named by the day it covers and parsed to a date here
-    so nothing downstream reads the filename again.
+    """One weekly price snapshot, its filename parsed to a date here so nothing
+    downstream reads the name again.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -78,11 +78,11 @@ def snapshot_refs(listing: str) -> tuple[SnapshotRef, ...]:
     collector.feed(listing)
     names = {unquote(href.rsplit("/", 1)[-1]) for href in collector.hrefs}
     matched = (SNAPSHOT_NAME.match(name) for name in names)
-    refs = {
+    refs = [
         SnapshotRef(snapshot_date=date.fromisoformat(match.group(1)))
         for match in matched
         if match is not None
-    }
+    ]
     return tuple(sorted(refs, key=lambda ref: ref.snapshot_date))
 
 
@@ -133,6 +133,10 @@ def main() -> None:
         f"{len(harvest.skipped)} already present, "
         f"{harvest.available} snapshots in {settings.ge_snapshot_dir}"
     )
+
+
+if __name__ == "__main__":
+    main()
 
 
 # test cases

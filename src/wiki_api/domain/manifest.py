@@ -12,8 +12,8 @@ SCHEMA_VERSION: Final = 4
 
 
 class Manifest(BaseModel):
-    """What a build says about itself: the data-version every answer derives from, the
-    state of the game it was built from, and a hash fixing its contents.
+    """What a build says about itself: its data-version, the state of the game behind
+    it, and a hash fixing its contents.
     """
 
     model_config = ConfigDict(frozen=True)

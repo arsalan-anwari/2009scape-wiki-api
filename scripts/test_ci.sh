@@ -28,6 +28,9 @@ if [[ "$FIX" -eq 1 ]]; then
   uv run poe fix
 fi
 
+DOCS_STATUS=0
+bash "$REPO_ROOT/scripts/check_docs.sh" || DOCS_STATUS=1
+
 uv run poe check
 
 if [[ "$RUN_ACT" -eq 1 ]]; then
@@ -45,4 +48,9 @@ if [[ "$RUN_ACT" -eq 1 ]]; then
   else
     echo "note: 'act' is not installed; ran the local gate only." >&2
   fi
+fi
+
+if [[ "$DOCS_STATUS" -ne 0 ]]; then
+  echo "failure: scripts/check_docs.sh reported prose to correct (see above)." >&2
+  exit 1
 fi

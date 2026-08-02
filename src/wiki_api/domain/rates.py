@@ -1,4 +1,4 @@
-"""Turning the weights in a drop table into rates a reader can understand."""
+"""Turn the weights in a drop table into rates a reader can understand."""
 
 from __future__ import annotations
 

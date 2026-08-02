@@ -1,6 +1,8 @@
-"""Holding the artifact a surface is currently reading, so it can be replaced while the
-process keeps serving. Replacing it hands the old one back rather than closing it, since
-requests in flight are still reading from it.
+"""Hold the artifact a surface is reading, so it can be replaced while the process
+keeps serving.
+
+`swap` hands the old one back rather than closing it, because requests in flight are
+still reading from it.
 """
 
 from __future__ import annotations

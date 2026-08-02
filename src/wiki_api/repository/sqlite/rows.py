@@ -1,4 +1,4 @@
-"""Turning artifact rows back into domain objects."""
+"""Turn artifact rows back into domain objects."""
 
 from __future__ import annotations
 
@@ -30,8 +30,8 @@ _Member = TypeVar("_Member", bound="StrEnum")
 def _named[Member: StrEnum](
     vocabulary: type[Member], table: str, column: str, value: object
 ) -> Member:
-    """Read a stored value as one of the names the domain knows, raising a domain error
-    rather than letting a ValueError escape the enum constructor.
+    """Read a stored value as a name the domain knows, raising a domain error rather
+    than a bare ValueError.
     """
     try:
         return vocabulary(str(value))

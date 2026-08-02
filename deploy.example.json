@@ -1,0 +1,31 @@
+{
+  "surfaces": "both",
+  "http_host": "0.0.0.0",
+  "http_port": 8000,
+  "data_dir": "/data",
+  "artifact_filename": "knowledge.sqlite3",
+  "hf_repo_id": "arsalan-anwari/2009scape-wiki-api-data",
+  "hf_revision": "main",
+  "auth_mode": "required",
+  "auth_public_key": "",
+  "auth_public_key_file": "/config/issuer.pub",
+  "auth_revoked_file": "/config/revoked.json",
+  "ban_file": null,
+  "cors_origins": [
+    "https://wiki.example.test"
+  ],
+  "rate_per_second": 10.0,
+  "rate_burst": 60,
+  "max_refusals": 10,
+  "refusal_window": 60.0,
+  "ban_seconds": 900.0,
+  "guard_entries": 10000,
+  "trusted_proxies": [],
+  "block_rows": 60,
+  "mcp_rows": 10,
+  "near_limit": 5,
+  "near_keep": 0.9,
+  "near_floor": 0.6,
+  "cache_seconds": 300,
+  "tooltip_cache_seconds": 3600
+}

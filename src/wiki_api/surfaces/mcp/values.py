@@ -1,5 +1,5 @@
-"""Turning a declared value into the words a reader sees, falling back to the value
-itself when the format is one this module does not recognise.
+"""Render a declared value into the words a reader sees, falling back to the value
+itself on a format this module does not know.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ MOST_PARTS = 8
 
 
 def rendered(value: AttributeValue) -> str:
-    """One declared value, said in words."""
+    """Render one declared value as words."""
     said = _said(value.value, value.format)
     if value.unit is None:
         return said
@@ -30,7 +30,7 @@ def rendered(value: AttributeValue) -> str:
 
 
 def labelled(values: Sequence[AttributeValue]) -> dict[str, str]:
-    """Several declared values, each under the name the registry gives it."""
+    """Render several declared values, each under the name the registry gives it."""
     return {value.label: rendered(value) for value in values}
 
 

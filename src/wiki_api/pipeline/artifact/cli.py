@@ -1,4 +1,4 @@
-"""Turning a directory of documents into an artifact a surface can be pointed at."""
+"""Turn a directory of documents into an artifact a surface can be pointed at."""
 
 from __future__ import annotations
 
@@ -9,16 +9,19 @@ from pathlib import Path
 from wiki_api.config import get_settings
 from wiki_api.pipeline.artifact.build import build_artifact
 
-FIXTURE_SOURCE = Path("tests/fixtures/knowledge")
 UNKNOWN_GAME_VERSION = "2009scape@unknown"
 
 
 def parser() -> argparse.ArgumentParser:
-    """How this command is asked to build something."""
+    """Declare this command's arguments.
+
+    The source directory is required, so a build never guesses; only the output path
+    defaults, to what the settings say.
+    """
     declared = argparse.ArgumentParser(
         prog="build-artifact", description="Build a knowledge artifact from documents."
     )
-    declared.add_argument("source", nargs="?", type=Path, default=FIXTURE_SOURCE)
+    declared.add_argument("source", type=Path)
     declared.add_argument("--destination", type=Path, default=None)
     declared.add_argument("--data-version", default=None)
     declared.add_argument("--game-version", default=UNKNOWN_GAME_VERSION)
@@ -46,13 +49,22 @@ def main() -> None:
     print(f"built {manifest.data_version} at {destination} ({manifest.content_hash})")
 
 
+if __name__ == "__main__":
+    main()
+
+
 # test cases
 
 
-def test_the_hand_made_documents_are_what_it_builds_by_default() -> None:
-    asked = parser().parse_args([])
-    assert asked.source == FIXTURE_SOURCE
-    assert asked.destination is None
+def test_a_build_that_names_no_documents_is_refused() -> None:
+    import pytest as testing
+
+    with testing.raises(SystemExit):
+        parser().parse_args([])
+
+
+def test_where_a_build_lands_is_what_the_settings_say_unless_told() -> None:
+    assert parser().parse_args(["some/where"]).destination is None
 
 
 def test_any_directory_of_documents_can_be_built_instead() -> None:
@@ -72,4 +84,5 @@ def test_two_builds_a_second_apart_are_told_apart() -> None:
 
 
 def test_a_build_says_which_game_it_reflects_even_when_it_cannot_tell() -> None:
-    assert parser().parse_args([]).game_version == UNKNOWN_GAME_VERSION
+    asked = parser().parse_args(["some/where"])
+    assert asked.game_version == UNKNOWN_GAME_VERSION

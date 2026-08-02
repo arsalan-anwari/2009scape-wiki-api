@@ -1,4 +1,4 @@
-"""What the query core hands back, in shapes no surface has to reinterpret.
+"""Hold what the query core hands back, in shapes no surface reinterprets.
 
 Every value carries the presentation facts the registry declares for it.
 """
@@ -38,8 +38,8 @@ class Direction(GameEnum):
 
 
 class AttributeValue(BaseModel):
-    """One field of an entity, carrying the label, group, order, format and unit needed
-    to display it without recognising `key`.
+    """One field of an entity, carrying everything needed to display it without
+    recognising `key`.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -75,9 +75,7 @@ ATTRIBUTE_SECTION: Final = "attributes"
 
 
 class Section(BaseModel):
-    """A group of attributes drawn as one block of the page body, with a `render` word
-    saying how it wants to be laid out.
-    """
+    """One block of the page body, with a `render` word saying how to lay it out."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -110,8 +108,8 @@ class Walk(BaseModel):
 
 
 class Block(BaseModel):
-    """One relationship's worth of a page: a label, a first page of rows, the walk that
-    produced them, and a count of rows left out because their target is unpublished.
+    """One relationship's worth of a page: a label, a first page of rows, the walk
+    behind them, and a count of rows whose target is unpublished.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -129,8 +127,8 @@ class Block(BaseModel):
 
 
 class PageDescriptor(BaseModel):
-    """A whole entity page described as data: identity, a line of description, the
-    infobox, the attribute sections, and a first page of every set of related entities.
+    """A whole entity page as data: identity, a line of description, the infobox, the
+    sections, and a first page of each set of related entities.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -147,8 +145,8 @@ class PageDescriptor(BaseModel):
 
 
 class Tooltip(BaseModel):
-    """The short form of an entity: identity, one line of description, and the few
-    values the registry marks as worth showing.
+    """The short form of an entity: identity, one line, and the few values the
+    registry marks as worth showing.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -170,14 +168,14 @@ class EntitySummary(BaseModel):
 
 
 class SearchResult(EntitySummary):
-    """One entity a search matched, with its score. A higher score matched better."""
+    """One entity a search matched; a higher `score` matched better."""
 
     score: float = Field(ge=0.0)
 
 
 class Match(BaseModel):
-    """The single entity a name most likely meant, or null when nothing matched,
-    together with the ranked candidates either way.
+    """The entity a name most likely meant, null when nothing matched, with the ranked
+    candidates either way.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -244,7 +242,7 @@ BlockResolution = Found[Block] | Absent
 
 
 class Named[T](BaseModel):
-    """What a name turned out to mean, which entity it was answered about, and what else
+    """What a name turned out to mean, the entity it was answered about, and what else
     the words matched.
     """
 

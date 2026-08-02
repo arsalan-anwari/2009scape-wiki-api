@@ -1,0 +1,71 @@
+name: Container
+
+# Kept out of the gate on purpose: `uv run poe check` has to stay runnable with no
+# daemon, no network and no credential. This builds the image, starts it three ways,
+# and asks each one the same questions a deployment has to be able to answer.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "compose.yaml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "src/**"
+      - "scripts/container.sh"
+      - ".github/workflows/container.yml"
+
+concurrency:
+  group: container-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - run: uv sync --all-extras --locked
+
+      - name: Issue the key these deployments will answer
+        # The signing key stays on the runner as it would on an administrator's
+        # machine. Only the public half reaches a container, and the script is what
+        # copies it there.
+        run: uv run poe keys init
+
+      # Started from nothing but the image, a dataset and the public key: the state
+      # a fresh deployment is in. The fixture stands in for the published dataset so
+      # this never depends on Hugging Face being reachable.
+      - name: Answer only key holders, started as a plain container
+        run: |
+          uv run poe container up --fixture
+          uv run poe container check
+          uv run poe container down
+
+      # The same image and the same questions, brought up the way the README tells a
+      # reader to bring it up, from a clean checkout that has never run compose.
+      - name: Answer only key holders, started through compose
+        run: |
+          uv run poe container up --fixture --compose
+          uv run poe container check
+          uv run poe container down
+
+      - name: Answer everyone when a deployment asks to
+        run: |
+          uv run poe container up --fixture --open
+          uv run poe container check
+          uv run poe container down
+
+      # Whichever step failed left its container standing and run/started saying how
+      # it was brought up, so this reaches the right one without being told which.
+      - name: What the container said, if any of that failed
+        if: failure()
+        run: uv run poe container logs || true

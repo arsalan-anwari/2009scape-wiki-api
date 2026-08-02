@@ -19,4 +19,5 @@ jobs:
           python-version: "3.12"
           enable-cache: true
       - run: uv sync --all-extras --locked
+      - run: bash scripts/check_docs.sh
       - run: uv run poe check

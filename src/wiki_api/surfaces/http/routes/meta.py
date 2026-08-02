@@ -1,5 +1,5 @@
-"""What this process is, as opposed to what it knows: whether it can serve at all, and
-which build it is serving. Neither answer is cached.
+"""Report what this process is rather than what it knows: whether it can serve, and
+which build it serves. Neither answer is cached.
 """
 
 from __future__ import annotations
@@ -24,8 +24,9 @@ router = APIRouter(tags=["meta"])
     response_description="The server is up and has data open.",
 )
 def read_health(manifest: ManifestDep, response: Response) -> Health:
-    """Say that the server is up and has a readable build of the data open; a process
-    that failed to open one never answers here at all.
+    """Say the server is up with a readable build open.
+
+    A process that failed to open one never answers here at all.
     """
     decline_caching(response)
     return Health(
@@ -40,8 +41,10 @@ def read_health(manifest: ManifestDep, response: Response) -> Health:
     response_description="The manifest of the build currently being served.",
 )
 def read_about(manifest: ManifestDep, response: Response) -> Manifest:
-    """Describe the build every other answer comes from: `data_version` is what every
-    response repeats in `X-Data-Version` and what `?v=` pins to.
+    """Describe the build every other answer comes from.
+
+    `data_version` is what every response repeats in `X-Data-Version` and what `?v=`
+    pins to.
     """
     decline_caching(response)
     return manifest

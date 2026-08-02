@@ -1,30 +1,31 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
 
+from tests.artifact import FIXTURE_KNOWLEDGE
+from wiki_api.access.paths import banned_path, config_dir, revoked_path
 from wiki_api.config import Settings
 from wiki_api.core import BLOCK_PAGE_SIZE, KnowledgeService
-from wiki_api.pipeline.artifact import build_snapshot, write_artifact
+from wiki_api.pipeline.artifact import build_snapshot
 from wiki_api.repository.memory import InMemoryKnowledgeRepository
 from wiki_api.repository.sqlite import SqliteKnowledgeRepository
 from wiki_api.surfaces.http import create_app
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from pathlib import Path
 
+    from wiki_api.access.issuing import Issuer
     from wiki_api.domain.manifest import Manifest
     from wiki_api.pipeline.artifact import KnowledgeSnapshot
     from wiki_api.repository.protocol import KnowledgeRepository
 
-FIXTURE_KNOWLEDGE = Path(__file__).parent / "fixtures" / "knowledge"
-FIXTURE_DATA_VERSION = "fixture-0001"
-FIXTURE_GAME_VERSION = "2009scape@5a37f2f8"
-FIXTURE_BUILT_AT = datetime(2026, 7, 25, 12, 0, tzinfo=UTC)
+ORIGINS = ("https://wiki.example.test",)
+MACHINE_CONFIG = config_dir()
+"""Where this machine keeps its own keys, read before the suite points elsewhere."""
 
 
 @pytest.fixture
@@ -35,13 +36,6 @@ def settings() -> Settings:
 @pytest.fixture(scope="session")
 def fixture_snapshot() -> KnowledgeSnapshot:
     return build_snapshot(FIXTURE_KNOWLEDGE)
-
-
-@pytest.fixture(scope="session")
-def fixture_artifact(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    destination = tmp_path_factory.mktemp("artifact") / "knowledge.sqlite3"
-    build_fixture_artifact(destination)
-    return destination
 
 
 @pytest.fixture(scope="session")
@@ -82,35 +76,49 @@ def service(repository: KnowledgeRepository) -> KnowledgeService:
 
 
 @pytest.fixture
-def http_settings(fixture_artifact: Path) -> Settings:
+def http_settings(fixture_artifact: Path, suite_issuer: Issuer) -> Settings:
+    """Build settings shaped like a real deployment: key holders only, named origins.
+
+    The default, so a test saying nothing about access exercises how this is served.
+    """
     return Settings(
-        data_dir=fixture_artifact.parent, artifact_filename=fixture_artifact.name
+        data_dir=fixture_artifact.parent,
+        artifact_filename=fixture_artifact.name,
+        auth_revoked_file=revoked_path(suite_issuer.directory),
+        ban_file=banned_path(suite_issuer.directory),
+        cors_origins=ORIGINS,
     )
 
 
 @pytest.fixture
-def client(http_settings: Settings) -> Iterator[TestClient]:
-    with TestClient(create_app(http_settings)) as connected:
+def open_settings(fixture_artifact: Path) -> Settings:
+    """A deployment that answers everyone, for the tests that are about that."""
+    return Settings(
+        data_dir=fixture_artifact.parent,
+        artifact_filename=fixture_artifact.name,
+        auth_mode="off",
+        cors_origins=("*",),
+    )
+
+
+@pytest.fixture
+def client(http_settings: Settings, bearer: dict[str, str]) -> Iterator[TestClient]:
+    """A caller holding a key this deployment answers."""
+    with TestClient(create_app(http_settings), headers=bearer) as connected:
         yield connected
 
 
 @pytest.fixture
-def preview_client(http_settings: Settings) -> Iterator[TestClient]:
+def open_client(open_settings: Settings) -> Iterator[TestClient]:
+    """A caller of a deployment that asks nobody for anything."""
+    with TestClient(create_app(open_settings)) as connected:
+        yield connected
+
+
+@pytest.fixture
+def preview_client(
+    http_settings: Settings, bearer: dict[str, str]
+) -> Iterator[TestClient]:
     settings = http_settings.model_copy(update={"block_rows": BLOCK_PAGE_SIZE})
-    with TestClient(create_app(settings)) as connected:
+    with TestClient(create_app(settings), headers=bearer) as connected:
         yield connected
-
-
-def build_fixture_artifact(
-    destination: Path,
-    *,
-    data_version: str = FIXTURE_DATA_VERSION,
-    built_at: datetime = FIXTURE_BUILT_AT,
-) -> Manifest:
-    return write_artifact(
-        build_snapshot(FIXTURE_KNOWLEDGE),
-        destination,
-        data_version=data_version,
-        game_version=FIXTURE_GAME_VERSION,
-        built_at=built_at,
-    )

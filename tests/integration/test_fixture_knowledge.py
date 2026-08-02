@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from tests.conftest import FIXTURE_KNOWLEDGE
+from tests.artifact import FIXTURE_KNOWLEDGE
 from wiki_api.domain.alias import AliasKind
 from wiki_api.domain.attributes import ATTRIBUTE_SPECS
 from wiki_api.domain.entity import Visibility

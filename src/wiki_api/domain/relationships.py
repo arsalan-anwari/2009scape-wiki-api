@@ -58,8 +58,8 @@ class DropTableKind(GameEnum):
 
 
 class DropEdgeAttributes(BaseModel):
-    """What an npc dropping an item is worth, keeping both the weight and the
-    denominator so a rate renders exactly.
+    """What an npc dropping an item is worth, keeping weight and denominator so a rate
+    renders exactly.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -236,8 +236,8 @@ EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = 
 
 
 class RelationshipSpec(BaseModel):
-    """One relationship as the registry declares it: a label for each direction, the
-    types it can join, and the attributes one link may carry.
+    """One relationship as declared: a label each direction, the types it joins, and
+    the attributes a link may carry.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -341,8 +341,8 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
 
 
 def discriminator_of(attributes: EdgeAttributes) -> str:
-    """What tells apart two edges joining the same pair under the same relationship,
-    read off the edge's own attributes.
+    """Read what tells apart two edges joining the same pair, off the edge's own
+    attributes.
     """
     if isinstance(attributes, LocatedInEdgeAttributes):
         return "" if attributes.at is None else str(attributes.at)

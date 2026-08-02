@@ -1,4 +1,4 @@
-"""The hover sized answer: what this is, in as few values as the registry allows."""
+"""Answer at hover size: what this is, in as few values as the registry allows."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def preview(entity: Entity) -> Tooltip:
-    """The smallest honest description of an entity."""
+    """Describe an entity as briefly as the registry allows."""
     return Tooltip(
         link=entity.to_link(),
         type=entity.type,

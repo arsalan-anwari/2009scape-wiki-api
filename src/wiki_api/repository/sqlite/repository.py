@@ -17,8 +17,9 @@ from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.manifest import SCHEMA_VERSION
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
 from wiki_api.domain.relationships import Edge
-from wiki_api.domain.search import SearchHit
+from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT, SearchHit
 from wiki_api.repository.errors import ArtifactUnreadable
+from wiki_api.repository.naming import NameIndex
 from wiki_api.repository.sqlite import queries
 from wiki_api.repository.sqlite.connection import ReadOnlyConnections
 from wiki_api.repository.sqlite.fts import to_match_query
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
 
 
 class SqliteKnowledgeRepository:
-    """Reads the built artifact, so that nothing above this class knows the storage is
+    """Read the built artifact, so nothing above this class knows the storage is
     SQLite.
     """
 
@@ -58,6 +59,7 @@ class SqliteKnowledgeRepository:
             self._connections.close()
             raise IncompatibleArtifact(manifest.schema_version, SCHEMA_VERSION)
         self._manifest = manifest
+        self._names: dict[EntityType, NameIndex] = {}
 
     def manifest(self) -> Manifest:
         return self._manifest
@@ -145,6 +147,26 @@ class SqliteKnowledgeRepository:
         )
         return Page[SearchHit](items=hits, total=total, limit=limit, offset=offset)
 
+    def nearest(
+        self,
+        query: str,
+        entity_type: EntityType,
+        *,
+        limit: int = NEAR_LIMIT,
+        keep: float = NEAR_KEEP,
+        floor: float = NEAR_FLOOR,
+    ) -> Page[SearchHit]:
+        found = self._name_index(entity_type).near(
+            query, limit=limit, keep=keep, floor=floor
+        )
+        entities = self.get_entities([nearby.key for nearby in found])
+        hits = tuple(
+            SearchHit(entity=entities[nearby.key], score=nearby.score)
+            for nearby in found
+            if nearby.key in entities
+        )
+        return Page[SearchHit](items=hits, total=len(hits), limit=limit, offset=0)
+
     def edges_from(
         self,
         keys: Sequence[EntityKey],
@@ -225,6 +247,17 @@ class SqliteKnowledgeRepository:
             offset=offset,
         )
 
+    def _name_index(self, entity_type: EntityType) -> NameIndex:
+        held = self._names.get(entity_type)
+        if held is not None:
+            return held
+        rows = self._all(queries.SELECT_NEAR_NAMES, {"type": entity_type.value})
+        built = NameIndex(
+            (EntityKey(type=entity_type, id=row["id"]), row["name"]) for row in rows
+        )
+        self._names[entity_type] = built
+        return built
+
     def _read_manifest(self) -> Manifest:
         return manifest_from_rows(self._all(queries.SELECT_META, {}))
 
@@ -255,7 +288,7 @@ class SqliteKnowledgeRepository:
 
 
 def _as_json_keys(keys: Sequence[EntityKey]) -> str:
-    """The keys a statement joins against, each one listed once so no edge is joined
+    """List the keys a statement joins against, each once, so no edge is joined
     twice.
     """
     unique = dict.fromkeys(keys)

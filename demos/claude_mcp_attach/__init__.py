@@ -1,0 +1,1 @@
+"""The MCP attachment demonstration."""

@@ -1,11 +1,20 @@
-"""What a search gives back."""
+"""What a search gives back, and how close a near miss has to be to be worth
+offering.
+"""
 
 from __future__ import annotations
+
+from typing import Final
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from wiki_api.domain.entity import Entity
 from wiki_api.domain.identity import Link
+
+NEAR_LIMIT: Final = 5
+NEAR_KEEP: Final = 0.9
+NEAR_FLOOR: Final = 0.6
+MOST_NEAR_LIMIT: Final = 25
 
 
 class SearchHit(BaseModel):
@@ -37,6 +46,15 @@ def test_a_hit_carries_the_entity_and_a_non_negative_score() -> None:
     hit = SearchHit(entity=entity, score=12.5)
     assert hit.entity.name == "Dragon scimitar"
     assert hit.score == 12.5
+
+
+def test_a_near_miss_is_only_offered_when_it_is_actually_close() -> None:
+    assert 0.0 < NEAR_FLOOR < 1.0
+    assert 0.0 < NEAR_KEEP <= 1.0
+
+
+def test_only_a_handful_of_near_misses_are_ever_offered() -> None:
+    assert 1 <= NEAR_LIMIT <= MOST_NEAR_LIMIT
 
 
 def test_negative_scores_are_rejected() -> None:

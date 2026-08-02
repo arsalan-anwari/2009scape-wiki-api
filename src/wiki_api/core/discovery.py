@@ -1,4 +1,4 @@
-"""Finding things without knowing their identity, and saying what there is to find.
+"""Find things without knowing their identity, and say what there is to find.
 
 Searching ranks; finding decides.
 """
@@ -24,6 +24,7 @@ from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
 from wiki_api.domain.presentation import ENTITY_TYPE_META
 from wiki_api.domain.relationships import RELATIONSHIP_SPECS
+from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT
 from wiki_api.domain.slug import slugify
 
 if TYPE_CHECKING:
@@ -41,7 +42,7 @@ def search(
     limit: int = DEFAULT_PAGE_SIZE,
     offset: int = 0,
 ) -> Page[SearchResult]:
-    """Whatever matches the words a caller typed, best first."""
+    """Rank whatever matches the words a caller typed, best first."""
     hits = repository.search(query, types=types, limit=limit, offset=offset)
     return Page[SearchResult](
         items=tuple(
@@ -66,7 +67,7 @@ def find(
     types: Sequence[EntityType] | None = None,
     limit: int = DEFAULT_PAGE_SIZE,
 ) -> Match:
-    """The thing called this, plus everything else the words matched."""
+    """Decide which one thing a name means, with everything else it matched."""
     results = search(repository, name, types=types, limit=limit)
     exact = _by_handle(repository, slugify(name), types)
     if exact is None and results.items:
@@ -81,8 +82,8 @@ def lookup(
     types: Sequence[EntityType] | None = None,
     limit: int = DEFAULT_PAGE_SIZE,
 ) -> Named[Entity]:
-    """The entity a caller meant by a name, or by a written identity, with whatever else
-    the words matched alongside.
+    """Resolve a name or a written identity to one entity, with whatever else the
+    words matched.
     """
     written = _written_identity(name, types)
     if written is not None:
@@ -98,6 +99,38 @@ def lookup(
     )
 
 
+def near_names(
+    repository: KnowledgeRepository,
+    name: str,
+    entity_type: EntityType,
+    *,
+    limit: int = NEAR_LIMIT,
+    keep: float = NEAR_KEEP,
+    floor: float = NEAR_FLOOR,
+) -> Page[SearchResult]:
+    """Return the real names a misspelt one may have meant, or nothing when none is
+    close enough.
+
+    Each candidate carries identity only, so whoever asked has to choose one and ask
+    again rather than be answered from a guess.
+    """
+    hits = repository.nearest(name, entity_type, limit=limit, keep=keep, floor=floor)
+    return Page[SearchResult](
+        items=tuple(
+            SearchResult(
+                link=hit.entity.to_link(),
+                type=hit.entity.type,
+                description=None,
+                score=hit.score,
+            )
+            for hit in hits.items
+        ),
+        total=hits.total,
+        limit=hits.limit,
+        offset=hits.offset,
+    )
+
+
 def list_type(
     repository: KnowledgeRepository,
     entity_type: EntityType,
@@ -106,7 +139,7 @@ def list_type(
     offset: int = 0,
     order: SortOrder = SortOrder.NAME,
 ) -> Page[EntitySummary]:
-    """One page of an index."""
+    """Read one page of an index."""
     listed = repository.list_entities(
         entity_type, limit=limit, offset=offset, order=order
     )
@@ -119,8 +152,8 @@ def list_type(
 
 
 def describe_types() -> tuple[TypeInfo, ...]:
-    """The whole registry as a reader sees it: what kinds of thing exist, and how each
-    one's values present.
+    """Publish the registry: what sorts of thing exist, and how each one's values
+    present.
     """
     described = [
         TypeInfo(
@@ -146,8 +179,8 @@ def describe_types() -> tuple[TypeInfo, ...]:
 def _written_identity(
     name: str, types: Sequence[EntityType] | None
 ) -> Reference | None:
-    """An identity a caller wrote out, which counts only when they narrowed the question
-    to exactly one type.
+    """Read an identity a caller wrote out, which counts only when they narrowed the
+    question to one type.
     """
     text = name.strip()
     if not text:
@@ -190,7 +223,7 @@ def _by_handle(
     handle: str,
     types: Sequence[EntityType] | None,
 ) -> Link | None:
-    """The entity whose slug or alias is exactly this, searched in type order."""
+    """Find the entity whose slug or alias is exactly this, searched in type order."""
     if not handle:
         return None
     wanted = tuple(types) if types else tuple(_in_declared_order())

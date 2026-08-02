@@ -1,4 +1,4 @@
-"""The published description of this contract, which is itself a deliverable."""
+"""Shape the published description of this contract, which is itself a deliverable."""
 
 from __future__ import annotations
 
@@ -21,6 +21,24 @@ if TYPE_CHECKING:
 TITLE: Final = "2009scape Wiki API"
 VERSION: Final = "1.0.0"
 KNOWN_VALUES: Final = "x-known-values"
+SECURITY_SCHEME: Final = "issued_key"
+UNGUARDED_PATHS: Final = frozenset({"/health"})
+GUARD_NOTE: Final = (
+    "Send the key you were issued as `Authorization: Bearer <token>`. Keys are "
+    "handed out by whoever runs this deployment and do not expire; one that leaks is "
+    "withdrawn by its holder's key id. A browser cannot keep one secret, so a public "
+    "front end should call this through its own backend."
+)
+GUARD_RESPONSES: Final[dict[str, Any]] = {
+    "401": {"description": "No key was sent, or it is not one this service answers."},
+    "403": {"description": "Too many refused requests have come from this address."},
+    "429": {
+        "description": (
+            "This key has asked for more than its share; `Retry-After` says when to "
+            "come back."
+        )
+    },
+}
 OPEN_NOTE: Final = (
     "Published as an open string rather than a fixed enum, because new values get "
     "added as the data grows. The ones this build knows are listed under "
@@ -100,12 +118,12 @@ _PARAMETRISED = re.compile(r"^(?P<outer>[A-Za-z0-9]+)_(?P<inner>[A-Za-z0-9_]+)_$
 
 
 def operation_id(route: BaseRoute) -> str:
-    """The name a generated client gives the method for this route."""
+    """Name the method a generated client gives this route."""
     return str(getattr(route, "name", ""))
 
 
-def build(app: FastAPI) -> dict[str, Any]:
-    """The whole contract, described so that a typed client falls out of it."""
+def build(app: FastAPI, *, guarded: bool = False) -> dict[str, Any]:
+    """Describe the whole contract, so a typed client falls out of it."""
     document = get_openapi(
         title=TITLE,
         version=VERSION,
@@ -115,7 +133,28 @@ def build(app: FastAPI) -> dict[str, Any]:
     )
     schemas = document.get("components", {}).get("schemas", {})
     _open_up(schemas)
+    if guarded:
+        _guarded(document)
     return _readable(document, _renames(schemas))
+
+
+def _guarded(document: dict[str, Any]) -> None:
+    """Declare that this deployment answers holders of an issued key.
+
+    Said once here because the key is checked in one middleware, not route by route.
+    """
+    components = document.setdefault("components", {})
+    components.setdefault("securitySchemes", {})[SECURITY_SCHEME] = {
+        "type": "http",
+        "scheme": "bearer",
+        "description": GUARD_NOTE,
+    }
+    for path, served in document["paths"].items():
+        if path in UNGUARDED_PATHS:
+            continue
+        for operation in served.values():
+            operation["security"] = [{SECURITY_SCHEME: []}]
+            operation.setdefault("responses", {}).update(GUARD_RESPONSES)
 
 
 def _open_up(schemas: dict[str, Any]) -> None:
@@ -249,6 +288,48 @@ def test_a_closed_vocabulary_is_left_closed() -> None:
 
     published = {vocabulary.__name__ for vocabulary in OPEN_VOCABULARIES}
     assert GroupPlacement.__name__ not in published
+
+
+def _document() -> dict[str, Any]:
+    return {
+        "paths": {
+            "/health": {"get": {"responses": {"200": {}}}},
+            "/v1/about": {"get": {"responses": {"200": {}}}},
+        },
+        "components": {"schemas": {}},
+    }
+
+
+def test_an_unguarded_contract_says_nothing_about_keys() -> None:
+    document = _document()
+    assert "securitySchemes" not in document["components"]
+    assert "security" not in document["paths"]["/v1/about"]["get"]
+
+
+def test_a_guarded_contract_says_a_key_is_expected() -> None:
+    document = _document()
+    _guarded(document)
+    scheme = document["components"]["securitySchemes"][SECURITY_SCHEME]
+    assert scheme["type"] == "http"
+    assert scheme["scheme"] == "bearer"
+    assert document["paths"]["/v1/about"]["get"]["security"] == [{SECURITY_SCHEME: []}]
+
+
+def test_a_health_check_is_never_declared_to_need_a_key() -> None:
+    document = _document()
+    _guarded(document)
+    assert "security" not in document["paths"]["/health"]["get"]
+
+
+def test_a_guarded_contract_documents_every_way_it_refuses() -> None:
+    document = _document()
+    _guarded(document)
+    answered = document["paths"]["/v1/about"]["get"]["responses"]
+    assert {"401", "403", "429"} <= set(answered)
+
+
+def test_a_reader_is_warned_that_a_browser_cannot_hold_a_key() -> None:
+    assert "browser cannot keep one secret" in GUARD_NOTE
 
 
 def test_a_route_lends_its_name_to_the_method_a_client_generates() -> None:

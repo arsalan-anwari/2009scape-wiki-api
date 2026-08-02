@@ -1,5 +1,5 @@
-"""Turning stored attributes into values a reader can show, by walking the registry
-rather than naming any field.
+"""Turn stored fields into values a reader can show, by walking the registry rather
+than naming any of them.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 def declared_values(
     specs: Sequence[AttributeSpec], recorded: Mapping[str, JsonValue]
 ) -> tuple[AttributeValue, ...]:
-    """The values a record holds, in the order the registry publishes them."""
+    """Read the values a record holds, in the order the registry publishes them."""
     return tuple(
         AttributeValue.of(spec, recorded[spec.key])
         for spec in specs
@@ -32,19 +32,19 @@ def declared_values(
 
 
 def entity_values(entity: Entity) -> tuple[AttributeValue, ...]:
-    """Everything an entity records that a reader is allowed to see."""
+    """Read everything an entity records that a reader may see."""
     return declared_values(ATTRIBUTE_SPECS[entity.type], _recorded(entity.attributes))
 
 
 def edge_values(edge: Edge) -> tuple[AttributeValue, ...]:
-    """Everything a relationship records about itself."""
+    """Read everything a relationship records about itself."""
     return declared_values(
         RELATIONSHIP_SPECS[edge.rel].edge_attributes, _recorded(edge.attributes)
     )
 
 
 def prominent_values(values: Sequence[AttributeValue]) -> tuple[AttributeValue, ...]:
-    """The few values worth showing on hover."""
+    """Read the few values worth showing on hover."""
     return tuple(value for value in values if value.prominent)
 
 

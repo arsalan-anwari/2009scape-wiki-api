@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import shutil
 import sys
 from dataclasses import dataclass
@@ -18,29 +17,30 @@ from claude_agent_sdk import (
     ToolUseBlock,
     query,
 )
-from dotenv import load_dotenv
+from claude_agent_sdk.types import McpHttpServerConfig, McpServerConfig
 
-from wiki_api.config import get_settings
 from wiki_api.surfaces.mcp import SERVER_NAME, WRITTEN_TOOLS, followable
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from claude_common import (
+    MISSED,
+    ROOT,
+    UNSURE,
+    WORKED,
+    Wiki,
+    read_env,
+    served,
+    told,
+    unready,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]
-ENV = HERE / ".env"
-CONFIG = ROOT / ".mcp.json"
 MODEL = "sonnet"
 MOST_TURNS = 8
-
-WANTED = f"""no .env beside this demonstration. Create {ENV} containing:
-
-    CLAUDE_CODE_OAUTH_TOKEN=
-
-Generate the token with `claude setup-token`, which signs in with your Claude
-subscription rather than pay-per-token api credits. Leave the value empty to use
-whatever `claude` on this machine is already signed in as. Any WIKI_API_ setting put
-in the same file is picked up too."""
 
 PROMPT = (
     "Answer using only the 2009scape wiki tools available to you. Do not answer from "
@@ -66,16 +66,26 @@ ASKED = (
 )
 
 
+def attached(wiki: Wiki) -> dict[str, McpServerConfig]:
+    """Write down where the wiki is and what to present to it, as a client would."""
+    reached: McpHttpServerConfig = {
+        "type": "http",
+        "url": wiki.url,
+        "headers": wiki.headers,
+    }
+    return {SERVER_NAME: reached}
+
+
 def tool_names() -> list[str]:
     """Every tool this server offers, under the name a client calls it by."""
     offered = [*WRITTEN_TOOLS, *(followed.name for followed in followable())]
     return [f"mcp__{SERVER_NAME}__{name}" for name in offered]
 
 
-async def ask(question: Question) -> bool:
+async def ask(question: Question, wiki: Wiki) -> bool:
     """Put one question to Claude and report whether this server answered it."""
     options = ClaudeAgentOptions(
-        mcp_servers=CONFIG,
+        mcp_servers=attached(wiki),
         allowed_tools=tool_names(),
         system_prompt=PROMPT,
         model=MODEL,
@@ -103,49 +113,41 @@ def _reported(question: Question, called: Sequence[str], said: str) -> bool:
     answered = question.expects.lower() in said.lower()
     print(f"    said: {said.strip()[:200]}")
     if not reached:
-        print("    MISSED  claude never called this server")
+        print(told(MISSED, "claude never called this server"))
         return False
     if not answered:
-        print(f"    UNSURE  the answer does not mention {question.expects!r}")
+        print(told(UNSURE, f"the answer does not mention {question.expects!r}"))
         return False
-    print(f"    WORKED  reached {len(reached)} tool(s) and answered from them")
+    print(told(WORKED, f"reached {len(reached)} tool(s) and answered from them"))
     return True
 
 
 def _ready() -> str | None:
     """Whatever stands between this script and a working run."""
-    if not ENV.exists():
-        return WANTED
+    blocked = unready(HERE)
+    if blocked is not None:
+        return blocked
     if shutil.which("claude") is None:
         return "claude code is not installed: https://claude.com/product/claude-code"
-    if not CONFIG.exists():
-        return f"no mcp configuration at {CONFIG}"
-    if not get_settings().artifact_path.exists():
-        return "no dataset yet: run `uv run poe build-artifact` first"
-    signed_in = Path.home() / ".claude" / ".credentials.json"
-    credentials = (
-        "CLAUDE_CODE_OAUTH_TOKEN",
-        "ANTHROPIC_API_KEY",
-        "ANTHROPIC_AUTH_TOKEN",
-    )
-    if not any(os.environ.get(name) for name in credentials) and not signed_in.exists():
-        return f"no way to sign in. Put a token in {ENV}, or run `claude` once"
     return None
 
 
 async def _main(questions: Sequence[Question]) -> int:
     worked = 0
-    for question in questions:
-        print(f"\n  asked: {question.asked}")
-        if await ask(question):
-            worked += 1
+    with served() as wiki:
+        print(f"  the wiki is answering at {wiki.url}")
+        print(f"  presenting the key issued to {wiki.kept}, id {wiki.key_id}")
+        for question in questions:
+            print(f"\n  asked: {question.asked}")
+            if await ask(question, wiki):
+                worked += 1
     print(f"\n{worked}/{len(questions)} questions were answered from this server")
     return 0 if worked == len(questions) else 1
 
 
 def main() -> None:
     """Ask whatever was given on the command line, or the built in questions."""
-    load_dotenv(ENV)
+    read_env(HERE)
     blocked = _ready()
     if blocked is not None:
         print(blocked)

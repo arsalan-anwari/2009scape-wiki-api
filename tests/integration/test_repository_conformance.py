@@ -272,6 +272,98 @@ def test_a_query_with_no_searchable_characters_returns_nothing(
     assert page.total == 0
 
 
+@pytest.mark.parametrize(
+    ("misspelt", "entity_type", "meant"),
+    [
+        ("dragon scimtar", EntityType.ITEM, SCIMITAR),
+        ("clmbing boots", EntityType.ITEM, CLIMBING_BOOTS),
+        ("king black dragn", EntityType.NPC, KBD),
+        ("crossbow shopp (white wolf mountain)", EntityType.SHOP, CROSSBOW_SHOP),
+        ("deth plateau", EntityType.QUEST, DEATH_PLATEAU),
+        ("wildernes", EntityType.LOCATION, WILDERNESS),
+    ],
+)
+def test_a_misspelt_name_offers_the_one_that_was_meant(
+    repository: KnowledgeRepository,
+    misspelt: str,
+    entity_type: EntityType,
+    meant: EntityKey,
+) -> None:
+    page = repository.nearest(misspelt, entity_type)
+    assert meant in {hit.entity.key for hit in page.items}
+
+
+def test_a_name_nothing_is_close_to_offers_nothing(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.nearest("zzzzqqqqwwww", EntityType.ITEM)
+    assert page.items == ()
+    assert page.total == 0
+
+
+def test_a_near_name_answer_is_never_a_page_of_more(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.nearest("dragon scimtar", EntityType.ITEM)
+    assert page.offset == 0
+    assert page.has_more is False
+    assert page.next_offset is None
+    assert page.total == len(page.items)
+
+
+def test_a_near_name_answer_never_grows_past_what_was_asked_for(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.nearest("dragon", EntityType.ITEM, limit=2, keep=0.1, floor=0.1)
+    assert len(page.items) <= 2
+
+
+def test_letting_less_through_narrows_a_near_name_answer(
+    repository: KnowledgeRepository,
+) -> None:
+    loose = repository.nearest("dragon", EntityType.ITEM, keep=0.1, floor=0.1)
+    tight = repository.nearest("dragon", EntityType.ITEM, keep=1.0, floor=0.1)
+    assert len(tight.items) <= len(loose.items)
+
+
+def test_a_near_name_is_only_looked_for_in_the_sort_that_was_asked_about(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.nearest("dragon scimtar", EntityType.NPC)
+    assert {hit.entity.key.type for hit in page.items} <= {EntityType.NPC}
+
+
+def test_a_variant_is_never_offered_as_a_near_name(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.nearest("dragon scimitar", EntityType.ITEM, keep=0.1, floor=0.1)
+    assert NOTED_SCIMITAR not in {hit.entity.key for hit in page.items}
+
+
+def test_an_unpublished_thing_is_never_offered_as_a_near_name(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.nearest("", EntityType.NPC, keep=0.0, floor=0.0)
+    assert UNNAMED_NPC not in {hit.entity.key for hit in page.items}
+
+
+def test_the_same_near_name_question_is_answered_the_same_way_twice(
+    repository: KnowledgeRepository,
+) -> None:
+    once = repository.nearest("dragon", EntityType.ITEM, keep=0.1, floor=0.1)
+    again = repository.nearest("dragon", EntityType.ITEM, keep=0.1, floor=0.1)
+    assert [hit.entity.key for hit in once.items] == [
+        hit.entity.key for hit in again.items
+    ]
+
+
+def test_every_near_name_carries_the_score_it_matched_at(
+    repository: KnowledgeRepository,
+) -> None:
+    page = repository.nearest("dragon scimtar", EntityType.ITEM)
+    assert all(0.0 < hit.score <= 1.0 for hit in page.items)
+
+
 def test_a_query_that_matches_nothing_returns_an_empty_page(
     repository: KnowledgeRepository,
 ) -> None:

@@ -1,4 +1,4 @@
-"""Running a whole build, from the documents on disk to the finished artifact."""
+"""Run a whole build, from the documents on disk to the finished artifact."""
 
 from __future__ import annotations
 

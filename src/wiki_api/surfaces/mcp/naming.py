@@ -1,5 +1,5 @@
-"""What each way of following a link is called, worked out from the registry rather than
-written down, so one declared later turns up on its own.
+"""Name each way of following a link, from the registry rather than by hand, so one
+declared later turns up on its own.
 """
 
 from __future__ import annotations
@@ -21,6 +21,17 @@ if TYPE_CHECKING:
 SEPARATOR = re.compile(r"[^a-z0-9]+")
 VOWELS = "aeiou"
 
+SORTS_TOOL = "list_sorts"
+CLOSE_NAMES_TOOL = "find_close_names"
+WRITTEN_TOOLS = (
+    "search",
+    "get_thing",
+    "list_things",
+    "about",
+    SORTS_TOOL,
+    CLOSE_NAMES_TOOL,
+)
+
 
 @dataclass(frozen=True)
 class Followed:
@@ -34,19 +45,19 @@ class Followed:
 
 
 def tool_name(spec: RelationshipSpec, direction: Direction) -> str:
-    """What to call the tool that follows this link this way round."""
+    """Name the tool that follows this link this way round."""
     return SEPARATOR.sub("_", label_of(spec, direction).lower()).strip("_")
 
 
 def label_of(spec: RelationshipSpec, direction: Direction) -> str:
-    """The registry's own words for this link, read this way round."""
+    """Read the registry's own words for this link, this way round."""
     if direction is Direction.FORWARD:
         return spec.forward_label
     return spec.inverse_label
 
 
 def asked_of(spec: RelationshipSpec, direction: Direction) -> tuple[EntityType, ...]:
-    """The sorts of thing a caller names when they follow this link this way."""
+    """List the sorts of thing a caller names to follow this link this way."""
     types = spec.src_types if direction is Direction.FORWARD else spec.dst_types
     return _ordered(types)
 
@@ -54,13 +65,13 @@ def asked_of(spec: RelationshipSpec, direction: Direction) -> tuple[EntityType, 
 def answered_with(
     spec: RelationshipSpec, direction: Direction
 ) -> tuple[EntityType, ...]:
-    """The sorts of thing that come back."""
+    """List the sorts of thing that come back."""
     types = spec.dst_types if direction is Direction.FORWARD else spec.src_types
     return _ordered(types)
 
 
 def described(spec: RelationshipSpec, direction: Direction) -> str:
-    """The words a model reads before deciding whether this is the tool it wants."""
+    """Write the words a model reads to decide whether this is the tool it wants."""
     label = label_of(spec, direction)
     asked = _words(asked_of(spec, direction))
     answered = _words(answered_with(spec, direction), plural=True)
@@ -73,7 +84,9 @@ def described(spec: RelationshipSpec, direction: Direction) -> str:
 
 
 def followable() -> tuple[Followed, ...]:
-    """Every way of following every link the registry declares, in a stable order."""
+    """List every way of following every link the registry declares, in a stable
+    order.
+    """
     return tuple(
         Followed(
             rel=spec.rel,
@@ -183,6 +196,18 @@ def test_several_sorts_of_thing_are_said_as_a_reader_would_say_them() -> None:
     assert _words((EntityType.ITEM, EntityType.NPC, EntityType.SHOP)) == (
         "item, npc or shop"
     )
+
+
+def test_the_tools_written_by_hand_never_collide_with_the_generated_ones() -> None:
+    assert not set(WRITTEN_TOOLS) & {followed.name for followed in followable()}
+
+
+def test_every_tool_written_by_hand_is_named_once() -> None:
+    assert len(set(WRITTEN_TOOLS)) == len(WRITTEN_TOOLS)
+
+
+def test_the_tools_a_reader_is_pointed_at_are_tools_that_exist() -> None:
+    assert {SORTS_TOOL, CLOSE_NAMES_TOOL} <= set(WRITTEN_TOOLS)
 
 
 def test_a_word_beginning_with_a_vowel_gets_the_other_article() -> None:

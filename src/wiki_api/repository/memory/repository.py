@@ -1,9 +1,8 @@
-"""A repository backed by objects in memory, used for tests and small tools."""
+"""Back the repository with objects in memory, for tests and small tools."""
 
 from __future__ import annotations
 
 import re
-import unicodedata
 from typing import TYPE_CHECKING
 
 from wiki_api.domain.entity import Entity
@@ -17,7 +16,8 @@ from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.manifest import SCHEMA_VERSION
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
 from wiki_api.domain.relationships import Edge
-from wiki_api.domain.search import SearchHit
+from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT, SearchHit
+from wiki_api.repository.naming import NameIndex, fold
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -62,6 +62,7 @@ class InMemoryKnowledgeRepository:
         }
         self._prices = tuple(prices)
         self._alias_terms = _alias_terms(aliases)
+        self._names: dict[EntityType, NameIndex] = {}
 
     def manifest(self) -> Manifest:
         return self._manifest
@@ -152,6 +153,25 @@ class InMemoryKnowledgeRepository:
             offset=offset,
         )
 
+    def nearest(
+        self,
+        query: str,
+        entity_type: EntityType,
+        *,
+        limit: int = NEAR_LIMIT,
+        keep: float = NEAR_KEEP,
+        floor: float = NEAR_FLOOR,
+    ) -> Page[SearchHit]:
+        found = self._name_index(entity_type).near(
+            query, limit=limit, keep=keep, floor=floor
+        )
+        hits = tuple(
+            SearchHit(entity=self._entities[nearby.key], score=nearby.score)
+            for nearby in found
+            if nearby.key in self._entities
+        )
+        return Page[SearchHit](items=hits, total=len(hits), limit=limit, offset=0)
+
     def edges_from(
         self,
         keys: Sequence[EntityKey],
@@ -236,14 +256,26 @@ class InMemoryKnowledgeRepository:
     def close(self) -> None:
         return None
 
+    def _name_index(self, entity_type: EntityType) -> NameIndex:
+        held = self._names.get(entity_type)
+        if held is not None:
+            return held
+        built = NameIndex(
+            (entity.key, entity.name)
+            for entity in self._entities.values()
+            if entity.key.type is entity_type and entity.searchable
+        )
+        self._names[entity_type] = built
+        return built
+
     def _is_hidden(self, key: EntityKey) -> bool:
         entity = self._entities.get(key)
         return entity is not None and not entity.is_published
 
     def _score(self, entity: Entity, tokens: Sequence[str]) -> float | None:
         total = 0.0
-        name = _fold(entity.name)
-        description = _fold(entity.description or "")
+        name = fold(entity.name)
+        description = fold(entity.description or "")
         aliases = self._alias_terms.get(entity.key, "")
         for token in tokens:
             weight = 0.0
@@ -268,13 +300,8 @@ def _edge_page(matched: Sequence[Edge], limit: int, offset: int) -> Page[Edge]:
     )
 
 
-def _fold(value: str) -> str:
-    folded = unicodedata.normalize("NFKD", value)
-    return folded.encode("ascii", "ignore").decode("ascii").lower()
-
-
 def _tokens(query: str) -> tuple[str, ...]:
-    return tuple(_TOKENS.findall(_fold(query)))
+    return tuple(_TOKENS.findall(fold(query)))
 
 
 def _has_prefix(haystack: str, token: str) -> bool:
@@ -291,9 +318,9 @@ def _alias_terms(aliases: Sequence[EntityAlias]) -> dict[EntityKey, str]:
 # test cases
 
 
-def test_folding_matches_the_search_index_rules() -> None:
-    assert _fold("Café AU Lait") == "cafe au lait"
-    assert _fold("Green d'hide") == "green d'hide"
+def test_folding_matches_the_near_name_rules() -> None:
+    assert fold("Café AU Lait") == "cafe au lait"
+    assert fold("Green d'hide") == "green d'hide"
 
 
 def test_a_query_becomes_alphanumeric_tokens() -> None:

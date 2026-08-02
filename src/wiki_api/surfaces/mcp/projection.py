@@ -1,5 +1,7 @@
-"""The same answers, sized for a reader that pays for every word: what it takes to
-answer a question, a count of what was not sent, and the exact call that would send it.
+"""Shrink the core's answers for a reader that pays per word.
+
+Each carries what the question needs, a count of what was left out, and the call that
+would fetch it.
 """
 
 from __future__ import annotations
@@ -15,6 +17,8 @@ from wiki_api.surfaces.mcp.naming import tool_name
 from wiki_api.surfaces.mcp.values import labelled
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
     from wiki_api.core import (
         AttributeValue,
         Block,
@@ -22,6 +26,7 @@ if TYPE_CHECKING:
         PageDescriptor,
         Row,
         SearchResult,
+        TypeInfo,
     )
     from wiki_api.domain.identity import Link
     from wiki_api.domain.page import Page
@@ -30,7 +35,7 @@ MOST_EXAMPLES: Final = 3
 
 
 class Neighbour(BaseModel):
-    """One thing reached by following a link, and what the link itself records."""
+    """One thing reached over a link, and what the link itself records."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -52,8 +57,8 @@ class Reachable(BaseModel):
 
 
 class Thing(BaseModel):
-    """One thing, with the values worth knowing and every way onwards from it, each
-    carrying a count rather than contents.
+    """One thing, its values worth knowing, and every way onwards from it as a count
+    rather than contents.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -105,8 +110,28 @@ class Matches(BaseModel):
     data_version: str
 
 
+class Sort(BaseModel):
+    """One sort of thing this build knows about, and how many of them there are."""
+
+    model_config = ConfigDict(frozen=True)
+
+    type: EntityType
+    label: str
+    plural: str
+    total: int = Field(ge=0)
+
+
+class Sorts(BaseModel):
+    """Every sort of thing that can be asked about."""
+
+    model_config = ConfigDict(frozen=True)
+
+    sorts: tuple[Sort, ...] = ()
+    data_version: str
+
+
 def thing_of(descriptor: PageDescriptor) -> Thing:
-    """A whole page, kept down to what a reader would actually use."""
+    """Shrink a whole page to what a reader would use."""
     return Thing(
         name=descriptor.entity.label,
         type=descriptor.type,
@@ -120,7 +145,7 @@ def thing_of(descriptor: PageDescriptor) -> Thing:
 
 
 def related_of(block: Block, of: str) -> Related:
-    """One page of one way onwards."""
+    """Shrink one page of one way onwards."""
     return Related(
         of=of,
         label=block.label,
@@ -135,7 +160,7 @@ def related_of(block: Block, of: str) -> Related:
 def matches_of(
     page: Page[SearchResult] | Page[EntitySummary], data_version: str
 ) -> Matches:
-    """A listing, kept to what it takes to ask a better question next."""
+    """Shrink a listing to what it takes to ask a better question next."""
     return Matches(
         total=page.total,
         offset=page.offset,
@@ -149,6 +174,28 @@ def matches_of(
             for summary in page.items
         ),
         next_offset=page.next_offset,
+        data_version=data_version,
+    )
+
+
+def sorts_of(
+    described: Sequence[TypeInfo], totals: Mapping[EntityType, int], data_version: str
+) -> Sorts:
+    """List what can be asked about, and how much of each there is.
+
+    Each sort's declared values are left out: choosing between sorts does not need
+    them, and they cost more to read than the answer they lead to.
+    """
+    return Sorts(
+        sorts=tuple(
+            Sort(
+                type=info.type,
+                label=info.label,
+                plural=info.plural,
+                total=totals.get(info.type, 0),
+            )
+            for info in described
+        ),
         data_version=data_version,
     )
 

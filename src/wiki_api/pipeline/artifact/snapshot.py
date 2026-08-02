@@ -1,4 +1,4 @@
-"""The whole knowledge base in memory, before it is written to disk."""
+"""Hold the whole knowledge base in memory, before it is written to disk."""
 
 from __future__ import annotations
 

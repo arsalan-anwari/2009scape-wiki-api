@@ -1,4 +1,4 @@
-"""Folding the overlay documents into one snapshot, deterministically."""
+"""Fold the overlay documents into one snapshot, deterministically."""
 
 from __future__ import annotations
 

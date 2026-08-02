@@ -1,4 +1,4 @@
-"""Turning what a reader typed into something FTS5 will accept."""
+"""Turn what a reader typed into something FTS5 will accept."""
 
 from __future__ import annotations
 

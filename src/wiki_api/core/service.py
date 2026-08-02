@@ -1,5 +1,5 @@
-"""The one place a question about the game is answered; every surface calls these
-operations and shapes what comes back.
+"""Answer every question about the game in one place; a surface calls these and only
+shapes what comes back.
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ from wiki_api.core.results import (
 from wiki_api.core.tooltips import preview
 from wiki_api.core.walks import BLOCK_PAGE_SIZE, walk
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
+from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
 
 
 class KnowledgeService:
-    """Everything a client can ask, in terms of the game rather than of storage."""
+    """Answer everything a client can ask, in game terms rather than storage terms."""
 
     def __init__(
         self,
@@ -52,7 +53,7 @@ class KnowledgeService:
         self._block_size = block_size
 
     def about(self) -> Manifest:
-        """Which build of the knowledge base is being served."""
+        """Report which build of the knowledge base is being served."""
         return self._repository.manifest()
 
     def resolve(self, reference: Reference) -> EntityResolution:
@@ -60,7 +61,7 @@ class KnowledgeService:
         return resolve(self._repository, reference)
 
     def get_page(self, reference: Reference) -> PageResolution:
-        """A whole page, described as data."""
+        """Describe a whole page as data."""
         resolution = self.resolve(reference)
         if not isinstance(resolution, Found):
             return resolution
@@ -74,7 +75,7 @@ class KnowledgeService:
         )
 
     def tooltip(self, reference: Reference) -> TooltipResolution:
-        """The hover sized description of an entity."""
+        """Describe an entity at hover size."""
         resolution = self.resolve(reference)
         if not isinstance(resolution, Found):
             return resolution
@@ -111,7 +112,9 @@ class KnowledgeService:
         types: Sequence[EntityType] | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
     ) -> Named[Entity]:
-        """The thing a caller named, and what else that name could have meant."""
+        """Resolve the thing a caller named, with what else that name could have
+        meant.
+        """
         return discovery.lookup(self._repository, name, types=types, limit=limit)
 
     def page_by_name(
@@ -121,7 +124,9 @@ class KnowledgeService:
         types: Sequence[EntityType] | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
     ) -> Named[PageDescriptor]:
-        """A whole page, for a caller who has a name rather than an identity."""
+        """Describe a whole page for a caller holding a name rather than an
+        identity.
+        """
         named = self.lookup(name, types=types, limit=limit)
         if not isinstance(named.resolution, Found):
             return Named[PageDescriptor](
@@ -183,7 +188,7 @@ class KnowledgeService:
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[SearchResult]:
-        """Whatever matches the words a caller typed."""
+        """Rank whatever matches the words a caller typed."""
         return discovery.search(
             self._repository, query, types=types, limit=limit, offset=offset
         )
@@ -195,8 +200,29 @@ class KnowledgeService:
         types: Sequence[EntityType] | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
     ) -> Match:
-        """The thing called this, and everything else the words matched."""
+        """Decide which one thing a name means, with everything else it matched."""
         return discovery.find(self._repository, name, types=types, limit=limit)
+
+    def near_names(
+        self,
+        name: str,
+        entity_type: EntityType,
+        *,
+        limit: int | None = None,
+        keep: float | None = None,
+        floor: float | None = None,
+    ) -> Page[SearchResult]:
+        """Return the real names a misspelt one may have meant, identity only, so
+        whoever asked chooses rather than being answered from a guess.
+        """
+        return discovery.near_names(
+            self._repository,
+            name,
+            entity_type,
+            limit=limit if limit is not None else NEAR_LIMIT,
+            keep=keep if keep is not None else NEAR_KEEP,
+            floor=floor if floor is not None else NEAR_FLOOR,
+        )
 
     def list_type(
         self,
@@ -206,13 +232,13 @@ class KnowledgeService:
         offset: int = 0,
         order: SortOrder = SortOrder.NAME,
     ) -> Page[EntitySummary]:
-        """One page of an index."""
+        """Read one page of an index."""
         return discovery.list_type(
             self._repository, entity_type, limit=limit, offset=offset, order=order
         )
 
     def describe_types(self) -> tuple[TypeInfo, ...]:
-        """What kinds of thing exist and how their values present."""
+        """Publish what sorts of thing exist and how their values present."""
         return discovery.describe_types()
 
 
@@ -232,9 +258,19 @@ def test_the_service_answers_every_question_the_phase_promised() -> None:
         "walk_by_name",
         "search",
         "find",
+        "near_names",
         "list_type",
         "describe_types",
     }
+
+
+def test_a_near_name_answer_is_asked_for_one_sort_of_thing_at_a_time() -> None:
+    import inspect
+
+    signature = inspect.signature(KnowledgeService.near_names)
+    assert signature.parameters["entity_type"].default is inspect.Parameter.empty
+    for tunable in ("limit", "keep", "floor"):
+        assert signature.parameters[tunable].default is None
 
 
 def test_a_name_is_answered_in_one_call_rather_than_two() -> None:

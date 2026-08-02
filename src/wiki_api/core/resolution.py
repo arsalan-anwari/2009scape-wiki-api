@@ -1,7 +1,7 @@
-"""Working out which entity a caller means.
+"""Work out which entity a caller means.
 
-Absence comes back as an answer rather than as an exception, and that answer
-says whether the entity is gone, was never published, or has been renamed.
+Absence comes back as an answer, not an exception, saying whether the entity is gone,
+was never published, or has been renamed.
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ def resolve(repository: KnowledgeRepository, reference: Reference) -> EntityReso
 
 
 def entity_of(resolution: EntityResolution) -> Entity | None:
-    """The entity a resolution found, if it found one."""
+    """Unwrap the entity a resolution found, if it found one."""
     if isinstance(resolution, Found):
         return resolution.value
     return None
@@ -83,8 +83,8 @@ def _by_source_key(
 
 
 def _redirect(repository: KnowledgeRepository, target: EntityKey) -> EntityResolution:
-    """Turn a redirect into a link a reader can follow, reading the target's name so a
-    caller never fetches it a second time.
+    """Turn a redirect into a link a reader can follow, with the target's name already
+    read.
     """
     found = repository.get_entities([target])
     entity = found.get(target)

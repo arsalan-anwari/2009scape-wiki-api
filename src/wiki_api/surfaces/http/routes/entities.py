@@ -1,6 +1,7 @@
-"""Routes for one thing you can already name, addressed by its identity: each picks the
-shape of the reference, asks the core one question, and lets the absence mapping shape a
-non-answer.
+"""Serve one thing you can already name, addressed by its identity.
+
+Each route reads the reference, asks the core one question, and leaves a non-answer to
+the absence mapping.
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from wiki_api.surfaces.http.addressing import (
     TOOLTIP_SEGMENT,
     WALK_SEGMENT,
     entity_path,
+    near_names_path,
     reference,
     tooltip_path,
     walk_path,
@@ -70,7 +72,9 @@ ABSENT_RESPONSES: dict[int | str, dict[str, Any]] = {
         "description": (
             "Nothing published answers to that reference. The code says which "
             "case it is: `not_found` means there is no such entity, "
-            "`not_published` means it exists in this build but is held back."
+            "`not_published` means it exists in this build but is held back. A "
+            "`not_found` for a name rather than an id also carries `near_names`, "
+            "the address that answers what the name might have been meant to be."
         ),
     },
     308: {
@@ -84,6 +88,16 @@ ABSENT_RESPONSES: dict[int | str, dict[str, Any]] = {
 router = APIRouter(prefix=ENTITIES_PREFIX, tags=["entities"])
 
 
+def _asked_by_name(entity_type: EntityType, ref: str) -> str | None:
+    """Build where to ask what this reference meant, but only for a name.
+
+    A number that matches nothing is a wrong id, not a misspelling.
+    """
+    if ref.isdigit():
+        return None
+    return near_names_path(entity_type, ref.replace("-", " "))
+
+
 @router.get(
     "/{entity_type}/{ref}",
     name="entity",
@@ -94,11 +108,14 @@ router = APIRouter(prefix=ENTITIES_PREFIX, tags=["entities"])
 def read_entity(
     entity_type: TypePath, ref: RefPath, service: ServiceDep
 ) -> PageDescriptor:
-    """Get everything needed to draw one entity's page in a single response: identity,
-    the infobox, the attribute sections, and a first page of every set of related
-    entities.
+    """Get everything needed to draw one entity's page: identity, the infobox, the
+    attribute sections, and a first page of each set of related entities.
     """
-    return delivered(service.get_page(reference(entity_type, ref)), entity_path)
+    return delivered(
+        service.get_page(reference(entity_type, ref)),
+        entity_path,
+        _asked_by_name(entity_type, ref),
+    )
 
 
 @router.get(
@@ -115,10 +132,12 @@ def read_tooltip(
     settings: SettingsDep,
     response: Response,
 ) -> Tooltip:
-    """Get identity, one sentence, and the few values the registry marks as worth
-    showing on hover.
-    """
-    preview = delivered(service.tooltip(reference(entity_type, ref)), tooltip_path)
+    """Get identity, one sentence, and the few values the registry marks for hover."""
+    preview = delivered(
+        service.tooltip(reference(entity_type, ref)),
+        tooltip_path,
+        _asked_by_name(entity_type, ref),
+    )
     stamp_freshness(response, settings.tooltip_cache_seconds)
     return preview
 
@@ -139,13 +158,16 @@ def read_walk(
     direction: DirectionQuery = Direction.FORWARD,
     offset: OffsetQuery = 0,
 ) -> Block:
-    """Read one more page of a set of related entities that the entity page only
-    started; `direction=reverse` reads the link the other way round.
+    """Read one more page of a set of related entities the entity page only started.
+
+    `direction=reverse` reads the link the other way round.
     """
     answered = service.walk(
         reference(entity_type, ref), rel, direction, limit=limit, offset=offset
     )
-    return delivered(answered, partial(walk_path, rel=rel))
+    return delivered(
+        answered, partial(walk_path, rel=rel), _asked_by_name(entity_type, ref)
+    )
 
 
 @router.get(
@@ -157,8 +179,9 @@ def read_walk(
 def read_resolution(
     entity_type: TypePath, ref: RefPath, service: ServiceDep
 ) -> Resolution:
-    """Ask what a reference points at without being redirected there: live, retired,
-    held back and unknown all come back as a 200 with an `outcome` in the body.
+    """Ask what a reference points at without being redirected there.
+
+    Live, retired, held back and unknown all come back as a 200 with an `outcome`.
     """
     resolution = service.resolve(reference(entity_type, ref))
     if isinstance(resolution, Found):
@@ -193,3 +216,13 @@ def test_every_route_names_itself_for_a_generated_client() -> None:
 
 def test_absence_is_documented_wherever_a_thing_can_be_absent() -> None:
     assert set(ABSENT_RESPONSES) == {404, 308}
+
+
+def test_a_name_nobody_answers_to_is_pointed_at_the_ones_that_exist() -> None:
+    assert _asked_by_name(EntityType.ITEM, "dragon-scimtar") == (
+        "/v1/near-names?name=dragon+scimtar&type=item"
+    )
+
+
+def test_an_id_nobody_answers_to_is_a_wrong_number_not_a_misspelling() -> None:
+    assert _asked_by_name(EntityType.ITEM, "999999") is None

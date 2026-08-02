@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from tests.conftest import build_fixture_artifact
+from tests.artifact import build_fixture_artifact
 from wiki_api.pipeline.artifact import content_hash
 
 if TYPE_CHECKING:

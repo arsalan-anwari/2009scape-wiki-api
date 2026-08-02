@@ -1,4 +1,4 @@
-"""The SQL the repository reads with, kept in files rather than in strings here."""
+"""Load the SQL the repository reads with, kept in files rather than in strings."""
 
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ SELECT_EDGES_FROM: Final = load("select_edges_from.sql")
 SELECT_EDGES_TO: Final = load("select_edges_to.sql")
 COUNT_EDGES_FROM: Final = load("count_edges_from.sql")
 COUNT_EDGES_TO: Final = load("count_edges_to.sql")
+SELECT_NEAR_NAMES: Final = load("select_near_names.sql")
 SELECT_VARIANTS: Final = load("select_variants.sql")
 SELECT_PRICE_HISTORY: Final = load("select_price_history.sql")
 
@@ -65,11 +66,16 @@ def test_no_query_writes_to_the_artifact() -> None:
         SELECT_EDGES_TO,
         COUNT_EDGES_FROM,
         COUNT_EDGES_TO,
+        SELECT_NEAR_NAMES,
         SELECT_VARIANTS,
         SELECT_PRICE_HISTORY,
     )
     for statement in statements:
         assert not any(word in statement.upper() for word in forbidden)
+
+
+def test_a_near_name_is_only_looked_for_among_the_ones_a_reader_can_reach() -> None:
+    assert "e.searchable = 1" in SELECT_NEAR_NAMES
 
 
 def test_every_walk_of_the_graph_is_bounded_and_countable() -> None:

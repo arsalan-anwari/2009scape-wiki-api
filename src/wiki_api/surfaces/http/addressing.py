@@ -1,12 +1,12 @@
-"""Where things live in this api, and how a caller names one.
+"""Build this api's paths, and read what a caller named.
 
-Paths are built here rather than inside a route so that a redirect can point at the same
-resource the caller asked for.
+Kept out of the routes so a redirect points at the same path the caller asked for.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
+from urllib.parse import urlencode
 
 from wiki_api.domain.identity import EntityKey
 
@@ -18,32 +18,37 @@ if TYPE_CHECKING:
 API_PREFIX: Final = "/v1"
 ENTITIES_PREFIX: Final = f"{API_PREFIX}/entities"
 TYPES_PREFIX: Final = f"{API_PREFIX}/types"
+NEAR_NAMES_PREFIX: Final = f"{API_PREFIX}/near-names"
 TOOLTIP_SEGMENT: Final = "tooltip"
 WALK_SEGMENT: Final = "rel"
 
 
 def reference(entity_type: EntityType, handle: str) -> Reference:
-    """What the caller meant by the last segment of the path: a run of nothing but
-    digits is an id, anything else a handle.
-    """
+    """Read the last path segment: all digits is an id, anything else a handle."""
     if handle.isdigit():
         return EntityKey(type=entity_type, id=int(handle))
     return (entity_type, handle)
 
 
 def entity_path(link: Link) -> str:
-    """Where the page of the thing this link points at is served."""
+    """Build the path serving this link's page."""
     return f"{ENTITIES_PREFIX}/{link.type.value}/{link.id}"
 
 
 def tooltip_path(link: Link) -> str:
-    """Where the hover sized answer for this link is served."""
+    """Build the path serving this link's hover-sized answer."""
     return f"{entity_path(link)}/{TOOLTIP_SEGMENT}"
 
 
 def walk_path(link: Link, rel: RelationshipType) -> str:
-    """Where one relationship of the thing this link points at is served."""
+    """Build the path serving one of this link's relationships."""
     return f"{entity_path(link)}/{WALK_SEGMENT}/{rel.value}"
+
+
+def near_names_path(entity_type: EntityType, name: str) -> str:
+    """Build the path for asking what an unmatched name may have meant."""
+    asked = urlencode({"name": name, "type": entity_type.value})
+    return f"{NEAR_NAMES_PREFIX}?{asked}"
 
 
 # test cases
@@ -88,13 +93,31 @@ def test_one_relationship_is_a_resource_of_its_own() -> None:
     assert path == "/v1/entities/item/4587/rel/located_in"
 
 
+def test_a_name_that_meant_nothing_is_pointed_at_the_names_that_exist() -> None:
+    from wiki_api.domain.identity import EntityType as Type
+
+    assert near_names_path(Type.ITEM, "dragon scimtar") == (
+        "/v1/near-names?name=dragon+scimtar&type=item"
+    )
+
+
+def test_a_name_full_of_punctuation_is_still_safe_to_point_at() -> None:
+    from wiki_api.domain.identity import EntityType as Type
+
+    assert near_names_path(Type.ITEM, "a&b=c") == (
+        "/v1/near-names?name=a%26b%3Dc&type=item"
+    )
+
+
 def test_no_path_this_surface_builds_is_ever_an_absolute_url() -> None:
+    from wiki_api.domain.identity import EntityType as Type
     from wiki_api.domain.relationships import RelationshipType as Rel
 
     built = (
         entity_path(_link()),
         tooltip_path(_link()),
         walk_path(_link(), Rel.LOCATED_IN),
+        near_names_path(Type.ITEM, "dragon"),
     )
     assert all(path.startswith("/") for path in built)
     assert not any("://" in path for path in built)

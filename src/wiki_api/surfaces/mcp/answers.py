@@ -1,5 +1,6 @@
-"""What comes back when a name meant nothing, or meant something else: on this surface
-an absence is part of the answer rather than a raised error.
+"""Answer a name that meant nothing, or meant something else.
+
+On this surface an absence is part of the answer, never a raised error.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from wiki_api.core import Found, Hidden, Missing, Moved
 from wiki_api.domain.identity import EntityType
+from wiki_api.surfaces.mcp.naming import CLOSE_NAMES_TOOL, SORTS_TOOL
 from wiki_api.surfaces.mcp.projection import Related, Thing, related_of, thing_of
 
 if TYPE_CHECKING:
@@ -21,8 +23,13 @@ MOST_OTHERS: Final = 5
 
 RENAMED_NOTE = "that name is retired; ask again using the one below"
 WITHHELD_NOTE = "that is in this build but is not published"
-UNKNOWN_NOTE = "nothing here answers to that name"
-UNKNOWN_WITH_OTHERS = f"{UNKNOWN_NOTE}; one of the names below may be the one meant"
+UNKNOWN_NOTE = (
+    "nothing here answers to that name. It may be misspelt: settle with whoever "
+    f"asked which sort of thing was meant, using `{SORTS_TOOL}` if that is unclear, "
+    f"then call `{CLOSE_NAMES_TOOL}` for the real names closest to it. Put those "
+    "names to whoever asked and use the one they choose; do not choose for them"
+)
+UNKNOWN_WITH_OTHERS = f"{UNKNOWN_NOTE}. One of the names below may be the one meant"
 
 
 class Outcome(StrEnum):
@@ -35,7 +42,7 @@ class Outcome(StrEnum):
 
 
 class Suggestion(BaseModel):
-    """Another name worth trying, and the identity behind it."""
+    """One other name worth trying, with the identity behind it."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -45,8 +52,9 @@ class Suggestion(BaseModel):
 
 
 class Answer[T](BaseModel):
-    """An answer, or the reason there isn't one: `note` says what went wrong in words
-    and `others` offers names worth trying instead.
+    """An answer, or the reason there isn't one.
+
+    `note` says what went wrong; `others` offers names worth trying instead.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -59,7 +67,7 @@ class Answer[T](BaseModel):
 
 
 def suggested(links: tuple[Link, ...]) -> tuple[Suggestion, ...]:
-    """The few other names worth putting in front of a reader."""
+    """Pick the few other names worth putting in front of a reader."""
     return tuple(
         Suggestion(name=link.label, type=link.type, id=link.id)
         for link in links[:MOST_OTHERS]
@@ -67,7 +75,7 @@ def suggested(links: tuple[Link, ...]) -> tuple[Suggestion, ...]:
 
 
 def refusal(absent: Absent) -> tuple[Outcome, str, tuple[Suggestion, ...]]:
-    """Why there is no answer, said in a way a reader can act on."""
+    """Say why there is no answer, in terms a reader can act on."""
     if isinstance(absent, Moved):
         return Outcome.RENAMED, RENAMED_NOTE, suggested((absent.target,))
     if isinstance(absent, Hidden):
@@ -76,7 +84,7 @@ def refusal(absent: Absent) -> tuple[Outcome, str, tuple[Suggestion, ...]]:
 
 
 def about_thing(named: Named[PageDescriptor], data_version: str) -> Answer[Thing]:
-    """One thing, or why that name did not reach one."""
+    """Answer with one thing, or with why that name did not reach one."""
     if isinstance(named.resolution, Found):
         return Answer[Thing](
             outcome=Outcome.FOUND,
@@ -88,7 +96,7 @@ def about_thing(named: Named[PageDescriptor], data_version: str) -> Answer[Thing
 
 
 def about_related(named: Named[Block], data_version: str) -> Answer[Related]:
-    """One page of one way onwards, or why that name did not reach one."""
+    """Answer with one page of one way onwards, or why that name did not reach one."""
     if isinstance(named.resolution, Found) and named.subject is not None:
         return Answer[Related](
             outcome=Outcome.FOUND,

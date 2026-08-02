@@ -1,6 +1,6 @@
-"""Making the most of the fact that a built artifact never changes under a reader, so a
-response can be validated rather than re-sent and a caller pinned to one build can hold
-the answer forever.
+"""Stamp and validate responses, which never change while one build is being served.
+
+A caller pinned to a build with `?v=` may hold the answer forever.
 """
 
 from __future__ import annotations
@@ -38,9 +38,7 @@ PIN_MESSAGE: Final = (
 
 
 def validator(data_version: str, path: str, query: Iterable[tuple[str, str]]) -> str:
-    """A short word standing in for one exact response, weak because the same answer
-    compressed differently is still the same answer.
-    """
+    """Build the weak ETag standing in for one exact response."""
     asked = "&".join(f"{name}={value}" for name, value in sorted(query))
     digest = blake2s(
         f"{data_version}\n{path}\n{asked}".encode(), digest_size=8
@@ -49,7 +47,7 @@ def validator(data_version: str, path: str, query: Iterable[tuple[str, str]]) ->
 
 
 class Validators(BaseHTTPMiddleware):
-    """Stamps every answer with what it was built from, and honours a re-ask."""
+    """Stamp every answer with what it was built from, and answer 304 on a re-ask."""
 
     def __init__(self, app: ASGIApp, *, settings: Settings) -> None:
         super().__init__(app)
@@ -110,7 +108,7 @@ def decline_caching(response: Response) -> None:
 
 
 def http_date(moment: float) -> str:
-    """A moment, written the way a validator header wants it."""
+    """Write a moment the way a validator header wants it."""
     return format_date_time(moment)
 
 

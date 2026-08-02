@@ -1,4 +1,4 @@
-"""Assembling the surface an agent talks to: four tools written out here, and one built
+"""Assemble the surface an agent talks to: the tools written out here, plus one built
 from the registry for every way a link can be followed.
 """
 
@@ -15,17 +15,31 @@ from wiki_api.core import KnowledgeService
 from wiki_api.domain.identity import EntityType
 from wiki_api.domain.manifest import Manifest
 from wiki_api.domain.page import MAX_PAGE_SIZE
+from wiki_api.domain.search import MOST_NEAR_LIMIT
 from wiki_api.repository.provider import RepositoryProvider
 from wiki_api.surfaces.mcp.answers import Answer, about_related, about_thing
-from wiki_api.surfaces.mcp.naming import Followed, followable
-from wiki_api.surfaces.mcp.projection import Matches, Related, Thing, matches_of
+from wiki_api.surfaces.mcp.guarding import keys_for
+from wiki_api.surfaces.mcp.naming import (
+    CLOSE_NAMES_TOOL,
+    SORTS_TOOL,
+    WRITTEN_TOOLS,
+    Followed,
+    followable,
+)
+from wiki_api.surfaces.mcp.projection import (
+    Matches,
+    Related,
+    Sorts,
+    Thing,
+    matches_of,
+    sorts_of,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 SERVER_NAME: Final = "2009scape-wiki"
 MOST_RESULT_CHARS: Final = 20_000
-WRITTEN_TOOLS: Final = ("search", "get_thing", "list_things", "about")
 
 READ_ONLY: Final = ToolAnnotations(
     readOnlyHint=True, idempotentHint=True, openWorldHint=False
@@ -39,7 +53,10 @@ INSTRUCTIONS: Final = (
     "If an answer comes back with an outcome other than found, read its note and the "
     "names it offers instead of guessing again. Answers arrive one page at a time "
     "and report how many there are in total, so ask for the next page only when the "
-    "count says it is worth it."
+    "count says it is worth it. A name that answers to nothing may simply be "
+    "misspelt; the closest real names can be looked up once the sort of thing is "
+    "known, but which of them was meant is for whoever asked to say, never for you "
+    "to decide."
 )
 
 SEARCH_DESCRIPTION: Final = (
@@ -61,6 +78,19 @@ ABOUT_DESCRIPTION: Final = (
     "Say which build of the game data is being answered from, and when it was made. "
     "Use this when an answer needs to be attributed, or looks out of date."
 )
+SORTS_DESCRIPTION: Final = (
+    "List the sorts of thing this build knows about, with how many there are of "
+    "each. Use this to settle what something is before asking about it by name, "
+    "which the tool for close spellings needs told."
+)
+CLOSE_NAMES_DESCRIPTION: Final = (
+    "Given a name that answered to nothing, offer the real names closest to it. Use "
+    "this only after a lookup came back unknown, and only once whoever asked has "
+    "said which sort of thing they meant. The answer is names and identities alone, "
+    "on purpose: show it to whoever asked, let them say which one they meant, and "
+    "look that one up. Never pick for them, and never treat an empty answer as "
+    "permission to guess."
+)
 
 NameArg = Annotated[
     str,
@@ -80,6 +110,41 @@ TypeArg = Annotated[
 ]
 OneTypeArg = Annotated[
     EntityType, Field(description="Which sort of thing to go through.")
+]
+MisspeltArg = Annotated[
+    str,
+    Field(description="The name that answered to nothing, exactly as it was given."),
+]
+NamedTypeArg = Annotated[
+    EntityType,
+    Field(
+        description=(
+            "Which sort of thing the name belongs to. There is no default: the same "
+            "misspelling points at different things depending on the answer, so ask "
+            "whoever wants to know before calling this."
+        )
+    ),
+]
+CloseLimitArg = Annotated[
+    int,
+    Field(
+        ge=1,
+        le=MOST_NEAR_LIMIT,
+        description=(
+            "At most how many close names to offer for a person to choose from."
+        ),
+    ),
+]
+CloseKeepArg = Annotated[
+    float,
+    Field(
+        ge=0.0,
+        le=1.0,
+        description=(
+            "How close to the best candidate a name has to be to be offered "
+            "alongside it, as a share of the best score. Lower values offer more."
+        ),
+    ),
 ]
 OffsetArg = Annotated[
     int,
@@ -101,11 +166,21 @@ LimitArg = Annotated[
 ]
 
 
-def create_server(settings: Settings | None = None) -> FastMCP:
-    """A ready server, reading whatever artifact the settings point at."""
+def create_server(
+    settings: Settings | None = None, *, mounted: bool = False
+) -> FastMCP:
+    """Build the MCP server over the artifact the settings point at.
+
+    `mounted` leaves out this server's own guard, because the application it hangs
+    inside has already checked the caller.
+    """
     chosen = settings if settings is not None else get_settings()
     provider = RepositoryProvider.open(chosen.artifact_path)
-    server: FastMCP = FastMCP(name=SERVER_NAME, instructions=INSTRUCTIONS)
+    server: FastMCP = FastMCP(
+        name=SERVER_NAME,
+        instructions=INSTRUCTIONS,
+        auth=keys_for(chosen, mounted=mounted),
+    )
     _offer_asking(server, provider, chosen)
     _offer_following(server, provider, chosen)
     return server
@@ -187,6 +262,44 @@ def _offer_asking(
     def about() -> Manifest:
         return _service(provider, settings).about()
 
+    @server.tool(
+        name=SORTS_TOOL,
+        description=SORTS_DESCRIPTION,
+        annotations=READ_ONLY,
+        meta=BUDGET,
+    )
+    def list_sorts() -> Sorts:
+        service = _service(provider, settings)
+        described = service.describe_types()
+        return sorts_of(
+            described,
+            {
+                info.type: service.list_type(info.type, limit=1).total
+                for info in described
+            },
+            service.about().data_version,
+        )
+
+    @server.tool(
+        name=CLOSE_NAMES_TOOL,
+        description=CLOSE_NAMES_DESCRIPTION,
+        annotations=READ_ONLY,
+        meta=BUDGET,
+    )
+    def find_close_names(
+        name: MisspeltArg,
+        type: NamedTypeArg,
+        limit: CloseLimitArg = settings.near_limit,
+        keep: CloseKeepArg = settings.near_keep,
+    ) -> Matches:
+        service = _service(provider, settings)
+        return matches_of(
+            service.near_names(
+                name, type, limit=limit, keep=keep, floor=settings.near_floor
+            ),
+            service.about().data_version,
+        )
+
 
 def _offer_following(
     server: FastMCP, provider: RepositoryProvider, settings: Settings
@@ -220,14 +333,11 @@ def _following(
     return follow
 
 
+if __name__ == "__main__":
+    main()
+
+
 # test cases
-
-
-def test_the_tools_offered_are_the_ones_the_registry_implies() -> None:
-    from wiki_api.surfaces.mcp.naming import followable as declared
-
-    generated = {followed.name for followed in declared()}
-    assert not set(WRITTEN_TOOLS) & generated
 
 
 def test_the_written_tools_are_named_in_one_place_only() -> None:
@@ -258,6 +368,8 @@ def test_every_written_tool_explains_when_to_reach_for_it() -> None:
         GET_DESCRIPTION,
         LIST_DESCRIPTION,
         ABOUT_DESCRIPTION,
+        SORTS_DESCRIPTION,
+        CLOSE_NAMES_DESCRIPTION,
     ):
         assert "Use this" in described or "call first" in described
 
@@ -268,8 +380,19 @@ def test_no_two_written_tools_read_the_same() -> None:
         GET_DESCRIPTION,
         LIST_DESCRIPTION,
         ABOUT_DESCRIPTION,
+        SORTS_DESCRIPTION,
+        CLOSE_NAMES_DESCRIPTION,
     )
     assert len(set(described_as)) == len(described_as)
+
+
+def test_the_tool_for_close_names_says_who_chooses_between_them() -> None:
+    assert "Never pick for them" in CLOSE_NAMES_DESCRIPTION
+    assert "whoever asked" in CLOSE_NAMES_DESCRIPTION
+
+
+def test_the_words_read_first_say_that_a_misspelling_is_not_ours_to_settle() -> None:
+    assert "never for you" in INSTRUCTIONS
 
 
 def test_a_server_refuses_to_start_without_an_artifact() -> None:

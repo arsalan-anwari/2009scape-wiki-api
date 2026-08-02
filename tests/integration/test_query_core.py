@@ -193,6 +193,39 @@ def test_a_name_that_folds_away_to_nothing_finds_nothing(
     assert match.results.total == 0
 
 
+def test_what_did_i_mean_by_this_misspelling(service: KnowledgeService) -> None:
+    page = service.near_names("dragon scimtar", EntityType.ITEM)
+    assert [result.link.key for result in page.items] == [SCIMITAR]
+
+
+def test_a_near_name_answer_carries_no_more_than_identity(
+    service: KnowledgeService,
+) -> None:
+    page = service.near_names("dragon scimtar", EntityType.ITEM)
+    assert page.items
+    for result in page.items:
+        assert result.description is None
+        assert result.link.label
+
+
+def test_a_near_name_answer_says_plainly_when_nothing_is_close(
+    service: KnowledgeService,
+) -> None:
+    page = service.near_names("zzzzqqqqwwww", EntityType.ITEM)
+    assert page.items == ()
+    assert page.total == 0
+
+
+def test_a_near_name_answer_uses_the_configured_defaults_when_asked_for_none(
+    service: KnowledgeService,
+) -> None:
+    from wiki_api.domain.search import NEAR_LIMIT
+
+    page = service.near_names("dragon", EntityType.ITEM, keep=0.1, floor=0.1)
+    assert page.limit == NEAR_LIMIT
+    assert len(page.items) <= NEAR_LIMIT
+
+
 def test_what_types_exist_and_how_they_present(service: KnowledgeService) -> None:
     described = {info.type: info for info in service.describe_types()}
     assert set(described) == set(EntityType)

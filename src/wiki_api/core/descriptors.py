@@ -1,4 +1,4 @@
-"""Describing a whole page as data, so a reader can render one mechanically."""
+"""Describe a whole page as data, so a reader can render one mechanically."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def describe_page(
     data_version: str,
     limit: int = BLOCK_PAGE_SIZE,
 ) -> PageDescriptor:
-    """Everything a reader needs to render this entity's page."""
+    """Describe everything a reader needs to render this entity's page."""
     canonical_key = entity.canonical_key
     variants = repository.variants_of(canonical_key)
     keys = tuple(dict.fromkeys([canonical_key, *(variant.key for variant in variants)]))
@@ -67,7 +67,7 @@ def build_descriptor(
 
 
 def infobox_of(values: Sequence[AttributeValue]) -> tuple[AttributeValue, ...]:
-    """The values shown beside the page rather than inside it."""
+    """Collect the values shown beside the page rather than inside it."""
     chosen = [
         value
         for value in values
@@ -78,7 +78,7 @@ def infobox_of(values: Sequence[AttributeValue]) -> tuple[AttributeValue, ...]:
 
 
 def sections_of(values: Sequence[AttributeValue]) -> tuple[Section, ...]:
-    """The body of the page, one section per group that has anything to show."""
+    """Build the page body, one section per group that has anything to show."""
     grouped: dict[AttributeGroup, list[AttributeValue]] = {}
     for value in values:
         if GROUP_META[value.group].placement is not GroupPlacement.SECTION:

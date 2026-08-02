@@ -1,10 +1,11 @@
-"""The one read interface every storage backend satisfies."""
+"""Declare the one read interface every storage backend satisfies."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, SortOrder
+from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -21,8 +22,8 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class KnowledgeRepository(Protocol):
-    """Everything the query core can ask of storage: read only, every listing paged, and
-    every walk taking a set of keys rather than one.
+    """Everything the query core asks of storage: read only, every listing paged, every
+    walk taking a set of keys.
     """
 
     def manifest(self) -> Manifest: ...
@@ -53,6 +54,16 @@ class KnowledgeRepository(Protocol):
         types: Sequence[EntityType] | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
+    ) -> Page[SearchHit]: ...
+
+    def nearest(
+        self,
+        query: str,
+        entity_type: EntityType,
+        *,
+        limit: int = NEAR_LIMIT,
+        keep: float = NEAR_KEEP,
+        floor: float = NEAR_FLOOR,
     ) -> Page[SearchHit]: ...
 
     def edges_from(
@@ -97,6 +108,7 @@ def test_the_protocol_describes_the_whole_read_surface() -> None:
         "resolve_source_key",
         "list_entities",
         "search",
+        "nearest",
         "edges_from",
         "edges_to",
         "variants_of",
@@ -112,6 +124,22 @@ def test_every_listing_operation_is_paginated() -> None:
         signature = inspect.signature(getattr(KnowledgeRepository, name))
         assert {"limit", "offset"} <= set(signature.parameters)
         assert signature.return_annotation.startswith("Page[")
+
+
+def test_a_near_name_question_is_always_about_one_sort_of_thing() -> None:
+    import inspect
+
+    signature = inspect.signature(KnowledgeRepository.nearest)
+    assert signature.parameters["entity_type"].annotation == "EntityType"
+    assert signature.parameters["entity_type"].default is inspect.Parameter.empty
+
+
+def test_a_near_name_answer_is_bounded_without_being_paged() -> None:
+    import inspect
+
+    signature = inspect.signature(KnowledgeRepository.nearest)
+    assert "limit" in signature.parameters
+    assert "offset" not in signature.parameters
 
 
 def test_a_walk_takes_a_set_of_keys_so_variants_travel_with_the_canonical() -> None:

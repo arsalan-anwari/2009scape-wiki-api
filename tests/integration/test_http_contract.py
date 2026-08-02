@@ -149,6 +149,60 @@ def test_the_thing_called_this(client: TestClient) -> None:
     assert matched["best_match"]["id"] == 4587
 
 
+def test_what_did_i_mean_by_this_misspelling(client: TestClient) -> None:
+    offered = _body(client, "/v1/near-names?name=dragon scimtar&type=item")
+    assert [result["link"]["id"] for result in offered["items"]] == [4587]
+
+
+def test_a_near_name_answer_carries_no_more_than_identity(client: TestClient) -> None:
+    offered = _body(client, "/v1/near-names?name=dragon scimtar&type=item")
+    assert offered["items"]
+    for result in offered["items"]:
+        assert result["description"] is None
+        assert set(result) == {"link", "type", "score", "description"}
+
+
+def test_a_near_name_answer_is_empty_when_nothing_is_close(client: TestClient) -> None:
+    offered = _body(client, "/v1/near-names?name=zzzqqqwww&type=item")
+    assert offered["items"] == []
+    assert offered["total"] == 0
+
+
+def test_a_near_name_question_without_a_sort_of_thing_is_refused(
+    client: TestClient,
+) -> None:
+    assert client.get("/v1/near-names?name=dragon scimtar").status_code == 422
+
+
+def test_a_near_name_answer_can_be_asked_to_be_narrower(client: TestClient) -> None:
+    wide = _body(client, "/v1/near-names?name=dragon&type=item&keep=0.1")
+    narrow = _body(client, "/v1/near-names?name=dragon&type=item&keep=0.1&limit=1")
+    assert len(narrow["items"]) <= 1 <= len(wide["items"])
+
+
+def test_a_near_name_answer_can_never_be_asked_to_be_a_listing(
+    client: TestClient,
+) -> None:
+    asked = "/v1/near-names?name=dragon&type=item&limit=99"
+    assert client.get(asked).status_code == 422
+
+
+def test_a_name_nobody_answers_to_says_where_to_ask_what_it_meant(
+    client: TestClient,
+) -> None:
+    response = client.get("/v1/entities/item/dragon-scimtar")
+    assert response.status_code == 404
+    reported = response.json()["error"]
+    assert reported["code"] == "not_found"
+    assert reported["near_names"] == "/v1/near-names?name=dragon+scimtar&type=item"
+
+
+def test_an_id_nobody_answers_to_offers_no_spelling_help(client: TestClient) -> None:
+    response = client.get("/v1/entities/item/999999")
+    assert response.status_code == 404
+    assert "near_names" not in response.json()["error"]
+
+
 def test_what_types_exist_and_how_do_their_fields_present(client: TestClient) -> None:
     response = client.get("/v1/types")
     assert response.status_code == 200
@@ -543,8 +597,9 @@ def test_nothing_may_be_written_through_this_contract(client: TestClient) -> Non
 
 
 def test_a_front_end_elsewhere_is_allowed_in(client: TestClient) -> None:
-    response = client.get(SCIMITAR, headers={"origin": "https://wiki.example.test"})
-    assert response.headers["access-control-allow-origin"] == "*"
+    origin = "https://wiki.example.test"
+    response = client.get(SCIMITAR, headers={"origin": origin})
+    assert response.headers["access-control-allow-origin"] == origin
 
 
 def test_a_front_end_can_read_the_headers_it_caches_with(client: TestClient) -> None:

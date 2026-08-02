@@ -64,8 +64,8 @@ class AttributeMeta:
 
 
 class AttributeSpec(BaseModel):
-    """One attribute as the registry declares it: label, group, order, format, unit, and
-    any fixed set of values it may take.
+    """One attribute as declared: label, group, order, format, unit, and any fixed set
+    of values it takes.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -101,7 +101,7 @@ class MisdeclaredAttribute(TypeError):
 
 
 def choices_of(annotation: Any) -> tuple[str, ...] | None:
-    """The vocabulary behind a field, so a page can render it without naming it."""
+    """Read the vocabulary behind a field, so a page renders it without naming it."""
     for candidate in get_args(annotation) or (annotation,):
         if isinstance(candidate, type) and issubclass(candidate, StrEnum):
             return tuple(member.value for member in candidate)

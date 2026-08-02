@@ -10,12 +10,20 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from wiki_api.surfaces.mcp import SERVER_NAME, WRITTEN_TOOLS, followable
+from wiki_api.surfaces.mcp import (
+    CLOSE_NAMES_TOOL,
+    SERVER_NAME,
+    SORTS_TOOL,
+    WRITTEN_TOOLS,
+    followable,
+)
 from wiki_api.surfaces.mcp.server import (
     ABOUT_DESCRIPTION,
+    CLOSE_NAMES_DESCRIPTION,
     GET_DESCRIPTION,
     LIST_DESCRIPTION,
     SEARCH_DESCRIPTION,
+    SORTS_DESCRIPTION,
 )
 
 if TYPE_CHECKING:
@@ -24,6 +32,8 @@ if TYPE_CHECKING:
 ROOT = Path(__file__).parent.parent.parent
 DEMOS = ROOT / "demos"
 RUNNER = DEMOS / "run_demo.py"
+COMMON = DEMOS / "claude_common.py"
+SHARED = (RUNNER, COMMON)
 ENTRY = "main.py"
 QUOTED = re.compile(r"[\"'`](\w+)[\"'`]")
 PREFIXED = re.compile(r"mcp__([\w-]+)__([\w*]+)")
@@ -38,7 +48,10 @@ def _entries() -> list[Path]:
 
 
 def _modules() -> list[Path]:
-    return sorted(path for folder in _folders() for path in folder.glob("*.py"))
+    """Every file a demonstration is made of, including what they share."""
+    return sorted(
+        [*(path for folder in _folders() for path in folder.glob("*.py")), COMMON]
+    )
 
 
 def _loaded(path: Path) -> ModuleType:
@@ -71,8 +84,14 @@ def test_every_demonstration_stands_on_its_own(folder: Path) -> None:
 
 
 def test_no_demonstration_leaves_loose_files_beside_the_others() -> None:
-    loose = [path.name for path in DEMOS.glob("*.py") if path != RUNNER]
+    """Only the runner and what every demonstration shares sit above the folders."""
+    loose = [path.name for path in DEMOS.glob("*.py") if path not in SHARED]
     assert not loose, f"{loose} belong in a folder of their own"
+
+
+def test_what_the_demonstrations_share_is_somewhere_they_can_all_reach() -> None:
+    assert COMMON.is_file()
+    assert COMMON.parent == DEMOS
 
 
 @pytest.mark.parametrize("path", _modules(), ids=lambda path: path.parent.name)
@@ -85,11 +104,15 @@ def test_every_demonstration_starts_the_same_way(path: Path) -> None:
     assert callable(_loaded(path).main)
 
 
-@pytest.mark.parametrize("path", _entries(), ids=lambda path: path.parent.name)
-def test_every_demonstration_explains_what_it_costs(path: Path) -> None:
-    source = path.read_text(encoding="utf-8")
-    assert source.startswith('"""')
-    assert "demonstrat" in source.lower()
+@pytest.mark.parametrize("folder", _folders(), ids=lambda path: path.name)
+def test_every_demonstration_explains_what_it_costs(folder: Path) -> None:
+    """Check the entry says what it does and the README says what a run costs.
+
+    Cost is asked of the README, which a reader sees before running, not of the
+    docstring.
+    """
+    assert (folder / ENTRY).read_text(encoding="utf-8").startswith('"""')
+    assert "cost" in (folder / "README.md").read_text(encoding="utf-8").lower()
 
 
 @pytest.mark.parametrize("path", _modules(), ids=lambda path: path.parent.name)
@@ -191,6 +214,8 @@ def test_the_written_tools_a_reader_meets_are_the_ones_offered() -> None:
         "get_thing": GET_DESCRIPTION,
         "list_things": LIST_DESCRIPTION,
         "about": ABOUT_DESCRIPTION,
+        SORTS_TOOL: SORTS_DESCRIPTION,
+        CLOSE_NAMES_TOOL: CLOSE_NAMES_DESCRIPTION,
     }
     assert set(described) == set(WRITTEN_TOOLS)
     assert set(described) <= _offered()

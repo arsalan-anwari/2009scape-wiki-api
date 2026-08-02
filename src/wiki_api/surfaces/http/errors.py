@@ -1,5 +1,5 @@
-"""Turning everything that can go wrong into one envelope a client can branch on,
-carrying no stack trace, file path or internal identifier.
+"""Turn everything that can go wrong into one envelope a client branches on, carrying
+no stack trace, path or internal identifier.
 """
 
 from __future__ import annotations
@@ -25,17 +25,24 @@ UNEXPECTED_MESSAGE = "the request could not be completed"
 
 
 class ContractError(Exception):
-    """A request that cannot be answered, phrased the way a client reads it."""
+    """Raise a failure already phrased the way a client reads it."""
 
-    def __init__(self, status: HTTPStatus, code: ErrorCode, message: str) -> None:
+    def __init__(
+        self,
+        status: HTTPStatus,
+        code: ErrorCode,
+        message: str,
+        near_names: str | None = None,
+    ) -> None:
         super().__init__(message)
         self.status = status
         self.code = code
         self.message = message
+        self.near_names = near_names
 
 
 class Redirect(Exception):
-    """The thing asked for now answers somewhere else in this api."""
+    """Raise when the thing asked for now answers elsewhere in this api."""
 
     def __init__(self, path: str) -> None:
         super().__init__(path)
@@ -48,10 +55,11 @@ def error_response(
     message: str,
     *,
     data_version: str | None = None,
+    near_names: str | None = None,
     headers: dict[str, str] | None = None,
 ) -> JSONResponse:
-    """One failure, written into the envelope every other failure uses."""
-    body = ErrorBody.of(code, message, data_version)
+    """Write one failure into the envelope every other failure uses."""
+    body = ErrorBody.of(code, message, data_version, near_names)
     return JSONResponse(
         status_code=int(status),
         content=body.model_dump(exclude_none=True),
@@ -78,7 +86,9 @@ async def _redirect(request: Request, error: Exception) -> Response:
 
 async def _contract(request: Request, error: Exception) -> Response:
     assert isinstance(error, ContractError)
-    return error_response(error.status, error.code, error.message)
+    return error_response(
+        error.status, error.code, error.message, near_names=error.near_names
+    )
 
 
 async def _invalid(request: Request, error: Exception) -> Response:

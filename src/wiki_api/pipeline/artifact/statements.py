@@ -1,4 +1,4 @@
-"""The SQL a build writes with, kept in files rather than in strings here."""
+"""Load the SQL a build writes with, kept in files rather than in strings."""
 
 from __future__ import annotations
 
@@ -23,8 +23,8 @@ def load(name: str) -> str:
 
 
 def declared_vocabularies(schema: str) -> Mapping[str, frozenset[str]]:
-    """The values each column of the schema will accept, which have to stay identical to
-    the vocabularies the domain declares.
+    """Read the values each schema column accepts, which must stay identical to the
+    vocabularies the domain declares.
     """
     declared: dict[str, frozenset[str]] = {}
     for column, listed in _VOCABULARY_CHECK.findall(schema):

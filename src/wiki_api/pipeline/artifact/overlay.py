@@ -1,6 +1,6 @@
-"""The overlay documents a build reads, where every raw encoding the game uses is
-converted so nothing above this layer sees an ordinal, a packed string or a date written
-as text.
+"""Read the overlay documents a build takes, converting every raw game encoding here.
+
+Nothing above this layer sees an ordinal, a packed string or a date written as text.
 """
 
 from __future__ import annotations
@@ -123,7 +123,7 @@ class OverlayPrice(BaseModel):
 
 
 class OverlayDocument(BaseModel):
-    """A whole document, with the source and game version everything in it inherits."""
+    """One document, with the source and game version everything in it inherits."""
 
     model_config = ConfigDict(frozen=True, extra="forbid", populate_by_name=True)
 

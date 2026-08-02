@@ -1,5 +1,5 @@
-"""Following a relationship in either direction, over an entity together with its
-variants, so one query yields a total that can be trusted.
+"""Follow a relationship either way over an entity and its variants, so one query
+yields a total that can be trusted.
 """
 
 from __future__ import annotations
@@ -23,8 +23,8 @@ BLOCK_PAGE_SIZE: Final = 10
 
 
 def key_set(repository: KnowledgeRepository, entity: Entity) -> tuple[EntityKey, ...]:
-    """Every id a walk from this entity has to cover: the canonical entity together with
-    its variants.
+    """Collect every id a walk from this entity covers: the canonical one and its
+    variants.
     """
     canonical = entity.canonical_key
     variants = repository.variants_of(canonical)
@@ -62,7 +62,7 @@ def walk_keys(
     limit: int = BLOCK_PAGE_SIZE,
     offset: int = 0,
 ) -> Block:
-    """The same walk, over a key set the caller has already worked out."""
+    """Walk over a key set the caller has already worked out."""
     if direction is Direction.FORWARD:
         edges = repository.edges_from(keys, rel=rel, limit=limit, offset=offset)
     else:
@@ -80,7 +80,7 @@ def blocks_of(
     *,
     limit: int = BLOCK_PAGE_SIZE,
 ) -> tuple[Block, ...]:
-    """Every relationship this type can take part in that has anything in it."""
+    """Build a block for every relationship of this type that has anything in it."""
     blocks = []
     for spec in sorted(RELATIONSHIP_SPECS.values(), key=lambda spec: spec.order):
         for direction in Direction:
@@ -100,12 +100,12 @@ def blocks_of(
 
 
 def far_key(edge: Edge, direction: Direction) -> EntityKey:
-    """The end of an edge a walk in this direction arrives at."""
+    """Pick the end of an edge a walk in this direction arrives at."""
     return edge.dst if direction is Direction.FORWARD else edge.src
 
 
 def label_of(rel: RelationshipType, direction: Direction) -> str:
-    """What this relationship is called when it is read this way round."""
+    """Read what this relationship is called this way round."""
     spec = RELATIONSHIP_SPECS[rel]
     if direction is Direction.FORWARD:
         return spec.forward_label

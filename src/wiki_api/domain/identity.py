@@ -21,9 +21,7 @@ class EntityType(StrEnum):
 
 
 class EntityKey(BaseModel):
-    """What identifies an entity: its type together with an id that is only unique
-    within that type.
-    """
+    """What identifies an entity: its type, plus an id unique only within that type."""
 
     model_config = ConfigDict(frozen=True)
 

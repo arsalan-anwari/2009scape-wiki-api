@@ -53,6 +53,7 @@ def test_every_question_the_contract_answers_has_a_route(
         "/v1/types/{entity_type}/entities",
         "/v1/search",
         "/v1/find",
+        "/v1/near-names",
         "/v1/entities/{entity_type}/{ref}",
         "/v1/entities/{entity_type}/{ref}/tooltip",
         "/v1/entities/{entity_type}/{ref}/rel/{rel}",
@@ -125,6 +126,7 @@ def test_every_method_a_client_generates_is_named_by_hand(
         "listing",
         "search",
         "find",
+        "near_names",
         "entity",
         "tooltip",
         "walk",
@@ -154,7 +156,12 @@ def test_a_failure_is_described_in_one_shape(document: dict[str, Any]) -> None:
     body = _schemas(document)["ErrorBody"]
     detail = _schemas(document)["ErrorDetail"]
     assert set(body["properties"]) == {"error"}
-    assert set(detail["properties"]) == {"code", "message", "data_version"}
+    assert set(detail["properties"]) == {
+        "code",
+        "message",
+        "data_version",
+        "near_names",
+    }
     assert set(detail["required"]) == {"code", "message"}
 
 
