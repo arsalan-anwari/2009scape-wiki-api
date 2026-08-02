@@ -1,10 +1,6 @@
 # Ignore the data being uploaded to Huggingface
 data/*
 
-# Ignore the seed data used from the game server and other resources
-# This is updated by the developer and the clean data will be in `data/` and huggingface datasets
-game_data/*
-
 # Ignore what the container scripts prepare: a fetched dataset, a public key,
 # and the addresses the guard is refusing. All of it is made again on demand.
 run/

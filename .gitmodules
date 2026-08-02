@@ -1,0 +1,16 @@
+[submodule "game_data/2009scape"]
+	path = game_data/2009scape
+	url = https://gitlab.com/2009scape/2009scape.git
+	branch = master
+[submodule "game_data/2009scape-item-definition-editor"]
+	path = game_data/2009scape-item-definition-editor
+	url = https://gitlab.com/2009scape/tools/2009scape-item-definition-editor.git
+	branch = master
+[submodule "game_data/rs09-constants-library"]
+	path = game_data/rs09-constants-library
+	url = https://gitlab.com/2009scape/tools/rs09-constants-library.git
+	branch = main
+[submodule "game_data/rs09-thanos-tool"]
+	path = game_data/rs09-thanos-tool
+	url = https://gitlab.com/2009scape/tools/rs09-thanos-tool.git
+	branch = master
