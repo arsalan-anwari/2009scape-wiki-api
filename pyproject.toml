@@ -60,7 +60,7 @@ module-root = "src"
 [tool.ruff]
 target-version = "py312"
 line-length = 88
-src = ["src", "tests", "demos"]
+src = ["src", "tests", "demos", "tools"]
 extend-exclude = ["game_data"]
 
 [tool.ruff.lint]
@@ -69,7 +69,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["src", "tests", "demos", "conftest.py"]
+files = ["src", "tests", "demos", "tools", "conftest.py"]
 plugins = ["pydantic.mypy"]
 
 [tool.pydantic-mypy]
@@ -81,7 +81,7 @@ warn_required_dynamic_aliases = true
 extraPaths = ["demos"]
 
 [tool.pytest.ini_options]
-testpaths = ["src", "tests"]
+testpaths = ["src", "tests", "tools"]
 pythonpath = ["."]
 python_files = ["*.py"]
 python_functions = ["test_*"]

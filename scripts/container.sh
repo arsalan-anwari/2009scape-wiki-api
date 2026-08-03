@@ -132,7 +132,7 @@ dataset() {
   if [[ "$SOURCE" == "fixture" ]]; then
     # Built rather than fetched, for a check that has to hold with no network and
     # no dataset to reach. It answers the same questions about far less.
-    uv run poe build-artifact "$FIXTURE" \
+    uv run poe build-artifact --documents "$FIXTURE" \
       --destination "$DATA_DIR/$ARTIFACT" \
       --data-version container-check >/dev/null
     say "the test fixture is built into $DATA_DIR"
