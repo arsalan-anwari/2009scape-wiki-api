@@ -1,4 +1,4 @@
-"""Turn a directory of documents into an artifact a surface can be pointed at."""
+"""Turn the staged sources and the overlays into an artifact a surface can open."""
 
 from __future__ import annotations
 
@@ -8,23 +8,26 @@ from pathlib import Path
 
 from wiki_api.config import get_settings
 from wiki_api.pipeline.artifact.build import build_artifact
-
-UNKNOWN_GAME_VERSION = "2009scape@unknown"
+from wiki_api.pipeline.build import build_from_sources
 
 
 def parser() -> argparse.ArgumentParser:
     """Declare this command's arguments.
 
-    The source directory is required, so a build never guesses; only the output path
-    defaults, to what the settings say.
+    Every path defaults to what the settings say, so an ordinary build names nothing;
+    `--documents` builds from a directory of documents instead of the staged sources.
     """
     declared = argparse.ArgumentParser(
-        prog="build-artifact", description="Build a knowledge artifact from documents."
+        prog="build-artifact",
+        description="Build a knowledge artifact from the staged sources and overlays.",
     )
-    declared.add_argument("source", type=Path)
+    declared.add_argument("--staged", type=Path, default=None)
+    declared.add_argument("--overlays", type=Path, default=None)
+    declared.add_argument("--identity", type=Path, default=None)
+    declared.add_argument("--documents", type=Path, default=None)
     declared.add_argument("--destination", type=Path, default=None)
     declared.add_argument("--data-version", default=None)
-    declared.add_argument("--game-version", default=UNKNOWN_GAME_VERSION)
+    declared.add_argument("--game-version", default=None)
     return declared
 
 
@@ -34,19 +37,38 @@ def stamp(moment: datetime) -> str:
 
 
 def main() -> None:
-    """Build the artifact and say where it went."""
+    """Build the artifact and say what went into it."""
     asked = parser().parse_args()
     settings = get_settings()
     destination = Path(asked.destination or settings.artifact_path)
     built_at = datetime.now(tz=UTC)
-    manifest = build_artifact(
-        Path(asked.source),
+    data_version = asked.data_version or stamp(built_at)
+    if asked.documents is not None:
+        manifest = build_artifact(
+            Path(asked.documents),
+            destination,
+            data_version=data_version,
+            game_version=asked.game_version or UNKNOWN_GAME_VERSION,
+            built_at=built_at,
+        )
+        print(
+            f"built {manifest.data_version} at {destination} ({manifest.content_hash})"
+        )
+        return
+    manifest, report = build_from_sources(
+        Path(asked.staged or settings.staged_dir),
+        Path(asked.overlays or settings.overlay_dir),
+        Path(asked.identity or settings.identity_dir),
         destination,
-        data_version=asked.data_version or stamp(built_at),
-        game_version=asked.game_version,
+        data_version=data_version,
         built_at=built_at,
     )
-    print(f"built {manifest.data_version} at {destination} ({manifest.content_hash})")
+    for line in report.lines():
+        print(line)
+    print(f"  written to {destination} ({manifest.content_hash})")
+
+
+UNKNOWN_GAME_VERSION = "2009scape@unknown"
 
 
 if __name__ == "__main__":
@@ -56,20 +78,20 @@ if __name__ == "__main__":
 # test cases
 
 
-def test_a_build_that_names_no_documents_is_refused() -> None:
-    import pytest as testing
-
-    with testing.raises(SystemExit):
-        parser().parse_args([])
-
-
-def test_where_a_build_lands_is_what_the_settings_say_unless_told() -> None:
-    assert parser().parse_args(["some/where"]).destination is None
+def test_an_ordinary_build_names_nothing_and_reads_the_settings() -> None:
+    asked = parser().parse_args([])
+    assert asked.staged is None
+    assert asked.overlays is None
+    assert asked.documents is None
 
 
-def test_any_directory_of_documents_can_be_built_instead() -> None:
-    asked = parser().parse_args(["some/where", "--destination", "out.sqlite3"])
-    assert asked.source == Path("some/where")
+def test_a_build_from_hand_made_documents_says_so() -> None:
+    asked = parser().parse_args(["--documents", "tests/fixtures/knowledge"])
+    assert asked.documents == Path("tests/fixtures/knowledge")
+
+
+def test_where_a_build_lands_can_be_named() -> None:
+    asked = parser().parse_args(["--destination", "out.sqlite3"])
     assert asked.destination == Path("out.sqlite3")
 
 
@@ -83,6 +105,5 @@ def test_two_builds_a_second_apart_are_told_apart() -> None:
     assert first != second
 
 
-def test_a_build_says_which_game_it_reflects_even_when_it_cannot_tell() -> None:
-    asked = parser().parse_args(["some/where"])
-    assert asked.game_version == UNKNOWN_GAME_VERSION
+def test_a_build_from_staged_sources_reads_the_game_version_off_them() -> None:
+    assert parser().parse_args([]).game_version is None

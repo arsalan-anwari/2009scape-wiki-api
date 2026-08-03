@@ -1,4 +1,4 @@
-"""Fetch the weekly Grand Exchange price snapshots."""
+"""Fetch the weekly Grand Exchange price snapshots into the staged sources."""
 
 from __future__ import annotations
 
@@ -252,5 +252,5 @@ def test_a_failing_listing_is_not_swallowed(tmp_path: Path) -> None:
 
 
 def test_the_destination_comes_from_settings(tmp_path: Path) -> None:
-    settings = Settings(game_data_dir=tmp_path)
-    assert settings.ge_snapshot_dir == tmp_path / "grand-exchange-data"
+    settings = Settings(data_dir=tmp_path)
+    assert settings.ge_snapshot_dir == tmp_path / "source" / "grand-exchange"

@@ -1,0 +1,40 @@
+{
+ "enum": "Quests",
+ "source_file": "Quests.kt",
+ "language": "kotlin",
+ "columns": [
+  "questName"
+ ],
+ "constants": [
+  {
+   "name": "MYTHS_OF_THE_WHITE_LANDS",
+   "values": {
+    "questName": "Myths of the White Lands"
+   }
+  },
+  {
+   "name": "BLACK_KNIGHTS_FORTRESS",
+   "values": {
+    "questName": "Black Knights' Fortress"
+   }
+  },
+  {
+   "name": "COOKS_ASSISTANT",
+   "values": {
+    "questName": "Cook's Assistant"
+   }
+  },
+  {
+   "name": "DEMON_SLAYER",
+   "values": {
+    "questName": "Demon Slayer"
+   }
+  },
+  {
+   "name": "DORICS_QUEST",
+   "values": {
+    "questName": "Doric's Quest"
+   }
+  }
+ ]
+}

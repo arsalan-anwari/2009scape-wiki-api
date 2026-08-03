@@ -1,0 +1,24 @@
+[
+ {
+  "default": [
+   {
+    "minAmount": "1",
+    "weight": "100.0",
+    "id": "536",
+    "maxAmount": "1"
+   }
+  ],
+  "charm": [],
+  "tertiary": [],
+  "ids": "50",
+  "description": "",
+  "main": [
+   {
+    "minAmount": "30",
+    "weight": "50.0",
+    "id": "995",
+    "maxAmount": "690"
+   }
+  ]
+ }
+]

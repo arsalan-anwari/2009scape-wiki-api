@@ -210,7 +210,7 @@ not invalidate it.
 | path | what lives there |
 | --- | --- |
 | `src/wiki_api/domain` | entities, relationships, the attribute registry |
-| `src/wiki_api/pipeline` | the offline build that writes the artifact |
+| `src/wiki_api/pipeline` | the offline build: staging, adapters, merge, writer |
 | `src/wiki_api/repository` | data access behind one protocol (SQLite/FTS5, in-memory) |
 | `src/wiki_api/core` | the query logic both surfaces share |
 | `src/wiki_api/surfaces/http` | the FastAPI contract |
@@ -219,6 +219,10 @@ not invalidate it.
 | `src/wiki_api/serve.py` | starting one surface, the other, or both |
 | `tests` | integration tests and hand-made knowledge fixtures |
 | `demos` | worked examples, one folder each, run with `uv run poe demo <folder>` |
+| `game_data` | the game's own repositories, checked out and never written to |
+| `data/source` | the staged sources a build reads, and the manifest describing them |
+| `overlays` | hand-written corrections, merged over the sources at build time |
+| `identity` | the numbers kept for things the sources name but never number |
 
 Each demo needs `poe keys issue --label demos` first, and its own `.env`.
 
@@ -229,10 +233,34 @@ uv run poe check                 # lint, types, import boundaries, tests
 uv run poe check-docs            # prose gate over comments, docstrings and README
 uv run poe fix                   # auto-fix formatting and simple lint issues
 uv run poe build-test-artifact   # hand-made data at data/tests, enough to serve
-uv run poe build-artifact DOCS   # a real build, landing where the settings say
-uv run poe upload-data           # publish that build, if the dataset is yours
+uv run poe upload-data           # publish a build, if the dataset is yours
 ```
 
 Build the artifact yourself only when changing the pipeline. The test build lands in
 `data/tests` so it never overwrites what a deployment serves. Point at it with
 `WIKI_API_DATA_DIR=data/tests`. The test suite mints its own key per run.
+
+### Building from the game's own sources
+
+Ingestion is two commands with a directory between them. Staging reads the checked-out
+game repositories and writes `data/source/`; the build reads that directory and the
+hand-written inputs beside it, and never opens the submodules.
+
+```bash
+uv run poe sync-submodules       # check out the game repositories under game_data/
+uv run poe stage-sources         # copy, extract and fetch into data/source/
+uv run poe allocate-ids --write  # number any quest the sources name but never number
+uv run poe build-artifact        # data/source + overlays + identity -> the artifact
+```
+
+`stage-sources` takes `--only configs`, `--only tables` or `--only prices` when you want
+one of them; only prices reach the network. Everything staged is written down in
+`data/source/sources.json` with the commit it came from and a hash of what was written,
+so a file edited by hand still works and is reported by the next build rather than
+passing unnoticed.
+
+Corrections live in `overlays/` and are reviewed like code, because `data/` is not in
+version control. An overlay that *defines* an entity takes it away from the source
+entirely, which is how a duplicate id upstream gets resolved: the build stops, and the
+fix is a document. `identity/quest.json` holds the number each quest keeps across
+rebuilds; a quest never takes its number from an enum ordinal.

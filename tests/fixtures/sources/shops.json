@@ -1,0 +1,11 @@
+[
+ {
+  "npcs": "528",
+  "high_alch": "0",
+  "currency": "995",
+  "general_store": "true",
+  "id": "2",
+  "title": "Edgeville General Store",
+  "stock": "{995,10,100}"
+ }
+]

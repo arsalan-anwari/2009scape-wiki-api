@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "source_file": "shops.json",
+  "game_version": "2009scape@2419bdb65e344d6318972d6587d9b57d47032700",
+  "precedence": 10,
+  "entities": [
+    {
+      "type": "shop",
+      "id": 256,
+      "name": "Uglug's Stuffsies",
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "general_store": false,
+        "high_alch": false,
+        "currency": 995
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "shop:256",
+      "rel": "staffed_by",
+      "dst": "npc:2039",
+      "order_key": 0,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {}
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4844",
+      "order_key": 0,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 100,
+        "restock_rate": 10,
+        "slot": 0,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:10927",
+      "order_key": 1,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 100,
+        "slot": 1,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:2862",
+      "order_key": 2,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 100,
+        "restock_rate": 100,
+        "slot": 2,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:1777",
+      "order_key": 3,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 10,
+        "restock_rate": 200,
+        "slot": 3,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:2876",
+      "order_key": 4,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 500,
+        "slot": 4,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:2878",
+      "order_key": 5,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 10,
+        "restock_rate": 100,
+        "slot": 5,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4850",
+      "order_key": 6,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 100,
+        "slot": 6,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:946",
+      "order_key": 7,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 5,
+        "restock_rate": 100,
+        "slot": 7,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4773",
+      "order_key": 8,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 1000,
+        "slot": 8,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4778",
+      "order_key": 9,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 1000,
+        "slot": 9,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4783",
+      "order_key": 10,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 1000,
+        "slot": 10,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4788",
+      "order_key": 11,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 1500,
+        "slot": 11,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4793",
+      "order_key": 12,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 2000,
+        "slot": 12,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4798",
+      "order_key": 13,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 3000,
+        "slot": 13,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4803",
+      "order_key": 14,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 4000,
+        "slot": 14,
+        "currency": 995
+      }
+    },
+    {
+      "src": "shop:256",
+      "rel": "sells",
+      "dst": "item:4827",
+      "order_key": 15,
+      "source_ref": "shops.json#256 (second of two, the one the game keeps by id)",
+      "attributes": {
+        "stock_amount": 0,
+        "restock_rate": 2000,
+        "slot": 15,
+        "currency": 995
+      }
+    }
+  ]
+}

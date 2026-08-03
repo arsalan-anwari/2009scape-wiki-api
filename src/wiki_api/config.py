@@ -86,7 +86,11 @@ class Settings(BaseSettings):
     hf_revision: str = "main"
     data_dir: Path = Path("data")
     artifact_filename: str = "knowledge.sqlite3"
+    staged_dirname: str = "source"
+    prices_dirname: str = "grand-exchange"
     game_data_dir: Path = Path("game_data")
+    overlay_dir: Path = Path("overlays")
+    identity_dir: Path = Path("identity")
     ge_data_url: str = "https://cdn.2009scape.org/gedata/"
     cors_origins: tuple[str, ...] = ()
     cache_seconds: int = 300
@@ -120,8 +124,12 @@ class Settings(BaseSettings):
         return self.data_dir / self.artifact_filename
 
     @property
+    def staged_dir(self) -> Path:
+        return self.data_dir / self.staged_dirname
+
+    @property
     def ge_snapshot_dir(self) -> Path:
-        return self.game_data_dir / "grand-exchange-data"
+        return self.staged_dir / self.prices_dirname
 
     @property
     def guarded(self) -> bool:
@@ -201,13 +209,36 @@ def test_the_artifact_filename_is_configurable(
     assert Settings().artifact_path == Path("/srv/wiki/knowledge-2026.sqlite3")
 
 
-def test_raw_game_sources_live_outside_the_artifact_directory(
+def test_the_staged_sources_sit_beside_the_artifact_they_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for key in ("WIKI_API_STAGED_DIRNAME", "WIKI_API_PRICES_DIRNAME"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("WIKI_API_DATA_DIR", "/srv/wiki")
+    settings = Settings()
+    assert settings.staged_dir == Path("/srv/wiki/source")
+    assert settings.ge_snapshot_dir == Path("/srv/wiki/source/grand-exchange")
+    assert settings.staged_dir in settings.ge_snapshot_dir.parents
+
+
+def test_nothing_is_ever_written_into_the_checked_out_sources(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("WIKI_API_GAME_DATA_DIR", "/srv/raw")
+    monkeypatch.setenv("WIKI_API_DATA_DIR", "/srv/wiki")
     settings = Settings()
-    assert settings.ge_snapshot_dir == Path("/srv/raw/grand-exchange-data")
-    assert settings.data_dir not in settings.ge_snapshot_dir.parents
+    assert settings.game_data_dir not in settings.staged_dir.parents
+    assert settings.game_data_dir not in settings.ge_snapshot_dir.parents
+
+
+def test_the_hand_written_inputs_live_where_they_can_be_reviewed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for key in ("WIKI_API_OVERLAY_DIR", "WIKI_API_IDENTITY_DIR"):
+        monkeypatch.delenv(key, raising=False)
+    settings = Settings()
+    assert settings.overlay_dir == Path("overlays")
+    assert settings.identity_dir == Path("identity")
 
 
 def test_the_grand_exchange_host_is_not_hardcoded_in_code(

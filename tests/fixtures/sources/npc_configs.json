@@ -1,0 +1,59 @@
+[
+ {
+  "id": "1",
+  "name": "Man",
+  "examine": "One of Gielinor's many citizens.",
+  "attack_level": "5",
+  "attack_speed": "4",
+  "clue_level": "0",
+  "combat_audio": "511,513,512",
+  "death_animation": "9055",
+  "defence_animation": "404",
+  "defence_level": "5",
+  "lifepoints": "10",
+  "magic_animation": "422",
+  "magic_level": "6",
+  "melee_animation": "422",
+  "range_animation": "422",
+  "range_level": "1",
+  "respawn_delay": "18",
+  "safespot": null,
+  "slayer_exp": "0",
+  "strength_level": "2",
+  "weakness": "9"
+ },
+ {
+  "id": "50",
+  "name": "King Black Dragon",
+  "examine": "The biggest, meanest dragon around.",
+  "agg_radius": "64",
+  "aggressive": "true",
+  "attack_level": "240",
+  "bonuses": "0,0,0,0,0,70,90,90,80,70,0,0,0,0,0",
+  "clue_level": "2",
+  "combat_audio": "408,410,409",
+  "death_animation": "92",
+  "defence_animation": "89",
+  "defence_level": "240",
+  "lifepoints": "240",
+  "magic_animation": "80",
+  "magic_level": "240",
+  "melee_animation": "80",
+  "range_animation": "80",
+  "range_level": "1",
+  "respawn_delay": "50",
+  "safespot": null,
+  "slayer_exp": "258",
+  "strength_level": "240",
+  "weakness": "4"
+ },
+ {
+  "id": "4559",
+  "name": "Holoy"
+ },
+ {
+  "id": "528",
+  "name": "Shopkeeper",
+  "examine": "Sells stuff."
+ }
+]

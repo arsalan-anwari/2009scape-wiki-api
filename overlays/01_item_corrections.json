@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "source_file": "item_configs.json",
+  "game_version": "2009scape@2419bdb65e344d6318972d6587d9b57d47032700",
+  "precedence": 10,
+  "entities": [
+    {
+      "type": "item",
+      "id": 14422,
+      "name": "Sacred clay pouch (class 1)",
+      "description": "This scroll will make your familiar deposit its items at your base.",
+      "source_ref": "item_configs.json#14422 (first of two records)",
+      "attributes": {
+        "absorb": "0,0,0",
+        "archery_ticket_price": "0",
+        "attack_speed": "4",
+        "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+        "destroy": "true",
+        "destroy_message": "Drop",
+        "tradeable": "true"
+      }
+    },
+    {
+      "type": "item",
+      "id": 14424,
+      "name": "Sacred clay pouch (class 2)",
+      "description": "This scroll will make your familiar deposit its items at your base.",
+      "source_ref": "item_configs.json#14424 (first of two records)",
+      "attributes": {
+        "absorb": "0,0,0",
+        "archery_ticket_price": "0",
+        "attack_speed": "4",
+        "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+        "destroy": "true",
+        "destroy_message": "Drop",
+        "tradeable": "true"
+      }
+    },
+    {
+      "type": "item",
+      "id": 14426,
+      "name": "Sacred clay pouch (class 3)",
+      "description": "This scroll will make your familiar deposit its items at your base.",
+      "source_ref": "item_configs.json#14426 (first of two records)",
+      "attributes": {
+        "absorb": "0,0,0",
+        "archery_ticket_price": "0",
+        "attack_speed": "4",
+        "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+        "destroy": "true",
+        "destroy_message": "Drop",
+        "tradeable": "true"
+      }
+    },
+    {
+      "type": "item",
+      "id": 14428,
+      "name": "Sacred clay pouch (class 4)",
+      "description": "This scroll will make your familiar deposit its items at your base.",
+      "source_ref": "item_configs.json#14428 (first of two records)",
+      "attributes": {
+        "absorb": "0,0,0",
+        "archery_ticket_price": "0",
+        "attack_speed": "4",
+        "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+        "destroy": "true",
+        "destroy_message": "Drop",
+        "tradeable": "true"
+      }
+    },
+    {
+      "type": "item",
+      "id": 14430,
+      "name": "Sacred clay pouch (class 5)",
+      "description": "This scroll will make your familiar deposit its items at your base.",
+      "source_ref": "item_configs.json#14430 (first of two records)",
+      "attributes": {
+        "absorb": "0,0,0",
+        "archery_ticket_price": "0",
+        "attack_speed": "4",
+        "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+        "destroy": "true",
+        "destroy_message": "Drop",
+        "tradeable": "true"
+      }
+    },
+    {
+      "type": "item",
+      "id": 13910,
+      "name": "Corrupt statius's platebody (deg)",
+      "description": "This item degrades while worn, and will turn to dust.",
+      "source_ref": "item_configs.json#13910 (a stray brace in requirements)",
+      "attributes": {
+        "absorb": "6,0,12",
+        "archery_ticket_price": "0",
+        "attack_speed": "4",
+        "bonuses": "5,5,7,-10,-30,154,145,121,-6,157,60,5,0,0,0",
+        "destroy": "true",
+        "destroy_message": "Drop",
+        "equip_audio": "2239",
+        "equipment_slot": "4",
+        "remove_sleeves": "true",
+        "requirements": [
+          {
+            "skill": 1,
+            "level": 20
+          }
+        ]
+      }
+    },
+    {
+      "type": "item",
+      "id": 5098,
+      "name": "Nasturtium seed",
+      "description": "A nasturtium seed - plant in flower patch.",
+      "source_ref": "item_configs.json#5098 (requirements written the wrong way round)",
+      "attributes": {
+        "archery_ticket_price": "0",
+        "ge_buy_limit": "100",
+        "tradeable": "true",
+        "requirements": [
+          {
+            "skill": 19,
+            "level": 24
+          }
+        ]
+      }
+    },
+    {
+      "type": "item",
+      "id": 9422,
+      "name": "Blurite limbs",
+      "description": "A pair of blurite crossbow limbs.",
+      "source_ref": "item_configs.json#9422 (requirements written the wrong way round)",
+      "attributes": {
+        "archery_ticket_price": "0",
+        "equipment_slot": "5",
+        "weight": "1",
+        "requirements": [
+          {
+            "skill": 9,
+            "level": 24
+          }
+        ]
+      }
+    },
+    {
+      "type": "item",
+      "id": 9442,
+      "name": "Oak stock",
+      "description": "An oak crossbow stock.",
+      "source_ref": "item_configs.json#9442 (requirements written the wrong way round)",
+      "attributes": {
+        "archery_ticket_price": "0",
+        "equipment_slot": "3",
+        "ge_buy_limit": "1000",
+        "tradeable": "true",
+        "weight": "3",
+        "requirements": [
+          {
+            "skill": 9,
+            "level": 24
+          }
+        ]
+      }
+    }
+  ]
+}

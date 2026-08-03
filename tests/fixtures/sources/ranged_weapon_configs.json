@@ -1,0 +1,20 @@
+[
+ {
+  "itemId": "732",
+  "name": "Holy water",
+  "ammo_slot": "3",
+  "weapon_type": "3",
+  "animation": "385",
+  "drop_ammo": "true",
+  "ammunition": "732"
+ },
+ {
+  "itemId": "767",
+  "name": "Phoenix crossbow",
+  "ammo_slot": "13",
+  "weapon_type": "1",
+  "animation": "4230",
+  "drop_ammo": "true",
+  "ammunition": "877,878,6061,6062,879,9236"
+ }
+]
