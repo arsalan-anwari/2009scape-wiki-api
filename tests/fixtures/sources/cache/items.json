@@ -1,0 +1,275 @@
+[
+ {
+  "id": 20,
+  "name": "White cog",
+  "examine": null,
+  "value": null,
+  "stackable": false,
+  "members_only": true,
+  "unnoted": false,
+  "note_id": null,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 526,
+  "name": "Bones",
+  "examine": null,
+  "value": null,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": 527,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   "Bury",
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 536,
+  "name": "Dragon bones",
+  "examine": null,
+  "value": null,
+  "stackable": false,
+  "members_only": true,
+  "unnoted": true,
+  "note_id": 537,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   "Bury",
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 877,
+  "name": "Bronze bolts",
+  "examine": null,
+  "value": 3,
+  "stackable": true,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": null,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   "Wield",
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 878,
+  "name": "Bronze bolts(p)",
+  "examine": null,
+  "value": 3,
+  "stackable": true,
+  "members_only": true,
+  "unnoted": true,
+  "note_id": null,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   "Wield",
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 995,
+  "name": "Coins",
+  "examine": null,
+  "value": null,
+  "stackable": true,
+  "members_only": false,
+  "unnoted": false,
+  "note_id": null,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 1050,
+  "name": "Santa hat",
+  "examine": null,
+  "value": 160,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": 1051,
+  "note_template_id": null,
+  "lend_id": 13537,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   "Wear",
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 1065,
+  "name": "Green d'hide vamb",
+  "examine": null,
+  "value": 2500,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": 1066,
+  "note_template_id": null,
+  "lend_id": 13497,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   "Wear",
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 1149,
+  "name": "Dragon med helm",
+  "examine": null,
+  "value": 100000,
+  "stackable": false,
+  "members_only": true,
+  "unnoted": true,
+  "note_id": 1150,
+  "note_template_id": null,
+  "lend_id": 13495,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   "Wear",
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 1511,
+  "name": "Logs",
+  "examine": null,
+  "value": 4,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": 1512,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 4587,
+  "name": "Dragon scimitar",
+  "examine": null,
+  "value": 100000,
+  "stackable": false,
+  "members_only": true,
+  "unnoted": true,
+  "note_id": 4588,
+  "note_template_id": null,
+  "lend_id": 13477,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   "Wield",
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 4588,
+  "name": null,
+  "examine": null,
+  "value": null,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": false,
+  "note_id": 4587,
+  "note_template_id": 799,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 9440,
+  "name": "Wooden stock",
+  "examine": null,
+  "value": 20,
+  "stackable": false,
+  "members_only": true,
+  "unnoted": true,
+  "note_id": 9441,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ }
+]

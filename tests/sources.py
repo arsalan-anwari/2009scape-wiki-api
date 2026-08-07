@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from wiki_api.domain.provenance import GameVersion
 from wiki_api.pipeline.sources.staged import StagedSources
-from wiki_api.pipeline.staging.collectors import CONFIGS, PRICES, TABLES
+from wiki_api.pipeline.staging.collectors import CACHE, CONFIGS, PRICES, TABLES
 from wiki_api.pipeline.staging.manifest import (
     StagedFile,
     StagingManifest,
@@ -25,17 +25,22 @@ STAGED_AT = datetime(2026, 8, 3, tzinfo=UTC)
 
 def staged_from(
     root: Path,
-    files: Mapping[str, str],
+    files: Mapping[str, str | bytes],
     prices: Sequence[str] = (),
     game_version: str = STAGED_VERSION,
+    revisions: Mapping[str, str] | None = None,
 ) -> StagedSources:
     """Write these files under a staged directory and describe them in a manifest."""
     priced = set(prices)
+    recorded = revisions or {}
     entries: list[StagedFile] = []
     for name, payload in files.items():
         target = root / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(payload, encoding="utf-8")
+        if isinstance(payload, bytes):
+            target.write_bytes(payload)
+        else:
+            target.write_text(payload, encoding="utf-8")
         entries.append(
             StagedFile(
                 path=name,
@@ -45,6 +50,7 @@ def staged_from(
                 collector_version=1,
                 game_version=GameVersion.model_validate(game_version),
                 upstream=None,
+                source_revision=recorded.get(name),
             )
         )
     write_manifest(root, StagingManifest(staged_at=STAGED_AT, files=tuple(entries)))
@@ -54,6 +60,8 @@ def staged_from(
 def _collector(name: str, priced: set[str]) -> str:
     if name in priced:
         return PRICES
+    if name.startswith(f"{CACHE}/"):
+        return CACHE
     return TABLES if name.startswith(f"{TABLES}/") else CONFIGS
 
 

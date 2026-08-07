@@ -26,7 +26,9 @@ flowchart LR
 
 The build is offline and always from source. The dataset ships on
 [Hugging Face](https://huggingface.co/datasets/arsalan-anwari/2009scape-wiki-api-data)
-and is fetched before a server starts, never committed here.
+and is fetched before a server starts, never committed here. A build holds about 20,000
+entities, 58,000 relationships between them, and two years of daily Grand Exchange
+prices.
 
 ## Getting started
 
@@ -220,7 +222,7 @@ not invalidate it.
 | `tests` | integration tests and hand-made knowledge fixtures |
 | `demos` | worked examples, one folder each, run with `uv run poe demo <folder>` |
 | `game_data` | the game's own repositories, checked out and never written to |
-| `data/source` | the staged sources a build reads, and the manifest describing them |
+| `data/source` | the staged sources a build reads: `configs`, `tables`, `cache`, `grand-exchange`, and the manifest describing them |
 | `overlays` | hand-written corrections, merged over the sources at build time |
 | `identity` | the numbers kept for things the sources name but never number |
 
@@ -253,11 +255,29 @@ uv run poe allocate-ids --write  # number any quest the sources name but never n
 uv run poe build-artifact        # data/source + overlays + identity -> the artifact
 ```
 
-`stage-sources` takes `--only configs`, `--only tables` or `--only prices` when you want
-one of them; only prices reach the network. Everything staged is written down in
-`data/source/sources.json` with the commit it came from and a hash of what was written,
-so a file edited by hand still works and is reported by the next build rather than
-passing unnoticed.
+`stage-sources` takes `--only configs`, `--only tables`, `--only cache` or
+`--only prices` when you want one of them; only prices reach the network. Everything
+staged is written down in `data/source/sources.json` with the commit it came from and a
+hash of what was written, so a file edited by hand still works and is reported by the
+next build rather than passing unnoticed.
+
+Four kinds of source go in. Config files and enum tables are read as they are written.
+The cache is decoded during staging, the way the client decodes it, which is where item
+and NPC names, examine text, values, alchemy values, weights, buy limits and the noted
+and lent variants come from. Prices are the daily Grand Exchange snapshots.
+
+```bash
+uv run poe stage-sources --only cache    # decode the cache into data/source/cache/
+```
+
+Decoding is allowed to fail a little, and never quietly. `pipeline/tolerance.py` names
+how many rows each cache may lose and why, a build over that ceiling stops, and the
+staging report prints what each one used of what it was allowed. Map regions are the
+usual case: a few hundred have no working XTEA key, which the game cannot open either.
+
+Enum tables that staging writes but no adapter reads yet are named in the build report
+rather than left to be noticed, so it stays clear which sources are waiting on a shape
+in the model.
 
 Corrections live in `overlays/` and are reviewed like code, because `data/` is not in
 version control. An overlay that *defines* an entity takes it away from the source

@@ -25,6 +25,7 @@ from wiki_api.pipeline.artifact.errors import (
     InvalidEntity,
     PatchWithoutTarget,
     UnknownEntity,
+    VariantChain,
 )
 from wiki_api.pipeline.artifact.overlay import (
     OverlayEntity,
@@ -68,6 +69,7 @@ def merge(
     entities = _build_entities(drafts)
     _check_source_keys(entities, drafts)
     by_key = {entity.key: entity for entity in entities}
+    _check_canonical(entities, drafts, by_key)
     return KnowledgeSnapshot(
         entities=entities,
         edges=_build_edges(ordered, by_key),
@@ -178,6 +180,22 @@ def _check_source_keys(
                 drafts[entity.key].origin,
             )
         claimed[identity] = entity.key
+
+
+def _check_canonical(
+    entities: Sequence[Entity],
+    drafts: Mapping[EntityKey, _Draft],
+    by_key: Mapping[EntityKey, Entity],
+) -> None:
+    for entity in entities:
+        if entity.canonical_id is None:
+            continue
+        origin = drafts[entity.key].origin
+        canonical = by_key.get(entity.canonical_key)
+        if canonical is None:
+            raise UnknownEntity(entity.canonical_key, origin)
+        if canonical.is_variant:
+            raise VariantChain(entity.key, canonical.key, origin)
 
 
 def _visibility_of(draft: _Draft) -> Visibility:
@@ -499,6 +517,81 @@ def test_variants_are_never_searchable() -> None:
     assert canonical.searchable is True
     assert variant.searchable is False
     assert variant.canonical_key == canonical.key
+
+
+def test_a_variant_of_an_item_nothing_defines_fails_the_build() -> None:
+    import pytest
+
+    with pytest.raises(UnknownEntity):
+        merge(
+            [
+                _source(
+                    "items.json",
+                    entities=[
+                        _item(
+                            4588,
+                            "Dragon scimitar",
+                            canonical_id=4587,
+                            variant_kind="noted",
+                        )
+                    ],
+                )
+            ]
+        )
+
+
+def test_a_variant_may_not_point_at_another_variant() -> None:
+    import pytest
+
+    with pytest.raises(VariantChain):
+        merge(
+            [
+                _source(
+                    "items.json",
+                    entities=[
+                        _item(4587, "Dragon scimitar"),
+                        _item(
+                            4588,
+                            "Dragon scimitar",
+                            canonical_id=4587,
+                            variant_kind="noted",
+                        ),
+                        _item(
+                            13477,
+                            "Dragon scimitar",
+                            canonical_id=4588,
+                            variant_kind="bound",
+                        ),
+                    ],
+                )
+            ]
+        )
+
+
+def test_a_patch_that_collapses_onto_nothing_fails_the_build() -> None:
+    import pytest
+
+    with pytest.raises(UnknownEntity):
+        merge(
+            [
+                _source("items.json", entities=[_item(4588, "Dragon scimitar")]),
+                _source(
+                    "cache/items.json",
+                    precedence=1,
+                    source="game_cache",
+                    entities=[
+                        {
+                            "type": "item",
+                            "id": 4588,
+                            "mode": "patch",
+                            "canonical_id": 4587,
+                            "variant_kind": "noted",
+                            "searchable": False,
+                        }
+                    ],
+                ),
+            ]
+        )
 
 
 def test_invalid_attributes_name_the_entity_that_carries_them() -> None:

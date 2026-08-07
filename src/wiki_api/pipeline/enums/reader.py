@@ -8,19 +8,46 @@ from typing import TYPE_CHECKING, Final
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from wiki_api.pipeline.enums.errors import ColumnMismatch, EnumNotFound
+from wiki_api.pipeline.enums.errors import (
+    AmbiguousConstructor,
+    ColumnMismatch,
+    EnumNotFound,
+)
 from wiki_api.pipeline.enums.lexer import Token, TokenKind, tokenize
-from wiki_api.pipeline.enums.values import EnumValue, read_arguments
+from wiki_api.pipeline.enums.values import CALL_KEY, EnumValue, read_arguments
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
 ENUM_WORD: Final = "enum"
 CLASS_WORD: Final = "class"
+NEW_WORD: Final = "new"
 KOTLIN_SUFFIX: Final = ".kt"
 NAME_MODIFIERS: Final = frozenset({"val", "var", "vararg", "final", "private"})
 OPENING: Final = {"(": ")", "[": "]", "{": "}"}
 CLOSING: Final = {")": "(", "]": "[", "}": "{"}
+WHOLE_TYPES: Final = frozenset(
+    {"int", "long", "short", "byte", "Int", "Long", "Short", "Byte"}
+)
+DECIMAL_TYPES: Final = frozenset({"double", "float", "Double", "Float"})
+BOOLEAN_TYPES: Final = frozenset({"boolean", "Boolean"})
+TEXT_TYPES: Final = frozenset({"String", "char", "Char", "CharSequence"})
+OPAQUE_TYPES: Final = frozenset({"Object", "Any", "Array", "List", "Set", "Collection"})
+KOTLIN_ARRAY_TYPES: Final = frozenset(
+    {
+        "Array",
+        "IntArray",
+        "LongArray",
+        "ShortArray",
+        "ByteArray",
+        "DoubleArray",
+        "FloatArray",
+        "BooleanArray",
+        "CharArray",
+        "List",
+        "Set",
+    }
+)
 
 
 class Language(StrEnum):
@@ -59,24 +86,103 @@ class EnumTable(BaseModel):
 
 
 @dataclass(frozen=True)
+class _Parameter:
+    name: str
+    type_name: str
+    dimensions: int
+
+    @property
+    def declared(self) -> str:
+        return self.type_name + "[]" * self.dimensions
+
+    def element(self) -> _Parameter:
+        return _Parameter(
+            name=self.name,
+            type_name=self.type_name,
+            dimensions=max(self.dimensions - 1, 0),
+        )
+
+
+@dataclass(frozen=True)
+class _Constant:
+    name: str
+    arguments: tuple[EnumValue, ...]
+    types: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class _Signature:
-    names: tuple[str, ...]
+    parameters: tuple[_Parameter, ...]
     variadic: bool
+
+    @property
+    def names(self) -> tuple[str, ...]:
+        return tuple(parameter.name for parameter in self.parameters)
 
     def accepts(self, count: int) -> bool:
         if self.variadic:
-            return count >= len(self.names) - 1
-        return count == len(self.names)
+            return count >= len(self.parameters) - 1
+        return count == len(self.parameters)
+
+    def fits(self, constant: _Constant) -> bool:
+        fixed = len(self.parameters) - 1 if self.variadic else len(self.parameters)
+        head = zip(
+            self.parameters[:fixed],
+            constant.arguments[:fixed],
+            constant.types[:fixed],
+            strict=True,
+        )
+        if any(not _fits(*entry) for entry in head):
+            return False
+        if not self.variadic:
+            return True
+        tail = self.parameters[-1].element()
+        return all(
+            _fits(tail, argument, named)
+            for argument, named in zip(
+                constant.arguments[fixed:], constant.types[fixed:], strict=True
+            )
+        )
 
     def bind(self, arguments: Sequence[EnumValue]) -> dict[str, EnumValue]:
         if not self.variadic:
             return dict(zip(self.names, arguments, strict=True))
-        fixed = len(self.names) - 1
+        fixed = len(self.parameters) - 1
         bound: dict[str, EnumValue] = dict(
             zip(self.names[:fixed], arguments[:fixed], strict=True)
         )
         bound[self.names[-1]] = list(arguments[fixed:])
         return bound
+
+
+def _fits(parameter: _Parameter, argument: EnumValue, named: str) -> bool:
+    if named and parameter.type_name not in OPAQUE_TYPES:
+        return named == parameter.declared
+    if argument is None:
+        return True
+    if isinstance(argument, list):
+        element = parameter.element()
+        return bool(parameter.dimensions) and all(
+            _fits(element, entry, "") for entry in argument
+        )
+    return not parameter.dimensions and _element_fits(parameter.type_name, argument)
+
+
+def _element_fits(type_name: str, argument: EnumValue) -> bool:
+    if argument is None or type_name in OPAQUE_TYPES:
+        return True
+    if isinstance(argument, dict):
+        called = argument.get(CALL_KEY)
+        return not isinstance(called, str) or called.rsplit(".", 1)[-1] == type_name
+    if isinstance(argument, bool):
+        return type_name in BOOLEAN_TYPES
+    if isinstance(argument, int):
+        return type_name in WHOLE_TYPES or type_name in DECIMAL_TYPES
+    if isinstance(argument, float):
+        return type_name in DECIMAL_TYPES
+    if isinstance(argument, str):
+        return type_name in TEXT_TYPES
+    return False
 
 
 def read_enum(text: str, name: str, source_file: str) -> EnumTable:
@@ -99,27 +205,27 @@ def read_enum(text: str, name: str, source_file: str) -> EnumTable:
         language=language,
         columns=widest.names if widest else (),
         constants=tuple(
-            _row(constant, arguments, signatures, source_file)
-            for constant, arguments in constants
+            _row(constant, signatures, source_file) for constant in constants
         ),
     )
 
 
 def _row(
-    constant: str,
-    arguments: tuple[EnumValue, ...],
-    signatures: Sequence[_Signature],
-    source_file: str,
+    constant: _Constant, signatures: Sequence[_Signature], source_file: str
 ) -> EnumConstant:
-    if not signatures and not arguments:
-        return EnumConstant(name=constant)
-    matching = [
-        signature for signature in signatures if signature.accepts(len(arguments))
-    ]
-    if len(matching) != 1:
-        declared = len(signatures[0].names) if signatures else 0
-        raise ColumnMismatch(source_file, constant, len(arguments), declared)
-    return EnumConstant(name=constant, values=matching[0].bind(arguments))
+    count = len(constant.arguments)
+    if not signatures and not count:
+        return EnumConstant(name=constant.name)
+    matching = [signature for signature in signatures if signature.accepts(count)]
+    if not matching:
+        declared = len(signatures[0].parameters) if signatures else 0
+        raise ColumnMismatch(source_file, constant.name, count, declared)
+    if len(matching) > 1:
+        fitting = [signature for signature in matching if signature.fits(constant)]
+        if len(fitting) != 1:
+            raise AmbiguousConstructor(source_file, constant.name, count, len(matching))
+        matching = fitting
+    return EnumConstant(name=constant.name, values=matching[0].bind(constant.arguments))
 
 
 def _find_declaration(tokens: Sequence[Token], name: str, source_file: str) -> int:
@@ -143,8 +249,20 @@ def _read_parameters(
 ) -> tuple[_Signature, int]:
     inner, after = _bracketed(tokens, at)
     parts = _split(inner)
-    names = tuple(_parameter_name(part, language) for part in parts)
-    return _Signature(names=names, variadic=bool(parts) and _variadic(parts[-1])), after
+    parameters = tuple(_parameter_of(part, language) for part in parts)
+    signature = _Signature(
+        parameters=parameters, variadic=bool(parts) and _variadic(parts[-1])
+    )
+    return signature, after
+
+
+def _parameter_of(part: Sequence[Token], language: Language) -> _Parameter:
+    type_name = _parameter_type(part, language)
+    return _Parameter(
+        name=_parameter_name(part, language),
+        type_name=type_name,
+        dimensions=_dimensions(part, type_name, language),
+    )
 
 
 def _variadic(part: Sequence[Token]) -> bool:
@@ -158,6 +276,30 @@ def _parameter_name(part: Sequence[Token], language: Language) -> str:
             if token.punctuation(":") and at:
                 return part[at - 1].value
     return _last_name(part)
+
+
+def _parameter_type(part: Sequence[Token], language: Language) -> str:
+    if language is Language.KOTLIN:
+        for at, token in enumerate(part):
+            if token.punctuation(":"):
+                return _first_name(part[at + 1 :])
+        return ""
+    return _first_name(part)
+
+
+def _dimensions(part: Sequence[Token], type_name: str, language: Language) -> int:
+    if _variadic(part):
+        return 1
+    if language is Language.KOTLIN:
+        return 1 if type_name in KOTLIN_ARRAY_TYPES else 0
+    return sum(1 for token in part if token.punctuation("["))
+
+
+def _first_name(part: Sequence[Token]) -> str:
+    for token in part:
+        if token.kind is TokenKind.NAME and token.value not in NAME_MODIFIERS:
+            return token.value
+    return ""
 
 
 def _last_name(part: Sequence[Token]) -> str:
@@ -211,8 +353,8 @@ def _skip_to_body(tokens: Sequence[Token], at: int) -> int:
 
 def _read_constants(
     tokens: Sequence[Token], at: int, source_file: str
-) -> tuple[list[tuple[str, tuple[EnumValue, ...]]], int]:
-    constants: list[tuple[str, tuple[EnumValue, ...]]] = []
+) -> tuple[list[_Constant], int]:
+    constants: list[_Constant] = []
     while at < len(tokens):
         token = tokens[at]
         if token.punctuation(";") or token.punctuation("}"):
@@ -225,13 +367,34 @@ def _read_constants(
         name = token.value
         at += 1
         arguments: tuple[EnumValue, ...] = ()
+        types: tuple[str, ...] = ()
         if _is_open(tokens, at):
             inner, at = _bracketed(tokens, at)
             arguments = read_arguments(inner, source_file, name)
+            types = _argument_types(inner, len(arguments))
         if at < len(tokens) and tokens[at].punctuation("{"):
             _, at = _bracketed(tokens, at)
-        constants.append((name, arguments))
+        constants.append(_Constant(name=name, arguments=arguments, types=types))
     return constants, at
+
+
+def _argument_types(tokens: Sequence[Token], count: int) -> tuple[str, ...]:
+    named = tuple(_constructed_type(part) for part in _split(tokens))
+    return named if len(named) == count else ("",) * count
+
+
+def _constructed_type(part: Sequence[Token]) -> str:
+    if len(part) < 2 or not part[0].name(NEW_WORD):
+        return ""
+    if part[1].kind is not TokenKind.NAME:
+        return ""
+    dimensions, at = 0, 2
+    while at + 1 < len(part):
+        if not part[at].punctuation("[") or not part[at + 1].punctuation("]"):
+            break
+        dimensions += 1
+        at += 2
+    return part[1].value + "[]" * dimensions
 
 
 def _java_constructors(
@@ -398,6 +561,87 @@ def test_a_variadic_constructor_gathers_its_tail_into_one_column() -> None:
     tasks = table.constants[0].values["tasks"]
     assert isinstance(tasks, list)
     assert len(tasks) == 3
+
+
+_SAME_ARITY: Final = """
+public enum Decoration {
+    PORTAL(13615, 8173, 5, new Item[] { new Item(8778) }),
+    SHUTTERED(new int[] { 13253, 13226 }, 8076, 49, new Item[] { new Item(960) }),
+    DEAD_TREE(13411, 8173, 5, new int[] { 1 }, new Item[] { new Item(8417) }),
+    ARMOUR(13491, 8270, 28, new Item[] { new Item(1159) },
+            new Item[] { new Item(1121) });
+    Decoration(int objectId, int face, int level, Item[] items) { }
+    Decoration(int[] objectIds, int face, int level, Item[] items) { }
+    Decoration(int objectId, int face, int level, int[] tools, Item[] items) { }
+    Decoration(int objectId, int face, int level, Item[] items, Item[] refunds) { }
+}
+"""
+
+
+def test_an_array_parameter_tells_two_constructors_of_one_arity_apart() -> None:
+    table = read_enum(_SAME_ARITY, "Decoration", "Decoration.java")
+    rows = {constant.name: constant.values for constant in table.constants}
+    assert rows["PORTAL"]["objectId"] == 13615
+    assert rows["SHUTTERED"]["objectIds"] == [13253, 13226]
+    assert "objectIds" not in rows["PORTAL"]
+
+
+def test_the_element_type_tells_two_array_constructors_apart() -> None:
+    table = read_enum(_SAME_ARITY, "Decoration", "Decoration.java")
+    rows = {constant.name: constant.values for constant in table.constants}
+    assert rows["DEAD_TREE"]["tools"] == [1]
+    assert "refunds" not in rows["DEAD_TREE"]
+    assert "tools" not in rows["ARMOUR"]
+    assert rows["ARMOUR"]["refunds"] == [{"call": "Item", "arguments": [1121]}]
+
+
+def test_a_constructed_argument_tells_two_variadic_constructors_apart() -> None:
+    source = """
+    public enum PrayerType {
+        THICK_SKIN(1, 12, 83, Cat.BLUE, Sounds.THICK, new Bonus(1, 0.05)),
+        RETRIBUTION(46, 12, 98, Cat.BROWN, Cat.MAGENTA, new Audio(2682)),
+        PIETY(70, 2, 1053, Cat.PINK, Sounds.PIETY, 70, new Bonus(1, 0.25));
+        PrayerType(int level, int drain, int config, Cat rule, int soundId,
+                Bonus... bonuses) { }
+        PrayerType(int level, int drain, int config, Cat rule, int soundId,
+                int defenceReq, Bonus... bonuses) { }
+        PrayerType(int level, int drain, int config, Cat rule, Cat second,
+                Audio audio, Bonus... bonuses) { }
+    }
+    """
+    rows = {
+        constant.name: constant.values
+        for constant in read_enum(source, "PrayerType", "PrayerType.java").constants
+    }
+    assert "defenceReq" not in rows["THICK_SKIN"]
+    assert rows["RETRIBUTION"]["audio"] == {"call": "Audio", "arguments": [2682]}
+    assert rows["PIETY"]["defenceReq"] == 70
+
+
+def test_an_ambiguity_the_arguments_cannot_settle_is_refused() -> None:
+    import pytest
+
+    source = """
+    public enum Thing {
+        ONE(1, 2);
+        Thing(int a, int b) { }
+        Thing(int c, int d) { }
+    }
+    """
+    with pytest.raises(AmbiguousConstructor):
+        read_enum(source, "Thing", "Thing.java")
+
+
+def test_a_parameter_may_be_an_array_of_arrays() -> None:
+    source = """
+    public enum DiaryType {
+        KARAMJA("Karamja", 11, new String[] { "Easy" },
+                new String[][] { { "Pick 5 bananas" } });
+        DiaryType(String name, int child, String[] levels, String[][] tasks) { }
+    }
+    """
+    table = read_enum(source, "DiaryType", "DiaryType.java")
+    assert table.constants[0].values["tasks"] == [["Pick 5 bananas"]]
 
 
 def test_a_variadic_constructor_accepts_an_empty_tail() -> None:

@@ -1,0 +1,44 @@
+[
+ {
+  "id": 1276,
+  "name": "Tree",
+  "size_x": 2,
+  "size_y": 2,
+  "members_only": false,
+  "options": [
+   "Chop down",
+   null,
+   "hidden",
+   null,
+   null
+  ]
+ },
+ {
+  "id": 2213,
+  "name": "Bank booth",
+  "size_x": 1,
+  "size_y": 1,
+  "members_only": false,
+  "options": [
+   "Use",
+   "Use-quickly",
+   "Collect",
+   null,
+   null
+  ]
+ },
+ {
+  "id": 2728,
+  "name": "Range",
+  "size_x": 1,
+  "size_y": 2,
+  "members_only": false,
+  "options": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ }
+]

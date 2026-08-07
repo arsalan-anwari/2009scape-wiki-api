@@ -61,6 +61,19 @@ class UnknownEntity(BuildError):
         self.referenced_by = referenced_by
 
 
+class VariantChain(BuildError):
+    """A variant points at an entity that is itself a variant."""
+
+    def __init__(self, key: EntityKey, canonical: EntityKey, origin: str) -> None:
+        super().__init__(
+            f"{origin} makes {key} a variant of {canonical}, which is itself a "
+            f"variant; a variant points at the entity a walk collapses onto"
+        )
+        self.key = key
+        self.canonical = canonical
+        self.origin = origin
+
+
 class DuplicateEdge(BuildError):
     """One relationship between one pair is declared twice."""
 
@@ -135,12 +148,25 @@ def test_build_errors_are_knowledge_errors() -> None:
         InvalidOverlayDocument("items.json", "edges.0.src: malformed entity key"),
         DuplicateEntity(key, "items.json", "placeholders.json"),
         UnknownEntity(key, "edges.json"),
+        VariantChain(key, EntityKey(type=EntityType.ITEM, id=4587), "items.json"),
         DuplicateEdge("npc:50 drops item:536"),
         AliasConflict("dragon-scimitar", "an entity already owns this slug"),
         PatchWithoutTarget(key, "corrections.json"),
     )
     assert all(isinstance(error, BuildError) for error in errors)
     assert all(isinstance(error, KnowledgeError) for error in errors)
+
+
+def test_a_variant_chain_error_names_both_ends() -> None:
+    from wiki_api.domain.identity import EntityKey, EntityType
+
+    error = VariantChain(
+        EntityKey(type=EntityType.ITEM, id=13477),
+        EntityKey(type=EntityType.ITEM, id=4588),
+        "cache/items.json",
+    )
+    assert "item:13477" in str(error)
+    assert "item:4588" in str(error)
 
 
 def test_a_duplicate_entity_error_names_both_documents() -> None:

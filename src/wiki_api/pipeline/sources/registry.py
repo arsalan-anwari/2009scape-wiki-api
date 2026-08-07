@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from wiki_api.domain.attributes import LocationAttributes
 from wiki_api.domain.entity import Visibility
@@ -10,6 +10,7 @@ from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.pipeline.identity import IdentityAllocation
 from wiki_api.pipeline.sources import (
     ammunition,
+    cache,
     drops,
     items,
     npcs,
@@ -26,6 +27,22 @@ if TYPE_CHECKING:
     from wiki_api.pipeline.artifact.overlay import OverlaySource
     from wiki_api.pipeline.sources.outcome import SourceOutcome
     from wiki_api.pipeline.sources.staged import StagedSources
+
+
+READ_TABLES: Final = frozenset({"Quests"})
+
+
+def unread_tables() -> tuple[str, ...]:
+    """The enum tables staging writes that no adapter turns into facts yet."""
+    from wiki_api.pipeline.staging.declared import DECLARED_TABLES
+
+    return tuple(
+        sorted(
+            declared.enum
+            for declared in DECLARED_TABLES
+            if declared.enum not in READ_TABLES
+        )
+    )
 
 
 def read_sources(
@@ -46,8 +63,10 @@ def read_sources(
     places = places_in(overlays)
     described.extend(
         [
+            cache.read_cache_items(staged, known),
+            cache.read_cache_npcs(staged, known),
             drops.read_drops(staged, known),
-            shops.read_shop_edges(staged, known, overridden),
+            shops.read_shop_edges(staged, known, overridden, cache.item_values(staged)),
             ammunition.read_ammunition(staged, known),
             spawns.read_npc_spawns(staged, known, places),
             spawns.read_ground_spawns(staged, known, places),
@@ -108,6 +127,13 @@ def _overlay(*entities: object) -> OverlaySource:
             },
         }
     )
+
+
+def test_the_tables_no_adapter_reads_are_named_rather_than_forgotten() -> None:
+    unread = unread_tables()
+    assert "Quests" not in unread
+    assert "SkillingResource" in unread
+    assert "Stall" in unread
 
 
 def test_what_an_overlay_defines_is_what_an_adapter_leaves_alone() -> None:

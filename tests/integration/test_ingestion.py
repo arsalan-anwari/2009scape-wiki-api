@@ -9,8 +9,10 @@ import pytest
 from tests.sources import staged_from
 from wiki_api.core.results import Direction, Found
 from wiki_api.core.service import KnowledgeService
+from wiki_api.domain.attributes import ItemAttributes, NpcAttributes
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.relationships import RelationshipType
+from wiki_api.pipeline.artifact.errors import UnknownEntity, VariantChain
 from wiki_api.pipeline.build import build_from_sources
 from wiki_api.pipeline.identity import IdentityAllocation, write_allocation
 from wiki_api.pipeline.sources.registry import read_sources
@@ -32,6 +34,7 @@ SLICES = (
     "ground_spawns.json",
     "ranged_weapon_configs.json",
 )
+CACHE_SLICES = ("items.json", "npcs.json", "scenery.json")
 BUILT_AT = datetime(2026, 8, 3, 12, tzinfo=UTC)
 QUESTS = (
     "MYTHS_OF_THE_WHITE_LANDS",
@@ -48,11 +51,26 @@ def _slice(name: str) -> str:
     return (FIXTURE_KNOWLEDGE.parent / "sources" / name).read_text(encoding="utf-8")
 
 
-def _staged(root: Path) -> StagedSources:
-    files = {f"configs/{name}": _slice(name) for name in SLICES}
+def _binary_slice(name: str) -> bytes:
+    from tests.artifact import FIXTURE_KNOWLEDGE
+
+    return (FIXTURE_KNOWLEDGE.parent / "sources" / name).read_bytes()
+
+
+def _staged(root: Path, cache: bool = True) -> StagedSources:
+    files: dict[str, str | bytes] = {f"configs/{name}": _slice(name) for name in SLICES}
     files["tables/Quests.json"] = _slice("Quests.json")
     files["grand-exchange/2024-06-08.json"] = _slice("2024-06-08.json")
-    return staged_from(root, files, prices=("grand-exchange/2024-06-08.json",))
+    if cache:
+        for name in CACHE_SLICES:
+            files[f"cache/{name}"] = _slice(f"cache/{name}")
+        files["cache/placements.jsonl.gz"] = _binary_slice("cache/placements.jsonl.gz")
+    return staged_from(
+        root,
+        files,
+        prices=("grand-exchange/2024-06-08.json",),
+        revisions={"cache/items.json": "index 19 revision 214"},
+    )
 
 
 def _identity(root: Path) -> Path:
@@ -169,17 +187,95 @@ def test_a_page_descriptor_is_built_from_real_data(artifact: Path) -> None:
         repository.close()
 
 
-def test_a_noted_item_still_stands_beside_the_one_it_copies(artifact: Path) -> None:
-    """Until the cache says which item is a note of which, both carry one name."""
+def test_a_noted_item_collapses_onto_the_one_it_copies(artifact: Path) -> None:
+    repository = open_repository(artifact)
+    try:
+        note = repository.get_entity(EntityKey(type=EntityType.ITEM, id=4588))
+        assert note is not None
+        assert note.canonical_id == 4587
+        assert note.is_variant is True
+        assert note.searchable is False
+    finally:
+        repository.close()
+
+
+def test_a_name_a_note_used_to_share_now_answers_once(artifact: Path) -> None:
     repository = open_repository(artifact)
     try:
         named = KnowledgeService(repository).lookup(
             "Dragon scimitar", types=[EntityType.ITEM]
         )
-        assert named.alternatives
-        assert [link.label for link in named.alternatives].count("Dragon scimitar") >= 1
+        assert isinstance(named.resolution, Found)
+        assert named.resolution.value.key.id == 4587
+        assert [link.label for link in named.alternatives] == []
     finally:
         repository.close()
+
+
+def test_an_item_carries_the_value_every_price_is_worked_out_from(
+    artifact: Path,
+) -> None:
+    repository = open_repository(artifact)
+    try:
+        item = repository.get_entity(EntityKey(type=EntityType.ITEM, id=4587))
+        assert item is not None
+        attributes = ItemAttributes.model_validate(item.attributes.model_dump())
+        assert attributes.base_value == 100000
+        assert attributes.high_alch_value == 60000
+        assert attributes.low_alch_value == 40000
+    finally:
+        repository.close()
+
+
+def test_an_npc_carries_the_combat_level_the_cache_holds(artifact: Path) -> None:
+    repository = open_repository(artifact)
+    try:
+        npc = repository.get_entity(EntityKey(type=EntityType.NPC, id=50))
+        assert npc is not None
+        attributes = NpcAttributes.model_validate(npc.attributes.model_dump())
+        assert attributes.combat_level == 276
+    finally:
+        repository.close()
+
+
+def test_a_shop_line_is_priced_once_the_cache_is_staged(tmp_path: Path) -> None:
+    _built(tmp_path)
+    repository = open_repository(tmp_path / "knowledge.sqlite3")
+    try:
+        page = repository.edges_from(
+            [EntityKey(type=EntityType.SHOP, id=44)],
+            rel=RelationshipType.SELLS,
+            limit=10,
+        )
+        priced = [
+            edge for edge in page.items if getattr(edge.attributes, "price", None)
+        ]
+        assert priced
+    finally:
+        repository.close()
+
+
+def test_a_build_with_no_staged_cache_still_produces_an_artifact(
+    tmp_path: Path,
+) -> None:
+    _staged(tmp_path / "source", cache=False)
+    manifest, report = build_from_sources(
+        tmp_path / "source",
+        tmp_path / "overlays",
+        _identity(tmp_path),
+        tmp_path / "knowledge.sqlite3",
+        data_version="ingestion-0002",
+        built_at=BUILT_AT,
+    )
+    assert report.entities > 0
+    repository = open_repository(tmp_path / "knowledge.sqlite3")
+    try:
+        note = repository.get_entity(EntityKey(type=EntityType.ITEM, id=4588))
+        assert note is not None
+        assert note.canonical_id is None
+    finally:
+        repository.close()
+    assert manifest.schema_version >= 5
 
 
 def test_a_near_name_still_answers_against_real_names(artifact: Path) -> None:
@@ -190,6 +286,81 @@ def test_a_near_name_still_answers_against_real_names(artifact: Path) -> None:
         assert [row.link.label for row in near.items][:1] == ["Dragon scimitar"]
     finally:
         repository.close()
+
+
+def test_a_variant_resolves_to_a_canonical_that_is_not_itself_a_variant(
+    artifact: Path,
+) -> None:
+    repository = open_repository(artifact)
+    try:
+        canonical_key = EntityKey(type=EntityType.ITEM, id=4587)
+        variants = repository.variants_of(canonical_key)
+        assert variants
+        for variant in variants:
+            assert variant.canonical_key == canonical_key
+        canonical = repository.get_entity(canonical_key)
+        assert canonical is not None
+        assert canonical.canonical_id is None
+    finally:
+        repository.close()
+
+
+def test_an_overlay_collapsing_onto_nothing_fails_the_build(tmp_path: Path) -> None:
+    overlays = tmp_path / "overlays"
+    overlays.mkdir()
+    (overlays / "variants.json").write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "source": "overlay",
+                "game_version": "2009scape@1f4a2c9",
+                "precedence": 10,
+                "entities": [
+                    {
+                        "type": "item",
+                        "id": 995,
+                        "mode": "patch",
+                        "canonical_id": 999_999,
+                        "variant_kind": "noted",
+                        "searchable": False,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(UnknownEntity):
+        _built(tmp_path, overlays)
+
+
+def test_an_overlay_pointing_a_variant_at_a_variant_fails_the_build(
+    tmp_path: Path,
+) -> None:
+    overlays = tmp_path / "overlays"
+    overlays.mkdir()
+    (overlays / "variants.json").write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "source": "overlay",
+                "game_version": "2009scape@1f4a2c9",
+                "precedence": 10,
+                "entities": [
+                    {
+                        "type": "item",
+                        "id": 995,
+                        "mode": "patch",
+                        "canonical_id": 4588,
+                        "variant_kind": "noted",
+                        "searchable": False,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(VariantChain):
+        _built(tmp_path, overlays)
 
 
 def test_an_overlay_beats_the_source_it_corrects(tmp_path: Path) -> None:

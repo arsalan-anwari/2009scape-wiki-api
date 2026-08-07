@@ -35,6 +35,7 @@ class StagedFile(BaseModel):
     collector_version: int = Field(ge=1)
     game_version: GameVersion
     upstream: str | None = None
+    source_revision: str | None = None
 
 
 class StagingManifest(BaseModel):
@@ -226,6 +227,25 @@ def test_reading_a_directory_nobody_staged_is_refused(tmp_path: Path) -> None:
     with pytest.raises(ManifestMissing):
         read_manifest(tmp_path)
     assert read_manifest_if_staged(tmp_path) is None
+
+
+def test_a_file_can_record_the_revision_of_the_source_behind_it(
+    tmp_path: Path,
+) -> None:
+    entry = _entry("cache/items.json").model_copy(
+        update={"source_revision": "index 19 revision 214"}
+    )
+    write_manifest(tmp_path, _manifest(entry))
+    assert (
+        read_manifest(tmp_path).entry("cache/items.json").source_revision
+        == "index 19 revision 214"
+    )
+
+
+def test_a_file_staged_before_revisions_were_recorded_still_reads(
+    tmp_path: Path,
+) -> None:
+    assert _entry("configs/item_configs.json").source_revision is None
 
 
 def test_a_manifest_from_another_schema_is_refused(tmp_path: Path) -> None:

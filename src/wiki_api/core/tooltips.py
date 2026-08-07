@@ -57,10 +57,16 @@ def test_a_tooltip_leaves_out_what_is_not_worth_hovering_over() -> None:
     assert "defence_animation" not in keys
 
 
-def test_a_tooltip_says_a_computed_value_is_computed() -> None:
-    values = {value.key: value for value in preview(_entity()).attributes}
-    assert values["combat_level"].derived is True
-    assert values["lifepoints"].derived is False
+def test_a_value_says_whether_it_was_computed_or_read() -> None:
+    entity = _entity(
+        key={"type": "item", "id": 1050},
+        slug="santa-hat",
+        name="Santa hat",
+        attributes={"base_value": 160, "high_alch_value": 96},
+    )
+    values = {value.key: value for value in entity_values(entity)}
+    assert values["high_alch_value"].derived is True
+    assert values["base_value"].derived is False
 
 
 def test_an_entity_with_nothing_recorded_still_previews() -> None:

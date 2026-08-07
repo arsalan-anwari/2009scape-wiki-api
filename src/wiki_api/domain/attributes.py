@@ -200,6 +200,10 @@ class ItemAttributes(BaseModel):
         int | None,
         AttributeMeta("Buy limit", AttributeGroup.TRADE, 20, AttributeFormat.INT),
     ] = None
+    base_value: Annotated[
+        int | None,
+        AttributeMeta("Value", AttributeGroup.TRADE, 25, AttributeFormat.GP),
+    ] = None
     shop_price: Annotated[
         int | None,
         AttributeMeta(
@@ -518,7 +522,6 @@ class NpcAttributes(BaseModel):
             AttributeGroup.COMBAT,
             5,
             AttributeFormat.INT,
-            derived=True,
             prominent=True,
         ),
     ] = None
@@ -1234,9 +1237,10 @@ def test_unknown_attribute_keys_never_reach_the_model() -> None:
 
 
 def test_a_derived_attribute_is_declared_as_such() -> None:
-    npc_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.NPC]}
-    assert npc_specs["combat_level"].derived is True
-    assert npc_specs["lifepoints"].derived is False
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    assert item_specs["high_alch_value"].derived is True
+    assert item_specs["low_alch_value"].derived is True
+    assert item_specs["base_value"].derived is False
 
 
 def test_every_type_declares_something_worth_showing_on_hover() -> None:

@@ -189,8 +189,11 @@ class _Parser:
 
     def construction(self) -> EnumValue:
         word = self.dotted(self.take().value)
-        if self.take_punctuation("["):
+        dimensions = 0
+        while self.take_punctuation("["):
             self.expect("]")
+            dimensions += 1
+        if dimensions:
             return self.array("}")
         self.expect("(")
         return {CALL_KEY: word, ARGUMENTS_KEY: self.array(")")}
@@ -270,6 +273,11 @@ def test_an_array_of_either_language_becomes_a_list() -> None:
 
 def test_an_empty_array_is_still_an_array() -> None:
     assert _read("new int[] { }") == ([],)
+
+
+def test_an_array_of_arrays_keeps_both_levels() -> None:
+    assert _read('new String[][] { { "a", "b" }, { "c" } }') == ([["a", "b"], ["c"]],)
+    assert _read("new int[][] { }") == ([],)
 
 
 def test_a_trailing_comma_inside_an_array_is_allowed() -> None:

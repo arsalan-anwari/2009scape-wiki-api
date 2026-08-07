@@ -10,7 +10,11 @@ from wiki_api.pipeline.artifact.overlay import load_documents
 from wiki_api.pipeline.artifact.writer import write_artifact
 from wiki_api.pipeline.identity import read_allocation
 from wiki_api.pipeline.reporting import BuildReport, report_of
-from wiki_api.pipeline.sources.registry import defined_by, read_sources
+from wiki_api.pipeline.sources.registry import (
+    defined_by,
+    read_sources,
+    unread_tables,
+)
 from wiki_api.pipeline.sources.staged import StagedSources
 
 if TYPE_CHECKING:
@@ -57,6 +61,7 @@ def build_from_sources(
         overlays=len(overlays),
         overridden=len(defined_by(overlays)),
         drifted=staged.drifted(),
+        unread=unread_tables(),
         sources=outcomes,
     )
 

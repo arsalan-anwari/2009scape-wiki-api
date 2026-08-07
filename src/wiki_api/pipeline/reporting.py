@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 DRIFT_NOTE = "edited after staging, so it no longer matches the sources it came from"
+UNREAD_NOTE = "staged and read by nothing yet, waiting on a shape in the model"
 
 
 class BuildReport(BaseModel):
@@ -27,6 +28,7 @@ class BuildReport(BaseModel):
     overlays: int = Field(ge=0)
     overridden: int = Field(ge=0)
     drifted: tuple[str, ...] = ()
+    unread: tuple[str, ...] = ()
     sources: tuple[SourceOutcome, ...] = ()
 
     @property
@@ -46,6 +48,8 @@ class BuildReport(BaseModel):
             told.extend(source.lines())
         if self.skipped:
             told.append(f"  {self.skipped} source rows did not become facts")
+        if self.unread:
+            told.append(f"  {', '.join(self.unread)}: {UNREAD_NOTE}")
         return tuple(told)
 
 
@@ -59,6 +63,7 @@ def report_of(
     overlays: int,
     overridden: int,
     drifted: Sequence[str],
+    unread: Sequence[str],
     sources: Sequence[SourceOutcome],
 ) -> BuildReport:
     """Gather one build's counts into the report its command prints."""
@@ -71,6 +76,7 @@ def report_of(
         overlays=overlays,
         overridden=overridden,
         drifted=tuple(drifted),
+        unread=tuple(unread),
         sources=tuple(sources),
     )
 
@@ -107,6 +113,12 @@ def test_a_staged_file_edited_by_hand_is_named_in_the_report() -> None:
 def test_what_the_overlays_own_is_told_so_a_stale_one_shows_up() -> None:
     told = "\n".join(_report().lines())
     assert "2 overlay documents, 6 entities they own outright" in told
+
+
+def test_a_source_nothing_reads_yet_is_named_in_the_report() -> None:
+    told = "\n".join(_report(unread=("SkillingResource", "Stall")).lines())
+    assert "SkillingResource, Stall" in told
+    assert UNREAD_NOTE in told
 
 
 def test_rows_that_did_not_become_facts_are_counted() -> None:

@@ -1,0 +1,44 @@
+[
+ {
+  "id": 1,
+  "name": "Man",
+  "size": 1,
+  "combat_level": 2,
+  "visible_on_map": true,
+  "options": [
+   "Talk-to",
+   "Attack",
+   "Pickpocket",
+   null,
+   null
+  ]
+ },
+ {
+  "id": 50,
+  "name": "King Black Dragon",
+  "size": 5,
+  "combat_level": 276,
+  "visible_on_map": true,
+  "options": [
+   null,
+   "Attack",
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 528,
+  "name": "Lucien",
+  "size": 1,
+  "combat_level": 14,
+  "visible_on_map": true,
+  "options": [
+   "Talk-to",
+   "Attack",
+   null,
+   null,
+   null
+  ]
+ }
+]

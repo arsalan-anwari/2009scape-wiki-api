@@ -7,5 +7,14 @@
   "id": "2",
   "title": "Edgeville General Store",
   "stock": "{995,10,100}"
+ },
+ {
+  "npcs": "2356",
+  "high_alch": "0",
+  "currency": "995",
+  "general_store": "false",
+  "id": "44",
+  "title": "Lletya Archery Shop",
+  "stock": "{877,1000,100}-{878,10,100}"
  }
 ]

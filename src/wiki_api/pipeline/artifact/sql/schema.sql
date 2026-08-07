@@ -28,7 +28,8 @@ CREATE TABLE entity (
     attributes    TEXT    NOT NULL,
     source        TEXT    NOT NULL
         CHECK (source IN
-            ('game_config', 'game_code', 'grand_exchange', 'overlay', 'fixture')),
+            ('game_config', 'game_code', 'game_cache', 'grand_exchange', 'overlay',
+             'fixture')),
     source_file   TEXT,
     source_ref    TEXT,
     game_version  TEXT    NOT NULL,
@@ -66,7 +67,8 @@ CREATE TABLE edge (
     order_key     INTEGER NOT NULL DEFAULT 0,
     source        TEXT    NOT NULL
         CHECK (source IN
-            ('game_config', 'game_code', 'grand_exchange', 'overlay', 'fixture')),
+            ('game_config', 'game_code', 'game_cache', 'grand_exchange', 'overlay',
+             'fixture')),
     source_file   TEXT,
     source_ref    TEXT,
     game_version  TEXT    NOT NULL,

@@ -199,6 +199,7 @@ class SourceKind(GameEnum):
 
     GAME_CONFIG = "game_config"
     GAME_CODE = "game_code"
+    GAME_CACHE = "game_cache"
     GRAND_EXCHANGE = "grand_exchange"
     OVERLAY = "overlay"
     FIXTURE = "fixture"

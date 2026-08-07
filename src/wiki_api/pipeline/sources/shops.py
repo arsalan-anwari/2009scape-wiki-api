@@ -33,10 +33,15 @@ NPCS_FIELD: Final = "npcs"
 STOCK_FIELD: Final = "stock"
 CURRENCY_FIELD: Final = "currency"
 STOCK_WIDTH: Final = 3
-PRICE_NOTE: Final = (
+NO_PRICE_NOTE: Final = (
     "no line carries a price: the game works one out from a value only the cache "
     "holds, so prices arrive with the cache"
 )
+PRICED_NOTE: Final = (
+    "a line is priced at full stock, which is what the game charges before its "
+    "stock modifier moves"
+)
+MINIMUM_PRICE: Final = 1
 
 
 def read_shops(
@@ -84,11 +89,15 @@ def read_shops(
 
 
 def read_shop_edges(
-    staged: StagedSources, known: frozenset[EntityKey], overridden: frozenset[EntityKey]
+    staged: StagedSources,
+    known: frozenset[EntityKey],
+    overridden: frozenset[EntityKey],
+    values: Mapping[int, int] | None = None,
 ) -> SourceOutcome:
     """Turn every stock line into a sale and every named npc into the shop's staff."""
     edges: list[dict[str, Any]] = []
     skipped: list[Skipped] = []
+    priced = values or {}
     for record in staged.records(DECLARED):
         shop_id = int(str(record[ID_FIELD]))
         shop = EntityKey(type=EntityType.SHOP, id=shop_id)
@@ -103,12 +112,13 @@ def read_shop_edges(
             continue
         currency = _currency(record, shop_id)
         _read_staff(record, shop, known, edges, skipped)
-        _read_stock(record, shop, currency, known, edges, skipped)
+        _read_stock(record, shop, currency, known, edges, skipped, priced)
+    carried = sum(1 for edge in edges if edge["attributes"].get("price") is not None)
     return SourceOutcome(
         source=f"{DECLARED.name} lines",
         read=_document(staged, edges=edges),
         skipped=tuple(skipped),
-        notes=(PRICE_NOTE,),
+        notes=(PRICED_NOTE, f"{carried} lines priced") if priced else (NO_PRICE_NOTE,),
     )
 
 
@@ -151,6 +161,7 @@ def _read_stock(
     known: frozenset[EntityKey],
     edges: list[dict[str, Any]],
     skipped: list[Skipped],
+    values: Mapping[int, int],
 ) -> None:
     lines = groups(
         record.get(STOCK_FIELD), DECLARED.name, str(shop.id), STOCK_FIELD, STOCK_WIDTH
@@ -184,9 +195,17 @@ def _read_stock(
                     "restock_rate": restock,
                     "slot": slot,
                     "currency": currency,
+                    **_price(values, item_id, currency),
                 },
             }
         )
+
+
+def _price(values: Mapping[int, int], item_id: int, currency: int) -> dict[str, int]:
+    if currency != COINS.id:
+        return {}
+    value = values.get(item_id)
+    return {} if value is None else {"price": max(value, MINIMUM_PRICE)}
 
 
 def _currency(record: Mapping[str, Any], shop_id: int) -> int:
@@ -271,6 +290,47 @@ def test_stock_lines_become_sales_keyed_by_their_slot(tmp_path: Any) -> None:
         "slot": 0,
         "currency": 995,
     }
+
+
+def test_a_line_is_priced_from_the_value_the_cache_carries(tmp_path: Any) -> None:
+    outcome = read_shop_edges(
+        _sources(tmp_path, [_RECORD]), _known(), frozenset(), {9440: 45}
+    )
+    sells = [
+        edge
+        for edge in outcome.read.document.edges
+        if edge.rel is RelationshipType.SELLS
+    ]
+    assert sells[0].attributes["price"] == 45
+    assert "price" not in sells[1].attributes
+    assert any("1 lines priced" in note for note in outcome.notes)
+
+
+def test_a_line_a_shop_charges_something_other_than_coins_for_is_not_priced(
+    tmp_path: Any,
+) -> None:
+    record = {**_RECORD, "currency": "6529"}
+    outcome = read_shop_edges(
+        _sources(tmp_path, [record]), _known(), frozenset(), {9440: 45}
+    )
+    sells = [
+        edge
+        for edge in outcome.read.document.edges
+        if edge.rel is RelationshipType.SELLS
+    ]
+    assert all("price" not in edge.attributes for edge in sells)
+
+
+def test_a_free_item_still_costs_the_minimum_the_game_charges(tmp_path: Any) -> None:
+    outcome = read_shop_edges(
+        _sources(tmp_path, [_RECORD]), _known(), frozenset(), {9440: 0}
+    )
+    sells = [
+        edge
+        for edge in outcome.read.document.edges
+        if edge.rel is RelationshipType.SELLS
+    ]
+    assert sells[0].attributes["price"] == MINIMUM_PRICE
 
 
 def test_the_named_npcs_become_the_shops_staff(tmp_path: Any) -> None:

@@ -52,6 +52,20 @@ class ColumnMismatch(EnumReadError):
         self.declared = declared
 
 
+class AmbiguousConstructor(EnumReadError):
+    """Several constructors accept one constant, and its arguments pick none of them."""
+
+    def __init__(self, origin: str, constant: str, found: int, candidates: int) -> None:
+        super().__init__(
+            f"{origin} constant {constant} passes {found} arguments, which "
+            f"{candidates} constructors accept; none of them fits the argument types"
+        )
+        self.origin = origin
+        self.constant = constant
+        self.found = found
+        self.candidates = candidates
+
+
 # test cases
 
 
@@ -61,6 +75,7 @@ def test_every_reader_error_is_a_knowledge_error() -> None:
         EnumNotFound("Quests.kt", "Quests"),
         UnreadableConstant("Quests.kt", "DEATH_PLATEAU", "unsupported call"),
         ColumnMismatch("Quests.kt", "DEATH_PLATEAU", 2, 1),
+        AmbiguousConstructor("Decoration.java", "OAK_CHAIR", 6, 2),
     )
     assert all(isinstance(error, EnumReadError) for error in errors)
     assert all(isinstance(error, KnowledgeError) for error in errors)
@@ -70,3 +85,9 @@ def test_a_column_mismatch_names_both_counts() -> None:
     error = ColumnMismatch("Bars.java", "BRONZE", 3, 4)
     assert "3 arguments" in str(error)
     assert "declares 4" in str(error)
+
+
+def test_an_ambiguous_constructor_says_how_many_could_have_matched() -> None:
+    error = AmbiguousConstructor("Decoration.java", "OAK_CHAIR", 6, 2)
+    assert "6 arguments" in str(error)
+    assert "2 constructors" in str(error)

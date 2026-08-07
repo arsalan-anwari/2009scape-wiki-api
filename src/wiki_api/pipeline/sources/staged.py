@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING, Any
 
 from wiki_api.pipeline.enums.reader import EnumTable
 from wiki_api.pipeline.staging.collectors import PRICES
-from wiki_api.pipeline.staging.declared import DeclaredConfig, DeclaredTable
+from wiki_api.pipeline.staging.declared import (
+    DeclaredConfig,
+    DeclaredExtract,
+    DeclaredTable,
+)
 from wiki_api.pipeline.staging.errors import StagedFileMissing
 from wiki_api.pipeline.staging.manifest import StagingManifest, read_manifest
 
@@ -48,6 +52,29 @@ class StagedSources:
         return EnumTable.model_validate_json(
             self.path(declared.staged).read_text(encoding="utf-8")
         )
+
+    def extract(self, declared: DeclaredExtract) -> tuple[dict[str, Any], ...]:
+        """Read one staged cache extract as the records it holds."""
+        path = self.path(declared.staged)
+        if not declared.compressed:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            return tuple(payload)
+        import gzip
+
+        lines = gzip.decompress(path.read_bytes()).decode("utf-8").splitlines()
+        return tuple(json.loads(line) for line in lines if line)
+
+    def has_extract(self, declared: DeclaredExtract) -> bool:
+        """Whether a cache extract was staged, so a build can say it was not."""
+        try:
+            self.path(declared.staged)
+        except StagedFileMissing:
+            return False
+        return True
+
+    def revision(self, staged: str) -> str | None:
+        """What the manifest records about the revision of one staged file."""
+        return self.manifest.entry(staged).source_revision
 
     def price_files(self) -> tuple[Path, ...]:
         """Every staged price snapshot, oldest first."""
@@ -154,6 +181,51 @@ def test_a_staged_file_deleted_after_staging_is_refused(tmp_path: Path) -> None:
     (tmp_path / "configs/item_configs.json").unlink()
     with pytest.raises(StagedFileMissing):
         staged.path("configs/item_configs.json")
+
+
+def test_a_staged_cache_extract_reads_back_as_records(tmp_path: Path) -> None:
+    from tests.sources import staged_from
+
+    from wiki_api.pipeline.staging.declared import ITEM_EXTRACT
+
+    staged = staged_from(
+        tmp_path,
+        {ITEM_EXTRACT.staged: '[{"id": 4587, "value": 100000}]'},
+        revisions={ITEM_EXTRACT.staged: "index 19 revision 214"},
+    )
+    assert staged.extract(ITEM_EXTRACT)[0]["value"] == 100000
+    assert staged.has_extract(ITEM_EXTRACT) is True
+    assert staged.revision(ITEM_EXTRACT.staged) == "index 19 revision 214"
+
+
+def test_a_compressed_extract_reads_one_record_per_line(tmp_path: Path) -> None:
+    import gzip
+
+    from tests.sources import staged_from
+
+    from wiki_api.pipeline.staging.declared import PLACEMENT_EXTRACT
+
+    staged = staged_from(
+        tmp_path,
+        {
+            PLACEMENT_EXTRACT.staged: gzip.compress(
+                b'{"region": 12850}\n{"region": 12851}\n'
+            )
+        },
+    )
+    read = staged.extract(PLACEMENT_EXTRACT)
+    assert [record["region"] for record in read] == [12850, 12851]
+
+
+def test_a_cache_extract_nobody_staged_is_absent_rather_than_an_error(
+    tmp_path: Path,
+) -> None:
+    from tests.sources import staged_from
+
+    from wiki_api.pipeline.staging.declared import ITEM_EXTRACT
+
+    staged = staged_from(tmp_path, {"configs/item_configs.json": "[]"})
+    assert staged.has_extract(ITEM_EXTRACT) is False
 
 
 def test_an_edit_after_staging_is_visible_to_the_build(tmp_path: Path) -> None:
