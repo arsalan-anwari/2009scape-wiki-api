@@ -33,8 +33,18 @@ SLICES = (
     "npc_spawns.json",
     "ground_spawns.json",
     "ranged_weapon_configs.json",
+    "object_configs.json",
 )
 CACHE_SLICES = ("items.json", "npcs.json", "scenery.json")
+TABLE_SLICES = (
+    "Quests",
+    "SkillingResource",
+    "Stall",
+    "CookableItems",
+    "SummoningScroll",
+    "Consumables",
+    "WeaponInterfaces",
+)
 BUILT_AT = datetime(2026, 8, 3, 12, tzinfo=UTC)
 QUESTS = (
     "MYTHS_OF_THE_WHITE_LANDS",
@@ -59,7 +69,8 @@ def _binary_slice(name: str) -> bytes:
 
 def _staged(root: Path, cache: bool = True) -> StagedSources:
     files: dict[str, str | bytes] = {f"configs/{name}": _slice(name) for name in SLICES}
-    files["tables/Quests.json"] = _slice("Quests.json")
+    for enum in TABLE_SLICES:
+        files[f"tables/{enum}.json"] = _slice(_table_slice(enum))
     files["grand-exchange/2024-06-08.json"] = _slice("2024-06-08.json")
     if cache:
         for name in CACHE_SLICES:
@@ -69,8 +80,15 @@ def _staged(root: Path, cache: bool = True) -> StagedSources:
         root,
         files,
         prices=("grand-exchange/2024-06-08.json",),
-        revisions={"cache/items.json": "index 19 revision 214"},
+        revisions={
+            "cache/items.json": "index 19 revision 214",
+            "cache/scenery.json": "index 16 revision 330",
+        },
     )
+
+
+def _table_slice(enum: str) -> str:
+    return "Quests.json" if enum == "Quests" else f"tables/{enum}.json"
 
 
 def _identity(root: Path) -> Path:
@@ -141,7 +159,7 @@ def test_the_order_documents_are_read_in_does_not_change_the_artifact(
         type=EntityType.QUEST,
         ids={key: number for number, key in enumerate(QUESTS, start=1)},
     )
-    outcomes = read_sources(staged, [], allocation)
+    outcomes = read_sources(staged, [], {EntityType.QUEST: allocation})
     forwards = [outcome.read for outcome in outcomes]
     from wiki_api.pipeline.artifact.hashing import content_hash
     from wiki_api.pipeline.artifact.merge import merge
@@ -225,6 +243,84 @@ def test_an_item_carries_the_value_every_price_is_worked_out_from(
         assert attributes.low_alch_value == 40000
     finally:
         repository.close()
+
+
+def test_an_item_carries_the_weapon_type_its_position_stands_for(
+    artifact: Path,
+) -> None:
+    from wiki_api.domain.vocabulary import WeaponType
+
+    repository = open_repository(artifact)
+    try:
+        entity = repository.get_entity(EntityKey(type=EntityType.ITEM, id=4587))
+        read = ItemAttributes.model_validate(entity.attributes.model_dump())
+        assert read.weapon_type is WeaponType.SCIMITAR
+    finally:
+        repository.close()
+
+
+def test_a_weapon_list_that_moved_underneath_stops_the_whole_build(
+    tmp_path: Path,
+) -> None:
+    from wiki_api.pipeline.sources.errors import DriftedVocabulary
+    from wiki_api.pipeline.sources.items import check_weapon_types
+    from wiki_api.pipeline.staging.declared import WEAPON_TYPES
+
+    staged = _staged(tmp_path / "source")
+    moved = json.loads(_slice(f"tables/{WEAPON_TYPES.enum}.json"))
+    moved["constants"].insert(0, {"name": "SLING", "values": {"interfaceId": 1}})
+    (tmp_path / "source" / WEAPON_TYPES.staged).write_text(
+        json.dumps(moved), encoding="utf-8"
+    )
+    with pytest.raises(DriftedVocabulary):
+        check_weapon_types(staged)
+
+
+def _healing(artifact: Path) -> dict[int, int | None]:
+    repository = open_repository(artifact)
+    try:
+        read: dict[int, int | None] = {}
+        for item_id in (2140, 1957, 1511, 536, 2138):
+            entity = repository.get_entity(EntityKey(type=EntityType.ITEM, id=item_id))
+            read[item_id] = ItemAttributes.model_validate(
+                entity.attributes.model_dump()
+            ).heals
+        return read
+    finally:
+        repository.close()
+
+
+def test_an_item_carries_what_the_consumable_table_says_it_restores(
+    artifact: Path,
+) -> None:
+    assert _healing(artifact)[2140] == 3
+
+
+def test_only_what_the_game_offers_to_eat_or_drink_is_credited(
+    artifact: Path,
+) -> None:
+    read = _healing(artifact)
+    assert read[1957] == 11
+    assert read[1511] is None
+
+
+def test_an_effect_buried_in_a_combination_is_not_read(artifact: Path) -> None:
+    assert _healing(artifact)[536] is None
+
+
+def test_an_effect_that_states_a_range_rather_than_an_amount_is_not_read(
+    artifact: Path,
+) -> None:
+    assert _healing(artifact)[2138] is None
+
+
+def test_the_build_says_how_much_of_the_consumable_table_it_read(
+    tmp_path: Path,
+) -> None:
+    _, report = _built(tmp_path)
+    told = "\n".join(line for outcome in report.sources for line in outcome.lines())
+    assert "2 items restore an amount the table states outright" in told
+    assert "1 named ids the game offers no way to eat or drink" in told
 
 
 def test_an_npc_carries_the_combat_level_the_cache_holds(artifact: Path) -> None:
@@ -443,3 +539,149 @@ def test_a_build_tells_a_reader_what_it_could_not_carry(tmp_path: Path) -> None:
     told = "\n".join(report.lines())
     assert "item_configs.json" in told
     assert "source rows did not become facts" in told
+
+
+def test_a_thing_the_world_holds_becomes_an_entity_of_its_own(artifact: Path) -> None:
+    repository = open_repository(artifact)
+    try:
+        tree = repository.get_entity(EntityKey(type=EntityType.SCENERY, id=1276))
+        assert tree is not None
+        assert tree.name == "Tree"
+        assert tree.description == "One of the most common trees in 2009Scape."
+        assert tree.searchable is True
+    finally:
+        repository.close()
+
+
+def test_a_definition_the_world_never_places_is_left_out(tmp_path: Path) -> None:
+    _, report = _built(tmp_path)
+    read = [
+        source for source in report.sources if source.source.endswith("scenery.json")
+    ]
+    assert read[0].entities > 0
+    assert read[0].skipped_by_reason().get("no_place")
+
+
+def test_a_thing_in_the_world_says_what_working_it_gives(artifact: Path) -> None:
+    repository = open_repository(artifact)
+    try:
+        service = KnowledgeService(repository)
+        assert _rows(service, "Tree", RelationshipType.YIELDS) == 1
+        assert _rows(service, "Logs", RelationshipType.YIELDS, Direction.REVERSE) == 1
+    finally:
+        repository.close()
+
+
+def test_an_item_says_what_it_can_be_turned_into(artifact: Path) -> None:
+    repository = open_repository(artifact)
+    try:
+        service = KnowledgeService(repository)
+        assert _rows(service, "Raw chicken", RelationshipType.MAKES) == 1
+        assert (
+            _rows(service, "Cooked chicken", RelationshipType.MAKES, Direction.REVERSE)
+            == 1
+        )
+    finally:
+        repository.close()
+
+
+def test_a_decoded_fact_names_its_revision_without_the_staging_manifest(
+    artifact: Path,
+) -> None:
+    repository = open_repository(artifact)
+    try:
+        tree = repository.get_entity(EntityKey(type=EntityType.SCENERY, id=1276))
+        assert tree is not None
+        assert tree.provenance.source_revision == "index 16 revision 330"
+    finally:
+        repository.close()
+
+
+def test_a_definition_the_source_has_caught_up_with_fails_the_build(
+    tmp_path: Path,
+) -> None:
+    from wiki_api.pipeline.artifact.errors import OverlayExpired
+
+    overlays = tmp_path / "overlays"
+    overlays.mkdir()
+    (overlays / "replaced.json").write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "source": "overlay",
+                "game_version": "2009scape@1f4a2c9",
+                "precedence": 10,
+                "entities": [
+                    {
+                        "type": "item",
+                        "id": 995,
+                        "name": "Coins",
+                        "expects": {"name": "Placeholder nobody wrote"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(OverlayExpired) as caught:
+        _built(tmp_path, overlays)
+    assert caught.value.key.id == 995
+
+
+def test_a_definition_that_still_matches_the_source_builds(tmp_path: Path) -> None:
+    overlays = tmp_path / "overlays"
+    overlays.mkdir()
+    (overlays / "replaced.json").write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "source": "overlay",
+                "game_version": "2009scape@1f4a2c9",
+                "precedence": 10,
+                "entities": [
+                    {
+                        "type": "item",
+                        "id": 995,
+                        "name": "Coins",
+                        "description": "Corrected by hand.",
+                        "expects": {"name": "Coins"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    _, report = _built(tmp_path, overlays)
+    assert report.overridden == 1
+
+
+def test_a_correction_the_source_has_caught_up_with_fails_the_build(
+    tmp_path: Path,
+) -> None:
+    from wiki_api.pipeline.artifact.errors import OverlayExpired
+
+    overlays = tmp_path / "overlays"
+    overlays.mkdir()
+    (overlays / "expired.json").write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "source": "overlay",
+                "game_version": "2009scape@1f4a2c9",
+                "precedence": 10,
+                "entities": [
+                    {
+                        "type": "item",
+                        "id": 995,
+                        "mode": "patch",
+                        "description": "Corrected by hand.",
+                        "expects": {"name": "Coin"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(OverlayExpired) as caught:
+        _built(tmp_path, overlays)
+    assert caught.value.field == "name"

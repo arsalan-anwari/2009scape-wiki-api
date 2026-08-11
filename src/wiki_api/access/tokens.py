@@ -1,7 +1,6 @@
 """Accept or refuse the token a client presents.
 
-A token carries who it was issued to and no expiry, so `withdrawn` is the only way one
-stops being answered. Checking needs the issuer's public key and nothing else.
+A token has no expiry, so `withdrawn` is the only way one stops being answered.
 """
 
 from __future__ import annotations

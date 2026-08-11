@@ -3,9 +3,9 @@
 # 2009scape-wiki-api
 
 Turns the raw 2009scape game sources (items, NPCs, shops, drop tables, quests,
-locations) into one immutable SQLite artifact, and serves it two ways: an **FAST API**
-for a wiki front end, and an **MCP server** so Claude and other agents can answer questions
-about the game.
+locations) into one immutable SQLite artifact, and serves it two ways: a **FastAPI**
+contract for a wiki front end, and an **MCP server** so Claude and other agents can
+answer questions about the game.
 
 ```mermaid
 flowchart LR
@@ -27,7 +27,7 @@ flowchart LR
 The build is offline and always from source. The dataset ships on
 [Hugging Face](https://huggingface.co/datasets/arsalan-anwari/2009scape-wiki-api-data)
 and is fetched before a server starts, never committed here. A build holds about 20,000
-entities, 58,000 relationships between them, and two years of daily Grand Exchange
+entities, 83,000 relationships between them, and two years of weekly Grand Exchange
 prices.
 
 ## Getting started
@@ -82,6 +82,41 @@ own label, format and unit:
 
 `GET /v1/entities/item/dragon-scimitar` returns the whole page in one response: infobox,
 sections, and a first page of every relationship.
+
+What a thing is worth comes back two ways. The page and the hover card carry a summary of
+it, and every value says how far to trust itself: an item whose recorded worth never moved
+in two years reads `static`, one that never left the floor reads `untraded` and carries no
+price at all, and only one that actually traded reads `traded`. The whole record is a
+resource of its own, so a chart is one request and no page pays for it:
+
+```jsonc
+// GET /v1/entities/item/dragon-scimitar/prices?since=2026-01-01&limit=2
+{"items": [{"item_id": 4587, "snapshot_date": "2026-07-18", "value": 108601},
+           {"item_id": 4587, "snapshot_date": "2026-07-25", "value": 108590}],
+ "total": 2, "limit": 2, "offset": 0}
+```
+
+Anything the market never recorded answers with an empty page rather than a refusal.
+
+Not every question starts from a name. A question whose subject is a number is asked
+against a whole type, and the words for the value come from the registry rather than from
+the caller's imagination: pass the key `GET /v1/types` publishes, or the label beside it.
+
+```jsonc
+// GET /v1/types/item/compare?holds=Strength%20bonus&how=more_than&number=100&descending=true
+{"type": "item",
+ "where": [{"path": "bonuses.strength", "compare": "more_than", "value": 100.0}],
+ "order": {"path": "bonuses.strength", "descending": true},
+ "rows": {"items": [{"link": {"type": "item", "id": 11694, "slug": "armadyl-godsword",
+                              "label": "Armadyl godsword"},
+                     "attributes": [{"key": "bonuses.strength", "value": 132,
+                                     "label": "Strength bonus", "format": "int"}]}],
+          "total": 18, "limit": 50, "offset": 0}}
+```
+
+Anything not carrying the value being compared or sorted on is left out of the answer and
+out of the total, because it is absent rather than smallest. Words no declared value
+answers to are a 422 rather than a best guess.
 
 A name that answers to nothing is never silently corrected. The refusal says where to
 ask what it might have meant, and that answer carries names only:
@@ -222,7 +257,7 @@ not invalidate it.
 | `tests` | integration tests and hand-made knowledge fixtures |
 | `demos` | worked examples, one folder each, run with `uv run poe demo <folder>` |
 | `game_data` | the game's own repositories, checked out and never written to |
-| `data/source` | the staged sources a build reads: `configs`, `tables`, `cache`, `grand-exchange`, and the manifest describing them |
+| `data/source` | what staging wrote: `configs`, `tables`, `cache`, `grand-exchange` and the manifest describing them, which the build reads, plus `wiki` and `places`, which only `prefill-overlays` opens |
 | `overlays` | hand-written corrections, merged over the sources at build time |
 | `identity` | the numbers kept for things the sources name but never number |
 
@@ -251,20 +286,13 @@ hand-written inputs beside it, and never opens the submodules.
 ```bash
 uv run poe sync-submodules       # check out the game repositories under game_data/
 uv run poe stage-sources         # copy, extract and fetch into data/source/
-uv run poe allocate-ids --write  # number any quest the sources name but never number
+uv run poe allocate-ids --write  # number what the sources name but never number
+uv run poe prefill-overlays      # write the overlays a person finishes by hand
 uv run poe build-artifact        # data/source + overlays + identity -> the artifact
 ```
 
-`stage-sources` takes `--only configs`, `--only tables`, `--only cache` or
-`--only prices` when you want one of them; only prices reach the network. Everything
-staged is written down in `data/source/sources.json` with the commit it came from and a
-hash of what was written, so a file edited by hand still works and is reported by the
-next build rather than passing unnoticed.
-
-Four kinds of source go in. Config files and enum tables are read as they are written.
-The cache is decoded during staging, the way the client decodes it, which is where item
-and NPC names, examine text, values, alchemy values, weights, buy limits and the noted
-and lent variants come from. Prices are the daily Grand Exchange snapshots.
+`stage-sources` takes `--only configs`, `--only tables`, `--only cache`, `--only places`
+or `--only prices` when you want one of them.
 
 ```bash
 uv run poe stage-sources --only cache    # decode the cache into data/source/cache/
@@ -272,15 +300,11 @@ uv run poe stage-sources --only cache    # decode the cache into data/source/cac
 
 Decoding is allowed to fail a little, and never quietly. `pipeline/tolerance.py` names
 how many rows each cache may lose and why, a build over that ceiling stops, and the
-staging report prints what each one used of what it was allowed. Map regions are the
-usual case: a few hundred have no working XTEA key, which the game cannot open either.
-
-Enum tables that staging writes but no adapter reads yet are named in the build report
-rather than left to be noticed, so it stays clear which sources are waiting on a shape
-in the model.
+staging report prints what each one used of what it was allowed.
 
 Corrections live in `overlays/` and are reviewed like code, because `data/` is not in
 version control. An overlay that *defines* an entity takes it away from the source
 entirely, which is how a duplicate id upstream gets resolved: the build stops, and the
-fix is a document. `identity/quest.json` holds the number each quest keeps across
-rebuilds; a quest never takes its number from an enum ordinal.
+fix is a document. `identity/` holds the number each quest, slayer task, place and
+house room keeps across rebuilds; none of them ever takes its number from an enum
+ordinal.

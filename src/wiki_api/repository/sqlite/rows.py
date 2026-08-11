@@ -72,6 +72,7 @@ def entity_from_row(row: sqlite3.Row) -> Entity:
                     "source": row["source"],
                     "source_file": row["source_file"],
                     "source_ref": row["source_ref"],
+                    "source_revision": row["source_revision"],
                     "game_version": row["game_version"],
                 }
             ),
@@ -106,6 +107,7 @@ def edge_from_row(row: sqlite3.Row) -> Edge:
                     "source": row["source"],
                     "source_file": row["source_file"],
                     "source_ref": row["source_ref"],
+                    "source_revision": row["source_revision"],
                     "game_version": row["game_version"],
                 }
             ),
@@ -176,6 +178,13 @@ def test_a_well_formed_row_still_reads_back_as_an_entity() -> None:
     assert str(entity.provenance.game_version) == "2009scape@1f4a2c9"
 
 
+def test_a_fact_answers_with_its_revision_without_the_staging_manifest() -> None:
+    entity = entity_from_row(
+        _entity_row(source="game_cache", source_revision="index 19 revision 214")
+    )
+    assert entity.provenance.source_revision == "index 19 revision 214"
+
+
 def _entity_row(**overrides: object) -> sqlite3.Row:
     values: dict[str, object] = {
         "search_id": 1,
@@ -195,6 +204,7 @@ def _entity_row(**overrides: object) -> sqlite3.Row:
         "source": "game_config",
         "source_file": "item_configs.json",
         "source_ref": None,
+        "source_revision": None,
         "game_version": "2009scape@1f4a2c9",
     }
     values.update(overrides)

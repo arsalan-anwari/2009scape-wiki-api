@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from wiki_api.core import (
         AttributeValue,
         Block,
+        Compared,
         EntitySummary,
         PageDescriptor,
         Row,
@@ -30,12 +31,16 @@ if TYPE_CHECKING:
     )
     from wiki_api.domain.identity import Link
     from wiki_api.domain.page import Page
+    from wiki_api.domain.prices import PriceMovement
 
 MOST_EXAMPLES: Final = 3
+UP: Final = "up"
+DOWN: Final = "down"
+NOWHERE: Final = "nowhere"
 
 
 class Neighbour(BaseModel):
-    """One thing reached over a link, and what the link itself records."""
+    """One thing an answer names, and the values that came with it."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -128,6 +133,72 @@ class Sorts(BaseModel):
 
     sorts: tuple[Sort, ...] = ()
     data_version: str
+
+
+class Ranking(BaseModel):
+    """One page of things a number picked out, and what to pass back for the rest."""
+
+    model_config = ConfigDict(frozen=True)
+
+    total: int = Field(ge=0)
+    offset: int = Field(ge=0)
+    found: tuple[Neighbour, ...] = ()
+    next_offset: int | None = None
+
+
+class Movement(BaseModel):
+    """Which way one thing's worth went over a stretch of the record, and how far."""
+
+    model_config = ConfigDict(frozen=True)
+
+    of: str
+    went: str
+    change: int
+    share: str
+    opened: int
+    opened_on: str
+    closed: int
+    closed_on: str
+    lowest: int
+    highest: int
+    readings: int = Field(ge=1)
+    trust: str
+
+
+def ranking_of(compared: Compared) -> Ranking:
+    """Shrink one page of a comparison to the names and the numbers behind them."""
+    return Ranking(
+        total=compared.rows.total,
+        offset=compared.rows.offset,
+        found=tuple(_carried(row) for row in compared.rows.items),
+        next_offset=compared.rows.next_offset,
+    )
+
+
+def movement_of(went: PriceMovement, of: str) -> Movement:
+    """Shrink a stretch of the record to which way it went and by how much."""
+    return Movement(
+        of=of,
+        went=_which_way(went.change),
+        change=went.change,
+        share=f"{went.share:+.1%}",
+        opened=went.opened,
+        opened_on=went.opened_on.isoformat(),
+        closed=went.closed,
+        closed_on=went.closed_on.isoformat(),
+        lowest=went.low,
+        highest=went.high,
+        readings=went.entries,
+        trust=went.confidence.value,
+    )
+
+
+def _which_way(change: int) -> str:
+    if change > 0:
+        return UP
+    if change < 0:
+        return DOWN
+    return NOWHERE
 
 
 def thing_of(descriptor: PageDescriptor) -> Thing:
@@ -223,6 +294,16 @@ def _neighbour(row: Row) -> Neighbour:
         type=row.type,
         id=row.link.id,
         facts=labelled(prominent_values(row.attributes)),
+    )
+
+
+def _carried(row: Row) -> Neighbour:
+    """Keep every value a row carries, because a comparison asked for all of them."""
+    return Neighbour(
+        name=row.link.label,
+        type=row.type,
+        id=row.link.id,
+        facts=labelled(row.attributes),
     )
 
 

@@ -5,17 +5,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from wiki_api.domain.identity import EntityType
+from wiki_api.pipeline.allocate import NUMBERED
 from wiki_api.pipeline.artifact.merge import merge
 from wiki_api.pipeline.artifact.overlay import load_documents
 from wiki_api.pipeline.artifact.writer import write_artifact
 from wiki_api.pipeline.identity import read_allocation
 from wiki_api.pipeline.reporting import BuildReport, report_of
+from wiki_api.pipeline.sources.overridden import overridden_by
 from wiki_api.pipeline.sources.registry import (
-    defined_by,
+    duplicate_tables,
     read_sources,
     unread_tables,
 )
 from wiki_api.pipeline.sources.staged import StagedSources
+from wiki_api.pipeline.staging.declared import GAME_REPO
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -41,7 +44,12 @@ def build_from_sources(
     staged = StagedSources.at(staged_dir)
     overlays = _overlays(overlay_dir)
     outcomes = read_sources(
-        staged, overlays, read_allocation(identity_dir, EntityType.QUEST)
+        staged,
+        overlays,
+        {
+            entity_type: read_allocation(identity_dir, entity_type)
+            for entity_type in NUMBERED
+        },
     )
     documents = [outcome.read for outcome in outcomes]
     snapshot = merge([*documents, *overlays], strict=strict)
@@ -59,9 +67,10 @@ def build_from_sources(
         edges=len(snapshot.edges),
         prices=len(snapshot.prices),
         overlays=len(overlays),
-        overridden=len(defined_by(overlays)),
+        overridden=len(overridden_by(overlays).keys),
         drifted=staged.drifted(),
         unread=unread_tables(),
+        duplicated=duplicate_tables(),
         sources=outcomes,
     )
 
@@ -73,11 +82,36 @@ def _overlays(overlay_dir: Path) -> tuple[OverlaySource, ...]:
 
 
 def _game_version(staged: StagedSources) -> str:
-    versions = sorted({str(entry.game_version) for entry in staged.manifest.files})
+    """Which build of the game the artifact reflects, ignoring the sources beside it.
+
+    Staging reads a constants library and a saved wiki snapshot as well, and each
+    carries its own version; the artifact is versioned by the game.
+    """
+    versions = sorted(
+        {
+            str(entry.game_version)
+            for entry in staged.manifest.files
+            if entry.game_version.repo == GAME_REPO
+        }
+    )
     return versions[0] if versions else UNKNOWN_GAME_VERSION
 
 
 # test cases
+
+
+def _empty_table(enum: str, language: str) -> str:
+    import json
+
+    return json.dumps(
+        {
+            "enum": enum,
+            "source_file": f"{enum}.{'kt' if language == 'kotlin' else 'java'}",
+            "language": language,
+            "columns": [],
+            "constants": [],
+        }
+    )
 
 
 def _staged(tmp_path: Path) -> Path:
@@ -85,10 +119,16 @@ def _staged(tmp_path: Path) -> Path:
 
     from tests.sources import staged_from
 
+    from wiki_api.pipeline.sources.skills import GATHERED, MADE
+
     root = tmp_path / "source"
     staged_from(
         root,
         {
+            **{
+                declared.staged: _empty_table(declared.enum, "java")
+                for declared in (*GATHERED, *MADE)
+            },
             "configs/item_configs.json": json.dumps(
                 [{"id": "995", "name": "Coins"}, {"id": "536", "name": "Dragon bones"}]
             ),

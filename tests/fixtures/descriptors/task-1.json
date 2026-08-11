@@ -1,0 +1,187 @@
+{
+  "entity": {
+    "type": "task",
+    "id": 1,
+    "slug": "banshee",
+    "label": "Banshee",
+    "icon_ref": null
+  },
+  "type": "task",
+  "description": "A screaming spirit found in the Slayer Tower.",
+  "canonical": null,
+  "variants": [],
+  "infobox": [
+    {
+      "key": "advice",
+      "value": [
+        "Banshees use a piercing scream to shock their enemies.",
+        "You'll need some earmuffs to protect yourself from them."
+      ],
+      "label": "Advice",
+      "group": "general",
+      "order": 30,
+      "format": "texts",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    },
+    {
+      "key": "slayer_level",
+      "value": 15,
+      "label": "Slayer level",
+      "group": "slayer",
+      "order": 10,
+      "format": "int",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "combat_level",
+      "value": 20,
+      "label": "Combat level needed",
+      "group": "slayer",
+      "order": 20,
+      "format": "int",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "undead",
+      "value": true,
+      "label": "Undead",
+      "group": "slayer",
+      "order": 40,
+      "format": "bool",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    },
+    {
+      "key": "dragonfire",
+      "value": false,
+      "label": "Breathes dragonfire",
+      "group": "slayer",
+      "order": 50,
+      "format": "bool",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    }
+  ],
+  "sections": [],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "task",
+          "id": 1
+        },
+        "rel": "assigns",
+        "direction": "reverse"
+      },
+      "label": "Assigned by",
+      "group": "slayer",
+      "order": 110,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "npc",
+              "id": 4559,
+              "slug": "holoy",
+              "label": "Holoy",
+              "icon_ref": null
+            },
+            "type": "npc",
+            "attributes": [
+              {
+                "key": "weight",
+                "value": 8,
+                "label": "Weight",
+                "group": "slayer",
+                "order": 10,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "choices": null
+              },
+              {
+                "key": "min_amount",
+                "value": 15,
+                "label": "Fewest kills",
+                "group": "amount",
+                "order": 20,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "max_amount",
+                "value": 50,
+                "label": "Most kills",
+                "group": "amount",
+                "order": 30,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "task",
+          "id": 1
+        },
+        "rel": "satisfied_by",
+        "direction": "forward"
+      },
+      "label": "Satisfied by",
+      "group": "slayer",
+      "order": 120,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "npc",
+              "id": 50,
+              "slug": "king-black-dragon",
+              "label": "King Black Dragon",
+              "icon_ref": null
+            },
+            "type": "npc",
+            "attributes": []
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

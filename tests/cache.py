@@ -178,18 +178,39 @@ def item_definition(name: str, value: int) -> bytes:
     )
 
 
+def quest_list() -> bytes:
+    """The journal's own quest list, as the client's key-to-value maps hold it."""
+    listed = {13: "Cook's Assistant", 14: "Dragon Slayer", 16: "Death Plateau"}
+    body = bytes([1, ord("I"), 2, ord("s"), 5]) + struct.pack(">H", len(listed))
+    for child, name in listed.items():
+        body += (
+            struct.pack(">I", (274 << 16) | child) + name.encode("latin-1") + b"\x00"
+        )
+    return body + bytes([0])
+
+
+def map_label(name: str, rank: int, x: int, y: int) -> bytes:
+    """One world map label, as index 23 holds it."""
+    return name.encode("latin-1") + b"\x00" + struct.pack(">BHHi", rank, x, y, -1)
+
+
 def built_cache(directory: Path) -> Path:
-    """A cache holding one item, one scenery, one npc and one named map region."""
+    """A cache holding one item, one scenery, one npc, one map, one label and the
+    quest list.
+    """
+    from wiki_api.pipeline.cache.datamaps import DATAMAP_INDEX
     from wiki_api.pipeline.cache.reader import (
         ITEM_INDEX,
         MAP_INDEX,
         NPC_INDEX,
         SCENERY_INDEX,
+        WORLDMAP_INDEX,
     )
 
     scenery = bytes([2]) + b"Furnace\x00" + bytes([30]) + b"Smelt\x00" + bytes([0])
     npc = bytes([2]) + b"Hans\x00" + bytes([95]) + struct.pack(">H", 4) + bytes([0])
     region = bytes([1, 2, 0b000100, 0, 0])
+    labels = [map_label("Lumbridge", 9, 3222, 3218)]
     return write_cache(
         directory,
         {
@@ -198,13 +219,17 @@ def built_cache(directory: Path) -> Path:
             },
             SCENERY_INDEX: {0: container(archive([scenery]))},
             NPC_INDEX: {0: container(archive([npc]))},
+            DATAMAP_INDEX: {1: container(archive([quest_list()]))},
             MAP_INDEX: {0: container(archive([region]))},
+            WORLDMAP_INDEX: {2: container(archive(labels))},
         },
         {
             ITEM_INDEX: container(reference_table({17: [235]})),
             SCENERY_INDEX: container(reference_table({0: [0]})),
             NPC_INDEX: container(reference_table({0: [0]})),
+            DATAMAP_INDEX: container(reference_table({1: [248]})),
             MAP_INDEX: container(reference_table({0: [0]}, names={0: "l50_50"})),
+            WORLDMAP_INDEX: container(reference_table({2: [0]})),
         },
     )
 

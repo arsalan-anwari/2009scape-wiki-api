@@ -1,7 +1,4 @@
-"""Hold what the query core hands back, in shapes no surface reinterprets.
-
-Every value carries the presentation facts the registry declares for it.
-"""
+"""Hold what the query core hands back, in shapes no surface reinterprets."""
 
 from __future__ import annotations
 
@@ -9,13 +6,16 @@ from typing import Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-from wiki_api.domain.attributes import AttributeFormat, AttributeSpec
+from wiki_api.domain.attributes import AttributeSpec
 from wiki_api.domain.entity import Entity
 from wiki_api.domain.identity import EntityKey, EntityType, Link
 from wiki_api.domain.page import Page
 from wiki_api.domain.presentation import GroupPlacement
+from wiki_api.domain.prices import PriceMovement, PricePoint
+from wiki_api.domain.query import Condition, Ordering
 from wiki_api.domain.relationships import RelationshipSpec, RelationshipType
 from wiki_api.domain.vocabulary import (
+    AttributeFormat,
     AttributeGroup,
     GameEnum,
     HiddenReason,
@@ -95,6 +95,31 @@ class Row(BaseModel):
     link: Link
     type: EntityType
     attributes: tuple[AttributeValue, ...]
+
+
+class Compared(BaseModel):
+    """One page of entities picked out by a number, with the question that picked
+    them.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    type: EntityType
+    where: tuple[Condition, ...] = ()
+    order: Ordering | None = None
+    rows: Page[Row]
+
+
+class Uncomparable(BaseModel):
+    """Nothing declared for that type answers to those words, so nothing was
+    compared.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    outcome: Literal["uncomparable"] = "uncomparable"
+    asked: str
+    offered: tuple[str, ...] = ()
 
 
 class Walk(BaseModel):
@@ -235,10 +260,13 @@ class Missing(BaseModel):
 
 
 Absent = Moved | Hidden | Missing
+ComparisonResolution = Found[Compared] | Uncomparable
 EntityResolution = Found[Entity] | Absent
 PageResolution = Found[PageDescriptor] | Absent
 TooltipResolution = Found[Tooltip] | Absent
 BlockResolution = Found[Block] | Absent
+HistoryResolution = Found[Page[PricePoint]] | Absent
+MovementResolution = Found[PriceMovement | None] | Absent
 
 
 class Named[T](BaseModel):

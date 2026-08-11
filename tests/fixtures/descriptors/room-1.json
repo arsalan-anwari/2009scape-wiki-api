@@ -1,0 +1,76 @@
+{
+  "entity": {
+    "type": "room",
+    "id": 1,
+    "slug": "kitchen",
+    "label": "Kitchen",
+    "icon_ref": null
+  },
+  "type": "room",
+  "description": "Where a house keeps its larder, its stove and its cat.",
+  "canonical": null,
+  "variants": [],
+  "infobox": [
+    {
+      "key": "outdoors",
+      "value": false,
+      "label": "Outdoors",
+      "group": "overview",
+      "order": 30,
+      "format": "bool",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    }
+  ],
+  "sections": [
+    {
+      "render": "attributes",
+      "group": "skill",
+      "label": "Training",
+      "placement": "section",
+      "order": 45,
+      "attributes": [
+        {
+          "key": "level",
+          "value": 5,
+          "label": "Construction level",
+          "group": "skill",
+          "order": 10,
+          "format": "int",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "build_cost",
+          "value": 5000,
+          "label": "Build cost",
+          "group": "skill",
+          "order": 20,
+          "format": "gp",
+          "unit": null,
+          "derived": false,
+          "prominent": true,
+          "choices": null
+        },
+        {
+          "key": "hotspots",
+          "value": 17,
+          "label": "Build spots",
+          "group": "skill",
+          "order": 40,
+          "format": "int",
+          "unit": null,
+          "derived": true,
+          "prominent": false,
+          "choices": null
+        }
+      ]
+    }
+  ],
+  "blocks": [],
+  "data_version": "fixture-0001"
+}

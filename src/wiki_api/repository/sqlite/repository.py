@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from wiki_api.domain.entity import Entity, Visibility
 from wiki_api.domain.errors import (
@@ -16,7 +16,7 @@ from wiki_api.domain.errors import (
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.manifest import SCHEMA_VERSION
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
-from wiki_api.domain.relationships import Edge
+from wiki_api.domain.relationships import Edge, RelationshipType
 from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT, SearchHit
 from wiki_api.repository.errors import ArtifactUnreadable
 from wiki_api.repository.naming import NameIndex
@@ -37,7 +37,10 @@ if TYPE_CHECKING:
 
     from wiki_api.domain.manifest import Manifest
     from wiki_api.domain.prices import PricePoint
-    from wiki_api.domain.relationships import RelationshipType
+    from wiki_api.domain.query import Condition, Ordering
+
+
+_RELATIONSHIP_VALUES: Final = frozenset(rel.value for rel in RelationshipType)
 
 
 class SqliteKnowledgeRepository:
@@ -118,6 +121,33 @@ class SqliteKnowledgeRepository:
         return Page[Entity](
             items=tuple(entity_from_row(row) for row in rows),
             total=total,
+            limit=limit,
+            offset=offset,
+        )
+
+    def list_by_attribute(
+        self,
+        entity_type: EntityType,
+        *,
+        where: Sequence[Condition] = (),
+        order: Ordering | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Entity]:
+        parameters: dict[str, object] = {
+            "type": entity_type.value,
+            "visibility": Visibility.PUBLISHED.value,
+            "conditions": _as_json_conditions(where),
+            "order_path": _json_path(order.path) if order else None,
+            "descending": bool(order and order.descending),
+        }
+        rows = self._all(
+            queries.SELECT_ENTITIES_BY_ATTRIBUTE,
+            {**parameters, "limit": limit, "offset": offset},
+        )
+        return Page[Entity](
+            items=tuple(entity_from_row(row) for row in rows),
+            total=self._total(queries.COUNT_ENTITIES_BY_ATTRIBUTE, parameters),
             limit=limit,
             offset=offset,
         )
@@ -211,6 +241,14 @@ class SqliteKnowledgeRepository:
         )
         return tuple(entity_from_row(row) for row in rows)
 
+    def relationship_totals(self) -> Mapping[RelationshipType, int]:
+        rows = self._all(queries.COUNT_EDGES_BY_RELATIONSHIP, {})
+        return {
+            RelationshipType(row["rel"]): int(row["total"])
+            for row in rows
+            if row["rel"] in _RELATIONSHIP_VALUES
+        }
+
     def price_history(
         self, item_id: int, *, since: date | None = None
     ) -> tuple[PricePoint, ...]:
@@ -298,6 +336,28 @@ def _as_json_keys(keys: Sequence[EntityKey]) -> str:
     )
 
 
+def _json_path(path: str) -> str:
+    """Address one stored value, whether it is a whole attribute or one part of one."""
+    return f"$.{path}"
+
+
+def _as_json_conditions(where: Sequence[Condition]) -> str:
+    """Hand every comparison to one statement as data, so none of it is ever spliced
+    into SQL.
+    """
+    return json.dumps(
+        [
+            {
+                "path": _json_path(condition.path),
+                "compare": condition.compare.value,
+                "value": condition.value,
+            }
+            for condition in where
+        ],
+        separators=(",", ":"),
+    )
+
+
 # test cases
 
 
@@ -319,3 +379,19 @@ def test_the_key_order_a_caller_asked_for_survives() -> None:
 
 def test_no_keys_serialise_to_an_empty_list() -> None:
     assert _as_json_keys([]) == "[]"
+
+
+def test_a_comparison_reaches_the_statement_as_data_and_never_as_sql() -> None:
+    from wiki_api.domain.query import Comparison, Condition
+
+    written = _as_json_conditions(
+        [Condition(path="bonuses.strength", compare=Comparison.MORE_THAN, value=100)]
+    )
+    assert written == (
+        '[{"path":"$.bonuses.strength","compare":"more_than","value":100.0}]'
+    )
+
+
+def test_a_part_of_a_packed_value_is_addressed_through_its_parent() -> None:
+    assert _json_path("bonuses.strength") == "$.bonuses.strength"
+    assert _json_path("heals") == "$.heals"

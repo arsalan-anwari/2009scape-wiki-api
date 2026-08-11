@@ -1,8 +1,4 @@
-"""Work out which real names a misspelt one might have meant, over the names alone.
-
-Three-letter runs narrow several thousand names to a few dozen, and only those are
-compared properly. Nothing here reads the artifact, so both backends answer alike.
-"""
+"""Work out which real names a misspelt one might have meant, over the names alone."""
 
 from __future__ import annotations
 

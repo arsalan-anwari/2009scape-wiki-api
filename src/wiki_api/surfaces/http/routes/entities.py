@@ -13,13 +13,17 @@ from fastapi import APIRouter, Path, Response
 
 from wiki_api.core import Block, Direction, Found, PageDescriptor, Tooltip
 from wiki_api.domain.identity import EntityType
+from wiki_api.domain.page import Page
+from wiki_api.domain.prices import PricePoint
 from wiki_api.domain.relationships import RelationshipType
 from wiki_api.surfaces.http.absence import delivered
 from wiki_api.surfaces.http.addressing import (
     ENTITIES_PREFIX,
+    HISTORY_SEGMENT,
     TOOLTIP_SEGMENT,
     WALK_SEGMENT,
     entity_path,
+    history_path,
     near_names_path,
     reference,
     tooltip_path,
@@ -32,6 +36,7 @@ from wiki_api.surfaces.http.dependencies import (
     RowsDep,
     ServiceDep,
     SettingsDep,
+    SinceQuery,
 )
 from wiki_api.surfaces.http.schemas import ErrorBody, Present, Resolution
 
@@ -171,6 +176,34 @@ def read_walk(
 
 
 @router.get(
+    f"/{{entity_type}}/{{ref}}/{HISTORY_SEGMENT}",
+    name="history",
+    summary="Page through what one entity has been worth",
+    response_description="One page of dated market readings, oldest first.",
+    responses=ABSENT_RESPONSES,
+)
+def read_history(
+    entity_type: TypePath,
+    ref: RefPath,
+    service: ServiceDep,
+    limit: RowsDep,
+    since: SinceQuery = None,
+    offset: OffsetQuery = 0,
+) -> Page[PricePoint]:
+    """Read the weekly market readings recorded for one entity, oldest first.
+
+    Anything the market never recorded answers with an empty page rather than a 404.
+    """
+    return delivered(
+        service.price_history(
+            reference(entity_type, ref), since=since, limit=limit, offset=offset
+        ),
+        history_path,
+        _asked_by_name(entity_type, ref),
+    )
+
+
+@router.get(
     f"/{{entity_type}}/{{ref}}/{RESOLVE_SEGMENT}",
     name="resolve",
     summary="Check what a reference points at, without being sent there",
@@ -211,7 +244,7 @@ def test_a_page_a_hover_and_an_inspection_are_separate_resources() -> None:
 
 def test_every_route_names_itself_for_a_generated_client() -> None:
     named = {str(getattr(route, "name", "")) for route in router.routes}
-    assert named == {"entity", "tooltip", "walk", "resolve"}
+    assert named == {"entity", "tooltip", "walk", "resolve", "history"}
 
 
 def test_absence_is_documented_wherever_a_thing_can_be_absent() -> None:

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from wiki_api.domain.attributes import AttributeFormat
+from wiki_api.domain.vocabulary import AttributeFormat
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -19,6 +19,7 @@ ABSENT = "unknown"
 YES = "yes"
 NO = "no"
 MOST_PARTS = 8
+POINTED_AT = "label"
 
 
 def rendered(value: AttributeValue) -> str:
@@ -39,6 +40,16 @@ def _said(value: JsonValue, shape: AttributeFormat) -> str:
         return ABSENT
     if shape is AttributeFormat.RATE:
         return _odds(value)
+    if shape is AttributeFormat.REF:
+        return _pointed(value)
+    return _plain(value)
+
+
+def _pointed(value: JsonValue) -> str:
+    if isinstance(value, dict):
+        named = value.get(POINTED_AT)
+        if isinstance(named, str):
+            return named
     return _plain(value)
 
 
@@ -134,3 +145,18 @@ def test_a_gap_inside_a_value_says_so_rather_than_saying_none() -> None:
 
 def test_several_values_come_back_under_the_names_they_were_given() -> None:
     assert labelled([_value(7, AttributeFormat.INT)]) == {"Declared": "7"}
+
+
+def test_a_pointer_is_said_as_the_thing_it_points_at() -> None:
+    pointer: JsonValue = {
+        "type": "item",
+        "id": 303,
+        "slug": "small-fishing-net",
+        POINTED_AT: "Small fishing net",
+    }
+    assert rendered(_value(pointer, AttributeFormat.REF)) == "Small fishing net"
+
+
+def test_a_pointer_nobody_resolved_still_says_where_it_pointed() -> None:
+    pointer: JsonValue = {"type": "item", "id": 303}
+    assert rendered(_value(pointer, AttributeFormat.REF)) == "type item, id 303"

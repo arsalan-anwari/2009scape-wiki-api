@@ -23,6 +23,7 @@ ITEM_INDEX: Final = 19
 SCENERY_INDEX: Final = 16
 NPC_INDEX: Final = 18
 MAP_INDEX: Final = 5
+WORLDMAP_INDEX: Final = 23
 DEFINITION_INDEXES: Final = (ITEM_INDEX, SCENERY_INDEX, NPC_INDEX)
 DEFINITIONS_PER_ARCHIVE: Final = 256
 
@@ -62,15 +63,16 @@ class CacheReader:
         self, index: int, archive: int, keys: tuple[int, ...] | None = None
     ) -> tuple[bytes, ...]:
         """Every file in one archive, in the order the reference table lists them."""
+        listed = self._tables[index].files.get(archive)
+        if listed is None:
+            raise ArchiveUnreadable(index, archive, "the reference table omits it")
         packed = self._store.container(index, archive)
         if packed is None:
             raise ArchiveUnreadable(index, archive, "the index has no entry")
         if keys is not None:
             packed = decrypt(keys, packed, CONTAINER_HEADER)
         data = unpack(index, archive, packed)
-        return split_archive(
-            index, archive, data, len(self._tables[index].files[archive])
-        )
+        return split_archive(index, archive, data, len(listed))
 
     def definitions(self, index: int) -> tuple[tuple[int, bytes], ...]:
         """Every definition in an index, keyed by the id the game addresses it with."""
@@ -132,6 +134,16 @@ def test_every_index_a_reader_opens_answers_for_its_own_archives(
     assert reader.indexes == (MAP_INDEX, SCENERY_INDEX, NPC_INDEX, ITEM_INDEX)
     assert len(reader.definitions(SCENERY_INDEX)) == 1
     assert reader.table(MAP_INDEX).archive_named("l50_50") == 0
+
+
+def test_an_archive_the_reference_table_omits_is_named(tmp_path: Path) -> None:
+    import pytest
+    from tests.cache import built_cache
+
+    reader = CacheReader.at(built_cache(tmp_path / "cache"), indexes=(WORLDMAP_INDEX,))
+    with pytest.raises(ArchiveUnreadable) as caught:
+        reader.archive(WORLDMAP_INDEX, 0)
+    assert "omits it" in str(caught.value)
 
 
 def test_an_archive_the_index_does_not_list_is_named(tmp_path: Path) -> None:

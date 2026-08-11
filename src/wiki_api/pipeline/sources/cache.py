@@ -7,10 +7,19 @@ from typing import TYPE_CHECKING, Any, Final
 from wiki_api.domain.entity import VariantKind
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.vocabulary import SourceKind
-from wiki_api.pipeline.artifact.overlay import OverlayMode, OverlaySource
+from wiki_api.pipeline.artifact.overlay import (
+    OverlayMode,
+    OverlayPrecedence,
+    OverlaySource,
+)
 from wiki_api.pipeline.sources.coercion import Skipped, SkipReason
+from wiki_api.pipeline.sources.journal import QUEST_LIST, read_journal
 from wiki_api.pipeline.sources.outcome import SourceOutcome
-from wiki_api.pipeline.staging.declared import ITEM_EXTRACT, NPC_EXTRACT
+from wiki_api.pipeline.staging.declared import (
+    DATAMAP_EXTRACT,
+    ITEM_EXTRACT,
+    NPC_EXTRACT,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -25,9 +34,9 @@ NOTE_TEMPLATE_FIELD: Final = "note_template_id"
 LEND_ID_FIELD: Final = "lend_id"
 LEND_TEMPLATE_FIELD: Final = "lend_template_id"
 COMBAT_LEVEL_FIELD: Final = "combat_level"
+MEMBERS_ATTRIBUTE: Final = "members"
 HIGH_ALCHEMY_RATE: Final = 0.6
 LOW_ALCHEMY_RATE: Final = 0.4
-CACHE_PRECEDENCE: Final = 1
 UNSTAGED_VERSION: Final = "2009scape@unknown"
 
 
@@ -137,6 +146,45 @@ def read_cache_npcs(
     )
 
 
+def read_cache_quests(
+    staged: StagedSources, named: Mapping[str, EntityKey]
+) -> SourceOutcome:
+    """Patch every quest the journal's own list puts on one side of the members line."""
+    journal = read_journal(staged)
+    entities: list[dict[str, Any]] = []
+    skipped: list[Skipped] = []
+    for name, key in sorted(named.items(), key=lambda pair: pair[1].id):
+        members = journal.members_only(name)
+        if members is None:
+            skipped.append(
+                Skipped(
+                    source=DATAMAP_EXTRACT.staged,
+                    reason=SkipReason.UNKNOWN_SUBJECT,
+                    detail=name,
+                )
+            )
+            continue
+        entities.append(
+            {
+                "type": EntityType.QUEST.value,
+                "id": key.id,
+                "mode": OverlayMode.PATCH.value,
+                "attributes": {MEMBERS_ATTRIBUTE: members},
+                "source_ref": f"{DATAMAP_EXTRACT.staged}#{QUEST_LIST}",
+            }
+        )
+    return SourceOutcome(
+        source=DATAMAP_EXTRACT.staged,
+        read=_document(staged, DATAMAP_EXTRACT.staged, entities),
+        skipped=tuple(skipped),
+        notes=(
+            f"{len(journal.listed)} quests listed in the journal",
+            f"{len(entities)} matched a declared quest, {len(skipped)} did not",
+            _revision_note(staged, DATAMAP_EXTRACT.staged),
+        ),
+    )
+
+
 def item_values(staged: StagedSources) -> Mapping[int, int]:
     """What each item is worth, which is what every shop price is worked out from."""
     if not staged.has_extract(ITEM_EXTRACT):
@@ -221,8 +269,9 @@ def _document(
                 "schema": 1,
                 "source": SourceKind.GAME_CACHE.value,
                 "source_file": path,
+                "source_revision": _staged_revision(staged, path),
                 "game_version": _game_version(staged, path),
-                "precedence": CACHE_PRECEDENCE,
+                "precedence": OverlayPrecedence.DECODED,
                 "entities": list(entities),
             },
         }
@@ -342,6 +391,7 @@ def test_the_document_says_which_revision_it_was_decoded_from(tmp_path: Any) -> 
         _staged(tmp_path, [{"id": 1050, "value": 160}]), _items(1050)
     )
     assert outcome.read.document.source is SourceKind.GAME_CACHE
+    assert outcome.read.document.source_revision == "index 19 revision 214"
     assert any("revision 214" in note for note in outcome.notes)
 
 

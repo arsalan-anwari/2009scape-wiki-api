@@ -16,6 +16,7 @@ INSERT INTO entity (
     source,
     source_file,
     source_ref,
+    source_revision,
     game_version
 ) VALUES (
     :search_id,
@@ -35,5 +36,6 @@ INSERT INTO entity (
     :source,
     :source_file,
     :source_ref,
+    :source_revision,
     :game_version
 );

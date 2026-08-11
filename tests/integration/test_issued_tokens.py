@@ -1,8 +1,7 @@
 """Check the tokens already on this machine against a running deployment.
 
-Unlike every other test, this reads what `poe keys issue` left in the config
-directory, so a token about to be pasted into a `.env` is known to work. Skipped
-where there are no keys.
+Reads what `poe keys issue` left in the config directory, and is skipped where there
+are no keys.
 """
 
 from __future__ import annotations

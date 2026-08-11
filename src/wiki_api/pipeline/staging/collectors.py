@@ -11,16 +11,35 @@ from typing import TYPE_CHECKING, Final
 import httpx
 from pydantic import BaseModel, ConfigDict
 
+from wiki_api.config import PRICES_DIRNAME
+from wiki_api.domain.provenance import GameVersion
 from wiki_api.pipeline.enums import read_enum
+from wiki_api.pipeline.enums.calls import read_base_calls
+from wiki_api.pipeline.enums.constants import read_constants
+from wiki_api.pipeline.enums.gates import read_gates
+from wiki_api.pipeline.places import read_anchors, read_tracks
 from wiki_api.pipeline.staging.declared import (
+    ANCHORS_CHECKOUT,
+    ANCHORS_REPO,
     CACHE_ROOT,
     CONFIG_ROOT,
+    CONSTANTS_CHECKOUT,
+    CONSTANTS_REPO,
     DECLARED_CONFIGS,
+    DECLARED_CONSTANTS,
     DECLARED_EXTRACTS,
+    DECLARED_PAGES,
+    DECLARED_SCANS,
     DECLARED_TABLES,
     GAME_CHECKOUT,
     GAME_REPO,
+    MUSIC_TRACKS,
+    TELEPORT_ANCHORS,
+    WIKI_CHECKOUT,
+    WIKI_REPO,
     DeclaredExtract,
+    DeclaredPages,
+    DeclaredScan,
 )
 from wiki_api.pipeline.staging.decoding import DecodeOutcome, decode_cache
 from wiki_api.pipeline.staging.errors import UnknownCollector, UpstreamMissing
@@ -32,25 +51,34 @@ from wiki_api.pipeline.staging.manifest import (
     write_manifest,
 )
 from wiki_api.pipeline.staging.prices import TIMEOUT, download_snapshots
-from wiki_api.pipeline.staging.upstream import game_version_of
+from wiki_api.pipeline.staging.upstream import game_version_of, vendored_version_of
 from wiki_api.pipeline.tolerance import check_tolerances, undeclared
+from wiki_api.pipeline.wiki import read_page
+from wiki_api.pipeline.wiki.errors import PagesMissing
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
     from pathlib import Path
     from typing import Any
 
-    from wiki_api.domain.provenance import GameVersion
-
 CONFIGS: Final = "configs"
 TABLES: Final = "tables"
 PRICES: Final = "prices"
 CACHE: Final = "cache"
-PRICES_DIRECTORY: Final = "grand-exchange"
+CONSTANTS: Final = "constants"
+CODE: Final = "code"
+WIKI: Final = "wiki"
+PLACES: Final = "places"
 CONFIG_VERSION: Final = 1
 TABLE_VERSION: Final = 1
 PRICE_VERSION: Final = 1
 CACHE_VERSION: Final = 1
+CONSTANTS_VERSION: Final = 1
+CODE_VERSION: Final = 2
+WIKI_VERSION: Final = 1
+PLACES_VERSION: Final = 1
+CODE_SUFFIXES: Final = (".kt", ".java")
+PAGE_SUFFIX: Final = ".html"
 PARTIAL_SUFFIX: Final = ".staging"
 JSON_INDENT: Final = 1
 REFUSAL_SAMPLE: Final = 3
@@ -68,8 +96,23 @@ class StagingRun:
     def checkout(self) -> Path:
         return self.game_data / GAME_CHECKOUT
 
+    @property
+    def constants(self) -> Path:
+        return self.game_data / CONSTANTS_CHECKOUT
+
+    @property
+    def pages(self) -> Path:
+        return self.game_data / WIKI_CHECKOUT
+
+    @property
+    def anchors(self) -> Path:
+        return self.game_data / ANCHORS_CHECKOUT
+
     def upstream(self, collector: str, relative: str) -> Path:
-        path = self.checkout / relative
+        return self.under(self.checkout, collector, relative)
+
+    def under(self, root: Path, collector: str, relative: str) -> Path:
+        path = root / relative
         if not path.is_file():
             raise UpstreamMissing(collector, str(path))
         return path
@@ -97,6 +140,7 @@ class StagingReport(BaseModel):
     destination: str
     game_version: str
     reports: tuple[CollectorReport, ...] = ()
+    left_alone: tuple[str, ...] = ()
 
     @property
     def count(self) -> int:
@@ -107,6 +151,7 @@ class StagingReport(BaseModel):
         for report in self.reports:
             told.append(f"  {report.collector}: {report.count} files")
             told.extend(f"    {note}" for note in report.notes)
+        told.extend(f"  {note}" for note in self.left_alone)
         return tuple(told)
 
 
@@ -154,14 +199,204 @@ def stage_tables(run: StagingRun, version: GameVersion) -> CollectorReport:
     return CollectorReport(collector=TABLES, files=tuple(staged), notes=tuple(notes))
 
 
+def stage_constants(run: StagingRun, version: GameVersion) -> CollectorReport:
+    """Read the named id constants the game's code compiles against."""
+    library = game_version_of(run.constants, CONSTANTS_REPO)
+    staged: list[StagedFile] = []
+    notes: list[str] = []
+    for declared in DECLARED_CONSTANTS:
+        source = run.under(run.constants, CONSTANTS, declared.upstream)
+        table = read_constants(
+            source.read_text(encoding="utf-8"), declared.object_name, declared.filename
+        )
+        staged.append(
+            _write(
+                run.destination / declared.staged,
+                _as_json(table.model_dump(mode="json")),
+                collector=CONSTANTS,
+                version=CONSTANTS_VERSION,
+                game_version=library,
+                upstream=declared.upstream,
+                relative=declared.staged,
+            )
+        )
+        notes.append(f"{declared.object_name}: {len(table.ids)} constants")
+    return CollectorReport(collector=CONSTANTS, files=tuple(staged), notes=tuple(notes))
+
+
+def stage_code(run: StagingRun, version: GameVersion) -> CollectorReport:
+    """Sweep the game's code for the numbers a class only states to its base class."""
+    staged: list[StagedFile] = []
+    notes: list[str] = []
+    for declared in DECLARED_SCANS:
+        found = _scan(run, declared)
+        staged.append(
+            _write(
+                run.destination / declared.staged,
+                _as_json(
+                    {
+                        "base": declared.base,
+                        "qualifier": declared.qualifier,
+                        "root": declared.root,
+                        "calls": found,
+                    }
+                ),
+                collector=CODE,
+                version=CODE_VERSION,
+                game_version=version,
+                upstream=declared.upstream,
+                relative=declared.staged,
+            )
+        )
+        gated = [one for one in found if one["requires"]]
+        notes.append(f"{declared.qualifier}: {len(found)} classes name a constant")
+        notes.append(f"{len(gated)} of them state what they ask for before starting")
+        disputed = [
+            f"{one['constant']}: {', '.join(one['requires']['disputed'])}"
+            for one in gated
+            if one["requires"]["disputed"]
+        ]
+        notes.extend(f"the class disagrees with itself, {one}" for one in disputed)
+    return CollectorReport(collector=CODE, files=tuple(staged), notes=tuple(notes))
+
+
+def _scan(run: StagingRun, declared: DeclaredScan) -> list[dict[str, Any]]:
+    root = run.checkout / declared.upstream
+    if not root.is_dir():
+        raise UpstreamMissing(CODE, str(root))
+    found: dict[str, dict[str, Any]] = {}
+    for path in sorted(root.rglob("*")):
+        if path.suffix not in CODE_SUFFIXES:
+            continue
+        source = path.read_text(encoding="utf-8", errors="replace")
+        if declared.base not in source:
+            continue
+        relative = path.relative_to(run.checkout).as_posix()
+        gates = read_gates(source)
+        for call in read_base_calls(source, declared.base, declared.qualifier):
+            found.setdefault(
+                call.constant,
+                {
+                    "constant": call.constant,
+                    "numbers": list(call.numbers),
+                    "path": relative,
+                    "requires": (
+                        gates.model_dump(mode="json")
+                        if gates or gates.disputed
+                        else None
+                    ),
+                },
+            )
+    return [found[name] for name in sorted(found)]
+
+
+def stage_wiki(run: StagingRun, version: GameVersion) -> CollectorReport:
+    """Read the saved community pages into headed sections a fact can be checked in."""
+    if not run.pages.is_dir():
+        raise PagesMissing(str(run.pages))
+    staged: list[StagedFile] = []
+    notes: list[str] = []
+    for declared in DECLARED_PAGES:
+        pages = _pages(run, declared)
+        payload = _as_json(
+            {
+                "namespace": declared.namespace,
+                "pages": [page.model_dump(mode="json") for page in pages],
+            }
+        )
+        staged.append(
+            _write(
+                run.destination / declared.staged,
+                payload,
+                collector=WIKI,
+                version=WIKI_VERSION,
+                game_version=_snapshot_version(run),
+                upstream=declared.upstream,
+                relative=declared.staged,
+            )
+        )
+        notes.append(
+            f"{declared.namespace}: {len(pages)} pages, "
+            f"{sum(len(page.sections) for page in pages)} sections"
+        )
+    return CollectorReport(collector=WIKI, files=tuple(staged), notes=tuple(notes))
+
+
+def _pages(run: StagingRun, declared: DeclaredPages) -> list[Any]:
+    read = [
+        read_page(path.read_text(encoding="utf-8", errors="replace"), path.name)
+        for path in sorted(run.pages.glob(f"*{PAGE_SUFFIX}"))
+    ]
+    kept = [page for page in read if page.namespace == declared.namespace]
+    if not kept:
+        raise PagesMissing(str(run.pages / f"{declared.namespace}*{PAGE_SUFFIX}"))
+    return sorted(kept, key=lambda page: page.slug)
+
+
+def _snapshot_version(run: StagingRun) -> GameVersion:
+    """Name the saved pages by what the vendored directory holds."""
+    return vendored_version_of(run.pages, WIKI_REPO)
+
+
+def stage_places(run: StagingRun, version: GameVersion) -> CollectorReport:
+    """Read the two sources that say where a part of the world is and what it is
+    called: the game's own music track dump, and the community's teleport list.
+    """
+    staged = [
+        _music_tracks(run, version),
+        _teleport_anchors(run),
+    ]
+    return CollectorReport(
+        collector=PLACES,
+        files=tuple(file for file, _ in staged),
+        notes=tuple(note for _, note in staged),
+    )
+
+
+def _music_tracks(run: StagingRun, version: GameVersion) -> tuple[StagedFile, str]:
+    declared = MUSIC_TRACKS
+    dump = run.upstream(PLACES, declared.upstream)
+    said = dump.read_text(encoding="utf-8", errors="replace")
+    tracks = read_tracks(said, declared.dump)
+    file = _write(
+        run.destination / declared.staged,
+        _as_json({"tracks": [track.model_dump(mode="json") for track in tracks]}),
+        collector=PLACES,
+        version=PLACES_VERSION,
+        game_version=version,
+        upstream=declared.upstream,
+        relative=declared.staged,
+    )
+    return file, f"tracks: {len(tracks)} tracks read from the dump"
+
+
+def _teleport_anchors(run: StagingRun) -> tuple[StagedFile, str]:
+    declared = TELEPORT_ANCHORS
+    source = run.under(run.anchors, PLACES, declared.upstream)
+    sheet = read_anchors(source.read_text(encoding="utf-8", errors="replace"))
+    file = _write(
+        run.destination / declared.staged,
+        _as_json(sheet.model_dump(mode="json")),
+        collector=PLACES,
+        version=PLACES_VERSION,
+        game_version=vendored_version_of(run.anchors, ANCHORS_REPO),
+        upstream=declared.upstream,
+        relative=declared.staged,
+    )
+    return file, (
+        f"anchors: {len(sheet.anchors)} named points, "
+        f"{sheet.unread} of {sheet.lines} lines unread"
+    )
+
+
 def stage_prices(run: StagingRun, version: GameVersion) -> CollectorReport:
     """Fetch the weekly price snapshots that are not staged yet."""
-    destination = run.destination / PRICES_DIRECTORY
+    destination = run.destination / PRICES_DIRNAME
     with httpx.Client(timeout=TIMEOUT, follow_redirects=True) as client:
         harvest = download_snapshots(client, run.prices_url, destination)
     staged = [
         StagedFile(
-            path=f"{PRICES_DIRECTORY}/{ref.filename}",
+            path=f"{PRICES_DIRNAME}/{ref.filename}",
             digest=digest_of(destination / ref.filename),
             size=(destination / ref.filename).stat().st_size,
             collector=PRICES,
@@ -231,13 +466,28 @@ def _extract_payload(declared: DeclaredExtract, outcome: DecodeOutcome) -> bytes
 COLLECTORS: Final[dict[str, Callable[[StagingRun, GameVersion], CollectorReport]]] = {
     CONFIGS: stage_configs,
     TABLES: stage_tables,
+    CONSTANTS: stage_constants,
+    CODE: stage_code,
     CACHE: stage_cache,
+    WIKI: stage_wiki,
+    PLACES: stage_places,
     PRICES: stage_prices,
 }
 
+NETWORKED: Final[frozenset[str]] = frozenset({PRICES})
+NETWORK_NOTE: Final = (
+    "{name} reaches a server rather than a checkout, so a run that names no "
+    "collector leaves it alone. Ask for it with --only {name}."
+)
+
+
+def offline_collectors() -> tuple[str, ...]:
+    """The collectors a run with no arguments takes, which read checkouts only."""
+    return tuple(name for name in COLLECTORS if name not in NETWORKED)
+
 
 def stage(run: StagingRun, only: Sequence[str] = ()) -> StagingReport:
-    """Run the named collectors, or all of them, and rewrite the manifest."""
+    """Run the named collectors, or every offline one, and rewrite the manifest."""
     chosen = _chosen(only)
     version = game_version_of(run.checkout, GAME_REPO)
     manifest = read_manifest_if_staged(run.destination) or StagingManifest(
@@ -256,12 +506,15 @@ def stage(run: StagingRun, only: Sequence[str] = ()) -> StagingReport:
         destination=str(run.destination),
         game_version=str(version),
         reports=tuple(reports),
+        left_alone=tuple(
+            NETWORK_NOTE.format(name=name) for name in NETWORKED - set(chosen)
+        ),
     )
 
 
 def _chosen(only: Sequence[str]) -> tuple[str, ...]:
     if not only:
-        return tuple(COLLECTORS)
+        return offline_collectors()
     for name in only:
         if name not in COLLECTORS:
             raise UnknownCollector(name, tuple(COLLECTORS))
@@ -315,24 +568,9 @@ def _declaration(enum: str, filename: str) -> str:
     )
 
 
-def _checkout(tmp_path: Path) -> StagingRun:
+def _committed(checkout: Path) -> None:
     import subprocess
 
-    from tests.cache import built_cache
-
-    checkout = tmp_path / "game_data" / GAME_CHECKOUT
-    (checkout / "Server/data/configs").mkdir(parents=True)
-    (checkout / "Server/src/main/content/data").mkdir(parents=True)
-    built_cache(checkout / CACHE_ROOT)
-    for config in DECLARED_CONFIGS:
-        (checkout / config.upstream).write_text("[]", encoding="utf-8")
-    (checkout / f"{CONFIG_ROOT}/xteas.json").write_text(
-        json.dumps({"xteas": []}), encoding="utf-8"
-    )
-    for table in DECLARED_TABLES:
-        path = checkout / table.upstream
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(_declaration(table.enum, table.filename), encoding="utf-8")
     for arguments in (
         ("init", "--quiet"),
         ("config", "user.email", "test@example.test"),
@@ -341,11 +579,47 @@ def _checkout(tmp_path: Path) -> StagingRun:
         ("commit", "--quiet", "-m", "sources"),
     ):
         subprocess.run(["git", "-C", str(checkout), *arguments], check=True)
+
+
+def _checkout(tmp_path: Path) -> StagingRun:
+    from wiki_api.pipeline.places.music import DUMP
+
+    checkout = tmp_path / "game_data" / GAME_CHECKOUT
+    (checkout / "Server/data/configs").mkdir(parents=True)
+    (checkout / "Server/src/main/content/data").mkdir(parents=True)
+    _cached(checkout)
+    for config in DECLARED_CONFIGS:
+        (checkout / config.upstream).write_text("[]", encoding="utf-8")
+    (checkout / f"{CONFIG_ROOT}/xteas.json").write_text(
+        json.dumps({"xteas": []}), encoding="utf-8"
+    )
+    (checkout / f"{CONFIG_ROOT}/music_regions.json").write_text(
+        json.dumps([{"region": "12850", "id": "177"}]), encoding="utf-8"
+    )
+    dump = checkout / MUSIC_TRACKS.upstream
+    dump.parent.mkdir(parents=True, exist_ok=True)
+    dump.write_text(DUMP, encoding="utf-8")
+    for table in DECLARED_TABLES:
+        path = checkout / table.upstream
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(_declaration(table.enum, table.filename), encoding="utf-8")
+    _committed(checkout)
+    anchors = tmp_path / "game_data" / ANCHORS_CHECKOUT
+    anchors.mkdir(parents=True)
+    (anchors / TELEPORT_ANCHORS.upstream).write_text(
+        "Varrock ::tele 3210,3424\nnonsense\n", encoding="utf-8"
+    )
     return StagingRun(
         game_data=tmp_path / "game_data",
         destination=tmp_path / "data" / "source",
         prices_url="https://example.test/gedata/",
     )
+
+
+def _cached(checkout: Path) -> None:
+    from tests.cache import built_cache
+
+    built_cache(checkout / CACHE_ROOT)
 
 
 def test_staging_copies_the_configs_and_reads_the_tables(tmp_path: Path) -> None:
@@ -427,6 +701,22 @@ def test_asking_for_a_collector_nobody_declares_is_refused(tmp_path: Path) -> No
         stage(_checkout(tmp_path), only=["images"])
 
 
+def test_a_run_that_names_nothing_leaves_the_networked_collector_alone() -> None:
+    assert PRICES in COLLECTORS
+    assert PRICES not in offline_collectors()
+    assert CONFIGS in offline_collectors()
+
+
+def test_a_run_says_which_collector_it_left_alone(tmp_path: Path) -> None:
+    told = "\n".join(stage(_checkout(tmp_path), only=[TABLES]).lines())
+    assert f"--only {PRICES}" in told
+
+
+def test_naming_the_networked_collector_still_chooses_it() -> None:
+    assert PRICES in _chosen([PRICES])
+    assert _chosen([]) == offline_collectors()
+
+
 def test_a_report_says_what_each_collector_did(tmp_path: Path) -> None:
     report = stage(_checkout(tmp_path), only=[TABLES])
     told = "\n".join(report.lines())
@@ -503,6 +793,89 @@ def test_the_cache_report_states_every_ceiling_it_stayed_under(tmp_path: Path) -
     assert "cache/placements: 0 of 330 allowed" in told
 
 
+def test_staging_places_writes_the_tracks_and_the_teleport_list(
+    tmp_path: Path,
+) -> None:
+    run = _checkout(tmp_path)
+    report = stage(run, only=[PLACES])
+    assert report.count == 2
+    dumped = json.loads((run.destination / "places/tracks.json").read_text())
+    assert dumped["tracks"][0]["name"] == "Adventure"
+    assert dumped["tracks"][0]["unlock"] == "at Varrock Palace."
+    sheet = json.loads((run.destination / "places/anchors.json").read_text())
+    assert sheet["anchors"][0]["name"] == "Varrock"
+    assert sheet["unread"] == 1
+
+
+def test_staging_writes_no_judgement_of_its_own_beside_the_dump(
+    tmp_path: Path,
+) -> None:
+    run = _checkout(tmp_path)
+    stage(run, only=[PLACES])
+    dumped = json.loads((run.destination / "places/tracks.json").read_text())
+    assert set(dumped) == {"tracks"}
+    assert "place" not in dumped["tracks"][0]
+
+
+def test_the_teleport_list_is_named_by_the_directory_it_came_from(
+    tmp_path: Path,
+) -> None:
+    from wiki_api.pipeline.staging.manifest import read_manifest
+
+    run = _checkout(tmp_path)
+    stage(run, only=[PLACES])
+    entry = read_manifest(run.destination).entry("places/anchors.json")
+    assert entry.game_version.repo == ANCHORS_REPO
+    assert entry.collector == PLACES
+
+
+def test_a_vendored_source_is_versioned_by_content_not_by_the_repo_above_it(
+    tmp_path: Path,
+) -> None:
+    from wiki_api.pipeline.staging.manifest import read_manifest
+
+    run = _checkout(tmp_path)
+    stage(run, only=[PLACES])
+    before = read_manifest(run.destination).entry("places/anchors.json").game_version
+    (run.anchors / TELEPORT_ANCHORS.upstream).write_text(
+        "Varrock ::tele 3210,3425\nnonsense\n", encoding="utf-8"
+    )
+    stage(run, only=[PLACES])
+    after = read_manifest(run.destination).entry("places/anchors.json").game_version
+    assert after != before
+    assert str(before) != str(_game_version(run))
+
+
+def _game_version(run: StagingRun) -> GameVersion:
+    return game_version_of(run.checkout, GAME_REPO)
+
+
+def test_the_places_report_says_how_much_of_each_source_was_read(
+    tmp_path: Path,
+) -> None:
+    told = "\n".join(stage(_checkout(tmp_path), only=[PLACES]).lines())
+    assert "tracks: 3 tracks read from the dump" in told
+    assert "1 of 2 lines unread" in told
+
+
+def test_staging_places_twice_writes_the_same_bytes(tmp_path: Path) -> None:
+    run = _checkout(tmp_path)
+    stage(run, only=[PLACES])
+    first = (run.destination / "places/tracks.json").read_bytes()
+    stage(run, only=[PLACES])
+    assert (run.destination / "places/tracks.json").read_bytes() == first
+
+
+def test_a_missing_teleport_list_names_the_collector(tmp_path: Path) -> None:
+    import pytest
+
+    run = _checkout(tmp_path)
+    (run.anchors / TELEPORT_ANCHORS.upstream).unlink()
+    with pytest.raises(UpstreamMissing) as caught:
+        stage(run, only=[PLACES])
+    assert PLACES in str(caught.value)
+
+
 def test_a_cache_that_decodes_worse_than_declared_stops_staging(
     tmp_path: Path, monkeypatch: Any
 ) -> None:
@@ -523,4 +896,4 @@ def test_a_cache_that_decodes_worse_than_declared_stops_staging(
     monkeypatch.setattr(collectors, "decode_cache", refusing)
     with pytest.raises(ToleranceExceeded) as caught:
         stage(run, only=[CACHE])
-    assert "cache/items" in str(caught.value)
+    assert "cache/datamaps" in str(caught.value)

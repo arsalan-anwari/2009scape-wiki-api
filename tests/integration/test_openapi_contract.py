@@ -51,6 +51,7 @@ def test_every_question_the_contract_answers_has_a_route(
         "/v1/about",
         "/v1/types",
         "/v1/types/{entity_type}/entities",
+        "/v1/types/{entity_type}/compare",
         "/v1/search",
         "/v1/find",
         "/v1/near-names",
@@ -58,6 +59,7 @@ def test_every_question_the_contract_answers_has_a_route(
         "/v1/entities/{entity_type}/{ref}/tooltip",
         "/v1/entities/{entity_type}/{ref}/rel/{rel}",
         "/v1/entities/{entity_type}/{ref}/resolve",
+        "/v1/entities/{entity_type}/{ref}/prices",
     }
 
 
@@ -81,7 +83,16 @@ def test_the_words_a_vocabulary_holds_today_are_still_written_down(
     document: dict[str, Any],
 ) -> None:
     known = set(_schemas(document)["EntityType"][KNOWN_VALUES])
-    assert known == {"item", "npc", "shop", "quest", "location"}
+    assert known == {
+        "item",
+        "npc",
+        "shop",
+        "quest",
+        "location",
+        "scenery",
+        "task",
+        "room",
+    }
 
 
 def test_a_vocabulary_that_cannot_grow_stays_a_closed_choice(
@@ -124,6 +135,7 @@ def test_every_method_a_client_generates_is_named_by_hand(
         "about",
         "types",
         "listing",
+        "compare",
         "search",
         "find",
         "near_names",
@@ -131,6 +143,7 @@ def test_every_method_a_client_generates_is_named_by_hand(
         "tooltip",
         "walk",
         "resolve",
+        "history",
     }
 
 

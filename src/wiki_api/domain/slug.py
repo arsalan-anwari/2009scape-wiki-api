@@ -11,7 +11,8 @@ from wiki_api.domain.errors import SlugCollision
 from wiki_api.domain.identity import EntityKey, EntityType
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
+    from collections.abc import Set as AbstractSet
 
 _SEPARATORS = re.compile(r"[^a-z0-9]+")
 _MAX_PASSES = 4
@@ -24,21 +25,38 @@ def slugify(value: str) -> str:
     return _SEPARATORS.sub("-", ascii_only.lower()).strip("-")
 
 
-def derive_slugs(names: Mapping[EntityKey, str]) -> dict[EntityKey, str]:
-    """Give every entity a slug that is unique within its own type."""
+def derive_slugs(
+    names: Mapping[EntityKey, str],
+    *,
+    variants: AbstractSet[EntityKey] = frozenset(),
+) -> dict[EntityKey, str]:
+    """Give every entity a slug unique within its type, the lowest id keeping the bare
+    one and a variant never claiming it.
+    """
     slugs = {
         key: slugify(names[key]) or _fallback(key)
         for key in sorted(names, key=lambda key: (key.type.value, key.id))
     }
+    for key in slugs:
+        if key in variants:
+            slugs[key] = f"{slugs[key]}-{key.id}"
     for _ in range(_MAX_PASSES):
         collisions = _collisions(slugs)
         if not collisions:
             return slugs
         for keys in collisions.values():
-            for key in keys:
+            for key in _losers(keys, variants):
                 slugs[key] = f"{slugs[key]}-{key.id}"
     unresolved_type, unresolved_slug = next(iter(_collisions(slugs)))
     raise SlugCollision(f"{unresolved_type.value}/{unresolved_slug}")
+
+
+def _losers(
+    keys: Sequence[EntityKey], variants: AbstractSet[EntityKey]
+) -> tuple[EntityKey, ...]:
+    contenders = [key for key in keys if key not in variants] or list(keys)
+    keeps = min(contenders, key=lambda key: key.id)
+    return tuple(key for key in keys if key != keeps)
 
 
 def _fallback(key: EntityKey) -> str:
@@ -73,17 +91,49 @@ def test_a_unique_name_keeps_the_bare_slug() -> None:
     }
 
 
-def test_colliding_names_are_all_disambiguated() -> None:
+def test_the_lowest_id_keeps_the_bare_slug_when_names_collide() -> None:
     names = {
         EntityKey(type=EntityType.ITEM, id=4587): "Dragon scimitar",
         EntityKey(type=EntityType.ITEM, id=4588): "Dragon scimitar",
         EntityKey(type=EntityType.ITEM, id=13477): "Dragon scimitar",
     }
     assert set(derive_slugs(names).values()) == {
-        "dragon-scimitar-4587",
+        "dragon-scimitar",
         "dragon-scimitar-4588",
         "dragon-scimitar-13477",
     }
+
+
+def test_a_variant_never_takes_the_bare_slug_from_the_entity_it_copies() -> None:
+    scimitar = EntityKey(type=EntityType.ITEM, id=4587)
+    noted = EntityKey(type=EntityType.ITEM, id=4588)
+    names = {noted: "Dragon scimitar", scimitar: "Dragon scimitar"}
+    slugs = derive_slugs(names, variants={noted})
+    assert slugs[scimitar] == "dragon-scimitar"
+    assert slugs[noted] == "dragon-scimitar-4588"
+
+
+def test_a_variant_with_a_lower_id_still_gives_way() -> None:
+    noted = EntityKey(type=EntityType.ITEM, id=100)
+    real = EntityKey(type=EntityType.ITEM, id=200)
+    slugs = derive_slugs({noted: "Bones", real: "Bones"}, variants={noted})
+    assert slugs[real] == "bones"
+    assert slugs[noted] == "bones-100"
+
+
+def test_variants_that_collide_with_nothing_else_still_carry_their_id() -> None:
+    noted = EntityKey(type=EntityType.ITEM, id=4588)
+    slugs = derive_slugs({noted: "Dragon scimitar"}, variants={noted})
+    assert slugs[noted] == "dragon-scimitar-4588"
+
+
+def test_a_group_of_nothing_but_variants_is_still_separated() -> None:
+    first = EntityKey(type=EntityType.ITEM, id=10)
+    second = EntityKey(type=EntityType.ITEM, id=20)
+    slugs = derive_slugs(
+        {first: "Clue scroll", second: "Clue scroll"}, variants={first, second}
+    )
+    assert set(slugs.values()) == {"clue-scroll-10", "clue-scroll-20"}
 
 
 def test_the_same_name_in_two_types_does_not_collide() -> None:
@@ -127,6 +177,14 @@ def test_derivation_is_independent_of_input_order() -> None:
     }
     reversed_names = dict(reversed(list(names.items())))
     assert derive_slugs(names) == derive_slugs(reversed_names)
+
+
+def test_a_later_namesake_does_not_move_the_slug_already_published() -> None:
+    scimitar = EntityKey(type=EntityType.ITEM, id=4587)
+    before = derive_slugs({scimitar: "Dragon scimitar"})
+    copy = EntityKey(type=EntityType.ITEM, id=13477)
+    after = derive_slugs({scimitar: "Dragon scimitar", copy: "Dragon scimitar"})
+    assert before[scimitar] == after[scimitar] == "dragon-scimitar"
 
 
 def test_derivation_is_stable_when_an_unrelated_entity_is_added() -> None:

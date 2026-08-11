@@ -210,6 +210,69 @@
   ]
  },
  {
+  "id": 1957,
+  "name": "Onion",
+  "examine": null,
+  "value": null,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": null,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   "Eat",
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 2138,
+  "name": "Raw chicken",
+  "examine": null,
+  "value": null,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": null,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
+  "id": 2140,
+  "name": "Cooked chicken",
+  "examine": null,
+  "value": null,
+  "stackable": false,
+  "members_only": false,
+  "unnoted": true,
+  "note_id": null,
+  "note_template_id": null,
+  "lend_id": null,
+  "lend_template_id": null,
+  "team_id": null,
+  "options": [
+   "Eat",
+   null,
+   null,
+   null,
+   null
+  ]
+ },
+ {
   "id": 4587,
   "name": "Dragon scimitar",
   "examine": null,

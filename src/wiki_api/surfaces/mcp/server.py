@@ -4,6 +4,7 @@ from the registry for every way a link can be followed.
 
 from __future__ import annotations
 
+from datetime import date
 from typing import TYPE_CHECKING, Annotated, Final
 
 from fastmcp import FastMCP
@@ -15,12 +16,21 @@ from wiki_api.core import KnowledgeService
 from wiki_api.domain.identity import EntityType
 from wiki_api.domain.manifest import Manifest
 from wiki_api.domain.page import MAX_PAGE_SIZE
+from wiki_api.domain.query import Comparison
 from wiki_api.domain.search import MOST_NEAR_LIMIT
 from wiki_api.repository.provider import RepositoryProvider
-from wiki_api.surfaces.mcp.answers import Answer, about_related, about_thing
+from wiki_api.surfaces.mcp.answers import (
+    Answer,
+    about_movement,
+    about_ranking,
+    about_related,
+    about_thing,
+)
 from wiki_api.surfaces.mcp.guarding import keys_for
 from wiki_api.surfaces.mcp.naming import (
     CLOSE_NAMES_TOOL,
+    COMPARE_TOOL,
+    MOVEMENT_TOOL,
     SORTS_TOOL,
     WRITTEN_TOOLS,
     Followed,
@@ -28,6 +38,8 @@ from wiki_api.surfaces.mcp.naming import (
 )
 from wiki_api.surfaces.mcp.projection import (
     Matches,
+    Movement,
+    Ranking,
     Related,
     Sorts,
     Thing,
@@ -82,6 +94,21 @@ SORTS_DESCRIPTION: Final = (
     "List the sorts of thing this build knows about, with how many there are of "
     "each. Use this to settle what something is before asking about it by name, "
     "which the tool for close spellings needs told."
+)
+COMPARE_DESCRIPTION: Final = (
+    "Go through one sort of thing by a number it records rather than by its name: "
+    "everything above or below a threshold, ordered largest or smallest first. Use "
+    "this for a question about how much or how many, where no one thing is named. "
+    "Say which number you mean in ordinary words; if none of them matches, the "
+    "answer lists every number that sort of thing records, so ask again with one of "
+    "those rather than guessing."
+)
+MOVEMENT_DESCRIPTION: Final = (
+    "Say which way one thing's worth has gone over the record, and by how far. Use "
+    "this for a question about a change over time rather than about what something "
+    "is worth now, which the tool that fetches one thing already answers. The reply "
+    "says how far to trust itself; an answer that says it was never really traded "
+    "means what it says."
 )
 CLOSE_NAMES_DESCRIPTION: Final = (
     "Given a name that answered to nothing, offer the real names closest to it. Use "
@@ -146,6 +173,41 @@ CloseKeepArg = Annotated[
         ),
     ),
 ]
+HoldsArg = Annotated[
+    str | None,
+    Field(
+        description=(
+            "Which recorded number to put the threshold against, in ordinary words. "
+            "Leave out to sort without narrowing."
+        )
+    ),
+]
+HowArg = Annotated[
+    Comparison,
+    Field(description="How to measure what is recorded against the number given."),
+]
+NumberArg = Annotated[float, Field(description="The number to measure against.")]
+OrderedByArg = Annotated[
+    str | None,
+    Field(
+        description=(
+            "Which recorded number to sort by, named the same way. Anything not "
+            "recording it is left out rather than sorted last."
+        )
+    ),
+]
+DescendingArg = Annotated[
+    bool, Field(description="Sort from the largest down rather than upwards.")
+]
+SinceArg = Annotated[
+    str | None,
+    Field(
+        description=(
+            "Read only from this day onwards, as `YYYY-MM-DD`. Leave out for the "
+            "whole record."
+        )
+    ),
+]
 OffsetArg = Annotated[
     int,
     Field(
@@ -198,6 +260,16 @@ def main() -> None:
 
 def _service(provider: RepositoryProvider, settings: Settings) -> KnowledgeService:
     return KnowledgeService(provider.current(), block_size=settings.mcp_rows)
+
+
+def _day(written: str | None) -> date | None:
+    """Read a day a caller wrote out, treating anything unreadable as no day at all."""
+    if not written:
+        return None
+    try:
+        return date.fromisoformat(written.strip())
+    except ValueError:
+        return None
 
 
 def _offer_asking(
@@ -281,6 +353,51 @@ def _offer_asking(
         )
 
     @server.tool(
+        name=COMPARE_TOOL,
+        description=COMPARE_DESCRIPTION,
+        annotations=READ_ONLY,
+        output_schema=None,
+        meta=BUDGET,
+    )
+    def compare_by_number(
+        type: OneTypeArg,
+        holds: HoldsArg = None,
+        how: HowArg = Comparison.AT_LEAST,
+        number: NumberArg = 0.0,
+        ordered_by: OrderedByArg = None,
+        descending: DescendingArg = False,
+        offset: OffsetArg = 0,
+    ) -> Answer[Ranking]:
+        service = _service(provider, settings)
+        return about_ranking(
+            service.compare(
+                type,
+                holds=holds,
+                how=how,
+                number=number,
+                ordered_by=ordered_by,
+                descending=descending,
+                limit=settings.mcp_rows,
+                offset=offset,
+            ),
+            service.about().data_version,
+        )
+
+    @server.tool(
+        name=MOVEMENT_TOOL,
+        description=MOVEMENT_DESCRIPTION,
+        annotations=READ_ONLY,
+        output_schema=None,
+        meta=BUDGET,
+    )
+    def how_the_price_moved(name: NameArg, since: SinceArg = None) -> Answer[Movement]:
+        service = _service(provider, settings)
+        return about_movement(
+            service.movement_by_name(name, since=_day(since)),
+            service.about().data_version,
+        )
+
+    @server.tool(
         name=CLOSE_NAMES_TOOL,
         description=CLOSE_NAMES_DESCRIPTION,
         annotations=READ_ONLY,
@@ -304,11 +421,12 @@ def _offer_asking(
 def _offer_following(
     server: FastMCP, provider: RepositoryProvider, settings: Settings
 ) -> None:
-    for followed in followable():
+    for followed in followable(_service(provider, settings).answerable()):
         server.tool(
             name=followed.name,
             description=followed.description,
             annotations=READ_ONLY,
+            output_schema=None,
             meta=BUDGET,
         )(_following(provider, settings, followed))
 
@@ -345,6 +463,15 @@ def test_the_written_tools_are_named_in_one_place_only() -> None:
 
     assert len(set(WRITTEN_TOOLS)) == len(WRITTEN_TOOLS)
     assert not set(WRITTEN_TOOLS) & {rel.value for rel in RELATIONSHIP_SPECS}
+
+
+def test_a_link_this_build_cannot_follow_is_never_offered() -> None:
+    from wiki_api.domain.relationships import RelationshipType
+
+    held = frozenset({RelationshipType.DROPS})
+    offered = {followed.rel for followed in followable(held)}
+    assert offered == held
+    assert len(followable(held)) == 2
 
 
 def test_everything_this_surface_answers_is_read_only() -> None:

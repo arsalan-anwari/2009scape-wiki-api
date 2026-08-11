@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from wiki_api.domain.manifest import Manifest
     from wiki_api.domain.page import Page
     from wiki_api.domain.prices import PricePoint
+    from wiki_api.domain.query import Condition, Ordering
     from wiki_api.domain.relationships import Edge, RelationshipType
     from wiki_api.domain.search import SearchHit
 
@@ -45,6 +46,16 @@ class KnowledgeRepository(Protocol):
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
         order: SortOrder = SortOrder.NAME,
+    ) -> Page[Entity]: ...
+
+    def list_by_attribute(
+        self,
+        entity_type: EntityType,
+        *,
+        where: Sequence[Condition] = (),
+        order: Ordering | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
     ) -> Page[Entity]: ...
 
     def search(
@@ -88,6 +99,8 @@ class KnowledgeRepository(Protocol):
 
     def variants_of(self, key: EntityKey) -> tuple[Entity, ...]: ...
 
+    def relationship_totals(self) -> Mapping[RelationshipType, int]: ...
+
     def price_history(
         self, item_id: int, *, since: date | None = None
     ) -> tuple[PricePoint, ...]: ...
@@ -107,11 +120,13 @@ def test_the_protocol_describes_the_whole_read_surface() -> None:
         "resolve_slug",
         "resolve_source_key",
         "list_entities",
+        "list_by_attribute",
         "search",
         "nearest",
         "edges_from",
         "edges_to",
         "variants_of",
+        "relationship_totals",
         "price_history",
         "close",
     }
@@ -120,7 +135,13 @@ def test_the_protocol_describes_the_whole_read_surface() -> None:
 def test_every_listing_operation_is_paginated() -> None:
     import inspect
 
-    for name in ("list_entities", "search", "edges_from", "edges_to"):
+    for name in (
+        "list_entities",
+        "list_by_attribute",
+        "search",
+        "edges_from",
+        "edges_to",
+    ):
         signature = inspect.signature(getattr(KnowledgeRepository, name))
         assert {"limit", "offset"} <= set(signature.parameters)
         assert signature.return_annotation.startswith("Page[")

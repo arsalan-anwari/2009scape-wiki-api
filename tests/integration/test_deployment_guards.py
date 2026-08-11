@@ -1,8 +1,7 @@
 """Check what a deployment is handed against what `Settings` will accept.
 
 The Dockerfile, compose.yaml and deploy.example.json are read by docker rather than
-imported, so a renamed field would leave all three naming something nothing answers to.
-Asked with no daemon and no network, so they run on every change.
+imported, so a renamed field would leave all three naming nothing.
 """
 
 from __future__ import annotations

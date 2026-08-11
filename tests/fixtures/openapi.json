@@ -364,6 +364,140 @@
         ]
       }
     },
+    "/v1/entities/{entity_type}/{ref}/prices": {
+      "get": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Page through what one entity has been worth",
+        "description": "Read the weekly market readings recorded for one entity, oldest first.\n\nAnything the market never recorded answers with an empty page rather than a 404.",
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+            },
+            "description": "Which type of thing to look up, such as `item` or `npc`. `GET /v1/types` lists the types this build serves."
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id.",
+              "title": "Ref"
+            },
+            "description": "How to address the entity: its id (`4587`), its slug (`dragon-scimitar`), a slug it used to have, or the token the game source calls it by. A reference made only of digits is always an id."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Read only from this day onwards, written as `YYYY-MM-DD`. Leave it out to read everything recorded.",
+              "title": "Since"
+            },
+            "description": "Read only from this day onwards, written as `YYYY-MM-DD`. Leave it out to read everything recorded."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 200,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "How many rows this page holds. Defaults to the width a whole entity page uses for the same relationship, so continuing a list is never narrower than the list you are continuing.",
+              "title": "Limit"
+            },
+            "description": "How many rows this page holds. Defaults to the width a whole entity page uses for the same relationship, so continuing a list is never narrower than the list you are continuing."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of dated market readings, oldest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricePointPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nothing published answers to that reference. The code says which case it is: `not_found` means there is no such entity, `not_published` means it exists in this build but is held back. A `not_found` for a name rather than an id also carries `near_names`, the address that answers what the name might have been meant to be.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "308": {
+            "description": "That reference is retired. `Location` holds the URL the same entity answers at now. Follow it, and store the new one."
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
+          }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
+      }
+    },
     "/v1/entities/{entity_type}/{ref}/resolve": {
       "get": {
         "tags": [
@@ -571,6 +705,162 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No key was sent, or it is not one this service answers."
+          },
+          "403": {
+            "description": "Too many refused requests have come from this address."
+          },
+          "429": {
+            "description": "This key has asked for more than its share; `Retry-After` says when to come back."
+          }
+        },
+        "security": [
+          {
+            "issued_key": []
+          }
+        ]
+      }
+    },
+    "/v1/types/{entity_type}/compare": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "List the entities of one type whose stored number answers a question",
+        "description": "List the entities of one type picked out by a number they store, paged and\nordered.\n\nAnything not carrying a value being compared or sorted on is left out of the\nanswer and out of the total.",
+        "operationId": "compare",
+        "parameters": [
+          {
+            "name": "entity_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityType",
+              "description": "Which type of thing to list, such as `item` or `quest`. `GET /v1/types` lists the types this build serves."
+            },
+            "description": "Which type of thing to list, such as `item` or `quest`. `GET /v1/types` lists the types this build serves."
+          },
+          {
+            "name": "holds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Which stored number to put a comparison against, given either as the key `GET /v1/types` publishes for it or as the label it publishes beside it. Anything that type declares in a numeric format can be named here, including one part of a value that packs several numbers, written as `parent.part`.",
+              "title": "Holds"
+            },
+            "description": "Which stored number to put a comparison against, given either as the key `GET /v1/types` publishes for it or as the label it publishes beside it. Anything that type declares in a numeric format can be named here, including one part of a value that packs several numbers, written as `parent.part`."
+          },
+          {
+            "name": "how",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Comparison",
+              "description": "How to measure what is stored against the number given. Defaults to `at_least`, which is what a caller passing only a number usually means.",
+              "default": "at_least"
+            },
+            "description": "How to measure what is stored against the number given. Defaults to `at_least`, which is what a caller passing only a number usually means."
+          },
+          {
+            "name": "number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "The number to measure the stored one against.",
+              "default": 0.0,
+              "title": "Number"
+            },
+            "description": "The number to measure the stored one against."
+          },
+          {
+            "name": "ordered_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Which stored number to sort by, named the same way as the one being compared. Anything not carrying it is left out of the answer, because it is absent rather than smallest.",
+              "title": "Ordered By"
+            },
+            "description": "Which stored number to sort by, named the same way as the one being compared. Anything not carrying it is left out of the answer, because it is absent rather than smallest."
+          },
+          {
+            "name": "descending",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Sort from the largest down rather than from the smallest up.",
+              "default": false,
+              "title": "Descending"
+            },
+            "description": "Sort from the largest down rather than from the smallest up."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "How many results one page holds. The response repeats the limit it used, so you never have to assume."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "How many results to skip before this page. To read the next page, pass back the `next_offset` from the last response. It is null once you have reached the end."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of entities, each carrying the values the question was about.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compared"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Nothing declared for that type answers to those words. `GET /v1/types` publishes what each type declares, and anything there formatted as a number can be compared.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
                 }
               }
             }
@@ -924,7 +1214,8 @@
           "absorb",
           "coord",
           "area",
-          "rate"
+          "rate",
+          "texts"
         ],
         "examples": [
           "int"
@@ -947,6 +1238,8 @@
           "rate",
           "amount",
           "reward",
+          "skill",
+          "slayer",
           "internal"
         ],
         "examples": [
@@ -1011,6 +1304,14 @@
               }
             ],
             "title": "Choices"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeSpec"
+            },
+            "type": "array",
+            "title": "Fields",
+            "default": []
           }
         },
         "type": "object",
@@ -1131,6 +1432,77 @@
         "title": "Block",
         "description": "One relationship's worth of a page: a label, a first page of rows, the walk\nbehind them, and a count of rows whose target is unpublished."
       },
+      "Compared": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EntityType"
+          },
+          "where": {
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "array",
+            "title": "Where",
+            "default": []
+          },
+          "order": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Ordering"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rows": {
+            "$ref": "#/components/schemas/RowPage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "rows"
+        ],
+        "title": "Compared",
+        "description": "One page of entities picked out by a number, with the question that picked\nthem."
+      },
+      "Comparison": {
+        "type": "string",
+        "enum": [
+          "at_least",
+          "more_than",
+          "at_most",
+          "less_than",
+          "equals"
+        ],
+        "title": "Comparison",
+        "description": "How a stored number is measured against the one a caller gave."
+      },
+      "Condition": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+            "title": "Path"
+          },
+          "compare": {
+            "$ref": "#/components/schemas/Comparison"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "compare",
+          "value"
+        ],
+        "title": "Condition",
+        "description": "One comparison to hold a stored value against."
+      },
       "Direction": {
         "type": "string",
         "enum": [
@@ -1196,7 +1568,10 @@
           "npc",
           "shop",
           "quest",
-          "location"
+          "location",
+          "scenery",
+          "task",
+          "room"
         ],
         "examples": [
           "item"
@@ -1488,6 +1863,26 @@
         "title": "Moved",
         "description": "The reference is retired. The entity answers at `target` now."
       },
+      "Ordering": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)?$",
+            "title": "Path"
+          },
+          "descending": {
+            "type": "boolean",
+            "title": "Descending",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "Ordering",
+        "description": "Which declared value to sort by, and which way round."
+      },
       "PageDescriptor": {
         "properties": {
           "entity": {
@@ -1617,6 +2012,60 @@
         ],
         "title": "Page[EntitySummary]"
       },
+      "PricePointPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PricePoint"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "readOnly": true
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "has_more",
+          "next_offset"
+        ],
+        "title": "Page[PricePoint]"
+      },
       "RowPage": {
         "properties": {
           "items": {
@@ -1744,6 +2193,33 @@
         "title": "Present",
         "description": "The reference points at an entity that is published right now."
       },
+      "PricePoint": {
+        "properties": {
+          "item_id": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Item Id"
+          },
+          "snapshot_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Snapshot Date"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "snapshot_date",
+          "value"
+        ],
+        "title": "PricePoint",
+        "description": "What one item was worth on one snapshot day."
+      },
       "RelationshipGroup": {
         "type": "string",
         "title": "RelationshipGroup",
@@ -1753,7 +2229,10 @@
           "trade",
           "quests",
           "equipment",
-          "map"
+          "map",
+          "skill",
+          "slayer",
+          "prerequisites"
         ],
         "examples": [
           "drops"
@@ -1828,7 +2307,12 @@
           "rewards",
           "uses_ammunition",
           "located_in",
-          "part_of"
+          "part_of",
+          "yields",
+          "makes",
+          "requires",
+          "assigns",
+          "satisfied_by"
         ],
         "examples": [
           "drops"

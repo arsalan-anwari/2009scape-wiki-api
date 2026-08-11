@@ -7,10 +7,14 @@ from typing import TYPE_CHECKING, Any, Final
 
 from fastapi.openapi.utils import get_openapi
 
-from wiki_api.domain.attributes import AttributeFormat
 from wiki_api.domain.identity import EntityType
 from wiki_api.domain.relationships import RelationshipType
-from wiki_api.domain.vocabulary import AttributeGroup, RelationshipGroup, Unit
+from wiki_api.domain.vocabulary import (
+    AttributeFormat,
+    AttributeGroup,
+    RelationshipGroup,
+    Unit,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

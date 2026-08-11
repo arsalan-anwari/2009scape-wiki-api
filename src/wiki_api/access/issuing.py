@@ -1,8 +1,7 @@
 """Make issuer keys and tokens, on an administrator's own machine.
 
-An import contract keeps this out of anything that serves requests, so a running
-service cannot mint a token even for itself. Issued tokens are copied beside the
-issuer key under the signing key's mode; do not put that directory on a server.
+Issued tokens are copied beside the issuer key under the signing key's mode; do not
+put that directory on a server.
 """
 
 from __future__ import annotations

@@ -90,6 +90,7 @@ def _write_entities(
                 "source": entity.provenance.source.value,
                 "source_file": entity.provenance.source_file,
                 "source_ref": entity.provenance.source_ref,
+                "source_revision": entity.provenance.source_revision,
                 "game_version": str(entity.provenance.game_version),
             },
         )
@@ -141,6 +142,7 @@ def _write_edges(connection: sqlite3.Connection, snapshot: KnowledgeSnapshot) ->
                 "source": edge.provenance.source.value,
                 "source_file": edge.provenance.source_file,
                 "source_ref": edge.provenance.source_ref,
+                "source_revision": edge.provenance.source_revision,
                 "game_version": str(edge.provenance.game_version),
             },
         )

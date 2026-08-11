@@ -7,17 +7,6 @@
   "entities": [
     {
       "type": "item",
-      "id": 995,
-      "name": "Coins",
-      "description": "Lovely money!",
-      "source_ref": "item_configs.json#995",
-      "attributes": {
-        "tradeable": true,
-        "archery_ticket_price": 0
-      }
-    },
-    {
-      "type": "item",
       "id": 536,
       "name": "Dragon bones",
       "description": "These would feed a dog for months!",
@@ -54,7 +43,7 @@
           0,
           24
         ],
-        "weapon_interface": 18,
+        "weapon_type": 18,
         "archery_ticket_price": 0
       }
     },
@@ -86,7 +75,7 @@
           0,
           0
         ],
-        "weapon_interface": 17,
+        "weapon_type": 17,
         "render_anim": 175,
         "equip_audio": 2244,
         "archery_ticket_price": 0
@@ -120,6 +109,17 @@
           0,
           10
         ],
+        "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 995,
+      "name": "Coins",
+      "description": "Lovely money!",
+      "source_ref": "item_configs.json#995",
+      "attributes": {
+        "tradeable": true,
         "archery_ticket_price": 0
       }
     },
@@ -161,6 +161,30 @@
         ],
         "equip_audio": 2241,
         "archery_ticket_price": 0
+      }
+    },
+    {
+      "type": "item",
+      "id": 1511,
+      "name": "Logs",
+      "description": "A number of wooden logs.",
+      "source_ref": "item_configs.json#1511",
+      "attributes": {
+        "tradeable": true,
+        "ge_buy_limit": 25000,
+        "weight": 2.0
+      }
+    },
+    {
+      "type": "item",
+      "id": 1512,
+      "name": "Ashes",
+      "description": "Ashes from a fire.",
+      "source_ref": "item_configs.json#1512",
+      "attributes": {
+        "tradeable": true,
+        "ge_buy_limit": 1000,
+        "weight": 0.1
       }
     },
     {
@@ -235,7 +259,7 @@
             "skill": 0
           }
         ],
-        "weapon_interface": 6,
+        "weapon_type": 6,
         "render_anim": 1,
         "equip_audio": 2248,
         "archery_ticket_price": 0

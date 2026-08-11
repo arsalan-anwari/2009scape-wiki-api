@@ -62,7 +62,7 @@ def test_an_entity_is_fetched_by_identity(repository: KnowledgeRepository) -> No
     entity = repository.get_entity(SCIMITAR)
     assert entity.name == "Dragon scimitar"
     assert entity.description == "A vicious, curved sword."
-    assert entity.slug == "dragon-scimitar-4587"
+    assert entity.slug == "dragon-scimitar"
     assert entity.provenance.source is SourceKind.GAME_CONFIG
     assert entity.provenance.source_file == "item_configs.json"
 
@@ -122,7 +122,7 @@ def test_an_empty_batch_asks_nothing(repository: KnowledgeRepository) -> None:
 
 
 def test_a_slug_resolves_to_its_entity(repository: KnowledgeRepository) -> None:
-    assert repository.resolve_slug(EntityType.ITEM, "dragon-scimitar-4587") == SCIMITAR
+    assert repository.resolve_slug(EntityType.ITEM, "dragon-scimitar") == SCIMITAR
     assert repository.resolve_slug(EntityType.NPC, "king-black-dragon") == KBD
 
 
@@ -134,12 +134,12 @@ def test_a_retired_slug_redirects_instead_of_disappearing(
     assert raised.value.target == SCIMITAR
 
 
-def test_a_readable_alias_points_at_the_canonical_entity(
+def test_a_readable_alias_points_at_the_entity_that_answers_to_it(
     repository: KnowledgeRepository,
 ) -> None:
     with pytest.raises(EntityMoved) as raised:
-        repository.resolve_slug(EntityType.ITEM, "dragon-scimitar")
-    assert raised.value.target == SCIMITAR
+        repository.resolve_slug(EntityType.ITEM, "dragon-scimitar-noted")
+    assert raised.value.target == NOTED_SCIMITAR
 
 
 def test_an_alias_is_scoped_to_its_type(repository: KnowledgeRepository) -> None:
@@ -157,9 +157,9 @@ def test_listing_a_type_is_paginated_and_ordered_by_name(
 ) -> None:
     first = repository.list_entities(EntityType.ITEM, limit=3, offset=0)
     assert [entity.name for entity in first.items] == [
+        "Ashes",
         "Bronze bolts",
         "Climbing boots",
-        "Coins",
     ]
     assert first.has_more is True
     second = repository.list_entities(EntityType.ITEM, limit=3, offset=3)
@@ -186,6 +186,135 @@ def test_index_pages_show_neither_variants_nor_hidden_entities(
 def test_every_entity_type_can_be_listed(repository: KnowledgeRepository) -> None:
     for entity_type in EntityType:
         assert repository.list_entities(entity_type, limit=50).total >= 1
+
+
+def test_a_listing_can_be_narrowed_to_what_holds_a_number(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Comparison, Condition
+
+    page = repository.list_by_attribute(
+        EntityType.ITEM,
+        where=[
+            Condition(path="ge_buy_limit", compare=Comparison.AT_LEAST, value=10_000)
+        ],
+        limit=50,
+    )
+    assert {entity.name for entity in page.items} == {
+        "Bronze bolts",
+        "Dragon bones",
+        "Logs",
+    }
+    assert page.total == 3
+
+
+def test_a_part_of_a_packed_value_is_compared_on_its_own(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Comparison, Condition
+
+    page = repository.list_by_attribute(
+        EntityType.ITEM,
+        where=[
+            Condition(path="bonuses.strength", compare=Comparison.MORE_THAN, value=10)
+        ],
+        limit=50,
+    )
+    assert [entity.name for entity in page.items] == ["Dragon scimitar"]
+
+
+def test_several_comparisons_all_have_to_hold(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Comparison, Condition
+
+    page = repository.list_by_attribute(
+        EntityType.ITEM,
+        where=[
+            Condition(path="weight", compare=Comparison.AT_LEAST, value=1.0),
+            Condition(path="weight", compare=Comparison.AT_MOST, value=2.0),
+        ],
+        limit=50,
+    )
+    assert {entity.name for entity in page.items} == {
+        "Dragon bones",
+        "Dragon scimitar",
+        "Logs",
+    }
+
+
+def test_a_listing_can_be_ordered_by_a_number_either_way(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Ordering
+
+    heaviest = repository.list_by_attribute(
+        EntityType.ITEM, order=Ordering(path="weight", descending=True), limit=3
+    )
+    assert [entity.name for entity in heaviest.items] == [
+        "Kbd heads",
+        "Phoenix crossbow",
+        "Logs",
+    ]
+    lightest = repository.list_by_attribute(
+        EntityType.ITEM, order=Ordering(path="weight"), limit=3
+    )
+    assert [entity.name for entity in lightest.items] == [
+        "Ashes",
+        "Green d'hide vambraces",
+        "Climbing boots",
+    ]
+
+
+def test_ordering_by_a_number_leaves_out_what_does_not_carry_it(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Ordering
+
+    weighed = repository.list_by_attribute(
+        EntityType.ITEM, order=Ordering(path="weight"), limit=50
+    )
+    everything = repository.list_entities(EntityType.ITEM, limit=50)
+    assert weighed.total < everything.total
+    assert all(entity.attributes.weight is not None for entity in weighed.items)  # type: ignore[union-attr]
+
+
+def test_comparing_pages_and_counts_like_every_other_listing(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Ordering
+
+    order = Ordering(path="weight", descending=True)
+    first = repository.list_by_attribute(EntityType.ITEM, order=order, limit=3)
+    second = repository.list_by_attribute(
+        EntityType.ITEM, order=order, limit=3, offset=3
+    )
+    assert first.total == second.total
+    assert first.next_offset == 3
+    assert not set(first.items) & set(second.items)
+
+
+def test_comparing_shows_neither_variants_nor_hidden_entities(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Comparison, Condition
+
+    page = repository.list_by_attribute(
+        EntityType.ITEM,
+        where=[Condition(path="ge_buy_limit", compare=Comparison.EQUALS, value=10)],
+        limit=50,
+    )
+    assert [entity.key for entity in page.items] == [SCIMITAR]
+
+
+def test_asking_for_no_comparison_lists_everything_it_would_have(
+    repository: KnowledgeRepository,
+) -> None:
+    compared = repository.list_by_attribute(EntityType.ITEM, limit=50)
+    listed = repository.list_entities(EntityType.ITEM, limit=50)
+    assert [entity.key for entity in compared.items] == [
+        entity.key for entity in listed.items
+    ]
 
 
 def test_paging_past_the_end_is_empty_but_valid(
@@ -566,6 +695,31 @@ def test_an_entity_without_variants_has_none(
     assert repository.variants_of(KBD) == ()
 
 
+def test_relationship_totals_count_every_edge_once(
+    repository: KnowledgeRepository,
+) -> None:
+    totals = repository.relationship_totals()
+    for rel, total in totals.items():
+        walked = repository.edges_from([], rel=rel, limit=1)
+        assert total > 0
+        assert walked.total == 0
+    assert sum(totals.values()) > 0
+
+
+def test_relationship_totals_name_only_declared_relationships(
+    repository: KnowledgeRepository,
+) -> None:
+    assert set(repository.relationship_totals()) <= set(RELATIONSHIP_SPECS)
+
+
+def test_a_relationship_with_no_edges_is_absent_rather_than_zero(
+    repository: KnowledgeRepository,
+) -> None:
+    totals = repository.relationship_totals()
+    assert RelationshipType.DROPS in totals
+    assert 0 not in set(totals.values())
+
+
 def test_price_history_comes_back_in_date_order(
     repository: KnowledgeRepository,
 ) -> None:
@@ -613,7 +767,7 @@ def test_a_link_carries_identity_and_a_label(
     assert link.model_dump() == {
         "type": EntityType.ITEM,
         "id": 4587,
-        "slug": "dragon-scimitar-4587",
+        "slug": "dragon-scimitar",
         "label": "Dragon scimitar",
         "icon_ref": None,
     }

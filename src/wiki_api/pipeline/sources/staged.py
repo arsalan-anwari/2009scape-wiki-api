@@ -4,19 +4,34 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
+from wiki_api.pipeline.enums.calls import BaseCall
+from wiki_api.pipeline.enums.constants import Constants, ConstantTable
 from wiki_api.pipeline.enums.reader import EnumTable
+from wiki_api.pipeline.places import (
+    AnchorSheet,
+    PlacedRegion,
+    Track,
+    read_placed_regions,
+)
 from wiki_api.pipeline.staging.collectors import PRICES
 from wiki_api.pipeline.staging.declared import (
+    DeclaredAnchors,
     DeclaredConfig,
+    DeclaredConstants,
     DeclaredExtract,
+    DeclaredScan,
     DeclaredTable,
+    DeclaredTracks,
 )
 from wiki_api.pipeline.staging.errors import StagedFileMissing
 from wiki_api.pipeline.staging.manifest import StagingManifest, read_manifest
 
+UNSTAGED_VERSION: Final = "2009scape@unknown"
+
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Sequence
     from pathlib import Path
 
     from wiki_api.domain.provenance import GameVersion
@@ -42,6 +57,15 @@ class StagedSources:
     def game_version(self, staged: str) -> GameVersion:
         return self.manifest.entry(staged).game_version
 
+    def version_of(self, staged: str) -> GameVersion:
+        """The version behind a staged file, or a stand-in when it was not staged."""
+        from wiki_api.domain.provenance import GameVersion as Version
+
+        try:
+            return self.manifest.entry(staged).game_version
+        except StagedFileMissing:
+            return Version.model_validate(UNSTAGED_VERSION)
+
     def records(self, declared: DeclaredConfig) -> tuple[dict[str, Any], ...]:
         """Read one staged config file as the list of records it holds."""
         payload = json.loads(self.path(declared.staged).read_text(encoding="utf-8"))
@@ -63,6 +87,63 @@ class StagedSources:
 
         lines = gzip.decompress(path.read_bytes()).decode("utf-8").splitlines()
         return tuple(json.loads(line) for line in lines if line)
+
+    def stream(self, declared: DeclaredExtract) -> Iterator[dict[str, Any]]:
+        """Read one cache extract a record at a time, for the ones too big to hold."""
+        path = self.path(declared.staged)
+        if not declared.compressed:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            yield from payload
+            return
+        import gzip
+
+        with gzip.open(path, "rt", encoding="utf-8") as lines:
+            for line in lines:
+                if line.strip():
+                    yield json.loads(line)
+
+    def constants(self, declared: Sequence[DeclaredConstants]) -> Constants:
+        """Read the staged constants objects as one lookup a symbol resolves through."""
+        return Constants(
+            tables=tuple(
+                ConstantTable.model_validate_json(
+                    self.path(one.staged).read_text(encoding="utf-8")
+                )
+                for one in declared
+            )
+        )
+
+    def calls(self, declared: DeclaredScan) -> tuple[BaseCall, ...]:
+        """Read the staged sweep of what each class hands its base class."""
+        payload = json.loads(self.path(declared.staged).read_text(encoding="utf-8"))
+        return tuple(BaseCall.model_validate(call) for call in payload["calls"])
+
+    def call_paths(self, declared: DeclaredScan) -> dict[str, str]:
+        """Which file each staged call was read out of, for a source reference."""
+        payload = json.loads(self.path(declared.staged).read_text(encoding="utf-8"))
+        return {call["constant"]: call["path"] for call in payload["calls"]}
+
+    def placed_regions(self, declared: DeclaredTracks) -> tuple[PlacedRegion, ...]:
+        """Join the staged config keying a region to a track with the dump that says
+        where each track unlocks.
+        """
+        payload = json.loads(self.path(declared.staged).read_text(encoding="utf-8"))
+        tracks = tuple(Track.model_validate(track) for track in payload["tracks"])
+        return read_placed_regions(self.records(declared.config), tracks)
+
+    def anchors(self, declared: DeclaredAnchors) -> AnchorSheet:
+        """Read the staged teleport list as points a name can be looked up in."""
+        return AnchorSheet.model_validate_json(
+            self.path(declared.staged).read_text(encoding="utf-8")
+        )
+
+    def has_staged(self, staged: str) -> bool:
+        """Whether one staged file is there, so a build can say it was not."""
+        try:
+            self.path(staged)
+        except StagedFileMissing:
+            return False
+        return True
 
     def has_extract(self, declared: DeclaredExtract) -> bool:
         """Whether a cache extract was staged, so a build can say it was not."""
@@ -215,6 +296,34 @@ def test_a_compressed_extract_reads_one_record_per_line(tmp_path: Path) -> None:
     )
     read = staged.extract(PLACEMENT_EXTRACT)
     assert [record["region"] for record in read] == [12850, 12851]
+
+
+def test_a_compressed_extract_streams_without_being_held_whole(tmp_path: Path) -> None:
+    import gzip
+
+    from tests.sources import staged_from
+
+    from wiki_api.pipeline.staging.declared import PLACEMENT_EXTRACT
+
+    staged = staged_from(
+        tmp_path,
+        {
+            PLACEMENT_EXTRACT.staged: gzip.compress(
+                b'{"object_id": 1}\n\n{"object_id": 2}\n'
+            )
+        },
+    )
+    streamed = staged.stream(PLACEMENT_EXTRACT)
+    assert [record["object_id"] for record in streamed] == [1, 2]
+
+
+def test_a_plain_extract_streams_the_same_records_it_reads(tmp_path: Path) -> None:
+    from tests.sources import staged_from
+
+    from wiki_api.pipeline.staging.declared import SCENERY_EXTRACT
+
+    staged = staged_from(tmp_path, {SCENERY_EXTRACT.staged: '[{"id": 1}, {"id": 2}]'})
+    assert [record["id"] for record in staged.stream(SCENERY_EXTRACT)] == [1, 2]
 
 
 def test_a_cache_extract_nobody_staged_is_absent_rather_than_an_error(

@@ -19,6 +19,7 @@ GROUP_CLOSE: Final = "}"
 TRUE_WORDS: Final = frozenset({"true", "yes", "1"})
 FALSE_WORDS: Final = frozenset({"false", "no", "0"})
 ABSENT_WORD: Final = "null"
+ZERO_WORDS: Final = frozenset({"0", "0.0", "-0"})
 SKILL_KEY: Final = "skill"
 LEVEL_KEY: Final = "level"
 
@@ -118,6 +119,15 @@ def requirements(
     return tuple({SKILL_KEY: skill, LEVEL_KEY: level} for skill, level in read)
 
 
+def defaulted(value: Any) -> bool:
+    """Say whether a value is the zero a writer left behind rather than a fact."""
+    if isinstance(value, bool):
+        return value is False
+    if isinstance(value, int | float):
+        return value == 0
+    return isinstance(value, str) and value.strip() in ZERO_WORDS
+
+
 def attributes(
     record: Mapping[str, Any],
     *,
@@ -127,21 +137,32 @@ def attributes(
     ignored: Iterable[str],
     declared: Iterable[str],
     listed: Iterable[str] = (),
+    zero_is_absent: Iterable[str] = (),
+    renamed: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Keep the fields the model declares, drop the empty ones, refuse the unknown."""
+    """Keep the fields the model declares, drop the empty ones, refuse the unknown.
+
+    `renamed` lands a source field under a different attribute key, declared per
+    adapter so no source is renamed behind another one's back.
+    """
     held = set(spine)
     skipped = set(ignored)
     known = set(declared)
     runs = set(listed)
+    defaults = set(zero_is_absent)
+    lands_as = dict(renamed or {})
     kept: dict[str, Any] = {}
     for field, value in record.items():
         if field in held or field in skipped:
             continue
-        if field not in known:
+        under = lands_as.get(field, field)
+        if under not in known:
             raise UnknownSourceField(source, field, identity)
         if not present(value):
             continue
-        kept[field] = (
+        if field in defaults and defaulted(value):
+            continue
+        kept[under] = (
             list(numbers(value, source, identity, field)) if field in runs else value
         )
     return kept
@@ -172,6 +193,27 @@ def test_an_empty_value_means_absent_rather_than_zero() -> None:
     assert numbers("", "x", "1", "f") == ()
     assert not present("")
     assert present("0")
+
+
+def test_a_zero_is_told_apart_from_a_number_somebody_meant() -> None:
+    assert defaulted("0") is True
+    assert defaulted(0) is True
+    assert defaulted("0.0") is True
+    assert defaulted("70") is False
+    assert defaulted("") is False
+
+
+def test_a_field_whose_zero_is_a_default_is_dropped_only_where_it_is_named() -> None:
+    kept = attributes(
+        {"ticket": "0", "price": "0"},
+        source="items.json",
+        identity="1",
+        spine=(),
+        ignored=(),
+        declared=("ticket", "price"),
+        zero_is_absent=("ticket",),
+    )
+    assert kept == {"price": "0"}
 
 
 def test_the_word_null_means_absent_the_way_the_game_reads_it() -> None:

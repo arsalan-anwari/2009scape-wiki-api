@@ -21,6 +21,7 @@ TYPES_PREFIX: Final = f"{API_PREFIX}/types"
 NEAR_NAMES_PREFIX: Final = f"{API_PREFIX}/near-names"
 TOOLTIP_SEGMENT: Final = "tooltip"
 WALK_SEGMENT: Final = "rel"
+HISTORY_SEGMENT: Final = "prices"
 
 
 def reference(entity_type: EntityType, handle: str) -> Reference:
@@ -38,6 +39,11 @@ def entity_path(link: Link) -> str:
 def tooltip_path(link: Link) -> str:
     """Build the path serving this link's hover-sized answer."""
     return f"{entity_path(link)}/{TOOLTIP_SEGMENT}"
+
+
+def history_path(link: Link) -> str:
+    """Address where this thing's week by week record is read."""
+    return f"{entity_path(link)}/{HISTORY_SEGMENT}"
 
 
 def walk_path(link: Link, rel: RelationshipType) -> str:

@@ -1,0 +1,39 @@
+{
+ "enum": "SkillingResource",
+ "source_file": "SkillingResource.java",
+ "language": "java",
+ "columns": [
+  "id",
+  "level",
+  "rate",
+  "respawnRate",
+  "experience",
+  "reward",
+  "rewardAmount",
+  "name",
+  "animation",
+  "emptyId",
+  "skillId",
+  "farming"
+ ],
+ "constants": [
+  {
+   "name": "STANDARD_TREE_1",
+   "values": {
+    "id": 1276,
+    "level": 1,
+    "rate": 0.05,
+    "respawnRate": 6553650,
+    "experience": 25.0,
+    "reward": 1511,
+    "rewardAmount": 1,
+    "name": "tree",
+    "animation": null,
+    "emptyId": 1342,
+    "skillId": {
+     "symbol": "Skills.WOODCUTTING"
+    }
+   }
+  }
+ ]
+}

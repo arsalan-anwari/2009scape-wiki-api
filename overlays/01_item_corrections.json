@@ -13,12 +13,14 @@
       "source_ref": "item_configs.json#14422 (first of two records)",
       "attributes": {
         "absorb": "0,0,0",
-        "archery_ticket_price": "0",
         "attack_speed": "4",
         "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
         "destroy": "true",
         "destroy_message": "Drop",
         "tradeable": "true"
+      },
+      "expects": {
+        "name": "USDT Slot"
       }
     },
     {
@@ -29,12 +31,14 @@
       "source_ref": "item_configs.json#14424 (first of two records)",
       "attributes": {
         "absorb": "0,0,0",
-        "archery_ticket_price": "0",
         "attack_speed": "4",
         "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
         "destroy": "true",
         "destroy_message": "Drop",
         "tradeable": "true"
+      },
+      "expects": {
+        "name": "HDT Slot"
       }
     },
     {
@@ -45,12 +49,14 @@
       "source_ref": "item_configs.json#14426 (first of two records)",
       "attributes": {
         "absorb": "0,0,0",
-        "archery_ticket_price": "0",
         "attack_speed": "4",
         "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
         "destroy": "true",
         "destroy_message": "Drop",
         "tradeable": "true"
+      },
+      "expects": {
+        "name": "GDT Slot"
       }
     },
     {
@@ -61,12 +67,14 @@
       "source_ref": "item_configs.json#14428 (first of two records)",
       "attributes": {
         "absorb": "0,0,0",
-        "archery_ticket_price": "0",
         "attack_speed": "4",
         "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
         "destroy": "true",
         "destroy_message": "Drop",
         "tradeable": "true"
+      },
+      "expects": {
+        "name": "RSDT Slot"
       }
     },
     {
@@ -77,12 +85,14 @@
       "source_ref": "item_configs.json#14430 (first of two records)",
       "attributes": {
         "absorb": "0,0,0",
-        "archery_ticket_price": "0",
         "attack_speed": "4",
         "bonuses": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
         "destroy": "true",
         "destroy_message": "Drop",
         "tradeable": "true"
+      },
+      "expects": {
+        "name": "ASDT Slot"
       }
     },
     {
@@ -93,7 +103,6 @@
       "source_ref": "item_configs.json#13910 (a stray brace in requirements)",
       "attributes": {
         "absorb": "6,0,12",
-        "archery_ticket_price": "0",
         "attack_speed": "4",
         "bonuses": "5,5,7,-10,-30,154,145,121,-6,157,60,5,0,0,0",
         "destroy": "true",
@@ -107,6 +116,11 @@
             "level": 20
           }
         ]
+      },
+      "expects": {
+        "attributes": {
+          "requirements": "{1,20}}"
+        }
       }
     },
     {
@@ -116,7 +130,6 @@
       "description": "A nasturtium seed - plant in flower patch.",
       "source_ref": "item_configs.json#5098 (requirements written the wrong way round)",
       "attributes": {
-        "archery_ticket_price": "0",
         "ge_buy_limit": "100",
         "tradeable": "true",
         "requirements": [
@@ -125,6 +138,11 @@
             "level": 24
           }
         ]
+      },
+      "expects": {
+        "attributes": {
+          "requirements": "{24,19}"
+        }
       }
     },
     {
@@ -134,7 +152,6 @@
       "description": "A pair of blurite crossbow limbs.",
       "source_ref": "item_configs.json#9422 (requirements written the wrong way round)",
       "attributes": {
-        "archery_ticket_price": "0",
         "equipment_slot": "5",
         "weight": "1",
         "requirements": [
@@ -143,6 +160,11 @@
             "level": 24
           }
         ]
+      },
+      "expects": {
+        "attributes": {
+          "requirements": "{24,9}"
+        }
       }
     },
     {
@@ -152,7 +174,6 @@
       "description": "An oak crossbow stock.",
       "source_ref": "item_configs.json#9442 (requirements written the wrong way round)",
       "attributes": {
-        "archery_ticket_price": "0",
         "equipment_slot": "3",
         "ge_buy_limit": "1000",
         "tradeable": "true",
@@ -163,6 +184,11 @@
             "level": 24
           }
         ]
+      },
+      "expects": {
+        "attributes": {
+          "requirements": "{24,9}"
+        }
       }
     }
   ]

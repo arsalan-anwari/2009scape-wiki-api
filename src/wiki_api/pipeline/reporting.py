@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 DRIFT_NOTE = "edited after staging, so it no longer matches the sources it came from"
 UNREAD_NOTE = "staged and read by nothing yet, waiting on a shape in the model"
+DUPLICATE_NOTE = "read by nothing on purpose, because the artifact already says it"
 
 
 class BuildReport(BaseModel):
@@ -29,6 +30,7 @@ class BuildReport(BaseModel):
     overridden: int = Field(ge=0)
     drifted: tuple[str, ...] = ()
     unread: tuple[str, ...] = ()
+    duplicated: tuple[str, ...] = ()
     sources: tuple[SourceOutcome, ...] = ()
 
     @property
@@ -50,6 +52,9 @@ class BuildReport(BaseModel):
             told.append(f"  {self.skipped} source rows did not become facts")
         if self.unread:
             told.append(f"  {', '.join(self.unread)}: {UNREAD_NOTE}")
+        if self.duplicated:
+            told.append(f"  {DUPLICATE_NOTE}")
+            told.extend(f"    {one}" for one in self.duplicated)
         return tuple(told)
 
 
@@ -64,7 +69,8 @@ def report_of(
     overridden: int,
     drifted: Sequence[str],
     unread: Sequence[str],
-    sources: Sequence[SourceOutcome],
+    duplicated: Sequence[str] = (),
+    sources: Sequence[SourceOutcome] = (),
 ) -> BuildReport:
     """Gather one build's counts into the report its command prints."""
     return BuildReport(
@@ -77,6 +83,7 @@ def report_of(
         overridden=overridden,
         drifted=tuple(drifted),
         unread=tuple(unread),
+        duplicated=tuple(duplicated),
         sources=tuple(sources),
     )
 

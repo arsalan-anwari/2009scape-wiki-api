@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "type": "room",
+  "ids": {
+    "PARLOUR": 1,
+    "GARDEN": 2,
+    "KITCHEN": 3,
+    "DINING_ROOM": 4,
+    "WORKSHOP": 5,
+    "BEDROOM": 6,
+    "SKILL_HALL": 7,
+    "GAMES_ROOM": 8,
+    "COMBAT_ROOM": 9,
+    "QUEST_HALL": 10,
+    "STUDY_ROOM": 11,
+    "COSTUME_ROOM": 12,
+    "CHAPEL": 13,
+    "PORTAL_CHAMBER": 14,
+    "FORMAL_GARDEN": 15,
+    "THRONE_ROOM": 16,
+    "OUBILETTE": 17,
+    "DUNGEON_CORRIDOR": 18,
+    "DUNGEON_JUNCTION": 19,
+    "DUNGEON_STAIRS": 20,
+    "DUNGEON_PIT": 21,
+    "TREASURE_ROOM": 22,
+    "ROOF_2_EXIT": 23,
+    "ROOF_3_EXIT": 24,
+    "ROOF_4_EXIT": 25,
+    "SKILL_HALL_2": 26,
+    "QUEST_HALL_2": 27
+  }
+}

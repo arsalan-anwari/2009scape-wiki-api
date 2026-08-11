@@ -11,18 +11,47 @@ from typing import TYPE_CHECKING, Final
 from pydantic import BaseModel, ConfigDict, Field
 
 from wiki_api.core import Found, Hidden, Missing, Moved
+from wiki_api.core.results import Uncomparable
 from wiki_api.domain.identity import EntityType
 from wiki_api.surfaces.mcp.naming import CLOSE_NAMES_TOOL, SORTS_TOOL
-from wiki_api.surfaces.mcp.projection import Related, Thing, related_of, thing_of
+from wiki_api.surfaces.mcp.projection import (
+    Movement,
+    Ranking,
+    Related,
+    Thing,
+    movement_of,
+    ranking_of,
+    related_of,
+    thing_of,
+)
 
 if TYPE_CHECKING:
-    from wiki_api.core import Absent, Block, Named, PageDescriptor
+    from wiki_api.core import (
+        Absent,
+        Block,
+        ComparisonResolution,
+        Named,
+        PageDescriptor,
+    )
     from wiki_api.domain.identity import Link
+    from wiki_api.domain.prices import PriceMovement
 
 MOST_OTHERS: Final = 5
 
 RENAMED_NOTE = "that name is retired; ask again using the one below"
 WITHHELD_NOTE = "that is in this build but is not published"
+UNRECORDED_NOTE = (
+    "the market never recorded that one, so there is nothing to say about what it "
+    "did; say so rather than guessing"
+)
+UNCOMPARABLE_NOTE = (
+    "nothing that sort of thing records answers to those words. Ask again using one "
+    "of these, exactly as written"
+)
+NOTHING_ASKED_NOTE = (
+    "no value was named to compare or to sort by. Ask again using one of these, "
+    "exactly as written"
+)
 UNKNOWN_NOTE = (
     "nothing here answers to that name. It may be misspelt: settle with whoever "
     f"asked which sort of thing was meant, using `{SORTS_TOOL}` if that is unclear, "
@@ -111,6 +140,68 @@ def about_related(named: Named[Block], data_version: str) -> Answer[Related]:
             data_version=data_version,
         )
     return _refused_related(named.resolution, named.alternatives, data_version)
+
+
+def about_ranking(answered: ComparisonResolution, data_version: str) -> Answer[Ranking]:
+    """Answer with one page of a comparison, or with what could have been compared."""
+    if isinstance(answered, Found):
+        return Answer[Ranking](
+            outcome=Outcome.FOUND,
+            result=ranking_of(answered.value),
+            data_version=data_version,
+        )
+    return Answer[Ranking](
+        outcome=Outcome.UNKNOWN,
+        note=_nothing_to_compare(answered),
+        data_version=data_version,
+    )
+
+
+def about_movement(
+    named: Named[PriceMovement | None], data_version: str
+) -> Answer[Movement]:
+    """Answer with which way one thing's worth went, or why that name reached
+    nothing.
+    """
+    if not isinstance(named.resolution, Found):
+        return _refused_movement(named.resolution, named.alternatives, data_version)
+    went = named.resolution.value
+    if named.subject is None:
+        return Answer[Movement](
+            outcome=Outcome.UNKNOWN, note=UNKNOWN_NOTE, data_version=data_version
+        )
+    if went is None:
+        return Answer[Movement](
+            outcome=Outcome.FOUND,
+            note=UNRECORDED_NOTE,
+            others=suggested(named.alternatives),
+            data_version=data_version,
+        )
+    return Answer[Movement](
+        outcome=Outcome.FOUND,
+        result=movement_of(went, of=named.subject.label),
+        others=suggested(named.alternatives),
+        data_version=data_version,
+    )
+
+
+def _nothing_to_compare(answered: Uncomparable) -> str:
+    offered = ", ".join(answered.offered) or "nothing"
+    if not answered.asked:
+        return f"{NOTHING_ASKED_NOTE}: {offered}"
+    return f"{UNCOMPARABLE_NOTE}: {offered}"
+
+
+def _refused_movement(
+    absent: Absent, alternatives: tuple[Link, ...], data_version: str
+) -> Answer[Movement]:
+    outcome, note, offered = refusal(absent)
+    return Answer[Movement](
+        outcome=outcome,
+        note=_noted(outcome, note, alternatives),
+        others=offered or suggested(alternatives),
+        data_version=data_version,
+    )
 
 
 def _refused(

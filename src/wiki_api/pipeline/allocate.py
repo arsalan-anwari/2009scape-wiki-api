@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable, Mapping
 from pathlib import Path
+from typing import Final
 
 from wiki_api.config import get_settings
 from wiki_api.domain.identity import EntityType
@@ -12,8 +14,18 @@ from wiki_api.pipeline.identity import (
     read_allocation,
     write_allocation,
 )
+from wiki_api.pipeline.sources.places import place_keys
 from wiki_api.pipeline.sources.quests import source_keys
+from wiki_api.pipeline.sources.rooms import room_keys
+from wiki_api.pipeline.sources.slayer import task_keys
 from wiki_api.pipeline.sources.staged import StagedSources
+
+NUMBERED: Final[Mapping[EntityType, Callable[[StagedSources], tuple[str, ...]]]] = {
+    EntityType.QUEST: source_keys,
+    EntityType.TASK: task_keys,
+    EntityType.LOCATION: place_keys,
+    EntityType.ROOM: room_keys,
+}
 
 
 def parser() -> argparse.ArgumentParser:
@@ -24,7 +36,7 @@ def parser() -> argparse.ArgumentParser:
     """
     declared = argparse.ArgumentParser(
         prog="allocate-ids",
-        description="Number the quests the sources declare but never number.",
+        description="Number what the sources declare but never number.",
     )
     declared.add_argument("--staged", type=Path, default=None)
     declared.add_argument("--identity", type=Path, default=None)
@@ -34,23 +46,30 @@ def parser() -> argparse.ArgumentParser:
 
 def allocate(staged: StagedSources, current: IdentityAllocation) -> IdentityAllocation:
     """Extend the allocation with every natural key the staged table declares."""
-    return current.extended_with(source_keys(staged))
+    return current.extended_with(NUMBERED[current.type](staged))
 
 
 def main() -> None:
-    """Say which quests have no number yet, and hand them one when asked."""
+    """Say what has no number yet, and hand one out when asked."""
     asked = parser().parse_args()
     settings = get_settings()
     identity = Path(asked.identity or settings.identity_dir)
     staged = StagedSources.at(Path(asked.staged or settings.staged_dir))
-    current = read_allocation(identity, EntityType.QUEST)
-    extended = allocate(staged, current)
-    added = len(extended.ids) - len(current.ids)
-    if not asked.write:
-        print(f"{added} quests have no id yet, {len(current.ids)} already do")
-        return
-    path = write_allocation(identity, extended)
-    print(f"numbered {added} quests, {len(extended.ids)} in all, written to {path}")
+    for entity_type in NUMBERED:
+        current = read_allocation(identity, entity_type)
+        extended = allocate(staged, current)
+        added = len(extended.ids) - len(current.ids)
+        if not asked.write:
+            print(
+                f"{added} {entity_type.value} keys have no id yet, "
+                f"{len(current.ids)} already do"
+            )
+            continue
+        path = write_allocation(identity, extended)
+        print(
+            f"numbered {added} {entity_type.value} keys, "
+            f"{len(extended.ids)} in all, written to {path}"
+        )
 
 
 if __name__ == "__main__":

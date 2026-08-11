@@ -47,6 +47,7 @@ GROUP_META: Final[Mapping[AttributeGroup, GroupMeta]] = {
     AttributeGroup.GENERAL: GroupMeta("General", GroupPlacement.INFOBOX, 20),
     AttributeGroup.MAP: GroupMeta("Location", GroupPlacement.INFOBOX, 30),
     AttributeGroup.COMBAT: GroupMeta("Combat", GroupPlacement.SECTION, 40),
+    AttributeGroup.SKILL: GroupMeta("Training", GroupPlacement.SECTION, 45),
     AttributeGroup.EQUIPMENT: GroupMeta("Equipment", GroupPlacement.SECTION, 50),
     AttributeGroup.TRADE: GroupMeta("Trade", GroupPlacement.SECTION, 60),
     AttributeGroup.BEHAVIOUR: GroupMeta("Behaviour", GroupPlacement.SECTION, 70),
@@ -55,6 +56,7 @@ GROUP_META: Final[Mapping[AttributeGroup, GroupMeta]] = {
     AttributeGroup.RATE: GroupMeta("Rate", GroupPlacement.SECTION, 100),
     AttributeGroup.AMOUNT: GroupMeta("Amount", GroupPlacement.SECTION, 110),
     AttributeGroup.REWARD: GroupMeta("Reward", GroupPlacement.SECTION, 120),
+    AttributeGroup.SLAYER: GroupMeta("Slayer", GroupPlacement.INFOBOX, 35),
     AttributeGroup.INTERNAL: GroupMeta("Internal", GroupPlacement.HIDDEN, 999),
 }
 
@@ -64,6 +66,9 @@ ENTITY_TYPE_META: Final[Mapping[EntityType, EntityTypeMeta]] = {
     EntityType.SHOP: EntityTypeMeta("Shop", "Shops", 30),
     EntityType.QUEST: EntityTypeMeta("Quest", "Quests", 40),
     EntityType.LOCATION: EntityTypeMeta("Location", "Locations", 50),
+    EntityType.SCENERY: EntityTypeMeta("Scenery object", "Scenery objects", 60),
+    EntityType.TASK: EntityTypeMeta("Slayer task", "Slayer tasks", 70),
+    EntityType.ROOM: EntityTypeMeta("House room", "House rooms", 80),
 }
 
 

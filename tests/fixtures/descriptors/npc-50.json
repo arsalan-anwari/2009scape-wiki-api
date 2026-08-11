@@ -562,7 +562,8 @@
                   "npc_spawn",
                   "ground_spawn",
                   "shop_front",
-                  "quest_start"
+                  "quest_start",
+                  "built_in"
                 ]
               },
               {
@@ -578,6 +579,40 @@
                 "choices": null
               }
             ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "npc",
+          "id": 50
+        },
+        "rel": "satisfied_by",
+        "direction": "reverse"
+      },
+      "label": "Counts towards",
+      "group": "slayer",
+      "order": 120,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "task",
+              "id": 1,
+              "slug": "banshee",
+              "label": "Banshee",
+              "icon_ref": null
+            },
+            "type": "task",
+            "attributes": []
           }
         ],
         "total": 1,

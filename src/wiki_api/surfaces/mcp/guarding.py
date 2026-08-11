@@ -1,7 +1,7 @@
 """Check a caller's key on the way into the tools.
 
-Holds no rule of its own: it asks `surfaces.guarding` and reports the answer in this
-protocol's words. Installed only when this surface is served over HTTP on its own.
+Asks `surfaces.guarding` and reports its answer in this protocol's words. Installed
+only when this surface is served over HTTP on its own.
 """
 
 from __future__ import annotations

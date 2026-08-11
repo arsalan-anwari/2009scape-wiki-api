@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Mapping
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from wiki_api.pipeline.artifact.overlay import OverlaySource
 from wiki_api.pipeline.sources.coercion import Skipped, SkipReason
-
-if TYPE_CHECKING:
-    from collections.abc import Mapping
 
 
 class SourceOutcome(BaseModel):
@@ -21,6 +18,7 @@ class SourceOutcome(BaseModel):
     source: str = Field(min_length=1)
     read: OverlaySource
     skipped: tuple[Skipped, ...] = ()
+    tallied: Mapping[SkipReason, int] = Field(default_factory=dict)
     notes: tuple[str, ...] = ()
 
     @property
@@ -36,8 +34,14 @@ class SourceOutcome(BaseModel):
         return len(self.read.document.prices)
 
     def skipped_by_reason(self) -> Mapping[str, int]:
-        """How many rows were left behind, counted by why."""
-        counted: dict[str, int] = {}
+        """How many rows were left behind, counted by why.
+
+        A source large enough that one row per skip would not fit in memory counts
+        them in `tallied` instead, and both are added up here.
+        """
+        counted: dict[str, int] = {
+            reason.value: count for reason, count in self.tallied.items()
+        }
         for row in self.skipped:
             counted[row.reason.value] = counted.get(row.reason.value, 0) + 1
         return dict(sorted(counted.items()))
@@ -84,6 +88,14 @@ def test_an_outcome_counts_what_it_carried() -> None:
     assert outcome.entities == 1
     assert outcome.edges == 0
     assert outcome.prices == 0
+
+
+def test_a_source_too_large_to_list_its_skips_still_counts_them() -> None:
+    outcome = _outcome(
+        tallied={SkipReason.UNKNOWN_SUBJECT: 1873729},
+        skipped=[Skipped(source="a", reason=SkipReason.UNKNOWN_SUBJECT)],
+    )
+    assert outcome.skipped_by_reason() == {"unknown_subject": 1873730}
 
 
 def test_skipped_rows_are_counted_by_reason() -> None:

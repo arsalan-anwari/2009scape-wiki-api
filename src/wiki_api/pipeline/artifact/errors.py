@@ -74,6 +74,23 @@ class VariantChain(BuildError):
         self.origin = origin
 
 
+class OverlayExpired(BuildError):
+    """A correction states what the source said, and the source no longer says it."""
+
+    def __init__(
+        self, key: EntityKey, origin: str, field: str, expected: object, found: object
+    ) -> None:
+        super().__init__(
+            f"{origin} corrects {key} expecting {field} to be {expected!r}, and the "
+            f"source now says {found!r}; check the correction is still needed"
+        )
+        self.key = key
+        self.origin = origin
+        self.field = field
+        self.expected = expected
+        self.found = found
+
+
 class DuplicateEdge(BuildError):
     """One relationship between one pair is declared twice."""
 

@@ -1,8 +1,7 @@
 """Decide who gets answered, once for both surfaces.
 
-HTTP reaches this from a middleware and MCP from a token verifier; neither checks
-anything itself. Every refusal reads the same to the caller, and the `Outcome` saying
-which it was is for counting, not for telling.
+Every refusal reads the same to the caller; the `Outcome` saying which it was is for
+counting, not for telling.
 """
 
 from __future__ import annotations

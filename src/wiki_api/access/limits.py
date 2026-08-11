@@ -1,8 +1,5 @@
 """Decide how much one caller may ask for, and shut out an address whose tokens keep
 failing to verify.
-
-A caller's share is counted in this process; shut-out addresses go to `Bans`, which
-writes them down. Pass `now` to move either clock without waiting.
 """
 
 from __future__ import annotations
@@ -178,10 +175,7 @@ class _Clock:
 
 
 def _guarding(clock: _Clock, **given: float | int) -> InProcessGuard:
-    """Build a guard whose share clock and ban clock are the same `clock`.
-
-    One `tick` then moves both, which no real pair of clocks does.
-    """
+    """Build a guard whose share clock and ban clock are the same `clock`."""
     return InProcessGuard(
         now=clock,
         bans=RememberedBans(clock=clock),

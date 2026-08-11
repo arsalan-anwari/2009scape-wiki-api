@@ -1,8 +1,7 @@
-"""Turning one decision about a caller into one transport answer.
+"""Turn one decision about a caller into one HTTP answer.
 
-This is a middleware rather than something each route asks for, because it also has to
-cover an application mounted underneath this one: in the container that serves both
-surfaces, the tools hang off this same application and are guarded by these same lines.
+A middleware rather than a per-route dependency, so it also covers any application
+mounted underneath this one.
 """
 
 from __future__ import annotations
@@ -88,10 +87,10 @@ def _refusal(outcome: Outcome, after: int | None) -> Response:
 
 
 def _kept_private(response: Response) -> None:
-    """An answer meant for one key holder is never held by a cache in between.
+    """Mark a guarded answer `private`, so no cache in between holds it.
 
-    The body is the same for every caller, but a shared cache in front of a guarded
-    service would hand it to callers that presented no key at all.
+    The body is the same for every caller, so a shared cache would hand it to
+    callers that presented no key at all.
     """
     held = response.headers.get("cache-control")
     if held is None:

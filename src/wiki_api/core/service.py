@@ -6,17 +6,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from wiki_api.core import discovery
+from wiki_api.core import comparing, discovery
 from wiki_api.core.descriptors import describe_page
+from wiki_api.core.history import history, movement
 from wiki_api.core.resolution import resolve
 from wiki_api.core.results import (
     Block,
     BlockResolution,
+    ComparisonResolution,
     Direction,
     EntityResolution,
     EntitySummary,
     Found,
+    HistoryResolution,
     Match,
+    MovementResolution,
     Named,
     PageDescriptor,
     PageResolution,
@@ -25,16 +29,20 @@ from wiki_api.core.results import (
     TypeInfo,
 )
 from wiki_api.core.tooltips import preview
+from wiki_api.core.values import naming_of
 from wiki_api.core.walks import BLOCK_PAGE_SIZE, walk
+from wiki_api.domain.identity import EntityType
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
+from wiki_api.domain.prices import PriceMovement
+from wiki_api.domain.query import Comparable, Comparison
 from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+    from datetime import date
 
     from wiki_api.core.resolution import Reference
     from wiki_api.domain.entity import Entity
-    from wiki_api.domain.identity import EntityType
     from wiki_api.domain.manifest import Manifest
     from wiki_api.domain.relationships import RelationshipType
     from wiki_api.repository.protocol import KnowledgeRepository
@@ -79,7 +87,7 @@ class KnowledgeService:
         resolution = self.resolve(reference)
         if not isinstance(resolution, Found):
             return resolution
-        return Found(value=preview(resolution.value))
+        return Found(value=preview(resolution.value, naming_of(self._repository)))
 
     def walk(
         self,
@@ -103,6 +111,87 @@ class KnowledgeService:
                 limit=limit,
                 offset=offset,
             )
+        )
+
+    def price_history(
+        self,
+        reference: Reference,
+        *,
+        since: date | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> HistoryResolution:
+        """Read what one thing was worth week by week, one page at a time."""
+        resolution = self.resolve(reference)
+        if not isinstance(resolution, Found):
+            return resolution
+        return Found(
+            value=history(
+                self._repository,
+                resolution.value,
+                since=since,
+                limit=limit,
+                offset=offset,
+            )
+        )
+
+    def price_movement(
+        self, reference: Reference, *, since: date | None = None
+    ) -> MovementResolution:
+        """Read which way one thing's worth went, without handing back every reading."""
+        resolution = self.resolve(reference)
+        if not isinstance(resolution, Found):
+            return resolution
+        return Found(value=movement(self._repository, resolution.value, since=since))
+
+    def movement_by_name(
+        self, name: str, *, since: date | None = None
+    ) -> Named[PriceMovement | None]:
+        """Read which way one thing's worth went, for a caller holding a name."""
+        named = self.lookup(name, types=[EntityType.ITEM])
+        if not isinstance(named.resolution, Found):
+            return Named[PriceMovement | None](
+                resolution=named.resolution,
+                subject=named.subject,
+                alternatives=named.alternatives,
+            )
+        return Named[PriceMovement | None](
+            resolution=Found(
+                value=movement(self._repository, named.resolution.value, since=since)
+            ),
+            subject=named.subject,
+            alternatives=named.alternatives,
+        )
+
+    def comparable(self, entity_type: EntityType) -> tuple[Comparable, ...]:
+        """List the values of one sort of thing a caller may put a number against."""
+        return comparing.comparable(entity_type)
+
+    def compare(
+        self,
+        entity_type: EntityType,
+        *,
+        holds: str | None = None,
+        how: Comparison = Comparison.AT_LEAST,
+        number: float = 0.0,
+        ordered_by: str | None = None,
+        descending: bool = False,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> ComparisonResolution:
+        """Page through the things of one sort whose stored number answers the
+        question.
+        """
+        return comparing.compare(
+            self._repository,
+            entity_type,
+            holds=holds,
+            how=how,
+            number=number,
+            ordered_by=ordered_by,
+            descending=descending,
+            limit=limit,
+            offset=offset,
         )
 
     def lookup(
@@ -241,6 +330,12 @@ class KnowledgeService:
         """Publish what sorts of thing exist and how their values present."""
         return discovery.describe_types()
 
+    def answerable(self) -> frozenset[RelationshipType]:
+        """List the links this build holds, so nothing is offered that answers
+        nothing.
+        """
+        return discovery.answerable(self._repository)
+
 
 # test cases
 
@@ -261,6 +356,12 @@ def test_the_service_answers_every_question_the_phase_promised() -> None:
         "near_names",
         "list_type",
         "describe_types",
+        "answerable",
+        "price_history",
+        "price_movement",
+        "movement_by_name",
+        "comparable",
+        "compare",
     }
 
 

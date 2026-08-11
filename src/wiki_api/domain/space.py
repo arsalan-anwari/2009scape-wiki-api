@@ -10,6 +10,8 @@ from wiki_api.domain.vocabulary import GameEnum
 
 REGION_SHIFT: Final = 6
 REGION_STRIDE: Final = 8
+REGION_SIDE: Final = 1 << REGION_SHIFT
+REGION_MASK: Final = (1 << REGION_STRIDE) - 1
 MAX_PLANE: Final = 3
 COORDINATE_SEPARATOR: Final = ":"
 
@@ -33,6 +35,7 @@ class SpawnKind(GameEnum):
     GROUND_SPAWN = "ground_spawn"
     SHOP_FRONT = "shop_front"
     QUEST_START = "quest_start"
+    BUILT_IN = "built_in"
 
 
 class Coordinate(BaseModel):
@@ -71,6 +74,30 @@ class Area(BaseModel):
         if self.max_x < self.min_x or self.max_y < self.min_y:
             raise ValueError("an area cannot end before it starts")
         return self
+
+    @classmethod
+    def of_region(cls, region_id: int) -> Self:
+        """The square of tiles the game addresses under one region number."""
+        west = (region_id >> REGION_STRIDE) << REGION_SHIFT
+        south = (region_id & REGION_MASK) << REGION_SHIFT
+        return cls(
+            min_x=west,
+            min_y=south,
+            max_x=west + REGION_SIDE - 1,
+            max_y=south + REGION_SIDE - 1,
+        )
+
+    def joined(self, other: Area) -> Self:
+        """The smallest rectangle holding both, which is how an area of many regions
+        gets its extent.
+        """
+        return type(self)(
+            min_x=min(self.min_x, other.min_x),
+            min_y=min(self.min_y, other.min_y),
+            max_x=max(self.max_x, other.max_x),
+            max_y=max(self.max_y, other.max_y),
+            plane=self.plane,
+        )
 
     @property
     def centre(self) -> Coordinate:
@@ -118,6 +145,25 @@ def test_coordinates_compare_by_value_and_are_hashable() -> None:
     second = Coordinate(x=3200, y=3200)
     assert first == second
     assert len({first, second}) == 1
+
+
+def test_a_region_number_turns_back_into_the_square_it_addresses() -> None:
+    square = Area.of_region(12850)
+    assert (square.min_x, square.min_y) == (3200, 3200)
+    assert (square.max_x, square.max_y) == (3263, 3263)
+    assert square.contains(Coordinate(x=3222, y=3218))
+
+
+def test_every_tile_in_a_square_agrees_on_the_region_it_came_from() -> None:
+    square = Area.of_region(9033)
+    assert Coordinate(x=square.min_x, y=square.min_y).region_id == 9033
+    assert Coordinate(x=square.max_x, y=square.max_y).region_id == 9033
+
+
+def test_two_squares_join_into_the_rectangle_that_holds_both() -> None:
+    joined = Area.of_region(12850).joined(Area.of_region(12851))
+    assert (joined.min_x, joined.min_y) == (3200, 3200)
+    assert (joined.max_x, joined.max_y) == (3263, 3327)
 
 
 def test_an_area_knows_its_centre_and_what_falls_inside_it() -> None:

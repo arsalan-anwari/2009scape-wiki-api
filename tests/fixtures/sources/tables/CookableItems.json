@@ -1,0 +1,32 @@
+{
+ "enum": "CookableItems",
+ "source_file": "CookableItems.java",
+ "language": "java",
+ "columns": [
+  "cooked",
+  "raw",
+  "burnt",
+  "level",
+  "experience",
+  "low",
+  "high",
+  "lowRange",
+  "highRange"
+ ],
+ "constants": [
+  {
+   "name": "CHICKEN",
+   "values": {
+    "cooked": 2140,
+    "raw": 2138,
+    "burnt": 2144,
+    "level": 1,
+    "experience": 30,
+    "low": 128,
+    "high": 512,
+    "lowRange": 128,
+    "highRange": 512
+   }
+  }
+ ]
+}

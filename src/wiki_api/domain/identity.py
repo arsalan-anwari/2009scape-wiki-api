@@ -18,6 +18,9 @@ class EntityType(StrEnum):
     SHOP = "shop"
     QUEST = "quest"
     LOCATION = "location"
+    SCENERY = "scenery"
+    TASK = "task"
+    ROOM = "room"
 
 
 class EntityKey(BaseModel):

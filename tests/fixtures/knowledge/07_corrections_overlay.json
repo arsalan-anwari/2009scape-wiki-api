@@ -52,12 +52,6 @@
   "aliases": [
     {
       "type": "item",
-      "slug": "dragon-scimitar",
-      "id": 4587,
-      "kind": "alternate_name"
-    },
-    {
-      "type": "item",
       "slug": "dscim",
       "id": 4587,
       "kind": "shorthand"

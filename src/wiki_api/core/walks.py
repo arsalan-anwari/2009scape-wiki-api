@@ -1,5 +1,5 @@
 """Follow a relationship either way over an entity and its variants, so one query
-yields a total that can be trusted.
+returns a total that can be trusted.
 """
 
 from __future__ import annotations
@@ -7,13 +7,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final
 
 from wiki_api.core.results import Block, Direction, Row, Walk
-from wiki_api.core.values import edge_values
+from wiki_api.core.values import edge_values, naming_of
 from wiki_api.domain.page import Page
 from wiki_api.domain.relationships import RELATIONSHIP_SPECS
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
+    from wiki_api.core.values import Naming
     from wiki_api.domain.entity import Entity
     from wiki_api.domain.identity import EntityKey
     from wiki_api.domain.relationships import Edge, RelationshipType
@@ -61,6 +62,7 @@ def walk_keys(
     *,
     limit: int = BLOCK_PAGE_SIZE,
     offset: int = 0,
+    naming: Naming | None = None,
 ) -> Block:
     """Walk over a key set the caller has already worked out."""
     if direction is Direction.FORWARD:
@@ -70,7 +72,14 @@ def walk_keys(
     neighbours = repository.get_entities(
         [far_key(edge, direction) for edge in edges.items]
     )
-    return build_block(origin, rel, direction, edges, neighbours)
+    return build_block(
+        origin,
+        rel,
+        direction,
+        edges,
+        neighbours,
+        naming=naming_of(repository) if naming is None else naming,
+    )
 
 
 def blocks_of(
@@ -79,8 +88,10 @@ def blocks_of(
     keys: Sequence[EntityKey],
     *,
     limit: int = BLOCK_PAGE_SIZE,
+    naming: Naming | None = None,
 ) -> tuple[Block, ...]:
     """Build a block for every relationship of this type that has anything in it."""
+    shared = naming_of(repository) if naming is None else naming
     blocks = []
     for spec in sorted(RELATIONSHIP_SPECS.values(), key=lambda spec: spec.order):
         for direction in Direction:
@@ -92,7 +103,13 @@ def blocks_of(
             if not reachable:
                 continue
             block = walk_keys(
-                repository, entity.key, keys, spec.rel, direction, limit=limit
+                repository,
+                entity.key,
+                keys,
+                spec.rel,
+                direction,
+                limit=limit,
+                naming=shared,
             )
             if not block.is_empty:
                 blocks.append(block)
@@ -118,11 +135,12 @@ def build_block(
     direction: Direction,
     edges: Page[Edge],
     neighbours: Mapping[EntityKey, Entity],
+    naming: Naming | None = None,
 ) -> Block:
     """Assemble one block out of edges and the entities they point at, counting rather
     than dropping the edges whose neighbour cannot be resolved.
     """
-    rows = tuple(_rows(edges.items, direction, neighbours))
+    rows = tuple(_rows(edges.items, direction, neighbours, naming))
     spec = RELATIONSHIP_SPECS[rel]
     return Block(
         walk=Walk(origin=origin, rel=rel, direction=direction),
@@ -143,6 +161,7 @@ def _rows(
     edges: Sequence[Edge],
     direction: Direction,
     neighbours: Mapping[EntityKey, Entity],
+    naming: Naming | None = None,
 ) -> list[Row]:
     rows = []
     for edge in edges:
@@ -153,7 +172,7 @@ def _rows(
             Row(
                 link=neighbour.to_link(),
                 type=neighbour.type,
-                attributes=edge_values(edge),
+                attributes=edge_values(edge, naming),
             )
         )
     return rows

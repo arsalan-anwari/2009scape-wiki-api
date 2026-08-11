@@ -154,6 +154,20 @@ source_modules = [
 forbidden_modules = ["wiki_api.access.issuing", "wiki_api.access.cli"]
 
 [[tool.importlinter.contracts]]
+name = "The build publishes; a prefill only proposes"
+type = "forbidden"
+source_modules = [
+    "wiki_api.pipeline.sources",
+    "wiki_api.pipeline.artifact",
+    "wiki_api.pipeline.build",
+]
+forbidden_modules = [
+    "wiki_api.pipeline.prefill",
+    "wiki_api.pipeline.wiki",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
 name = "Domain is pure: no transport, storage, or ingestion libraries"
 type = "forbidden"
 source_modules = ["wiki_api.domain"]
@@ -183,6 +197,7 @@ download-data = "bash scripts/download_data.sh"
 fetch-ge = { script = "wiki_api.pipeline.staging.prices:main" }
 stage-sources = { script = "wiki_api.pipeline.staging.cli:main" }
 allocate-ids = { script = "wiki_api.pipeline.allocate:main" }
+prefill-overlays = { script = "wiki_api.pipeline.prefill.cli:main" }
 build-artifact = { script = "wiki_api.pipeline.artifact.cli:main" }
 build-test-artifact = { script = "tests.artifact:main" }
 serve = "uvicorn wiki_api.surfaces.http.app:create_app --factory --reload"

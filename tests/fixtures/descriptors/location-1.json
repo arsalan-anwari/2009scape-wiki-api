@@ -140,7 +140,8 @@
                   "npc_spawn",
                   "ground_spawn",
                   "shop_front",
-                  "quest_start"
+                  "quest_start",
+                  "built_in"
                 ]
               },
               {

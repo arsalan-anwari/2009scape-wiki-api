@@ -2,8 +2,7 @@ from wiki_api.domain.alias import AliasKind, EntityAlias
 from wiki_api.domain.attributes import (
     ATTRIBUTE_MODELS,
     ATTRIBUTE_SPECS,
-    AttributeFormat,
-    AttributeMeta,
+    PATH_SEPARATOR,
     AttributeSpec,
     EntityAttributes,
     ItemAttributes,
@@ -41,6 +40,15 @@ from wiki_api.domain.presentation import (
 )
 from wiki_api.domain.prices import PricePoint, latest_price
 from wiki_api.domain.provenance import GameVersion, Provenance
+from wiki_api.domain.query import (
+    COMPARABLE_FORMATS,
+    Comparable,
+    Comparison,
+    Condition,
+    Ordering,
+    comparable_of,
+    understood,
+)
 from wiki_api.domain.rates import (
     NOTHING_ITEM_ID,
     DropRoll,
@@ -71,7 +79,9 @@ from wiki_api.domain.vocabulary import (
     BONUS_WIDTH,
     COINS,
     AbsorbBonuses,
+    AttributeFormat,
     AttributeGroup,
+    AttributeMeta,
     ClueLevel,
     CombatBonuses,
     CombatStyle,
@@ -94,12 +104,14 @@ __all__ = [
     "ATTRIBUTE_SPECS",
     "BONUS_WIDTH",
     "COINS",
+    "COMPARABLE_FORMATS",
     "DEFAULT_PAGE_SIZE",
     "EDGE_ATTRIBUTE_MODELS",
     "ENTITY_TYPE_META",
     "GROUP_META",
     "MAX_PAGE_SIZE",
     "NOTHING_ITEM_ID",
+    "PATH_SEPARATOR",
     "RELATIONSHIP_SPECS",
     "SCHEMA_VERSION",
     "AbsorbBonuses",
@@ -113,6 +125,9 @@ __all__ = [
     "ClueLevel",
     "CombatBonuses",
     "CombatStyle",
+    "Comparable",
+    "Comparison",
+    "Condition",
     "Coordinate",
     "CorruptArtifact",
     "DropEdgeAttributes",
@@ -146,6 +161,7 @@ __all__ = [
     "MisdeclaredAttribute",
     "MissingAttributeMeta",
     "NpcAttributes",
+    "Ordering",
     "OrdinalEnum",
     "PackedInts",
     "Page",
@@ -174,6 +190,7 @@ __all__ = [
     "Visibility",
     "choices_of",
     "coerce_item_ref",
+    "comparable_of",
     "derive_slugs",
     "discriminator_of",
     "drop_denominator",
@@ -183,4 +200,5 @@ __all__ = [
     "rewarding_rolls",
     "slugify",
     "specs_of",
+    "understood",
 ]

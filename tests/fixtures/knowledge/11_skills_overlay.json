@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "source": "game_code",
+  "source_file": "SkillingResource.java",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "edges": [
+    {
+      "src": "scenery:1276",
+      "rel": "yields",
+      "dst": "item:1511",
+      "order_key": 1,
+      "source_ref": "SkillingResource.java#STANDARD_TREE_1",
+      "attributes": {
+        "skill": "woodcutting",
+        "level": 1,
+        "experience": 25.0,
+        "amount": 1,
+        "success_rate": 0.05,
+        "respawn_min": 50,
+        "respawn_max": 100
+      }
+    },
+    {
+      "src": "item:1511",
+      "rel": "makes",
+      "dst": "item:1512",
+      "order_key": 1,
+      "source_ref": "overlay/skills/logs_burn",
+      "attributes": {
+        "skill": "firemaking",
+        "level": 1,
+        "experience": 40.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,747 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "source_file": "wiki/quests.json",
+  "game_version": "authored",
+  "precedence": 10,
+  "entities": [
+    {
+      "type": "quest",
+      "id": 2,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#black_knights_fortress says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 3,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": "Recipe for Disaster"
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#cooks_assistant says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 4,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Demon Slayer"
+    },
+    {
+      "type": "quest",
+      "id": 5,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/very_short; no guide states a rating for Doric's Quest"
+    },
+    {
+      "type": "quest",
+      "id": 6,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null
+      },
+      "source_ref": "authored. rated experienced/long; wiki/quests.json#dragon_slayer says Experienced/(none), agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 7,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#ernest_the_chicken says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 8,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": "Dorgeshuun"
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#goblin_diplomacy says Novice/(none), agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 9,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#imp_catcher says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 10,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#the_knights_sword says Beginner/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 11,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Pirate"
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#pirates_treasure says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 12,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/medium; wiki/quests.json#prince_ali_rescue says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 13,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#the_restless_ghost says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 14,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#romeo_juliet says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 15,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#rune_mysteries says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 16,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#sheep_shearer says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 17,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/medium; wiki/quests.json#shield_of_arrav says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 18,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#vampire_slayer says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 19,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#witchs_potion says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 20,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#animal_magnetism says hardmode/a little longer than, which is rejected"
+    },
+    {
+      "type": "quest",
+      "id": 22,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": "Ogre"
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#big_chompy_bird_hunting says Beginner/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 25,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Clock Tower"
+    },
+    {
+      "type": "quest",
+      "id": 27,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Ogre"
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Zogre Flesh Eaters"
+    },
+    {
+      "type": "quest",
+      "id": 28,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Creature of Fenkenstrain"
+    },
+    {
+      "type": "quest",
+      "id": 31,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Troll"
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Death Plateau"
+    },
+    {
+      "type": "quest",
+      "id": 32,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Mahjarrat"
+      },
+      "source_ref": "authored. rated master/long; no guide states a rating for Desert Treasure"
+    },
+    {
+      "type": "quest",
+      "id": 34,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for The Dig Site"
+    },
+    {
+      "type": "quest",
+      "id": 35,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/very_short; wiki/quests.json#druidic_ritual says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 36,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": "Dwarf"
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#dwarf_cannon says Beginner/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 39,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Elemental Workshop"
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#elemental_workshop_i says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 46,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": null
+      },
+      "source_ref": "authored. rated master/long; wiki/quests.json#family_crest says Beginner/Long, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 48,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Fight Arena"
+    },
+    {
+      "type": "quest",
+      "id": 49,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Fishing Contest"
+    },
+    {
+      "type": "quest",
+      "id": 51,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Fremennik"
+      },
+      "source_ref": "authored. rated experienced/long; no guide states a rating for The Fremennik Trials"
+    },
+    {
+      "type": "quest",
+      "id": 52,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Elf"
+      },
+      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#waterfall says Beginner/Short, which is rejected"
+    },
+    {
+      "type": "quest",
+      "id": 54,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Cat"
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#gertrudes_cat says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 57,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#the_golem says Beginner/Short, which is rejected"
+    },
+    {
+      "type": "quest",
+      "id": 58,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Gnome"
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for The Grand Tree"
+    },
+    {
+      "type": "quest",
+      "id": 61,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Mahjarrat"
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Hazeel Cult"
+    },
+    {
+      "type": "quest",
+      "id": 62,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null
+      },
+      "source_ref": "authored. rated experienced/long; wiki/quests.json#heroes_quest says Easy/Long, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 68,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Karamja"
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Jungle Potion"
+    },
+    {
+      "type": "quest",
+      "id": 70,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "short",
+        "series": "Fairytale"
+      },
+      "source_ref": "authored. rated experienced/short; wiki/quests.json#lost_city says Beginner/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 71,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Dorgeshuun"
+      },
+      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#the_lost_tribe says Beginner/Short, which is rejected"
+    },
+    {
+      "type": "quest",
+      "id": 74,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Camelot"
+      },
+      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#merlins_crystal says short/(none), which is rejected"
+    },
+    {
+      "type": "quest",
+      "id": 76,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Monk's Friend"
+    },
+    {
+      "type": "quest",
+      "id": 80,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#murder_mystery says Easy/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 82,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Myreque"
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Nature Spirit"
+    },
+    {
+      "type": "quest",
+      "id": 83,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; no guide states a rating for Observatory Quest"
+    },
+    {
+      "type": "quest",
+      "id": 85,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Elf"
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#plague_city says Beginner/Short, which agrees"
+    },
+    {
+      "type": "quest",
+      "id": 86,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; no guide states a rating for Priest in Peril"
+    },
+    {
+      "type": "quest",
+      "id": 87,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/medium; wiki/quests.json#rag_and_bone_man says Beginner/Short, agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 90,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": "Temple Knight"
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#recruitment_drive says Beginner/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 92,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "short",
+        "series": "Elf"
+      },
+      "source_ref": "authored. rated experienced/short; no guide states a rating for Roving Elves"
+    },
+    {
+      "type": "quest",
+      "id": 95,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; no guide states a rating for Scorpion Catcher"
+    },
+    {
+      "type": "quest",
+      "id": 96,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": "Sea Slug"
+      },
+      "source_ref": "authored. rated intermediate/short; no guide states a rating for Sea Slug"
+    },
+    {
+      "type": "quest",
+      "id": 100,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; no guide states a rating for Sheep Herder"
+    },
+    {
+      "type": "quest",
+      "id": 102,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for A Soul's Bane"
+    },
+    {
+      "type": "quest",
+      "id": 107,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "very_short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/very_short; no guide states a rating for Tears of Guthix"
+    },
+    {
+      "type": "quest",
+      "id": 108,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Mahjarrat"
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Temple of Ikov"
+    },
+    {
+      "type": "quest",
+      "id": 110,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Desert"
+      },
+      "source_ref": "authored. rated intermediate/medium; no guide states a rating for The Tourist Trap"
+    },
+    {
+      "type": "quest",
+      "id": 111,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; no guide states a rating for Witch's House"
+    },
+    {
+      "type": "quest",
+      "id": 112,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Gnome"
+      },
+      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#tree_gnome_village says Beginner/Short, which is rejected"
+    },
+    {
+      "type": "quest",
+      "id": 113,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; no guide states a rating for Tribal Totem"
+    },
+    {
+      "type": "quest",
+      "id": 115,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": "Troll"
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#troll_stronghold says Beginner/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 123,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#what_lies_below says Beginner/Short, agreeing on length only"
+    },
+    {
+      "type": "quest",
+      "id": 133,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated novice/short; wiki/quests.json#wolf_whistle says Novice/(none), agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 144,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. rated intermediate/short; wiki/quests.json#all_fired_up says Intermediate/(none), agreeing on difficulty only"
+    },
+    {
+      "type": "quest",
+      "id": 148,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "grandmaster",
+        "length": "very_long",
+        "series": "Mahjarrat"
+      },
+      "source_ref": "authored. rated grandmaster/very_long; no guide states a rating for While Guthix Sleeps"
+    }
+  ],
+  "edges": []
+}

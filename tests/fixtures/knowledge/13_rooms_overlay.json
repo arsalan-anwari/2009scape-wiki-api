@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "source": "game_code",
+  "source_file": "RoomProperties.java",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "room",
+      "id": 1,
+      "name": "Kitchen",
+      "description": "Where a house keeps its larder, its stove and its cat.",
+      "source_key": "KITCHEN",
+      "source_ref": "RoomProperties.java#KITCHEN",
+      "attributes": {
+        "level": 5,
+        "build_cost": 5000,
+        "outdoors": false,
+        "hotspots": 17
+      }
+    }
+  ]
+}

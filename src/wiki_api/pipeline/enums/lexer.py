@@ -126,7 +126,7 @@ def _next_token(scanner: _Scanner) -> Token:
         return Token(TokenKind.TEXT, _read_text(scanner), line)
     if character == "'":
         return Token(TokenKind.CHARACTER, _read_character(scanner), line)
-    if character.isdigit():
+    if character.isdigit() or (character == "." and scanner.peek(1).isdigit()):
         return Token(TokenKind.NUMBER, _read_number(scanner), line)
     if character.isalpha() or character in NAME_START:
         return Token(TokenKind.NAME, _read_name(scanner), line)
@@ -293,6 +293,17 @@ def test_an_unknown_character_is_refused() -> None:
 def test_a_number_keeps_its_suffix_and_separators() -> None:
     values = [token.value for token in tokenize("1_000L 0x1F 2.5e-3", "x.java")]
     assert values == ["1_000L", "0x1F", "2.5e-3"]
+
+
+def test_a_java_float_may_begin_with_a_dot() -> None:
+    tokens = tokenize("f(.15)", "x.java")
+    assert tokens[2].kind is TokenKind.NUMBER
+    assert tokens[2].value == ".15"
+
+
+def test_a_dot_between_two_names_is_still_punctuation() -> None:
+    kinds = [token.kind for token in tokenize("Skills.ATTACK", "x.kt")]
+    assert kinds == [TokenKind.NAME, TokenKind.PUNCTUATION, TokenKind.NAME]
 
 
 def test_a_character_literal_is_read_as_one_letter() -> None:

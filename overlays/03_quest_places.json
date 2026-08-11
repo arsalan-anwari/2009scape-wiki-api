@@ -1,0 +1,708 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "source_file": "wiki/quests.json",
+  "game_version": "2009scape@91bb6be123bdc08e1d022ddb310a901d1b363269",
+  "precedence": 10,
+  "entities": [
+    {
+      "type": "location",
+      "id": 1,
+      "mode": "patch",
+      "description": "The desert town south of Lumbridge.",
+      "source_ref": "wiki/quests.json#kharidian/al_kharid",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 5,
+      "mode": "patch",
+      "description": "The dwarven coal run north of the Fishing Guild.",
+      "source_ref": "wiki/quests.json#kandarin/coal_trucks",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 10,
+      "mode": "patch",
+      "description": "The arena south of Ardougne, run by General Khazard.",
+      "source_ref": "wiki/quests.json#kandarin/fight_arena",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 12,
+      "mode": "patch",
+      "description": "The guild between Taverley and Burthorpe.",
+      "source_ref": "wiki/quests.json#asgarnia/heroes_guild",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 16,
+      "mode": "patch",
+      "description": "The port south of Falador.",
+      "source_ref": "wiki/quests.json#asgarnia/port_sarim",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 17,
+      "mode": "patch",
+      "description": "A village south-west of Falador.",
+      "source_ref": "wiki/quests.json#asgarnia/rimmington",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 19,
+      "mode": "patch",
+      "description": "A town in northern Kandarin.",
+      "source_ref": "wiki/quests.json#kandarin/seers_village",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 44,
+      "mode": "patch",
+      "description": "A town on the edge of the troll lands.",
+      "source_ref": "wiki/quests.json#asgarnia/burthorpe",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 50,
+      "mode": "patch",
+      "description": "The guild south-west of Varrock, for those with quest points.",
+      "source_ref": "wiki/quests.json#misthalin/champions_guild",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 67,
+      "mode": "patch",
+      "description": "The haunted manor north of Draynor Village.",
+      "source_ref": "wiki/quests.json#misthalin/draynor_manor",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 68,
+      "mode": "patch",
+      "description": "A small village west of Lumbridge.",
+      "source_ref": "wiki/quests.json#misthalin/draynor_village",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 72,
+      "mode": "patch",
+      "description": "The eastern half of Ardougne.",
+      "source_ref": "wiki/quests.json#kandarin/east_ardougne",
+      "attributes": {
+        "kind": "city"
+      }
+    },
+    {
+      "type": "location",
+      "id": 78,
+      "mode": "patch",
+      "description": "The white-walled capital of Asgarnia.",
+      "source_ref": "wiki/quests.json#asgarnia/falador",
+      "attributes": {
+        "kind": "city"
+      }
+    },
+    {
+      "type": "location",
+      "id": 80,
+      "mode": "patch",
+      "description": "The hills in the far south of Kandarin.",
+      "source_ref": "wiki/quests.json#kandarin/feldip_hills",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 89,
+      "mode": "patch",
+      "description": "The goblin settlement north of Falador.",
+      "source_ref": "wiki/quests.json#asgarnia/goblin_village",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 104,
+      "mode": "patch",
+      "description": "The elven woods west of the Underground Pass.",
+      "source_ref": "wiki/quests.json#kandarin/isafdar",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 113,
+      "mode": "patch",
+      "description": "The desert south of Al Kharid.",
+      "source_ref": "wiki/quests.json#kharidian/kharidian_desert",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 123,
+      "mode": "patch",
+      "description": "The town every new adventurer starts in.",
+      "source_ref": "wiki/quests.json#misthalin/lumbridge",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 124,
+      "mode": "patch",
+      "description": "The marsh south of Lumbridge, over the river.",
+      "source_ref": "wiki/quests.json#misthalin/lumbridge_swamp",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 182,
+      "mode": "patch",
+      "description": "The druids' village west of Falador.",
+      "source_ref": "wiki/quests.json#asgarnia/taverley",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 191,
+      "mode": "patch",
+      "description": "The gnome settlement south of Ardougne.",
+      "source_ref": "wiki/quests.json#kandarin/tree_gnome_village",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 192,
+      "mode": "patch",
+      "description": "The troll fortress above Death Plateau.",
+      "source_ref": "wiki/quests.json#asgarnia/troll_stronghold",
+      "attributes": {
+        "kind": "dungeon"
+      }
+    },
+    {
+      "type": "location",
+      "id": 196,
+      "mode": "patch",
+      "description": "The capital of Misthalin.",
+      "source_ref": "wiki/quests.json#misthalin/varrock",
+      "attributes": {
+        "kind": "city"
+      }
+    },
+    {
+      "type": "location",
+      "id": 201,
+      "mode": "patch",
+      "description": "The seat of the White Knights, in Falador.",
+      "source_ref": "wiki/quests.json#asgarnia/white_knights_castle",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 205,
+      "mode": "patch",
+      "description": "The tower of the Order of Wizards, south of Draynor.",
+      "source_ref": "wiki/quests.json#misthalin/wizards_tower",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 1002,
+      "name": "Lumbridge Castle",
+      "description": "The Duke of Lumbridge's keep, above the town.",
+      "source_key": "lumbridgecastle",
+      "source_ref": "wiki/quests.json#misthalin/lumbridge_castle; centre from configs/npc_spawns.json#Cook, who stands in the castle kitchen",
+      "attributes": {
+        "kind": "building",
+        "centre": {
+          "x": 3209,
+          "y": 3215,
+          "plane": 0
+        }
+      }
+    },
+    {
+      "type": "location",
+      "id": 1005,
+      "name": "Varrock Palace",
+      "description": "King Roald's palace, in the north of Varrock.",
+      "source_key": "varrockpalace",
+      "source_ref": "wiki/quests.json#misthalin/varrock_palace; centre from cache/maplabels.json#Palace, which is the game's own map label",
+      "attributes": {
+        "kind": "building",
+        "centre": {
+          "x": 3213,
+          "y": 3483,
+          "plane": 0
+        }
+      }
+    },
+    {
+      "type": "location",
+      "id": 1006,
+      "name": "Varrock Square",
+      "description": "The market square at the centre of Varrock.",
+      "source_key": "varrocksquare",
+      "source_ref": "wiki/quests.json#misthalin/varrock_square; centre from configs/npc_spawns.json#Romeo, who stands in the square",
+      "attributes": {
+        "kind": "area",
+        "centre": {
+          "x": 3211,
+          "y": 3425,
+          "plane": 0
+        }
+      }
+    },
+    {
+      "type": "location",
+      "id": 1021,
+      "name": "Uzer",
+      "description": "The ruined city east of the Shantay Pass.",
+      "source_key": "uzer",
+      "source_ref": "wiki/quests.json#kharidian/uzer; centre from places/anchors.json#uzer",
+      "attributes": {
+        "kind": "area",
+        "centre": {
+          "x": 3490,
+          "y": 3090,
+          "plane": 0
+        },
+        "bounds": {
+          "min_x": 3456,
+          "min_y": 3072,
+          "max_x": 3519,
+          "max_y": 3135,
+          "plane": 0
+        },
+        "region_id": 13872
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "location:1002",
+      "rel": "part_of",
+      "dst": "location:123",
+      "source_ref": "wiki/quests.json#misthalin/lumbridge_castle"
+    },
+    {
+      "src": "location:1005",
+      "rel": "part_of",
+      "dst": "location:196",
+      "source_ref": "wiki/quests.json#misthalin/varrock_palace"
+    },
+    {
+      "src": "location:1006",
+      "rel": "part_of",
+      "dst": "location:196",
+      "source_ref": "wiki/quests.json#misthalin/varrock_square"
+    },
+    {
+      "src": "location:1021",
+      "rel": "part_of",
+      "dst": "location:113",
+      "source_ref": "wiki/quests.json#kharidian/uzer"
+    },
+    {
+      "src": "location:12",
+      "rel": "part_of",
+      "dst": "location:44",
+      "source_ref": "wiki/quests.json#asgarnia/heroes_guild"
+    },
+    {
+      "src": "location:201",
+      "rel": "part_of",
+      "dst": "location:78",
+      "source_ref": "wiki/quests.json#asgarnia/white_knights_castle"
+    },
+    {
+      "src": "location:67",
+      "rel": "part_of",
+      "dst": "location:68",
+      "source_ref": "wiki/quests.json#misthalin/draynor_manor"
+    },
+    {
+      "src": "quest:10",
+      "rel": "located_in",
+      "dst": "location:201",
+      "source_ref": "wiki/quests.json#THE_KNIGHTS_SWORD",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:11",
+      "rel": "located_in",
+      "dst": "location:16",
+      "source_ref": "wiki/quests.json#PIRATES_TREASURE",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:112",
+      "rel": "located_in",
+      "dst": "location:191",
+      "source_ref": "wiki/quests.json#TREE_GNOME_VILLAGE",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:115",
+      "rel": "located_in",
+      "dst": "location:192",
+      "source_ref": "wiki/quests.json#TROLL_STRONGHOLD",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:12",
+      "rel": "located_in",
+      "dst": "location:1",
+      "source_ref": "wiki/quests.json#PRINCE_ALI_RESCUE",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:13",
+      "rel": "located_in",
+      "dst": "location:123",
+      "source_ref": "wiki/quests.json#THE_RESTLESS_GHOST",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:133",
+      "rel": "located_in",
+      "dst": "location:182",
+      "source_ref": "wiki/quests.json#WOLF_WHISTLE",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:14",
+      "rel": "located_in",
+      "dst": "location:1006",
+      "source_ref": "wiki/quests.json#ROMEO_JULIET",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:144",
+      "rel": "located_in",
+      "dst": "location:1005",
+      "source_ref": "wiki/quests.json#ALL_FIRED_UP",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:15",
+      "rel": "located_in",
+      "dst": "location:1002",
+      "source_ref": "wiki/quests.json#RUNE_MYSTERIES",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:16",
+      "rel": "located_in",
+      "dst": "location:123",
+      "source_ref": "wiki/quests.json#SHEEP_SHEARER",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:17",
+      "rel": "located_in",
+      "dst": "location:1005",
+      "source_ref": "wiki/quests.json#SHIELD_OF_ARRAV",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:18",
+      "rel": "located_in",
+      "dst": "location:68",
+      "source_ref": "wiki/quests.json#VAMPIRE_SLAYER",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:19",
+      "rel": "located_in",
+      "dst": "location:17",
+      "source_ref": "wiki/quests.json#WITCHS_POTION",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:2",
+      "rel": "located_in",
+      "dst": "location:201",
+      "source_ref": "wiki/quests.json#BLACK_KNIGHTS_FORTRESS",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:20",
+      "rel": "located_in",
+      "dst": "location:67",
+      "source_ref": "wiki/quests.json#ANIMAL_MAGNETISM",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:22",
+      "rel": "located_in",
+      "dst": "location:80",
+      "source_ref": "wiki/quests.json#BIG_CHOMPY_BIRD_HUNTING",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:3",
+      "rel": "located_in",
+      "dst": "location:1002",
+      "source_ref": "wiki/quests.json#COOKS_ASSISTANT",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:35",
+      "rel": "located_in",
+      "dst": "location:182",
+      "source_ref": "wiki/quests.json#DRUIDIC_RITUAL",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:36",
+      "rel": "located_in",
+      "dst": "location:5",
+      "source_ref": "wiki/quests.json#DWARF_CANNON",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:39",
+      "rel": "located_in",
+      "dst": "location:19",
+      "source_ref": "wiki/quests.json#ELEMENTAL_WORKSHOP_I",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:4",
+      "rel": "located_in",
+      "dst": "location:1006",
+      "source_ref": "wiki/quests.json#DEMON_SLAYER",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:46",
+      "rel": "located_in",
+      "dst": "location:196",
+      "source_ref": "wiki/quests.json#FAMILY_CREST",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:48",
+      "rel": "located_in",
+      "dst": "location:10",
+      "source_ref": "wiki/quests.json#FIGHT_ARENA",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:54",
+      "rel": "located_in",
+      "dst": "location:196",
+      "source_ref": "wiki/quests.json#GERTRUDES_CAT",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:57",
+      "rel": "located_in",
+      "dst": "location:1021",
+      "source_ref": "wiki/quests.json#THE_GOLEM",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:6",
+      "rel": "located_in",
+      "dst": "location:50",
+      "source_ref": "wiki/quests.json#DRAGON_SLAYER",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:61",
+      "rel": "located_in",
+      "dst": "location:72",
+      "source_ref": "wiki/quests.json#HAZEEL_CULT",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:62",
+      "rel": "located_in",
+      "dst": "location:12",
+      "source_ref": "wiki/quests.json#HEROES_QUEST",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:7",
+      "rel": "located_in",
+      "dst": "location:67",
+      "source_ref": "wiki/quests.json#ERNEST_THE_CHICKEN",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:70",
+      "rel": "located_in",
+      "dst": "location:124",
+      "source_ref": "wiki/quests.json#LOST_CITY",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:71",
+      "rel": "located_in",
+      "dst": "location:1002",
+      "source_ref": "wiki/quests.json#THE_LOST_TRIBE",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:8",
+      "rel": "located_in",
+      "dst": "location:89",
+      "source_ref": "wiki/quests.json#GOBLIN_DIPLOMACY",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:85",
+      "rel": "located_in",
+      "dst": "location:72",
+      "source_ref": "wiki/quests.json#PLAGUE_CITY",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:9",
+      "rel": "located_in",
+      "dst": "location:205",
+      "source_ref": "wiki/quests.json#IMP_CATCHER",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:90",
+      "rel": "located_in",
+      "dst": "location:201",
+      "source_ref": "wiki/quests.json#RECRUITMENT_DRIVE",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    },
+    {
+      "src": "quest:92",
+      "rel": "located_in",
+      "dst": "location:104",
+      "source_ref": "wiki/quests.json#ROVING_ELVES",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      }
+    }
+  ]
+}

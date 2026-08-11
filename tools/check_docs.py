@@ -1,11 +1,9 @@
-"""Flags prose that reads as machine-written: unconventional characters and
-filler phrases in Python comments, docstrings and description strings, in the
-prose values of JSON files, and in README.md outside its code blocks.
+"""Report prose that reads as machine-written: non-ASCII characters and filler
+phrases in Python comments, docstrings and description strings, in the prose values
+of JSON files, and in README.md outside its code blocks.
 
-It never stops at the first failure. Every offending line in every file is
-reported, then it exits 1 if anything was found.
-
-A line carrying the marker "docs-check: ignore" is left alone.
+Every offending line in every file is reported before it exits 1; a line carrying the
+marker "docs-check: ignore" is left alone.
 """
 
 from __future__ import annotations
@@ -33,11 +31,9 @@ DEFAULT_EXCLUDES = (".venv", ".git", "game_data", "node_modules", "*cache*")
 SUFFIXES = (".py", ".json")
 FILENAMES = ("README.md",)
 
-# Characters no hand-written comment in this repository needs. Anything outside
-# ASCII is reported; these get a name so the report says what to type instead.
-# Written as escapes rather than the characters themselves: a table of what not
-# to type is the one place they would otherwise be, and an escape cannot be
-# mistaken for its neighbour or lost by an editor that rewrites what it sees.
+# Anything outside ASCII is reported; these get a name so the report says what to
+# type instead. Written as escapes so a table of what not to type does not contain
+# the characters themselves.
 NAMED_CHARACTERS = {
     "\u2014": ("em dash", "use a comma, a colon, or two sentences"),
     "\u2013": ("en dash", "use a hyphen, or 'to' for ranges"),
@@ -437,10 +433,10 @@ def _excluded(path: Path, excludes: tuple[str, ...]) -> bool:
 
 
 def discover(paths: tuple[str, ...], excludes: tuple[str, ...]) -> list[str]:
-    """The files to read, in a stable order and without repeats.
+    """List the files to read, in a stable order and without repeats.
 
-    A path that is a file is taken as it is, so any single document can be named.
-    A directory is walked for the kinds of file that hold prose worth checking.
+    A path that is a file is taken as it is; a directory is walked for the kinds of
+    file that hold prose worth checking.
     """
     found: set[str] = set()
     for name in paths:

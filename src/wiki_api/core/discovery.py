@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from wiki_api.domain.identity import Link
+    from wiki_api.domain.relationships import RelationshipType
     from wiki_api.repository.protocol import KnowledgeRepository
 
 
@@ -148,6 +149,13 @@ def list_type(
         total=listed.total,
         limit=listed.limit,
         offset=listed.offset,
+    )
+
+
+def answerable(repository: KnowledgeRepository) -> frozenset[RelationshipType]:
+    """List the links this build can actually follow, so nothing offers an empty one."""
+    return frozenset(
+        rel for rel, total in repository.relationship_totals().items() if total > 0
     )
 
 

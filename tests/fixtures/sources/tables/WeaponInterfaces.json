@@ -1,0 +1,155 @@
+{
+ "enum": "WeaponInterfaces",
+ "source_file": "WeaponInterface.java",
+ "language": "java",
+ "columns": [
+  "interfaceId",
+  "attackStyles"
+ ],
+ "constants": [
+  {
+   "name": "UNARMED",
+   "values": {
+    "interfaceId": 100
+   }
+  },
+  {
+   "name": "STAFF",
+   "values": {
+    "interfaceId": 101
+   }
+  },
+  {
+   "name": "AXE",
+   "values": {
+    "interfaceId": 102
+   }
+  },
+  {
+   "name": "SCEPTER",
+   "values": {
+    "interfaceId": 103
+   }
+  },
+  {
+   "name": "PICKAXE",
+   "values": {
+    "interfaceId": 104
+   }
+  },
+  {
+   "name": "SWORD_DAGGER",
+   "values": {
+    "interfaceId": 105
+   }
+  },
+  {
+   "name": "SCIMITAR",
+   "values": {
+    "interfaceId": 106
+   }
+  },
+  {
+   "name": "TWO_H_SWORD",
+   "values": {
+    "interfaceId": 107
+   }
+  },
+  {
+   "name": "MACE",
+   "values": {
+    "interfaceId": 108
+   }
+  },
+  {
+   "name": "CLAWS",
+   "values": {
+    "interfaceId": 109
+   }
+  },
+  {
+   "name": "WARHAMMER_MAUL",
+   "values": {
+    "interfaceId": 110
+   }
+  },
+  {
+   "name": "WHIP",
+   "values": {
+    "interfaceId": 111
+   }
+  },
+  {
+   "name": "FLOWERS",
+   "values": {
+    "interfaceId": 112
+   }
+  },
+  {
+   "name": "MUD_PIE",
+   "values": {
+    "interfaceId": 113
+   }
+  },
+  {
+   "name": "SPEAR",
+   "values": {
+    "interfaceId": 114
+   }
+  },
+  {
+   "name": "HALBERD",
+   "values": {
+    "interfaceId": 115
+   }
+  },
+  {
+   "name": "BOW",
+   "values": {
+    "interfaceId": 116
+   }
+  },
+  {
+   "name": "CROSSBOW",
+   "values": {
+    "interfaceId": 117
+   }
+  },
+  {
+   "name": "THROWN_WEAPONS",
+   "values": {
+    "interfaceId": 118
+   }
+  },
+  {
+   "name": "CHINCHOMPA",
+   "values": {
+    "interfaceId": 119
+   }
+  },
+  {
+   "name": "FIXED_DEVICE",
+   "values": {
+    "interfaceId": 120
+   }
+  },
+  {
+   "name": "SALAMANDER",
+   "values": {
+    "interfaceId": 121
+   }
+  },
+  {
+   "name": "SCYTHE",
+   "values": {
+    "interfaceId": 122
+   }
+  },
+  {
+   "name": "IVANDIS_FLAIL",
+   "values": {
+    "interfaceId": 123
+   }
+  }
+ ]
+}

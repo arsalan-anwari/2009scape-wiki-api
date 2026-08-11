@@ -15,8 +15,6 @@ from pydantic import (
 )
 
 from wiki_api.domain.attributes import (
-    AttributeFormat,
-    AttributeMeta,
     AttributeSpec,
     specs_of,
 )
@@ -25,9 +23,12 @@ from wiki_api.domain.provenance import Provenance
 from wiki_api.domain.space import Coordinate, SpawnKind
 from wiki_api.domain.vocabulary import (
     COINS,
+    AttributeFormat,
     AttributeGroup,
+    AttributeMeta,
     GameEnum,
     RelationshipGroup,
+    Skill,
     Unit,
     coerce_item_ref,
 )
@@ -46,6 +47,11 @@ class RelationshipType(StrEnum):
     USES_AMMUNITION = "uses_ammunition"
     LOCATED_IN = "located_in"
     PART_OF = "part_of"
+    YIELDS = "yields"
+    MAKES = "makes"
+    REQUIRES = "requires"
+    ASSIGNS = "assigns"
+    SATISFIED_BY = "satisfied_by"
 
 
 class DropTableKind(GameEnum):
@@ -214,6 +220,177 @@ class PartOfEdgeAttributes(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
+class YieldsEdgeAttributes(BaseModel):
+    """What working a thing in the world gives, and what it takes to work it."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    skill: Annotated[
+        Skill,
+        BeforeValidator(Skill.coerce),
+        AttributeMeta(
+            "Skill", AttributeGroup.SKILL, 10, AttributeFormat.ENUM, prominent=True
+        ),
+    ]
+    level: Annotated[
+        int,
+        AttributeMeta(
+            "Level", AttributeGroup.SKILL, 20, AttributeFormat.INT, prominent=True
+        ),
+    ] = Field(default=1, ge=1, le=99)
+    experience: Annotated[
+        float | None,
+        AttributeMeta(
+            "Experience",
+            AttributeGroup.SKILL,
+            30,
+            AttributeFormat.FLOAT,
+            prominent=True,
+        ),
+    ] = Field(default=None, ge=0.0)
+    amount: Annotated[
+        int,
+        AttributeMeta("Amount", AttributeGroup.AMOUNT, 40, AttributeFormat.INT),
+    ] = Field(default=1, ge=1)
+    tool: Annotated[
+        EntityKey | None,
+        BeforeValidator(coerce_item_ref),
+        AttributeMeta(
+            "Tool", AttributeGroup.SKILL, 45, AttributeFormat.REF, prominent=True
+        ),
+    ] = None
+    success_rate: Annotated[
+        float | None,
+        AttributeMeta("Success rate", AttributeGroup.RATE, 50, AttributeFormat.RATE),
+    ] = Field(default=None, gt=0.0, le=1.0)
+    respawn_min: Annotated[
+        int | None,
+        AttributeMeta(
+            "Respawn from",
+            AttributeGroup.RATE,
+            60,
+            AttributeFormat.INT,
+            unit=Unit.TICKS,
+        ),
+    ] = Field(default=None, ge=0)
+    respawn_max: Annotated[
+        int | None,
+        AttributeMeta(
+            "Respawn to", AttributeGroup.RATE, 70, AttributeFormat.INT, unit=Unit.TICKS
+        ),
+    ] = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        pair = (self.respawn_min, self.respawn_max)
+        if None not in pair and self.respawn_max < self.respawn_min:  # type: ignore[operator]
+            raise ValueError("respawn_max must not be below respawn_min")
+        return self
+
+
+class MakesEdgeAttributes(BaseModel):
+    """What turning one item into another takes."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    skill: Annotated[
+        Skill,
+        BeforeValidator(Skill.coerce),
+        AttributeMeta(
+            "Skill", AttributeGroup.SKILL, 10, AttributeFormat.ENUM, prominent=True
+        ),
+    ]
+    level: Annotated[
+        int,
+        AttributeMeta(
+            "Level", AttributeGroup.SKILL, 20, AttributeFormat.INT, prominent=True
+        ),
+    ] = Field(default=1, ge=1, le=99)
+    experience: Annotated[
+        float | None,
+        AttributeMeta(
+            "Experience",
+            AttributeGroup.SKILL,
+            30,
+            AttributeFormat.FLOAT,
+            prominent=True,
+        ),
+    ] = Field(default=None, ge=0.0)
+    ingredients: Annotated[
+        int,
+        AttributeMeta("How many go in", AttributeGroup.AMOUNT, 40, AttributeFormat.INT),
+    ] = Field(default=1, ge=1)
+    amount: Annotated[
+        int,
+        AttributeMeta(
+            "How many come out", AttributeGroup.AMOUNT, 50, AttributeFormat.INT
+        ),
+    ] = Field(default=1, ge=1)
+
+
+class RequirementKind(GameEnum):
+    """Whether something must be held, or finished, before a quest may be started."""
+
+    CARRIED = "carried"
+    COMPLETED = "completed"
+
+
+class RequiresEdgeAttributes(BaseModel):
+    """What a quest asks a player to bring or to have finished first."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    kind: Annotated[
+        RequirementKind,
+        BeforeValidator(RequirementKind.coerce),
+        AttributeMeta(
+            "Kind", AttributeGroup.OVERVIEW, 10, AttributeFormat.ENUM, prominent=True
+        ),
+    ] = RequirementKind.CARRIED
+    amount: Annotated[
+        int,
+        AttributeMeta("Amount", AttributeGroup.AMOUNT, 20, AttributeFormat.INT),
+    ] = Field(default=1, ge=1)
+    optional: Annotated[
+        bool,
+        AttributeMeta("Optional", AttributeGroup.OVERVIEW, 30, AttributeFormat.BOOL),
+    ] = False
+
+
+class AssignsEdgeAttributes(BaseModel):
+    """How often a master hands out one task, and how many kills it asks for."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    weight: Annotated[
+        int,
+        AttributeMeta(
+            "Weight", AttributeGroup.SLAYER, 10, AttributeFormat.INT, prominent=True
+        ),
+    ] = Field(ge=1)
+    min_amount: Annotated[
+        int | None,
+        AttributeMeta("Fewest kills", AttributeGroup.AMOUNT, 20, AttributeFormat.INT),
+    ] = Field(default=None, ge=1)
+    max_amount: Annotated[
+        int | None,
+        AttributeMeta("Most kills", AttributeGroup.AMOUNT, 30, AttributeFormat.INT),
+    ] = Field(default=None, ge=1)
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        pair = (self.min_amount, self.max_amount)
+        if None not in pair and self.max_amount < self.min_amount:  # type: ignore[operator]
+            raise ValueError("max_amount must not be below min_amount")
+        return self
+
+
+class SatisfiedByEdgeAttributes(BaseModel):
+    """Nothing. Counting towards the task is the whole fact."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+
 EdgeAttributes = (
     DropEdgeAttributes
     | SellEdgeAttributes
@@ -222,6 +399,11 @@ EdgeAttributes = (
     | AmmunitionEdgeAttributes
     | LocatedInEdgeAttributes
     | PartOfEdgeAttributes
+    | YieldsEdgeAttributes
+    | MakesEdgeAttributes
+    | RequiresEdgeAttributes
+    | AssignsEdgeAttributes
+    | SatisfiedByEdgeAttributes
 )
 
 EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = {
@@ -232,6 +414,11 @@ EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = 
     RelationshipType.USES_AMMUNITION: AmmunitionEdgeAttributes,
     RelationshipType.LOCATED_IN: LocatedInEdgeAttributes,
     RelationshipType.PART_OF: PartOfEdgeAttributes,
+    RelationshipType.YIELDS: YieldsEdgeAttributes,
+    RelationshipType.MAKES: MakesEdgeAttributes,
+    RelationshipType.REQUIRES: RequiresEdgeAttributes,
+    RelationshipType.ASSIGNS: AssignsEdgeAttributes,
+    RelationshipType.SATISFIED_BY: SatisfiedByEdgeAttributes,
 }
 
 
@@ -323,7 +510,15 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         RelationshipType.LOCATED_IN,
         "Found in",
         "Found here",
-        frozenset({EntityType.NPC, EntityType.SHOP, EntityType.ITEM, EntityType.QUEST}),
+        frozenset(
+            {
+                EntityType.NPC,
+                EntityType.SHOP,
+                EntityType.ITEM,
+                EntityType.QUEST,
+                EntityType.SCENERY,
+            }
+        ),
         frozenset({EntityType.LOCATION}),
         RelationshipGroup.MAP,
         60,
@@ -337,6 +532,51 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         RelationshipGroup.MAP,
         70,
     ),
+    RelationshipType.YIELDS: _spec(
+        RelationshipType.YIELDS,
+        "Yields",
+        "Gathered from",
+        frozenset({EntityType.SCENERY, EntityType.NPC}),
+        frozenset({EntityType.ITEM}),
+        RelationshipGroup.SKILL,
+        80,
+    ),
+    RelationshipType.MAKES: _spec(
+        RelationshipType.MAKES,
+        "Makes",
+        "Made from",
+        frozenset({EntityType.ITEM}),
+        frozenset({EntityType.ITEM}),
+        RelationshipGroup.SKILL,
+        90,
+    ),
+    RelationshipType.REQUIRES: _spec(
+        RelationshipType.REQUIRES,
+        "Requires",
+        "Needed for",
+        frozenset({EntityType.QUEST}),
+        frozenset({EntityType.ITEM, EntityType.QUEST}),
+        RelationshipGroup.PREREQUISITES,
+        100,
+    ),
+    RelationshipType.ASSIGNS: _spec(
+        RelationshipType.ASSIGNS,
+        "Assigns",
+        "Assigned by",
+        frozenset({EntityType.NPC}),
+        frozenset({EntityType.TASK}),
+        RelationshipGroup.SLAYER,
+        110,
+    ),
+    RelationshipType.SATISFIED_BY: _spec(
+        RelationshipType.SATISFIED_BY,
+        "Satisfied by",
+        "Counts towards",
+        frozenset({EntityType.TASK}),
+        frozenset({EntityType.NPC}),
+        RelationshipGroup.SLAYER,
+        120,
+    ),
 }
 
 
@@ -348,6 +588,10 @@ def discriminator_of(attributes: EdgeAttributes) -> str:
         return "" if attributes.at is None else str(attributes.at)
     if isinstance(attributes, DropEdgeAttributes):
         return attributes.table_kind.value
+    if isinstance(attributes, RequiresEdgeAttributes):
+        return attributes.kind.value
+    if isinstance(attributes, YieldsEdgeAttributes):
+        return "" if attributes.tool is None else str(attributes.tool)
     return ""
 
 
@@ -710,3 +954,60 @@ def test_a_location_cannot_be_part_of_itself() -> None:
             attributes=PartOfEdgeAttributes(),
             provenance=_provenance(),
         )
+
+
+def test_working_a_thing_in_the_world_says_what_it_takes_and_gives() -> None:
+    edge = Edge(
+        src=EntityKey(type=EntityType.SCENERY, id=2090),
+        rel=RelationshipType.YIELDS,
+        dst=EntityKey(type=EntityType.ITEM, id=436),
+        attributes=YieldsEdgeAttributes(
+            skill=Skill.MINING,
+            level=1,
+            experience=17.5,
+            respawn_min=50,
+            respawn_max=100,
+        ),
+        provenance=_provenance(),
+    )
+    assert edge.spec.forward_label == "Yields"
+    assert edge.spec.inverse_label == "Gathered from"
+
+
+def test_only_a_thing_in_the_world_gives_something_up() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        Edge(
+            src=EntityKey(type=EntityType.ITEM, id=2090),
+            rel=RelationshipType.YIELDS,
+            dst=EntityKey(type=EntityType.ITEM, id=436),
+            attributes=YieldsEdgeAttributes(skill=Skill.MINING),
+            provenance=_provenance(),
+        )
+
+
+def test_a_respawn_that_ends_before_it_starts_is_rejected() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        YieldsEdgeAttributes(skill=Skill.MINING, respawn_min=100, respawn_max=50)
+
+
+def test_turning_one_item_into_another_reads_both_ways() -> None:
+    edge = Edge(
+        src=EntityKey(type=EntityType.ITEM, id=2138),
+        rel=RelationshipType.MAKES,
+        dst=EntityKey(type=EntityType.ITEM, id=2140),
+        attributes=MakesEdgeAttributes(skill=Skill.COOKING, level=1, experience=30.0),
+        provenance=_provenance(),
+    )
+    assert edge.spec.forward_label == "Makes"
+    assert edge.spec.inverse_label == "Made from"
+
+
+def test_a_level_no_player_can_reach_is_refused() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        MakesEdgeAttributes(skill=Skill.COOKING, level=120)

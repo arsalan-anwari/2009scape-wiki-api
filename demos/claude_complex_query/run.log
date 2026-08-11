@@ -1,0 +1,641 @@
+  the wiki is answering at http://127.0.0.1:53403/mcp/, reading data/knowledge.sqlite3
+  presenting the key issued to demos, id Ls92_OtPBpbROwJObn6T-Q
+  it offers 30 tools, and this sweep puts 28 questions
+
+==============================================================================
+  manifest: the written surface: what this build is and what sorts it holds
+  asked: What is this wiki built from, and what sorts of thing does it know about? Give me the data version and the two largest sorts by count.
+    called about({})
+    called list_sorts({})
+
+  said: This wiki is built from the 2009scape server data (game version `2009scape@91bb6be1`), data version **2026.08.11.184602**, built 2026-08-11, schema version 8.
+
+It knows about eight sorts of thing: items, NPCs, shops, quests, locations, scenery objects, slayer tasks and house rooms. The two largest by count are **scenery objects (9,139)** and **items (8,578)** — NPCs come third at 7,995.
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 2 different ways
+    WORKED  the answer carries 'item'
+
+==============================================================================
+  browse_rooms: listing a whole sort, and construction room attributes
+  asked: List the construction rooms this game has and tell me which is the most expensive to build, with its cost and the Construction level it needs.
+    called list_things({'type': 'room', 'limit': 50})
+    called compare_by_number({'type': 'room', 'ordered_by': 'cost', 'descending': True, 'limit': 5})
+    called compare_by_number({'type': 'room', 'ordered_by': 'cost', 'descending': True})
+    called compare_by_number({'type': 'room', 'ordered_by': 'Build cost', 'descending': True})
+    called get_thing({'name': 'Treasure room', 'type': 'room'})
+
+  said: The wiki lists 27 rooms: Parlour, Garden, Kitchen, Dining room, Workshop, Bedroom, Skill hall, Skill hall 2, Games room, Combat room, Quest hall, Quest hall 2, Study room, Costume room, Chapel, Portal chamber, Formal garden, Throne room, Oubilette, Dungeon corridor, Dungeon junction, Dungeon stairs, Dungeon pit, Treasure room, and the Roof 2/3/4 exits.
+
+The most expensive is the **Treasure room** at **250,000 coins**, requiring **Construction level 75**. Next are the Oubilette and Throne room at 150,000 each, then the Portal chamber at 100,000.
+
+  what happened:
+    WORKED  it read the wiki 5 time(s)
+    WORKED  it read the wiki 3 different ways
+    WORKED  the answer carries 'Treasure room'
+
+==============================================================================
+  item_value: item attributes: market price, price confidence and equipment bonuses
+  asked: How much is Statius's warhammer worth on the market, how much can I trust that price, and what does it do for my strength?
+    called get_thing({'name': "Statius's warhammer", 'type': 'item'})
+    called how_the_price_moved({'name': "Statius's warhammer"})
+    called compare_by_number({'type': 'item', 'holds': 'strength bonus', 'how': 'at_least', 'number': 100})
+    called compare_by_number({'type': 'item', 'holds': 'strength bonus', 'how': 'at_least', 'number': 100, 'offset': 10})
+
+  said: Statius's warhammer (id 13902) sits at **6,893,037 gp**, and that figure is well-founded: the price record is marked "traded" with 113 readings from 2024-06-08 to 2026-08-01, ranging between 6,200,000 and 6,973,417, and it has drifted up 353,037 gp (+5.4%) over that span. For strength it gives a **+114 strength bonus** — note it's a weapon-slot item that degrades in combat and turns to dust. (The deg and corrupt variants also list +114, if you meant one of those instead.)
+
+  what happened:
+    WORKED  it read the wiki 4 time(s)
+    WORKED  it read the wiki 3 different ways
+    WORKED  the answer carries 'traded'
+
+==============================================================================
+  npc_stats: npc combat attributes, and a name eighteen things answer to
+  asked: How dangerous is a Tormented demon? Give me its combat stats.
+
+  the model asks: The wiki has six separate NPC entries called "Tormented demon" (they're the different combat-style forms). Which one do you want the stats for?
+    - Tormented demon (npc:8349) — combat style: magic, 326 lifepoints
+    - Tormented demon (npc:8350)
+    - Tormented demon (npc:8351)
+    - Tormented demon (npc:8352)
+    - Tormented demon (npc:8353)
+    - Tormented demon (npc:8354)
+  your answer: the strongest one you have   (given rather than typed)
+    called get_thing({'name': 'Tormented demon', 'type': 'npc'})
+    called ask_to_choose({'question': 'The wiki has six separate NPC entries called "Tormented demon" (they\'re the different combat-style forms). Which one do you want the stats for?', 'options': ['Tormented demon (npc:8349) — combat style: magic, 326 lifepoints', 'Tormented demon (npc:8350)', 'Tormented demon (npc:8351)', 'Tormented demon (npc:8352)', 'Tormented demon (npc:8353)', 'Tormented demon (npc:8354)']})
+    called get_thing({'name': 'npc:8350', 'type': 'npc'})
+    called get_thing({'name': 'npc:8351', 'type': 'npc'})
+    called get_thing({'name': 'npc:8352', 'type': 'npc'})
+    called get_thing({'name': 'npc:8353', 'type': 'npc'})
+    called get_thing({'name': 'npc:8354', 'type': 'npc'})
+
+  said: All six entries are identical in what the wiki records, so there's no "strongest" one to pick: each Tormented demon (npc:8349–8354) has **326 lifepoints** and is **aggressive**; 8349–8351 use a magic combat style and 8352–8354 use ranged. Beyond that, this build holds no combat level, attack/strength/defence levels or max hit for them — only those three facts plus a 33-item drop list. If you want, I can pull the full drop table.
+
+  what happened:
+    WORKED  it read the wiki 6 time(s)
+    WORKED  it read the wiki 1 different ways
+    WORKED  it turned back to ask: ask_to_choose
+    WORKED  the answer carries '326'
+
+==============================================================================
+  scenery_use: scenery as an entity type, with the options the game gives it
+  asked: What can I do with a Bank booth, and how many are in the world?
+
+  the model asks: The wiki holds several different scenery objects all called "Bank booth". Which one do you mean?
+    - Bank booth (id 2213) — "The bank teller will serve you from here.", 16 standing in the world, found in Fishing Guild, Keep Le Faye, Tree Gnome Stronghold and 1 more
+    - Bank booth (id 14367)
+    - Bank booth (id 14368)
+    - Bank booth (id 16700)
+    - Bank booth (id 22819)
+    - Bank booth (id 24914)
+  your answer: whichever has the most placements   (given rather than typed)
+    called get_thing({'name': 'Bank booth', 'type': 'scenery'})
+    called ask_to_choose({'question': 'The wiki holds several different scenery objects all called "Bank booth". Which one do you mean?', 'options': ['Bank booth (id 2213) — "The bank teller will serve you from here.", 16 standing in the world, found in Fishing Guild, Keep Le Faye, Tree Gnome Stronghold and 1 more', 'Bank booth (id 14367)', 'Bank booth (id 14368)', 'Bank booth (id 16700)', 'Bank booth (id 22819)', 'Bank booth (id 24914)']})
+    called get_thing({'name': 'scenery:14367', 'type': 'scenery'})
+    called get_thing({'name': 'scenery:14368', 'type': 'scenery'})
+    called get_thing({'name': 'scenery:16700', 'type': 'scenery'})
+    called get_thing({'name': 'scenery:22819', 'type': 'scenery'})
+    called get_thing({'name': 'scenery:24914', 'type': 'scenery'})
+
+  said: The one with the most placements is **Bank booth (id 2213)**, with **16 standing in the world** — ahead of ids 22819 and 24914 (6 each), 14367 (4), 16700 (3) and 14368 (1).
+
+It's described as "The bank teller will serve you from here," and offers three actions: **Use**, **Use-quickly** and **Collect**. It's recorded in 4 locations, including the Fishing Guild, Keep Le Faye and the Tree Gnome Stronghold — say the word if you'd like the fourth.
+
+  what happened:
+    WORKED  it read the wiki 6 time(s)
+    WORKED  it read the wiki 1 different ways
+    UNSURE  it asked when it did not have to: ask_to_choose
+    WORKED  the answer carries 'Collect'
+
+==============================================================================
+  quest_detail: quest attributes authored by hand, and what a quest asks you to bring
+  asked: How hard is Desert Treasure, how long does it take, what series is it part of, which skills does it want, and what must I bring with me?
+    called get_thing({'name': 'Desert Treasure', 'type': 'quest'})
+    called requires({'name': 'Desert Treasure'})
+
+  said: Here's what the wiki holds for **Desert Treasure** (quest #32, members only):
+
+- **Difficulty:** master
+- **Length:** long
+- **Quest points awarded:** 3
+- **Prerequisite quests (6):** The Dig Site, The Tourist Trap, Temple of Ikov, Priest in Peril, Waterfall Quest, Troll Stronghold — all must be completed.
+
+The entry records no quest series, no skill requirements, and no required or recommended items to bring, so I can't tell you those — that data simply isn't in this build.
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 2 different ways
+    WORKED  the answer carries 'master'
+    UNSURE  the answer never mentions 'Mahjarrat'
+
+==============================================================================
+  slayer_task: the task entity type and the advice it carries
+  asked: What Slayer level do I need before I can be sent after Skeletal wyverns, and what does the game warn me about them?
+    called get_thing({'name': 'Skeletal wyvern'})
+    called get_thing({'name': 'task:75', 'type': 'task'})
+    called get_thing({'name': 'npc:3068', 'type': 'npc'})
+
+  said: You need **Slayer level 72** (and combat level 70) before Duradel — the only master listed as assigning them — will send you after Skeletal wyverns.
+
+As for the warning, the wiki's only cautionary text is the examine description: *"A very dangerous pile of animated Wyvern bones."* They're also flagged as aggressive, with 200 lifepoints. The build holds no note about needing a protective shield or similar.
+
+  what happened:
+    WORKED  it read the wiki 3 time(s)
+    WORKED  it read the wiki 1 different ways
+    WORKED  the answer carries '72'
+
+==============================================================================
+  shop_currency: a pointer attribute resolving to a named thing rather than an id
+  asked: What does Tzhaar-mej-roh's Rune Store take as payment?
+    called search({'words': 'Tzhaar-mej-roh Rune Store'})
+    called get_thing({'name': "Tzhaar-mej-roh's Rune Store", 'type': 'shop'})
+
+  said: Tzhaar-mej-roh's Rune Store trades in **Tokkul** rather than coins. It's not a general store, stocks 8 items (Fire, Water, Earth runes among them), and is staffed by TzHaar-Mej-Roh.
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 2 different ways
+    WORKED  the answer carries 'Tokkul'
+
+==============================================================================
+  place_hierarchy: locations, their tiles, and the part_of / contains pair
+  asked: Where is Draynor Manor on the map, what larger place is it part of, and what does Burthorpe contain?
+    called get_thing({'name': 'Draynor Manor', 'type': 'location'})
+    called get_thing({'name': 'Burthorpe', 'type': 'location'})
+
+  said: **Draynor Manor** is described as "the haunted manor north of Draynor Village," and it's recorded as a building that is **part of Draynor Village** (its only parent location). The wiki entry doesn't hold map coordinates for it, just that description; it also lists 159 things found there.
+
+**Burthorpe** is a town on the edge of the troll lands, and it contains exactly one sub-location: the **Heroes' Guild**. (It also has 192 things listed as found there, if you want those.)
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    UNSURE  it read the wiki 1 ways, and this asks for 3
+    WORKED  the answer carries 'Draynor Village'
+    WORKED  the answer carries "Heroes' Guild"
+
+==============================================================================
+  drops_paged: a drop table too long for one answer, so the reader is asked first
+  asked: What does the King Black Dragon drop? There are a lot, so show me the first few and check with me before reading the rest.
+
+  the model asks: That's the first 10 of the King Black Dragon's 34 drops. Shall I read out the remaining 24?
+    shown 10 of 34
+  your answer: yes, show me the rest   (given rather than typed)
+    called drops({'name': 'King Black Dragon'})
+    called ask_for_more({'question': "That's the first 10 of the King Black Dragon's 34 drops. Shall I read out the remaining 24?", 'shown': 10, 'total': 34})
+    called drops({'name': 'King Black Dragon', 'offset': 10})
+    called drops({'name': 'King Black Dragon', 'offset': 20})
+    called drops({'name': 'King Black Dragon', 'offset': 30})
+
+  said: Here are the remaining 24 drops:
+
+**1/20:** Rune longsword, Mithril 2h sword, Adamant 2h sword, Adamant axe, Mithril battleaxe, Amulet of strength, Rune bolts
+**Charms:** Gold charm 1/22, Green charm 1/24, Blue charm 1/72
+**1/41:** Shark, Oyster, Iron ore, Death rune, Law rune, Blood rune, Iron arrow, Yew logs, Adamantite bar, Runite limbs
+**Rarer:** RDT Slot 1/102, Granite lobster pouch 1/102, Kbd heads 1/128, Draconic visage 1/5000
+
+That's all 34 entries.
+
+  what happened:
+    WORKED  it read the wiki 4 time(s)
+    WORKED  it read the wiki 1 different ways
+    WORKED  it turned back to ask: ask_for_more
+    UNSURE  the answer never mentions 'Dragon bones'
+
+==============================================================================
+  who_drops_it: following a link backwards, from an item to everything that drops it
+  asked: Which monsters drop Dragon bones?
+
+  the model asks: 33 NPCs drop Dragon bones. I've shown the first 10 — shall I list the remaining 23?
+    shown 10 of 33
+  your answer:     called dropped_by({'name': 'Dragon bones'})
+    called ask_for_more({'question': "33 NPCs drop Dragon bones. I've shown the first 10 — shall I list the remaining 23?", 'shown': 10, 'total': 33})
+    called dropped_by({'name': 'Dragon bones', 'offset': 10})
+    called dropped_by({'name': 'Dragon bones', 'offset': 20})
+    called dropped_by({'name': 'Dragon bones', 'offset': 30})
+
+  said: 33 NPC entries drop Dragon bones (many are duplicate IDs of the same monster):
+
+- **Always (1/1):** King Black Dragon (2 IDs), Red dragon (5), Black dragon (5), Blue dragon (6), Green dragon (5), Bronze dragon, Iron dragon, Steel dragon (2), Brutal green dragon, Mithril dragon
+- **1/20:** Dragon impling (2 IDs)
+- **1/128:** Jogre (2 IDs)
+
+  what happened:
+    WORKED  it read the wiki 4 time(s)
+    WORKED  it read the wiki 1 different ways
+    UNSURE  it asked when it did not have to: ask_for_more
+    WORKED  the answer carries 'dragon'
+
+==============================================================================
+  what_wants_it: the requires / needed_for pair, which the quest overlays feed
+  asked: Which quest wants me to bring an Iron chainbody, and what else does that quest ask for?
+    called needed_for({'name': 'Iron chainbody'})
+    called requires({'name': "Black Knights' Fortress"})
+
+  said: The quest is **Black Knights' Fortress**. Besides the Iron chainbody, it asks you to carry a **Bronze med helm** and a **Cabbage** — three required items in all.
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 2 different ways
+    WORKED  the answer carries 'Black Knights'
+
+==============================================================================
+  shop_lines: shops from both ends, with price and who stands behind the counter
+  asked: Where can I buy Iron arrowtips and for how much, and who runs the shop you find them in?
+    called sold_in({'name': 'Iron arrowtips'})
+    called staffed_by({'name': "Dargaud's Bows And Arrows"})
+    called staffed_by({'name': "Ava's Odds and Ends"})
+    called staffed_by({'name': 'Void Knight Archery Store'})
+
+  said: Iron arrowtips are stocked in three shops, all at the same price of **26 coins**:
+
+- **Dargaud's Bows And Arrows** — stock 300, run by the **Bow and Arrow salesman**
+- **Void Knight Archery Store** — stock 100, run by a **Squire**
+- **Ava's Odds and Ends** — stock 30, staffed by **Ava** and a **Witch**
+
+  what happened:
+    WORKED  it read the wiki 4 time(s)
+    WORKED  it read the wiki 2 different ways
+    WORKED  the answer carries 'Ava'
+
+==============================================================================
+  slayer_chain: assigns / assigned_by and satisfied_by, the two slayer links
+  asked: Which Slayer masters can assign Aberrant spectres, and what creatures count towards a Steel dragons task?
+    called assigned_by({'name': 'Aberrant spectres'})
+    called satisfied_by({'name': 'Steel dragons'})
+
+  said: Aberrant spectres can be assigned by three Slayer masters: Duradel (weight 7), Vannaka (weight 8) and Chaeldar (weight 8).
+
+A Steel dragons task is satisfied by two NPCs, both called "Steel dragon" (NPC ids 1592 and 3590) — no other creatures count towards it.
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 2 different ways
+    WORKED  the answer carries 'Vannaka'
+    WORKED  the answer carries 'Steel dragon'
+
+==============================================================================
+  skilling: yields and makes: gathering a resource and turning it into something
+  asked: What can I catch at a fishing spot and at what levels, and what do raw shrimps turn into when I cook them?
+
+  the model asks: The wiki lists many separate NPCs all called "Fishing spot", each catching different fish — which one do you mean? (I'll answer the raw shrimps cooking part regardless.)
+    - Fishing spot (npc:309) — rod/bait spot in the Fishing Guild, Combat Training Camp etc.: raw trout, pike, salmon +1 more
+    - Fishing spot (npc:310) — Baxtorian Falls: raw trout, pike, salmon +1 more
+    - Fishing spot (npc:311) — raw trout, pike, salmon +1 more
+    - Fishing spot (npc:312) — Catherby/Jatizso cage-harpoon spot: raw tuna, lobster, swordfish
+    - Fishing spot (npc:313) — Catherby net spot: raw mackerel, seaweed, raw cod +2 more
+    - Fishing spot (npc:314) — raw trout, pike, salmon +1 more
+    - Fishing spot (npc:315) — raw trout, pike, salmon +1 more
+    - Fishing spot (npc:234/235/236) — the wiki records nothing at all for these
+    - Something else — there are more spots further down the list
+  your answer:     called search({'words': 'fishing spot'})
+    called makes({'name': 'Raw shrimps'})
+    called get_thing({'name': 'npc:234', 'type': 'npc'})
+    called get_thing({'name': 'npc:309', 'type': 'npc'})
+    called get_thing({'name': 'npc:235', 'type': 'npc'})
+    called get_thing({'name': 'npc:310', 'type': 'npc'})
+    called get_thing({'name': 'npc:312', 'type': 'npc'})
+    called get_thing({'name': 'npc:313', 'type': 'npc'})
+    called get_thing({'name': 'npc:311', 'type': 'npc'})
+    called get_thing({'name': 'npc:314', 'type': 'npc'})
+    called get_thing({'name': 'npc:315', 'type': 'npc'})
+    called ask_to_choose({'question': 'The wiki lists many separate NPCs all called "Fishing spot", each catching different fish — which one do you mean? (I\'ll answer the raw shrimps cooking part regardless.)', 'options': ['Fishing spot (npc:309) — rod/bait spot in the Fishing Guild, Combat Training Camp etc.: raw trout, pike, salmon +1 more', 'Fishing spot (npc:310) — Baxtorian Falls: raw trout, pike, salmon +1 more', 'Fishing spot (npc:311) — raw trout, pike, salmon +1 more', 'Fishing spot (npc:312) — Catherby/Jatizso cage-harpoon spot: raw tuna, lobster, swordfish', 'Fishing spot (npc:313) — Catherby net spot: raw mackerel, seaweed, raw cod +2 more', 'Fishing spot (npc:314) — raw trout, pike, salmon +1 more', 'Fishing spot (npc:315) — raw trout, pike, salmon +1 more', 'Fishing spot (npc:234/235/236) — the wiki records nothing at all for these', 'Something else — there are more spots further down the list']})
+    called yields({'name': 'npc:309'})
+
+  said: At that fishing spot (npc:309, found in the Fishing Guild, Combat Training Camp and 20 other places) you can catch four things:
+
+- **Raw trout** — level 20 Fishing, 50 xp, fly fishing rod
+- **Raw pike** — level 25 Fishing, 60 xp, fishing rod
+- **Raw salmon** — level 30 Fishing, 70 xp, fly fishing rod
+- **Raw rainbow fish** — level 38 Fishing, 80 xp, fly fishing rod
+
+Raw shrimps cook into **Shrimps** at level 1 Cooking for 30 experience.
+
+  what happened:
+    WORKED  it read the wiki 12 time(s)
+    WORKED  it read the wiki 4 different ways
+    UNSURE  it asked when it did not have to: ask_to_choose
+    WORKED  the answer carries 'Shrimps'
+
+==============================================================================
+  ammunition: the uses_ammunition pair, followed both ways between two items
+  asked: What ammunition does a Phoenix crossbow take, and which other weapons fire Bronze bolts?
+
+  the model asks: The "Used by" list for Bronze bolts has 14 weapons; I've read the first 10 (Phoenix crossbow, Crossbow, Bronze/Blurite/Iron/Steel/Mith/Adamant/Rune crossbows, Phoenix crossbow again). Shall I fetch the remaining 4?
+    shown 10 of 14
+  your answer:     called uses_ammunition({'name': 'Phoenix crossbow'})
+    called used_by({'name': 'Bronze bolts'})
+    called ask_for_more({'question': 'The "Used by" list for Bronze bolts has 14 weapons; I\'ve read the first 10 (Phoenix crossbow, Crossbow, Bronze/Blurite/Iron/Steel/Mith/Adamant/Rune crossbows, Phoenix crossbow again). Shall I fetch the remaining 4?', 'shown': 10, 'total': 14})
+
+  said: **Phoenix crossbow** takes 6 ammunition types: Bronze bolts, Bronze bolts(p), Bronze bolts(p+), Bronze bolts(p++), Opal bolts and Opal bolts (e). (Note the wiki holds three separate "Phoenix crossbow" items — ids 767, 11165 and 11167 — so tell me if you need a specific one.)
+
+**Bronze bolts** are used by 14 weapons; the first 10 are: Phoenix crossbow (767), Crossbow, Bronze crossbow, Blurite crossbow, Iron crossbow, Steel crossbow, Mith crossbow, Adamant crossbow, Rune crossbow, and Phoenix crossbow (11165). The remaining 4 I haven't read, as you asked me to stop.
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 2 different ways
+    UNSURE  it asked when it did not have to: ask_for_more
+    WORKED  the answer carries 'bolts'
+
+==============================================================================
+  spawns: located_in both ways: what lies in a place, and where a thing lies
+  asked: What items lie on the ground in the Clocktower, and whereabouts does a White cog spawn?
+
+  the model asks: The Clocktower's "found here" list has 195 entries and I've read the first 90 — all scenery so far (trees, crates, clock spindles, etc.), no ground items yet. The White cog part is already answered. Shall I keep paging through the remaining 105 entries to pull out the items?
+    shown 90 of 195
+  your answer:     called get_thing({'name': 'Clocktower', 'type': 'location'})
+    called get_thing({'name': 'White cog', 'type': 'item'})
+    called found_in({'name': 'White cog'})
+    called found_here({'name': 'Clocktower'})
+    called found_here({'name': 'Clocktower', 'offset': 10})
+    called found_here({'name': 'Clocktower', 'offset': 20})
+    called found_here({'name': 'Clocktower', 'offset': 30})
+    called found_here({'name': 'Clocktower', 'offset': 40})
+    called found_here({'name': 'Clocktower', 'offset': 50})
+    called found_here({'name': 'Clocktower', 'offset': 60})
+    called found_here({'name': 'Clocktower', 'offset': 70})
+    called found_here({'name': 'Clocktower', 'offset': 80})
+    called ask_for_more({'question': 'The Clocktower\'s "found here" list has 195 entries and I\'ve read the first 90 — all scenery so far (trees, crates, clock spindles, etc.), no ground items yet. The White cog part is already answered. Shall I keep paging through the remaining 105 entries to pull out the items?', 'shown': 90, 'total': 195})
+
+  said: **White cog:** it spawns in the Clocktower at **x 2577, y 9655, plane 0** (the wiki lists Clocktower as its only location; it's described as "A cog from some machinery," weight 1 kg).
+
+**Ground items in the Clocktower:** I can't give a full list — the location's "found here" listing has 195 entries, and the 90 I read before you told me to stop were all scenery (trees, crates, clock spindles, shelves, sewer valves and so on), with no ground items among them. The remaining 105 entries are unchecked, so any item spawns beyond the White cog would be in there.
+
+  what happened:
+    WORKED  it read the wiki 12 time(s)
+    WORKED  it read the wiki 3 different ways
+    UNSURE  it asked when it did not have to: ask_for_more
+    WORKED  the answer carries 'cog'
+
+==============================================================================
+  reverse_skilling: gathered_from and made_from, the two skilling links read backwards
+  asked: Where do Raw salmon come from, and what are Shrimps made from and with which skill?
+
+  the model asks: Raw salmon is gathered from Fishing spot NPCs — I've read 10 of the 16 listed, all identical so far (Fishing, level 30, 70 xp, Fly fishing rod). Shall I read the remaining 6?
+    shown 10 of 16
+  your answer:     called gathered_from({'name': 'Raw salmon'})
+    called made_from({'name': 'Shrimps'})
+    called ask_for_more({'question': "Raw salmon is gathered from Fishing spot NPCs — I've read 10 of the 16 listed, all identical so far (Fishing, level 30, 70 xp, Fly fishing rod). Shall I read the remaining 6?", 'shown': 10, 'total': 16})
+    called gathered_from({'name': 'Raw salmon', 'offset': 10})
+
+  said: **Raw salmon** — from 16 sources: 15 different Fishing spot NPCs (Fishing level 30, 70 xp, using a Fly fishing rod), plus the Fish stall scenery, which can be stolen from at Thieving level 42 for 42 xp.
+
+**Shrimps** — cooked from Raw shrimps with the Cooking skill, level 1, giving 30 xp. (Note there are two items called "Raw shrimps"; the recipe listed is item 317.)
+
+  what happened:
+    WORKED  it read the wiki 3 time(s)
+    WORKED  it read the wiki 2 different ways
+    UNSURE  it asked when it did not have to: ask_for_more
+    WORKED  the answer carries 'cooking'
+
+==============================================================================
+  shop_from_npc: runs_shop and sells, a shop reached from the person behind the counter
+  asked: Which shop does Ava run, and what does it stock?
+    called search({'words': 'Ava', 'type': 'npc'})
+    called runs_shop({'name': 'npc:5198'})
+    called sells({'name': 'shop:1'})
+
+  said: Ava (NPC 5198) runs **Ava's Odds and Ends**, which stocks 5 items:
+
+- **Feather** — stock 1000, price 6
+- **Iron arrow** — stock 40, price 20
+- **Steel arrow** — stock 10, price 46
+- **Iron arrowtips** — stock 30, price 26
+- **Steel arrowtips** — stock 20, price 36
+
+  what happened:
+    WORKED  it read the wiki 3 time(s)
+    WORKED  it read the wiki 3 different ways
+    WORKED  the answer carries 'arrowtips'
+
+==============================================================================
+  master_tasks: assigns and counts_towards, the slayer links read the other way
+  asked: What can Vannaka send me after, and which Slayer tasks does killing a Steel dragon count towards?
+
+  the model asks: Vannaka (the Slayer master, NPC 1597 — the other Vannaka entry, 1596, just runs the Slayer Equipment shop) has 43 assignable tasks. The first 10 by weight are: Banshee (6), Crawling hand (6), Crocodiles (6), Earth warriors (6), Green dragons (6), Ankou (7), Blue dragons (7), Brine rats (7), Cave bug (7), Cave crawlers (7). Shall I list the remaining 33?
+    shown 10 of 43
+  your answer:     called assigns({'name': 'Vannaka'})
+    called counts_towards({'name': 'Steel dragon'})
+    called get_thing({'name': 'Vannaka', 'type': 'npc'})
+    called assigns({'name': 'npc:1597'})
+    called ask_for_more({'question': 'Vannaka (the Slayer master, NPC 1597 — the other Vannaka entry, 1596, just runs the Slayer Equipment shop) has 43 assignable tasks. The first 10 by weight are: Banshee (6), Crawling hand (6), Crocodiles (6), Earth warriors (6), Green dragons (6), Ankou (7), Blue dragons (7), Brine rats (7), Cave bug (7), Cave crawlers (7). Shall I list the remaining 33?', 'shown': 10, 'total': 43})
+    called assigns({'name': 'npc:1597', 'offset': 10})
+    called assigns({'name': 'npc:1597', 'offset': 20})
+    called assigns({'name': 'npc:1597', 'offset': 30})
+    called assigns({'name': 'npc:1597', 'offset': 40})
+
+  said: **Vannaka (NPC 1597) assigns 43 tasks**, by weight:
+
+- **Weight 6:** Banshee, Crawling hand, Crocodiles, Earth warriors, Green dragons
+- **Weight 7:** Ankou, Blue dragons, Brine rats, Cave bug, Cave crawlers, Cave slimes, Dagannoths, Desert lizards, Elves, Fire giants, Ghouls, Hellhounds, Hill giants, Ice giants, Ice warrior, Kalphites, Kurasks, Lesser demons, Mogres, Moss giants, Ogres, Rock slugs, Trolls, Vampires, Werewolves
+- **Weight 8:** Aberrant spectres, Basilisks, Bloodvelds, Cockatrices, Dust devils, Harpie bug swarms, Infernal mages, Jellies, Jungle horrors, Otherwordly being, Pyrefiends, Shade, Turoths
+
+(The other Vannaka entry, NPC 1596, assigns nothing — it only runs the Slayer Equipment shop.)
+
+**Steel dragon** counts towards exactly one task: **Steel dragons** — which is not on Vannaka's list.
+
+  what happened:
+    WORKED  it read the wiki 8 time(s)
+    WORKED  it read the wiki 3 different ways
+    UNSURE  it asked when it did not have to: ask_for_more
+    WORKED  the answer carries 'Steel dragon'
+
+==============================================================================
+  search_words: full text search over names and descriptions, rather than a lookup
+  asked: Search this wiki for anything with 'dragonfire' in it and tell me how many there are.
+    called search({'words': 'dragonfire'})
+
+  said: There are **2** results with "dragonfire" in the name — both are items called **Dragonfire shield** (ids 11283 and 11284), each described as "A heavy shield with a snarling, draconic visage." (These are the charged/uncharged variants sharing a name.)
+
+  what happened:
+    WORKED  it read the wiki 1 time(s)
+    WORKED  it read the wiki 1 different ways
+
+==============================================================================
+  multi_hop: three links in a row, which no single tool answers
+  asked: I want a Slayer task that will earn me dragon bones. Work out which creatures drop them, which of those are a Slayer task, and which master hands that task out.
+
+  the model asks: Dragon bones are dropped by 33 different NPCs. I've seen the first 10 (King Black Dragon x2, red/black/blue/green dragons, bronze/iron/steel dragons). Shall I pull the remaining 23 so the answer covers every dropper, or is it enough to work from the common dragons?
+    shown 10 of 33
+  your answer:     called dropped_by({'name': 'Dragon bones'})
+    called ask_for_more({'question': "Dragon bones are dropped by 33 different NPCs. I've seen the first 10 (King Black Dragon x2, red/black/blue/green dragons, bronze/iron/steel dragons). Shall I pull the remaining 23 so the answer covers every dropper, or is it enough to work from the common dragons?", 'shown': 10, 'total': 33})
+    called dropped_by({'name': 'Dragon bones', 'offset': 10})
+    called dropped_by({'name': 'Dragon bones', 'offset': 20})
+    called dropped_by({'name': 'Dragon bones', 'offset': 30})
+    called counts_towards({'name': 'npc:53'})
+    called counts_towards({'name': 'npc:54'})
+    called counts_towards({'name': 'npc:55'})
+    called counts_towards({'name': 'npc:941'})
+    called counts_towards({'name': 'npc:1590'})
+    called counts_towards({'name': 'npc:1591'})
+    called counts_towards({'name': 'npc:1592'})
+    called counts_towards({'name': 'npc:50'})
+    called counts_towards({'name': 'npc:5362'})
+    called counts_towards({'name': 'npc:5363'})
+    called counts_towards({'name': 'npc:113'})
+    called counts_towards({'name': 'npc:6054'})
+    called assigned_by({'name': 'task:68'})
+    called assigned_by({'name': 'task:10'})
+    called assigned_by({'name': 'task:12'})
+    called assigned_by({'name': 'task:41'})
+    called assigned_by({'name': 'task:14'})
+    called assigned_by({'name': 'task:50'})
+    called assigned_by({'name': 'task:81'})
+    called assigned_by({'name': 'task:58'})
+
+  said: Every dragon type that drops dragon bones does so at a **1/1 rate** (guaranteed), so any dragon task works. Here's the breakdown:
+
+| Task | Slayer master(s) | Weight |
+|---|---|---|
+| Green dragons (incl. Brutal green) | Vannaka | 6 |
+| Blue dragons | Vannaka / Chaeldar | 7 / 8 |
+| Bronze dragons | Chaeldar | 11 |
+| Iron dragons | Chaeldar / Duradel | 12 / 5 |
+| Steel dragons | Duradel | 7 |
+| Black dragons (incl. King Black Dragon) | Duradel | 9 |
+| Mithril dragons | Duradel | 9 |
+
+Two things worth noting: **Red dragons** is a task in the data but no master is recorded as assigning it, and the other two dragon-bone droppers — **Jogre** (1/128) and **Dragon impling** (1/20) — aren't tied to any Slayer task at all.
+
+Best bets: **Chaeldar** for iron dragons (weight 12, the highest of any dragon-bone task), or **Vannaka** for green/blue dragons at lower levels; **Duradel** covers the high-end black, steel and mithril dragons.
+
+  what happened:
+    WORKED  it read the wiki 24 time(s)
+    WORKED  it read the wiki 3 different ways
+    UNSURE  it asked when it did not have to: ask_for_more
+    WORKED  the answer carries 'dragon'
+
+==============================================================================
+  fuzzy_name: a misspelt name settled by asking rather than by guessing
+  asked: tell me about the abysal wipe
+
+  the model asks: I found two separate items both called "Abyssal whip" — which one did you mean?
+    - Abyssal whip (item 4151)
+    - Abyssal whip (item 4178)
+  your answer: item   (given rather than typed)
+
+  the model asks: Both are items — I need to know which of the two "Abyssal whip" items you want. Which one?
+    - Abyssal whip (id 4151) — equippable in the weapon slot, market price 1,121,785, dropped by Abyssal demons and sold in Armour & Supplies
+    - Abyssal whip (id 4178) — no equipment slot, market price 6, no drop or shop links
+  your answer: Abyssal whip   (given rather than typed)
+
+  the model asks: Shall I go with the well-known one?
+    proposing: You mean Abyssal whip id 4151 — the equippable weapon worth 1,121,785 that Abyssal demons drop — rather than the id 4178 duplicate worth 6.
+  your answer:     called search({'words': 'abyssal whip'})
+    called ask_to_choose({'question': 'I found two separate items both called "Abyssal whip" — which one did you mean?', 'options': ['Abyssal whip (item 4151)', 'Abyssal whip (item 4178)']})
+    called get_thing({'name': 'item:4151', 'type': 'item'})
+    called get_thing({'name': 'item:4178', 'type': 'item'})
+    called ask_to_choose({'question': 'Both are items — I need to know which of the two "Abyssal whip" items you want. Which one?', 'options': ['Abyssal whip (id 4151) — equippable in the weapon slot, market price 1,121,785, dropped by Abyssal demons and sold in Armour & Supplies', 'Abyssal whip (id 4178) — no equipment slot, market price 6, no drop or shop links']})
+    called ask_to_confirm({'question': 'Shall I go with the well-known one?', 'proposal': 'You mean Abyssal whip id 4151 — the equippable weapon worth 1,121,785 that Abyssal demons drop — rather than the id 4178 duplicate worth 6.'})
+
+  said: The **Abyssal whip** (item 4151), "A weapon from the Abyss": it weighs 0.45 kg, is worn in the weapon slot, and is tradeable at a market price of 1,121,785. It's dropped by the Abyssal demon (2 drop entries recorded) and sold in one shop, Armour & Supplies.
+
+Note there's also a second item of the same name (id 4178) with no equipment slot and a market price of 6 — likely a data duplicate.
+
+  what happened:
+    WORKED  it read the wiki 3 time(s)
+    WORKED  it read the wiki 2 different ways
+    WORKED  it turned back to ask: ask_to_choose, ask_to_confirm
+    WORKED  the answer carries 'Abyssal whip'
+
+==============================================================================
+  vague_question: a question too vague to look anything up for, so it must be narrowed
+  asked: what is the best weapon?
+
+  the model asks: "Best weapon" depends on what you're measuring and what you can use — could you narrow it down? For example: which combat style (melee, ranged, magic), which stat you want it judged by (highest strength bonus, highest attack bonus, fastest speed, best damage per second), and any limits like your combat level, Attack/Ranged requirement, or budget in coins.
+  your answer: best for melee, at attack level 70   (given rather than typed)
+    called ask_to_clarify({'question': '"Best weapon" depends on what you\'re measuring and what you can use — could you narrow it down? For example: which combat style (melee, ranged, magic), which stat you want it judged by (highest strength bonus, highest attack bonus, fastest speed, best damage per second), and any limits like your combat level, Attack/Ranged requirement, or budget in coins.'})
+    called compare_by_number({'type': 'item', 'holds': 'strength bonus', 'how': 'at_least', 'number': 60, 'ordered_by': 'strength bonus', 'descending': True})
+    called get_thing({'name': 'Armadyl godsword', 'type': 'item'})
+    called get_thing({'name': 'Abyssal whip', 'type': 'item'})
+    called compare_by_number({'type': 'item', 'holds': 'attack level requirement', 'how': 'equals', 'number': 70})
+    called compare_by_number({'type': 'item', 'holds': 'slash attack bonus', 'how': 'at_least', 'number': 80, 'ordered_by': 'slash attack bonus', 'descending': True})
+
+  said: I can't filter this one properly: the wiki data here records item bonuses (attack, strength, defence, speed) but **no level requirements at all**, so there's no way for me to check which weapons are usable at Attack 70 — I'd only be guessing from the public game, which differs on this server.
+
+What the data does show, for melee weapons ranked by bonuses:
+- **Strength bonus** (78 items at 60+): the four godswords — Armadyl, Bandos, Saradomin, Zamorak — tie at **132**, then Vesta's spear at **122** and Vesta's longsword at **118**.
+- **Slash attack bonus**: the "Scimitar (class 5)" at **225**, class 4 at **180**, class 3 at **145** (these look like Castle Wars/minigame items), then the godswords at **132** and Vesta's longsword at **121**.
+
+If you tell me a specific weapon you're considering at Attack 70 (e.g. abyssal whip, dragon scimitar), I can pull its exact bonuses, speed and price from the wiki.
+
+  what happened:
+    WORKED  it read the wiki 5 time(s)
+    WORKED  it turned back to ask: ask_to_clarify
+
+==============================================================================
+  honest_gap: a fact this build lacks, which should be said rather than invented
+  asked: What does completing Desert Treasure reward you with?
+    called get_thing({'name': 'Desert Treasure', 'type': 'quest'})
+
+  said: The wiki's entry for **Desert Treasure** records it as a master-difficulty, long, members-only quest worth **3 quest points**, and that is the only reward figure it holds — it lists no reward items, XP or unlocks at all. The only other thing linked to it is its 6 requirements (e.g. The Dig Site, The Tourist Trap, Temple of Ikov). If you'd like, I can list all six requirements.
+
+  what happened:
+    WORKED  it read the wiki 1 time(s)
+    WORKED  it read the wiki 1 different ways
+    WORKED  the answer says the wiki does not hold this
+
+==============================================================================
+  filter_by_attribute: picking things out by a number rather than by name
+  asked: Which weapons give more than 100 strength bonus? Name them and say how much each one gives.
+
+  the model asks: I've got the top 10 of 18 weapons with a strength bonus over 100 — shall I pull the remaining 8?
+    shown 10 of 18
+  your answer:     called compare_by_number({'type': 'item', 'holds': 'strength bonus', 'how': 'more_than', 'number': 100, 'descending': True})
+    called ask_for_more({'question': "I've got the top 10 of 18 weapons with a strength bonus over 100 — shall I pull the remaining 8?", 'shown': 10, 'total': 18})
+    called compare_by_number({'type': 'item', 'holds': 'strength bonus', 'how': 'more_than', 'number': 100, 'descending': True, 'offset': 10})
+
+  said: 18 items have a strength bonus above 100:
+
+- **132** — Armadyl godsword, Bandos godsword, Saradomin godsword, Zamorak godsword
+- **122** — Vesta's spear, Vesta's spear (deg)
+- **118** — Vesta's longsword, Vesta's longsword (deg), Corrupt vesta's longsword, C. vesta's longsword (deg)
+- **114** — Statius's warhammer, Statius' warhammer (deg), Corrupt statius's warhammer
+- **105** — Dharok's greataxe and its charged variants (Dharok's axe 100, 75, 50, 25)
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 1 different ways
+    UNSURE  it asked when it did not have to: ask_for_more
+    WORKED  the answer carries 'godsword'
+
+==============================================================================
+  order_by_attribute: asking for the cheapest or largest of something
+  asked: What is the cheapest food that restores more than 10 hitpoints, and how much does it restore?
+    called compare_by_number({'type': 'item', 'holds': 'hitpoints restored', 'how': 'more_than', 'number': 10})
+    called compare_by_number({'type': 'item', 'holds': 'Restores', 'how': 'more_than', 'number': 10, 'ordered_by': 'Market price', 'limit': 20})
+    called compare_by_number({'type': 'item', 'holds': 'Restores', 'how': 'more_than', 'number': 10, 'ordered_by': 'Market price'})
+
+  said: Four foods tie for cheapest at a market price of 2 gp: **Tangled toads' legs** (restores 15), **Worm hole** (12), and **Cheese+tom batta**, **Fruit batta** and **Vegetable batta** (11 each). Of those, Tangled toads' legs restores the most at 15 hitpoints. The next cheapest above them jumps to Egg potato at 13 gp (restores 11), out of 37 foods recorded as restoring more than 10.
+
+  what happened:
+    WORKED  it read the wiki 3 time(s)
+    WORKED  it read the wiki 1 different ways
+    WORKED  the answer says the wiki does not hold this
+
+==============================================================================
+  price_over_time: how a price moved, rather than what it is now
+  asked: Has the Abyssal whip gone up or down over the last year, and by how much?
+    called how_the_price_moved({'name': 'Abyssal whip'})
+    called how_the_price_moved({'name': 'Abyssal whip', 'since': '2025-08-01'})
+
+  said: Over the last year (2025-08-02 to 2026-08-01, 53 readings), the Abyssal whip has gone **down** by 131,437 coins — a drop of 10.5%, from 1,253,222 to 1,121,785.
+
+For context, the full record goes back to 2024-06-08, when it stood at 1,574,876; across that whole span it's down 453,091 coins (-28.8%), and its current 1,121,785 is the lowest reading on record.
+
+  what happened:
+    WORKED  it read the wiki 2 time(s)
+    WORKED  it read the wiki 1 different ways
+    WORKED  the answer says the wiki does not hold this
+
+==============================================================================
+
+  tool coverage: 27 of 30 the wiki offers
+    never called by any probe:
+      contains
+      find_close_names
+      part_of
+
+  probes: 16 of 28 showed everything asked of them
+    fell short: scenery_use, quest_detail, place_hierarchy, drops_paged, who_drops_it, skilling, ammunition, spawns, reverse_skilling, master_tasks, multi_hop, filter_by_attribute
+  human turns: ask_for_more x8, ask_to_choose x5, ask_to_clarify x1, ask_to_confirm x1

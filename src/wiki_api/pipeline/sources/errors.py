@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from wiki_api.domain.errors import KnowledgeError
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class AdapterError(KnowledgeError):
@@ -47,6 +52,26 @@ class MalformedSourceValue(AdapterError):
         self.detail = detail
 
 
+class DriftedVocabulary(AdapterError):
+    """A vocabulary read by position no longer matches the list it is read from."""
+
+    def __init__(
+        self, source: str, expected: Sequence[str], found: Sequence[str]
+    ) -> None:
+        moved = [
+            f"{at} was {was} and is now {now}"
+            for at, (was, now) in enumerate(zip(expected, found, strict=False))
+            if was != now
+        ]
+        super().__init__(
+            f"{source} no longer declares what this build reads by position: "
+            f"{'; '.join(moved) or f'{len(expected)} names against {len(found)}'}"
+        )
+        self.source = source
+        self.expected = tuple(expected)
+        self.found = tuple(found)
+
+
 class UnallocatedIdentity(AdapterError):
     """A source names something the identity file has never given a number to."""
 
@@ -68,6 +93,7 @@ def test_every_adapter_error_is_a_knowledge_error() -> None:
         ConflictingRecords("item_configs.json", "item:14422", "Scroll", "USDT Slot"),
         MalformedSourceValue("shops.json", "1", "stock", "not three numbers"),
         UnallocatedIdentity("quest", "DEATH_PLATEAU"),
+        DriftedVocabulary("WeaponInterface.java", ("BOW",), ("CROSSBOW",)),
     )
     assert all(isinstance(error, AdapterError) for error in errors)
     assert all(isinstance(error, KnowledgeError) for error in errors)
@@ -77,6 +103,19 @@ def test_an_unknown_field_says_what_to_do_about_it() -> None:
     error = UnknownSourceField("item_configs.json", "sparkle", "4587")
     assert "sparkle" in str(error)
     assert "ignore list" in str(error)
+
+
+def test_a_drifted_vocabulary_says_which_position_moved() -> None:
+    error = DriftedVocabulary(
+        "WeaponInterface.java", ("BOW", "CROSSBOW"), ("BOW", "SLING")
+    )
+    assert "1 was CROSSBOW and is now SLING" in str(error)
+    assert "BOW was BOW" not in str(error)
+
+
+def test_a_vocabulary_that_changed_length_still_says_so() -> None:
+    error = DriftedVocabulary("WeaponInterface.java", ("BOW", "CROSSBOW"), ("BOW",))
+    assert "2 names against 1" in str(error)
 
 
 def test_a_conflict_names_both_records() -> None:

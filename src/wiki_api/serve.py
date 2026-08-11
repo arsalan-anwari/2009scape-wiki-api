@@ -1,7 +1,7 @@
 """Start whichever surfaces a deployment asks for.
 
-The one module allowed to know both surfaces exist. Serving both mounts the tools
-inside the HTTP application, so there is one port, one health check and one guard.
+Serving both mounts the tools inside the HTTP application, so there is one port, one
+health check and one guard.
 """
 
 from __future__ import annotations
@@ -67,10 +67,10 @@ if __name__ == "__main__":
 
 
 def _over(artifact: Path) -> Settings:
-    """Settings answering from the artifact this run built.
+    """Point settings at the artifact this run built.
 
-    Named rather than left to default, because the tools open the artifact as they are
-    built, and a machine that has never downloaded one still has to serve them.
+    Named rather than left to default, so a machine that has never downloaded one can
+    still serve the tools.
     """
     return Settings(data_dir=artifact.parent, artifact_filename=artifact.name)
 

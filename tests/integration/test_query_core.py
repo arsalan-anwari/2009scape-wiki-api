@@ -260,7 +260,7 @@ def test_a_retired_slug_redirects_to_where_the_entity_lives_now(
     assert isinstance(resolution, Moved)
     assert resolution.target.key == SCIMITAR
     assert resolution.target.label == "Dragon scimitar"
-    assert resolution.target.slug == "dragon-scimitar-4587"
+    assert resolution.target.slug == "dragon-scimitar"
 
 
 def test_a_shorthand_resolves_the_same_way(service: KnowledgeService) -> None:
@@ -480,11 +480,9 @@ def test_nothing_in_the_core_names_an_attribute_or_a_relationship() -> None:
     from pathlib import Path
 
     import wiki_api.core as core
-    from wiki_api.domain.attributes import ATTRIBUTE_SPECS
-    from wiki_api.domain.relationships import RELATIONSHIP_SPECS
+    from tests.vocabulary import declared_names
 
-    forbidden = {spec.key for specs in ATTRIBUTE_SPECS.values() for spec in specs}
-    forbidden |= {rel.value for rel in RELATIONSHIP_SPECS}
+    forbidden = declared_names()
     for path in Path(str(core.__path__[0])).glob("*.py"):
         source = path.read_text(encoding="utf-8").split("\n# test cases\n")[0]
         named = {

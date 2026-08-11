@@ -4,25 +4,40 @@ guess, and the registry a generic front end reads.
 
 from __future__ import annotations
 
+from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Path, Query
 
-from wiki_api.core import EntitySummary, Match, SearchResult, TypeInfo
+from wiki_api.core import Compared, EntitySummary, Match, SearchResult, TypeInfo
+from wiki_api.core.results import Uncomparable
 from wiki_api.domain.identity import EntityType
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
+from wiki_api.domain.query import Comparison
 from wiki_api.surfaces.http.addressing import (
     API_PREFIX,
     NEAR_NAMES_PREFIX,
     TYPES_PREFIX,
 )
 from wiki_api.surfaces.http.dependencies import (
+    ComparisonQuery,
+    DescendingQuery,
+    HoldsQuery,
     LimitQuery,
     NearLimitsDep,
+    NumberQuery,
     OffsetQuery,
+    OrderedByQuery,
     OrderQuery,
     ServiceDep,
     TypesQuery,
+)
+from wiki_api.surfaces.http.errors import ContractError
+from wiki_api.surfaces.http.schemas import ErrorBody, ErrorCode
+
+UNCOMPARABLE_MESSAGE = (
+    "nothing that type declares answers to those words; GET /v1/types publishes "
+    "what each one declares"
 )
 
 TypePath = Annotated[
@@ -108,6 +123,60 @@ def read_listing(
     variants.
     """
     return service.list_type(entity_type, limit=limit, offset=offset, order=order)
+
+
+@router.get(
+    "/types/{entity_type}/compare",
+    name="compare",
+    summary="List the entities of one type whose stored number answers a question",
+    response_description=(
+        "One page of entities, each carrying the values the question was about."
+    ),
+    responses={
+        422: {
+            "model": ErrorBody,
+            "description": (
+                "Nothing declared for that type answers to those words. "
+                "`GET /v1/types` publishes what each type declares, and anything "
+                "there formatted as a number can be compared."
+            ),
+        }
+    },
+)
+def read_comparison(
+    entity_type: TypePath,
+    service: ServiceDep,
+    holds: HoldsQuery = None,
+    how: ComparisonQuery = Comparison.AT_LEAST,
+    number: NumberQuery = 0.0,
+    ordered_by: OrderedByQuery = None,
+    descending: DescendingQuery = False,
+    limit: LimitQuery = DEFAULT_PAGE_SIZE,
+    offset: OffsetQuery = 0,
+) -> Compared:
+    """List the entities of one type picked out by a number they store, paged and
+    ordered.
+
+    Anything not carrying a value being compared or sorted on is left out of the
+    answer and out of the total.
+    """
+    answered = service.compare(
+        entity_type,
+        holds=holds,
+        how=how,
+        number=number,
+        ordered_by=ordered_by,
+        descending=descending,
+        limit=limit,
+        offset=offset,
+    )
+    if isinstance(answered, Uncomparable):
+        raise ContractError(
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            ErrorCode.INVALID_REQUEST,
+            UNCOMPARABLE_MESSAGE,
+        )
+    return answered.value
 
 
 @router.get(
@@ -210,4 +279,23 @@ def test_the_registries_are_published_under_a_name_of_their_own() -> None:
 
 def test_every_route_names_itself_for_a_generated_client() -> None:
     named = {str(getattr(route, "name", "")) for route in router.routes}
-    assert named == {"types", "listing", "search", "find", "near_names"}
+    assert named == {
+        "types",
+        "listing",
+        "compare",
+        "search",
+        "find",
+        "near_names",
+    }
+
+
+def test_comparing_hangs_off_the_type_whose_values_are_compared() -> None:
+    assert f"{TYPES_PREFIX}/{{entity_type}}/compare" in _paths()
+
+
+def test_a_caller_naming_no_value_at_all_is_refused_rather_than_listed() -> None:
+    from typing import get_args
+
+    for alias in (HoldsQuery, OrderedByQuery):
+        _, declared = get_args(alias)
+        assert declared.description

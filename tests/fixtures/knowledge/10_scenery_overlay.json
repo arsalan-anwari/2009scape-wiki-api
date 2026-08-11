@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "source": "game_cache",
+  "source_file": "cache/scenery.json",
+  "source_revision": "index 16 revision 330",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "scenery",
+      "id": 1276,
+      "name": "Tree",
+      "description": "One of the most common trees in 2009Scape.",
+      "source_ref": "cache/scenery.json#1276",
+      "attributes": {
+        "placement_count": 3,
+        "options": [
+          "Chop down"
+        ],
+        "members": false,
+        "size_x": 2,
+        "size_y": 2
+      }
+    },
+    {
+      "type": "scenery",
+      "id": 2213,
+      "name": "Bank booth",
+      "description": "The bank teller will serve you from here.",
+      "source_ref": "cache/scenery.json#2213",
+      "attributes": {
+        "placement_count": 12,
+        "options": [
+          "Use",
+          "Use-quickly",
+          "Collect"
+        ],
+        "members": false,
+        "size_x": 1,
+        "size_y": 1
+      }
+    },
+    {
+      "type": "scenery",
+      "id": 4306,
+      "name": "Furnace",
+      "source_ref": "cache/scenery.json#4306",
+      "attributes": {
+        "placement_count": 1,
+        "options": [
+          "Smelt"
+        ],
+        "members": true,
+        "size_x": 2,
+        "size_y": 3
+      }
+    }
+  ]
+}

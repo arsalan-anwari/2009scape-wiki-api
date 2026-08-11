@@ -5,6 +5,7 @@ query parameters every listing shares.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from typing import Annotated, cast
 
 from fastapi import Depends, Query
@@ -15,6 +16,7 @@ from wiki_api.core import Direction, KnowledgeService
 from wiki_api.domain.identity import EntityType
 from wiki_api.domain.manifest import Manifest
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, SortOrder
+from wiki_api.domain.query import Comparison
 from wiki_api.domain.search import MOST_NEAR_LIMIT
 from wiki_api.repository.provider import RepositoryProvider
 
@@ -70,6 +72,15 @@ OffsetQuery = Annotated[
         ),
     ),
 ]
+SinceQuery = Annotated[
+    date | None,
+    Query(
+        description=(
+            "Read only from this day onwards, written as `YYYY-MM-DD`. Leave it out "
+            "to read everything recorded."
+        ),
+    ),
+]
 TypesQuery = Annotated[
     list[EntityType] | None,
     Query(
@@ -98,6 +109,45 @@ DirectionQuery = Annotated[
             "points at, `reverse` for what points at it."
         )
     ),
+]
+HoldsQuery = Annotated[
+    str | None,
+    Query(
+        description=(
+            "Which stored number to put a comparison against, given either as the "
+            "key `GET /v1/types` publishes for it or as the label it publishes "
+            "beside it. Anything that type declares in a numeric format can be "
+            "named here, including one part of a value that packs several numbers, "
+            "written as `parent.part`."
+        )
+    ),
+]
+ComparisonQuery = Annotated[
+    Comparison,
+    Query(
+        description=(
+            "How to measure what is stored against the number given. Defaults to "
+            "`at_least`, which is what a caller passing only a number usually means."
+        )
+    ),
+]
+NumberQuery = Annotated[
+    float,
+    Query(description="The number to measure the stored one against."),
+]
+OrderedByQuery = Annotated[
+    str | None,
+    Query(
+        description=(
+            "Which stored number to sort by, named the same way as the one being "
+            "compared. Anything not carrying it is left out of the answer, because "
+            "it is absent rather than smallest."
+        )
+    ),
+]
+DescendingQuery = Annotated[
+    bool,
+    Query(description="Sort from the largest down rather than from the smallest up."),
 ]
 RowsQuery = Annotated[
     int | None,

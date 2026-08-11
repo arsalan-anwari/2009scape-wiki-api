@@ -1,0 +1,94 @@
+{
+  "enum": "Consumables",
+  "source_file": "Consumables.java",
+  "language": "java",
+  "columns": [
+    "consumable",
+    "isIgnoreMainClock"
+  ],
+  "constants": [
+    {
+      "name": "COOKED_CHICKEN",
+      "values": {
+        "consumable": {
+          "call": "Food",
+          "arguments": [
+            [
+              2140
+            ],
+            {
+              "call": "HealingEffect",
+              "arguments": [
+                3
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "ONION_STEW",
+      "values": {
+        "consumable": {
+          "call": "Food",
+          "arguments": [
+            [
+              1957,
+              1511
+            ],
+            {
+              "call": "HealingEffect",
+              "arguments": [
+                11
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "GARDEN_PIE",
+      "values": {
+        "consumable": {
+          "call": "Food",
+          "arguments": [
+            [
+              536
+            ],
+            {
+              "call": "MultiEffect",
+              "arguments": [
+                {
+                  "call": "HealingEffect",
+                  "arguments": [
+                    6
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "THIN_SNAIL",
+      "values": {
+        "consumable": {
+          "call": "Food",
+          "arguments": [
+            [
+              2138
+            ],
+            {
+              "call": "RandomHealthEffect",
+              "arguments": [
+                5,
+                7
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

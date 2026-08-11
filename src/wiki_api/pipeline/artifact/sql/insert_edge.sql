@@ -10,6 +10,7 @@ INSERT INTO edge (
     source,
     source_file,
     source_ref,
+    source_revision,
     game_version
 ) VALUES (
     :src_type,
@@ -23,5 +24,6 @@ INSERT INTO edge (
     :source,
     :source_file,
     :source_ref,
+    :source_revision,
     :game_version
 );

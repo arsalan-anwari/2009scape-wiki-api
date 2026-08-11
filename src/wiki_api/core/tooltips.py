@@ -8,16 +8,17 @@ from wiki_api.core.results import Tooltip
 from wiki_api.core.values import entity_values, prominent_values
 
 if TYPE_CHECKING:
+    from wiki_api.core.values import Naming
     from wiki_api.domain.entity import Entity
 
 
-def preview(entity: Entity) -> Tooltip:
+def preview(entity: Entity, naming: Naming | None = None) -> Tooltip:
     """Describe an entity as briefly as the registry allows."""
     return Tooltip(
         link=entity.to_link(),
         type=entity.type,
         description=entity.description,
-        attributes=prominent_values(entity_values(entity)),
+        attributes=prominent_values(entity_values(entity, naming)),
     )
 
 

@@ -11,6 +11,7 @@ from wiki_api.pipeline.artifact.overlay import OverlaySource
 from wiki_api.pipeline.sources.coercion import Skipped, SkipReason, attributes, text
 from wiki_api.pipeline.sources.errors import ConflictingRecords
 from wiki_api.pipeline.sources.outcome import SourceOutcome
+from wiki_api.pipeline.sources.overridden import Overridden
 from wiki_api.pipeline.staging.declared import DeclaredConfig
 
 if TYPE_CHECKING:
@@ -27,7 +28,7 @@ LISTED: Final = ("combat_audio",)
 IGNORED: Final[tuple[str, ...]] = ()
 
 
-def read_npcs(staged: StagedSources, overridden: frozenset[EntityKey]) -> SourceOutcome:
+def read_npcs(staged: StagedSources, overridden: Overridden) -> SourceOutcome:
     """Turn every staged npc record into an entity, minus the ones an overlay owns."""
     declared = set(NpcAttributes.model_fields)
     records = staged.records(DECLARED)
@@ -45,6 +46,7 @@ def read_npcs(staged: StagedSources, overridden: frozenset[EntityKey]) -> Source
             raise ConflictingRecords(DECLARED.name, str(key), first, name)
         seen[npc_id] = name
         if key in overridden:
+            overridden.check(key, name, record)
             skipped.append(
                 Skipped(
                     source=DECLARED.name, reason=SkipReason.OVERRIDDEN, detail=str(key)
@@ -126,7 +128,7 @@ def test_a_record_becomes_an_entity_with_its_combat_stats(tmp_path: Any) -> None
                 }
             ],
         ),
-        frozenset(),
+        Overridden.of(),
     )
     entity = outcome.read.document.entities[0]
     assert entity.name == "Man"
@@ -138,7 +140,7 @@ def test_a_record_becomes_an_entity_with_its_combat_stats(tmp_path: Any) -> None
 def test_the_attributes_survive_the_model_that_declares_them(tmp_path: Any) -> None:
     outcome = read_npcs(
         _sources(tmp_path, [{"id": "50", "name": "KBD", "combat_style": "1"}]),
-        frozenset(),
+        Overridden.of(),
     )
     read = NpcAttributes.model_validate(outcome.read.document.entities[0].attributes)
     assert read.combat_style is not None
@@ -147,7 +149,7 @@ def test_the_attributes_survive_the_model_that_declares_them(tmp_path: Any) -> N
 def test_an_npc_with_no_name_is_counted_and_carried(tmp_path: Any) -> None:
     outcome = read_npcs(
         _sources(tmp_path, [{"id": "1", "name": ""}, {"id": "2", "name": "Man"}]),
-        frozenset(),
+        Overridden.of(),
     )
     assert outcome.entities == 2
     assert any("1 carry no name" in note for note in outcome.notes)
@@ -160,7 +162,7 @@ def test_a_field_the_registry_does_not_declare_stops_the_build(tmp_path: Any) ->
 
     with pytest.raises(UnknownSourceField):
         read_npcs(
-            _sources(tmp_path, [{"id": "1", "name": "X", "mood": "1"}]), frozenset()
+            _sources(tmp_path, [{"id": "1", "name": "X", "mood": "1"}]), Overridden.of()
         )
 
 
@@ -170,5 +172,5 @@ def test_two_records_for_one_id_stop_the_build(tmp_path: Any) -> None:
     with pytest.raises(ConflictingRecords):
         read_npcs(
             _sources(tmp_path, [{"id": "1", "name": "A"}, {"id": "1", "name": "B"}]),
-            frozenset(),
+            Overridden.of(),
         )

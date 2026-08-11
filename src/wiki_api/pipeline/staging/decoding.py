@@ -6,15 +6,18 @@ from typing import TYPE_CHECKING, Any, Final
 
 from pydantic import BaseModel, ConfigDict
 
+from wiki_api.pipeline.cache.datamaps import DATAMAP_INDEX, decode_datamap
 from wiki_api.pipeline.cache.errors import CacheError
 from wiki_api.pipeline.cache.items import decode_item
 from wiki_api.pipeline.cache.landscape import decode_landscape, region_name
+from wiki_api.pipeline.cache.maplabels import decode_map_label
 from wiki_api.pipeline.cache.npcs import decode_npc
 from wiki_api.pipeline.cache.reader import (
     ITEM_INDEX,
     MAP_INDEX,
     NPC_INDEX,
     SCENERY_INDEX,
+    WORLDMAP_INDEX,
     CacheReader,
 )
 from wiki_api.pipeline.cache.scenery import decode_scenery
@@ -28,6 +31,7 @@ REGIONS: Final = 256 * 256
 NO_KEY: Final = (0, 0, 0, 0)
 KEYS_FILE: Final = "xteas.json"
 REVISION: Final = "index {index} revision {revision}"
+LABEL_ARCHIVE: Final = 2
 
 
 class DecodeOutcome(BaseModel):
@@ -112,17 +116,55 @@ def decode_placements(
     )
 
 
+def decode_map_labels(reader: CacheReader) -> DecodeOutcome:
+    """Decode the one archive of the world map index that names part of the world."""
+    table = reader.table(WORLDMAP_INDEX)
+    records: list[dict[str, Any]] = []
+    refused: list[str] = []
+    read = 0
+    try:
+        files = reader.archive(WORLDMAP_INDEX, LABEL_ARCHIVE, NO_KEY)
+    except CacheError as error:
+        return DecodeOutcome(
+            index=WORLDMAP_INDEX, revision=table.revision, refused=(str(error),)
+        )
+    for identity, body in enumerate(files):
+        read += 1
+        try:
+            records.append(decode_map_label(identity, body).model_dump(mode="json"))
+        except CacheError as error:
+            refused.append(str(error))
+    return DecodeOutcome(
+        index=WORLDMAP_INDEX,
+        revision=table.revision,
+        records=tuple(records),
+        read=read,
+        kept=len(records),
+        refused=tuple(refused),
+    )
+
+
 def decode_cache(cache: Path, configs: Path) -> dict[str, DecodeOutcome]:
     """Decode every index this build reads, in the order the plan lands them."""
     reader = CacheReader.at(
-        cache, indexes=(ITEM_INDEX, SCENERY_INDEX, NPC_INDEX, MAP_INDEX)
+        cache,
+        indexes=(
+            ITEM_INDEX,
+            SCENERY_INDEX,
+            NPC_INDEX,
+            DATAMAP_INDEX,
+            MAP_INDEX,
+            WORLDMAP_INDEX,
+        ),
     )
     keys = read_region_keys(configs / KEYS_FILE)
     return {
         "items": decode_definitions(reader, ITEM_INDEX, decode_item),
         "scenery": decode_definitions(reader, SCENERY_INDEX, decode_scenery),
         "npcs": decode_definitions(reader, NPC_INDEX, decode_npc),
+        "datamaps": decode_definitions(reader, DATAMAP_INDEX, decode_datamap),
         "placements": decode_placements(reader, keys),
+        "maplabels": decode_map_labels(reader),
     }
 
 
@@ -161,6 +203,33 @@ def test_a_definition_that_does_not_decode_is_counted_not_dropped(
     assert len(outcome.refused) == 1
     assert "138" in outcome.refused[0]
     assert "1 refused" in outcome.note
+
+
+def test_the_world_map_index_decodes_to_the_names_it_draws(tmp_path: Path) -> None:
+    from tests.cache import built_cache
+
+    reader = CacheReader.at(built_cache(tmp_path / "cache"), indexes=(WORLDMAP_INDEX,))
+    outcome = decode_map_labels(reader)
+    assert outcome.read == 1
+    assert outcome.records[0]["name"] == "Lumbridge"
+    assert outcome.records[0]["x"] == 3222
+    assert outcome.refused == ()
+
+
+def test_a_world_map_index_that_will_not_open_is_counted_not_raised(
+    tmp_path: Path,
+) -> None:
+    from tests.cache import archive, container, reference_table, write_cache
+
+    directory = write_cache(
+        tmp_path / "cache",
+        {WORLDMAP_INDEX: {2: container(archive([b"\x00"]))}},
+        {WORLDMAP_INDEX: container(reference_table({3: [0]}))},
+    )
+    reader = CacheReader.at(directory, indexes=(WORLDMAP_INDEX,))
+    outcome = decode_map_labels(reader)
+    assert outcome.records == ()
+    assert len(outcome.refused) == 1
 
 
 def test_a_region_decodes_to_the_placements_it_holds(tmp_path: Path) -> None:

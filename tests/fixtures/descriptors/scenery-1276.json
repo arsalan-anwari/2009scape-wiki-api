@@ -1,0 +1,225 @@
+{
+  "entity": {
+    "type": "scenery",
+    "id": 1276,
+    "slug": "tree",
+    "label": "Tree",
+    "icon_ref": null
+  },
+  "type": "scenery",
+  "description": "One of the most common trees in 2009Scape.",
+  "canonical": null,
+  "variants": [],
+  "infobox": [
+    {
+      "key": "members",
+      "value": false,
+      "label": "Members only",
+      "group": "overview",
+      "order": 30,
+      "format": "bool",
+      "unit": null,
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    },
+    {
+      "key": "options",
+      "value": [
+        "Chop down"
+      ],
+      "label": "Actions",
+      "group": "general",
+      "order": 20,
+      "format": "texts",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "size_x",
+      "value": 2,
+      "label": "Width",
+      "group": "general",
+      "order": 40,
+      "format": "int",
+      "unit": "tiles",
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    },
+    {
+      "key": "size_y",
+      "value": 2,
+      "label": "Depth",
+      "group": "general",
+      "order": 50,
+      "format": "int",
+      "unit": "tiles",
+      "derived": false,
+      "prominent": false,
+      "choices": null
+    },
+    {
+      "key": "placement_count",
+      "value": 3,
+      "label": "Standing in the world",
+      "group": "map",
+      "order": 10,
+      "format": "int",
+      "unit": null,
+      "derived": true,
+      "prominent": true,
+      "choices": null
+    }
+  ],
+  "sections": [],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "scenery",
+          "id": 1276
+        },
+        "rel": "yields",
+        "direction": "forward"
+      },
+      "label": "Yields",
+      "group": "skill",
+      "order": 80,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "item",
+              "id": 1511,
+              "slug": "logs",
+              "label": "Logs",
+              "icon_ref": null
+            },
+            "type": "item",
+            "attributes": [
+              {
+                "key": "skill",
+                "value": "woodcutting",
+                "label": "Skill",
+                "group": "skill",
+                "order": 10,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "choices": [
+                  "attack",
+                  "defence",
+                  "strength",
+                  "hitpoints",
+                  "ranged",
+                  "prayer",
+                  "magic",
+                  "cooking",
+                  "woodcutting",
+                  "fletching",
+                  "fishing",
+                  "firemaking",
+                  "crafting",
+                  "smithing",
+                  "mining",
+                  "herblore",
+                  "agility",
+                  "thieving",
+                  "slayer",
+                  "farming",
+                  "runecrafting",
+                  "hunter",
+                  "construction",
+                  "summoning"
+                ]
+              },
+              {
+                "key": "level",
+                "value": 1,
+                "label": "Level",
+                "group": "skill",
+                "order": 20,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "choices": null
+              },
+              {
+                "key": "experience",
+                "value": 25.0,
+                "label": "Experience",
+                "group": "skill",
+                "order": 30,
+                "format": "float",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "choices": null
+              },
+              {
+                "key": "amount",
+                "value": 1,
+                "label": "Amount",
+                "group": "amount",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "success_rate",
+                "value": 0.05,
+                "label": "Success rate",
+                "group": "rate",
+                "order": 50,
+                "format": "rate",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "respawn_min",
+                "value": 50,
+                "label": "Respawn from",
+                "group": "rate",
+                "order": 60,
+                "format": "int",
+                "unit": "ticks",
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "respawn_max",
+                "value": 100,
+                "label": "Respawn to",
+                "group": "rate",
+                "order": 70,
+                "format": "int",
+                "unit": "ticks",
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

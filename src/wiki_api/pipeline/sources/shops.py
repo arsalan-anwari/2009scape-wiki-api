@@ -19,6 +19,7 @@ from wiki_api.pipeline.sources.coercion import (
 )
 from wiki_api.pipeline.sources.errors import ConflictingRecords
 from wiki_api.pipeline.sources.outcome import SourceOutcome
+from wiki_api.pipeline.sources.overridden import Overridden
 from wiki_api.pipeline.staging.declared import DeclaredConfig
 
 if TYPE_CHECKING:
@@ -44,9 +45,7 @@ PRICED_NOTE: Final = (
 MINIMUM_PRICE: Final = 1
 
 
-def read_shops(
-    staged: StagedSources, overridden: frozenset[EntityKey]
-) -> SourceOutcome:
+def read_shops(staged: StagedSources, overridden: Overridden) -> SourceOutcome:
     """Turn every staged shop record into an entity, minus the ones an overlay owns."""
     records = staged.records(DECLARED)
     seen: dict[int, str] = {}
@@ -61,6 +60,7 @@ def read_shops(
             raise ConflictingRecords(DECLARED.name, str(key), first, title)
         seen[shop_id] = title
         if key in overridden:
+            overridden.check(key, title, record)
             skipped.append(
                 Skipped(
                     source=DECLARED.name, reason=SkipReason.OVERRIDDEN, detail=str(key)
@@ -91,7 +91,7 @@ def read_shops(
 def read_shop_edges(
     staged: StagedSources,
     known: frozenset[EntityKey],
-    overridden: frozenset[EntityKey],
+    overridden: Overridden,
     values: Mapping[int, int] | None = None,
 ) -> SourceOutcome:
     """Turn every stock line into a sale and every named npc into the shop's staff."""
@@ -269,7 +269,7 @@ def _known() -> frozenset[EntityKey]:
 
 
 def test_a_record_becomes_a_shop_carrying_its_currency(tmp_path: Any) -> None:
-    outcome = read_shops(_sources(tmp_path, [_RECORD]), frozenset())
+    outcome = read_shops(_sources(tmp_path, [_RECORD]), Overridden.of())
     entity = outcome.read.document.entities[0]
     assert entity.name == "Crossbow Shop"
     assert entity.attributes["currency"] == 995
@@ -277,7 +277,7 @@ def test_a_record_becomes_a_shop_carrying_its_currency(tmp_path: Any) -> None:
 
 
 def test_stock_lines_become_sales_keyed_by_their_slot(tmp_path: Any) -> None:
-    outcome = read_shop_edges(_sources(tmp_path, [_RECORD]), _known(), frozenset())
+    outcome = read_shop_edges(_sources(tmp_path, [_RECORD]), _known(), Overridden.of())
     sells = [
         edge
         for edge in outcome.read.document.edges
@@ -294,7 +294,7 @@ def test_stock_lines_become_sales_keyed_by_their_slot(tmp_path: Any) -> None:
 
 def test_a_line_is_priced_from_the_value_the_cache_carries(tmp_path: Any) -> None:
     outcome = read_shop_edges(
-        _sources(tmp_path, [_RECORD]), _known(), frozenset(), {9440: 45}
+        _sources(tmp_path, [_RECORD]), _known(), Overridden.of(), {9440: 45}
     )
     sells = [
         edge
@@ -311,7 +311,7 @@ def test_a_line_a_shop_charges_something_other_than_coins_for_is_not_priced(
 ) -> None:
     record = {**_RECORD, "currency": "6529"}
     outcome = read_shop_edges(
-        _sources(tmp_path, [record]), _known(), frozenset(), {9440: 45}
+        _sources(tmp_path, [record]), _known(), Overridden.of(), {9440: 45}
     )
     sells = [
         edge
@@ -323,7 +323,7 @@ def test_a_line_a_shop_charges_something_other_than_coins_for_is_not_priced(
 
 def test_a_free_item_still_costs_the_minimum_the_game_charges(tmp_path: Any) -> None:
     outcome = read_shop_edges(
-        _sources(tmp_path, [_RECORD]), _known(), frozenset(), {9440: 0}
+        _sources(tmp_path, [_RECORD]), _known(), Overridden.of(), {9440: 0}
     )
     sells = [
         edge
@@ -334,7 +334,7 @@ def test_a_free_item_still_costs_the_minimum_the_game_charges(tmp_path: Any) -> 
 
 
 def test_the_named_npcs_become_the_shops_staff(tmp_path: Any) -> None:
-    outcome = read_shop_edges(_sources(tmp_path, [_RECORD]), _known(), frozenset())
+    outcome = read_shop_edges(_sources(tmp_path, [_RECORD]), _known(), Overridden.of())
     staff = [
         edge
         for edge in outcome.read.document.edges
@@ -345,14 +345,14 @@ def test_the_named_npcs_become_the_shops_staff(tmp_path: Any) -> None:
 
 def test_a_line_pointing_at_nothing_is_dropped_and_counted(tmp_path: Any) -> None:
     record = {**_RECORD, "stock": "{9440,10,100}-{4242,1,100}", "npcs": "4559,2258"}
-    outcome = read_shop_edges(_sources(tmp_path, [record]), _known(), frozenset())
+    outcome = read_shop_edges(_sources(tmp_path, [record]), _known(), Overridden.of())
     assert outcome.edges == 2
     assert outcome.skipped_by_reason() == {"unknown_target": 2}
 
 
 def test_one_shop_stocking_an_item_twice_keeps_the_first_line(tmp_path: Any) -> None:
     record = {**_RECORD, "stock": "{9440,10,100}-{9440,5,100}"}
-    outcome = read_shop_edges(_sources(tmp_path, [record]), _known(), frozenset())
+    outcome = read_shop_edges(_sources(tmp_path, [record]), _known(), Overridden.of())
     sells = [
         edge
         for edge in outcome.read.document.edges
@@ -368,12 +368,13 @@ def test_two_shops_with_one_id_stop_the_build(tmp_path: Any) -> None:
 
     with pytest.raises(ConflictingRecords):
         read_shops(
-            _sources(tmp_path, [_RECORD, {**_RECORD, "title": "Another"}]), frozenset()
+            _sources(tmp_path, [_RECORD, {**_RECORD, "title": "Another"}]),
+            Overridden.of(),
         )
 
 
 def test_an_overlay_that_owns_the_shop_settles_the_conflict(tmp_path: Any) -> None:
-    overridden = frozenset({EntityKey(type=EntityType.SHOP, id=53)})
+    overridden = Overridden.of({EntityKey(type=EntityType.SHOP, id=53)})
     outcome = read_shops(
         _sources(tmp_path, [_RECORD, {**_RECORD, "title": "Another"}]), overridden
     )
@@ -384,5 +385,5 @@ def test_an_overlay_that_owns_the_shop_settles_the_conflict(tmp_path: Any) -> No
 
 def test_a_shop_with_no_currency_named_trades_in_coins(tmp_path: Any) -> None:
     record = {key: value for key, value in _RECORD.items() if key != "currency"}
-    outcome = read_shops(_sources(tmp_path, [record]), frozenset())
+    outcome = read_shops(_sources(tmp_path, [record]), Overridden.of())
     assert outcome.read.document.entities[0].attributes["currency"] == COINS.id

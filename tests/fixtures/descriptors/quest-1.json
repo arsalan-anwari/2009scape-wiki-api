@@ -172,7 +172,8 @@
                   "npc_spawn",
                   "ground_spawn",
                   "shop_front",
-                  "quest_start"
+                  "quest_start",
+                  "built_in"
                 ]
               },
               {
@@ -182,6 +183,80 @@
                 "group": "map",
                 "order": 40,
                 "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "quest",
+          "id": 1
+        },
+        "rel": "requires",
+        "direction": "forward"
+      },
+      "label": "Requires",
+      "group": "prerequisites",
+      "order": 100,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "item",
+              "id": 3105,
+              "slug": "climbing-boots",
+              "label": "Climbing boots",
+              "icon_ref": null
+            },
+            "type": "item",
+            "attributes": [
+              {
+                "key": "kind",
+                "value": "carried",
+                "label": "Kind",
+                "group": "overview",
+                "order": 10,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "choices": [
+                  "carried",
+                  "completed"
+                ]
+              },
+              {
+                "key": "amount",
+                "value": 1,
+                "label": "Amount",
+                "group": "amount",
+                "order": 20,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              },
+              {
+                "key": "optional",
+                "value": false,
+                "label": "Optional",
+                "group": "overview",
+                "order": 30,
+                "format": "bool",
                 "unit": null,
                 "derived": false,
                 "prominent": false,

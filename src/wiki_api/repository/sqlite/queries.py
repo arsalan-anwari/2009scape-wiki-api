@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from importlib import resources
 from typing import Final
 
@@ -24,12 +25,15 @@ SELECT_ALIAS: Final = load("select_alias.sql")
 SELECT_ENTITIES_BY_NAME: Final = load("select_entities_by_name.sql")
 SELECT_ENTITIES_BY_ID: Final = load("select_entities_by_id.sql")
 COUNT_ENTITIES: Final = load("count_entities.sql")
+SELECT_ENTITIES_BY_ATTRIBUTE: Final = load("select_entities_by_attribute.sql")
+COUNT_ENTITIES_BY_ATTRIBUTE: Final = load("count_entities_by_attribute.sql")
 SEARCH_ENTITIES: Final = load("search_entities.sql")
 COUNT_SEARCH_ENTITIES: Final = load("count_search_entities.sql")
 SELECT_EDGES_FROM: Final = load("select_edges_from.sql")
 SELECT_EDGES_TO: Final = load("select_edges_to.sql")
 COUNT_EDGES_FROM: Final = load("count_edges_from.sql")
 COUNT_EDGES_TO: Final = load("count_edges_to.sql")
+COUNT_EDGES_BY_RELATIONSHIP: Final = load("count_edges_by_relationship.sql")
 SELECT_NEAR_NAMES: Final = load("select_near_names.sql")
 SELECT_VARIANTS: Final = load("select_variants.sql")
 SELECT_PRICE_HISTORY: Final = load("select_price_history.sql")
@@ -60,6 +64,8 @@ def test_no_query_writes_to_the_artifact() -> None:
         SELECT_ENTITIES_BY_NAME,
         SELECT_ENTITIES_BY_ID,
         COUNT_ENTITIES,
+        SELECT_ENTITIES_BY_ATTRIBUTE,
+        COUNT_ENTITIES_BY_ATTRIBUTE,
         SEARCH_ENTITIES,
         COUNT_SEARCH_ENTITIES,
         SELECT_EDGES_FROM,
@@ -107,9 +113,32 @@ def test_a_walk_orders_by_enough_columns_to_be_unambiguous() -> None:
 
 
 def test_the_listing_queries_exclude_variants_and_unpublished_entities() -> None:
-    for statement in (SELECT_ENTITIES_BY_NAME, SELECT_ENTITIES_BY_ID, COUNT_ENTITIES):
+    listings = (
+        SELECT_ENTITIES_BY_NAME,
+        SELECT_ENTITIES_BY_ID,
+        COUNT_ENTITIES,
+        SELECT_ENTITIES_BY_ATTRIBUTE,
+        COUNT_ENTITIES_BY_ATTRIBUTE,
+    )
+    for statement in listings:
         assert "canonical_id IS NULL" in statement
         assert "visibility = :visibility" in statement
+
+
+def test_every_way_of_comparing_is_written_out_rather_than_assembled() -> None:
+    from wiki_api.domain.query import Comparison
+
+    for statement in (SELECT_ENTITIES_BY_ATTRIBUTE, COUNT_ENTITIES_BY_ATTRIBUTE):
+        written = {
+            word for word in re.findall(r"'\$\.compare'\) = '([a-z_]+)'", statement)
+        }
+        assert written == {member.value for member in Comparison}
+
+
+def test_a_compared_listing_and_its_count_agree_on_what_they_mean() -> None:
+    for clause in ("json_each(:conditions)", ":order_path", ":visibility"):
+        assert clause in SELECT_ENTITIES_BY_ATTRIBUTE
+        assert clause in COUNT_ENTITIES_BY_ATTRIBUTE
 
 
 def test_a_missing_query_file_fails_loudly() -> None:

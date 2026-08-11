@@ -1,0 +1,26 @@
+{
+ "enum": "SummoningScroll",
+ "source_file": "SummoningScroll.java",
+ "language": "java",
+ "columns": [
+  "slotId",
+  "itemId",
+  "xp",
+  "level",
+  "items"
+ ],
+ "constants": [
+  {
+   "name": "HOWL_SCROLL",
+   "values": {
+    "slotId": 0,
+    "itemId": 12425,
+    "xp": 0.1,
+    "level": 1,
+    "items": [
+     12047
+    ]
+   }
+  }
+ ]
+}

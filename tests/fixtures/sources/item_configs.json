@@ -142,5 +142,49 @@
   "archery_ticket_price": "0",
   "durability": null,
   "weight": "1"
+ },
+ {
+  "id": "1511",
+  "name": "Logs",
+  "examine": "A number of wooden logs.",
+  "archery_ticket_price": "0",
+  "durability": null,
+  "ge_buy_limit": "25000",
+  "shop_price": "4",
+  "tradeable": "true",
+  "weight": "2"
+ },
+ {
+  "id": "2138",
+  "name": "Raw chicken",
+  "examine": "I need to cook this first.",
+  "archery_ticket_price": "0",
+  "durability": null,
+  "ge_buy_limit": "1000",
+  "shop_price": "60",
+  "tradeable": "true",
+  "weight": "0.15"
+ },
+ {
+  "id": "2140",
+  "name": "Cooked chicken",
+  "examine": "Mmm this looks tasty.",
+  "archery_ticket_price": "0",
+  "durability": null,
+  "ge_buy_limit": "1000",
+  "shop_price": "5",
+  "tradeable": "true",
+  "weight": "0.1"
+ },
+ {
+  "id": "1957",
+  "name": "Onion",
+  "examine": "A strong smelling onion.",
+  "archery_ticket_price": "0",
+  "durability": null,
+  "ge_buy_limit": "1000",
+  "shop_price": "12",
+  "tradeable": "true",
+  "weight": "0.1"
  }
 ]

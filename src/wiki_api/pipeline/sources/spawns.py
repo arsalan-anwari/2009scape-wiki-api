@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Final
 
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.relationships import RelationshipType
-from wiki_api.domain.space import Area, Coordinate, SpawnKind
+from wiki_api.domain.space import Coordinate, SpawnKind
 from wiki_api.domain.vocabulary import SourceKind
 from wiki_api.pipeline.artifact.overlay import OverlaySource
 from wiki_api.pipeline.sources.coercion import Skipped, SkipReason, groups
@@ -17,6 +16,7 @@ from wiki_api.pipeline.staging.declared import DeclaredConfig
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
+    from wiki_api.pipeline.places import Gazetteer
     from wiki_api.pipeline.sources.staged import StagedSources
 
 NPC_DECLARED: Final = DeclaredConfig(name="npc_spawns.json")
@@ -26,46 +26,13 @@ ITEM_ID_FIELD: Final = "item_id"
 LOCATIONS_FIELD: Final = "loc_data"
 SPAWN_WIDTH: Final = 5
 NO_PLACE_NOTE: Final = (
-    "a coordinate only becomes a placement once an overlay names a place that "
-    "contains it, so the world stays unnamed until the map is decoded"
+    "a coordinate only becomes a placement once some place with an extent contains "
+    "it, so the rest of the world waits on more places being named"
 )
 
 
-@dataclass(frozen=True)
-class Place:
-    """One named place an overlay gave an extent to."""
-
-    key: EntityKey
-    bounds: Area
-
-    @property
-    def size(self) -> int:
-        return (self.bounds.max_x - self.bounds.min_x + 1) * (
-            self.bounds.max_y - self.bounds.min_y + 1
-        )
-
-
-class Places:
-    """The places a coordinate can fall inside, smallest first."""
-
-    def __init__(self, places: Sequence[Place] = ()) -> None:
-        self._places = tuple(
-            sorted(places, key=lambda place: (place.size, place.key.id))
-        )
-
-    def __len__(self) -> int:
-        return len(self._places)
-
-    def holding(self, point: Coordinate) -> EntityKey | None:
-        """The smallest place whose extent covers this tile."""
-        for place in self._places:
-            if place.bounds.contains(point):
-                return place.key
-        return None
-
-
 def read_npc_spawns(
-    staged: StagedSources, known: frozenset[EntityKey], places: Places
+    staged: StagedSources, known: frozenset[EntityKey], places: Gazetteer
 ) -> SourceOutcome:
     """Turn every npc spawn tile into a placement inside a named place."""
     edges: list[dict[str, Any]] = []
@@ -110,7 +77,7 @@ def read_npc_spawns(
 
 
 def read_ground_spawns(
-    staged: StagedSources, known: frozenset[EntityKey], places: Places
+    staged: StagedSources, known: frozenset[EntityKey], places: Gazetteer
 ) -> SourceOutcome:
     """Turn every fixed item spawn into a placement inside a named place."""
     edges: list[dict[str, Any]] = []
@@ -159,7 +126,7 @@ def _place(
     at: Coordinate,
     kind: SpawnKind,
     extra: Mapping[str, int],
-    places: Places,
+    places: Gazetteer,
     source: str,
     edges: list[dict[str, Any]],
     skipped: list[Skipped],
@@ -208,6 +175,12 @@ def _document(
 # test cases
 
 
+def _area(**corners: int) -> Any:
+    from wiki_api.domain.space import Area
+
+    return Area(**corners)
+
+
 def _sources(tmp_path: Any, npc: str, ground: str = "[]") -> StagedSources:
     from tests.sources import staged_from
 
@@ -216,15 +189,23 @@ def _sources(tmp_path: Any, npc: str, ground: str = "[]") -> StagedSources:
     )
 
 
-def _places() -> Places:
-    return Places(
+def _places() -> Gazetteer:
+    from wiki_api.pipeline.places import Gazetteer, Place
+
+    return Gazetteer(
         [
             Place(
                 key=EntityKey(type=EntityType.LOCATION, id=1),
-                bounds=Area(min_x=3200, min_y=3200, max_x=3300, max_y=3300),
+                bounds=_area(min_x=3200, min_y=3200, max_x=3300, max_y=3300),
             )
         ]
     )
+
+
+def _empty() -> Gazetteer:
+    from wiki_api.pipeline.places import Gazetteer
+
+    return Gazetteer()
 
 
 def _known() -> frozenset[EntityKey]:
@@ -262,22 +243,24 @@ def test_with_no_places_named_nothing_is_placed(tmp_path: Any) -> None:
     outcome = read_npc_spawns(
         _sources(tmp_path, '[{"npc_id": "1", "loc_data": "{3222,3221,0,1,3}-"}]'),
         _known(),
-        Places(),
+        _empty(),
     )
     assert outcome.edges == 0
     assert outcome.skipped_by_reason() == {"no_place": 1}
 
 
 def test_the_smallest_place_holding_a_tile_wins(tmp_path: Any) -> None:
-    places = Places(
+    from wiki_api.pipeline.places import Gazetteer, Place
+
+    places = Gazetteer(
         [
             Place(
                 key=EntityKey(type=EntityType.LOCATION, id=1),
-                bounds=Area(min_x=3000, min_y=3000, max_x=3500, max_y=3500),
+                bounds=_area(min_x=3000, min_y=3000, max_x=3500, max_y=3500),
             ),
             Place(
                 key=EntityKey(type=EntityType.LOCATION, id=2),
-                bounds=Area(min_x=3220, min_y=3220, max_x=3230, max_y=3230),
+                bounds=_area(min_x=3220, min_y=3220, max_x=3230, max_y=3230),
             ),
         ]
     )

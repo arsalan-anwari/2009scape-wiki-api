@@ -21,6 +21,7 @@ from wiki_api.surfaces.mcp import (
     followable,
 )
 from wiki_api.surfaces.mcp.answers import Outcome
+from wiki_api.surfaces.mcp.naming import COMPARE_TOOL, MOVEMENT_TOOL
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Mapping
@@ -76,25 +77,75 @@ def tools(mcp_settings: Settings) -> dict[str, Tool]:
 # the tool surface is derived, never written down
 
 
+def _held(settings: Settings) -> frozenset[RelationshipType]:
+    from wiki_api.core import KnowledgeService
+    from wiki_api.repository.factory import open_repository
+
+    repository = open_repository(settings.artifact_path)
+    try:
+        return KnowledgeService(repository).answerable()
+    finally:
+        repository.close()
+
+
 def test_the_tools_offered_are_computed_from_the_registry(
-    tools: dict[str, Tool],
+    tools: dict[str, Tool], mcp_settings: Settings
 ) -> None:
-    expected = set(WRITTEN_TOOLS) | {followed.name for followed in followable()}
+    expected = set(WRITTEN_TOOLS) | {
+        followed.name for followed in followable(_held(mcp_settings))
+    }
     assert set(tools) == expected
 
 
 def test_a_relationship_the_registry_adds_would_add_a_tool(
-    tools: dict[str, Tool],
+    tools: dict[str, Tool], mcp_settings: Settings
 ) -> None:
     offered = set(tools) - set(WRITTEN_TOOLS)
-    assert len(offered) == len(RELATIONSHIP_SPECS) * len(Direction)
+    assert len(offered) == len(_held(mcp_settings)) * len(Direction)
 
 
 def test_every_relationship_is_reachable_in_both_directions(
+    tools: dict[str, Tool], mcp_settings: Settings
+) -> None:
+    for followed in followable(_held(mcp_settings)):
+        assert followed.name in tools
+
+
+def test_this_build_can_follow_every_link_it_declares(
+    mcp_settings: Settings,
+) -> None:
+    assert _held(mcp_settings) == frozenset(RELATIONSHIP_SPECS)
+
+
+def test_a_link_with_no_edges_is_never_offered_as_a_tool(
     tools: dict[str, Tool],
 ) -> None:
-    for followed in followable():
-        assert followed.name in tools
+    without = frozenset(RELATIONSHIP_SPECS) - {RelationshipType.DROPS}
+    offered = {followed.name for followed in followable(without)}
+    assert set(tools) - set(WRITTEN_TOOLS) - offered == {"drops", "dropped_by"}
+
+
+def test_a_generated_tool_does_not_repeat_a_shape_every_other_one_states(
+    tools: dict[str, Tool], mcp_settings: Settings
+) -> None:
+    for followed in followable(_held(mcp_settings)):
+        assert tools[followed.name].outputSchema is None
+
+
+def test_a_written_tool_states_the_shape_only_it_answers_with(
+    tools: dict[str, Tool],
+) -> None:
+    for name in ("get_thing", "search", "list_sorts"):
+        assert tools[name].outputSchema is not None
+
+
+def test_the_whole_surface_costs_less_than_a_single_answer_may(
+    tools: dict[str, Tool],
+) -> None:
+    import json
+
+    surface = json.dumps([tool.model_dump(mode="json") for tool in tools.values()])
+    assert len(surface) < MOST_RESULT_CHARS * 2
 
 
 def test_the_server_names_itself_for_whoever_connects(mcp_settings: Settings) -> None:
@@ -173,6 +224,11 @@ def test_what_are_the_stats_of_this_npc(mcp_settings: Settings) -> None:
     assert answered["result"]["facts"]
 
 
+def test_what_is_this_item_worth(mcp_settings: Settings) -> None:
+    answered = _called(mcp_settings, "get_thing", {"name": SCIMITAR})
+    assert answered["result"]["facts"]["Market price"] == "108590"
+
+
 def test_which_items_does_this_npc_drop(mcp_settings: Settings) -> None:
     answered = _called(mcp_settings, "drops", {"name": DRAGON})
     assert answered["outcome"] == Outcome.FOUND
@@ -205,6 +261,22 @@ def test_what_is_at_this_place(mcp_settings: Settings) -> None:
     assert answered["result"]["total"] >= 1
 
 
+def test_what_does_working_this_thing_give(mcp_settings: Settings) -> None:
+    answered = _called(mcp_settings, "yields", {"name": "Tree"})
+    assert answered["outcome"] == Outcome.FOUND
+    assert answered["result"]["neighbours"][0]["name"] == "Logs"
+
+
+def test_where_does_this_item_come_from(mcp_settings: Settings) -> None:
+    answered = _called(mcp_settings, "gathered_from", {"name": "Logs"})
+    assert answered["result"]["neighbours"][0]["type"] == EntityType.SCENERY
+
+
+def test_what_can_this_item_be_turned_into(mcp_settings: Settings) -> None:
+    answered = _called(mcp_settings, "makes", {"name": "Logs"})
+    assert answered["result"]["total"] >= 1
+
+
 def test_what_does_this_quest_reward(mcp_settings: Settings) -> None:
     answered = _called(mcp_settings, "rewards", {"name": "Death Plateau"})
     assert answered["result"]["total"] >= 1
@@ -225,6 +297,92 @@ def test_which_build_am_i_reading(mcp_settings: Settings) -> None:
     answered = _called(mcp_settings, "about", {})
     assert answered["data_version"] == "fixture-0001"
     assert answered["schema_version"]
+
+
+def test_which_of_these_hold_more_than_a_number(mcp_settings: Settings) -> None:
+    answered = _called(
+        mcp_settings,
+        COMPARE_TOOL,
+        {
+            "type": EntityType.ITEM,
+            "holds": "Strength bonus",
+            "how": "more_than",
+            "number": 10,
+        },
+    )
+    assert answered["outcome"] == Outcome.FOUND
+    assert [found["name"] for found in answered["result"]["found"]] == [SCIMITAR]
+    assert answered["result"]["found"][0]["facts"] == {"Strength bonus": "66"}
+
+
+def test_which_of_these_is_the_largest(mcp_settings: Settings) -> None:
+    answered = _called(
+        mcp_settings,
+        COMPARE_TOOL,
+        {"type": EntityType.ITEM, "ordered_by": "Weight", "descending": True},
+    )
+    assert answered["result"]["found"][0]["name"] == "Kbd heads"
+    assert answered["result"]["found"][0]["facts"] == {"Weight": "10 kg"}
+
+
+def test_words_no_value_answers_to_are_answered_with_the_ones_that_do(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(
+        mcp_settings, COMPARE_TOOL, {"type": EntityType.ITEM, "holds": "how shiny"}
+    )
+    assert answered["outcome"] == Outcome.UNKNOWN
+    assert answered["result"] is None
+    assert "Buy limit" in (answered["note"] or "")
+
+
+def test_naming_nothing_to_compare_is_answered_rather_than_listed(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(mcp_settings, COMPARE_TOOL, {"type": EntityType.ITEM})
+    assert answered["outcome"] == Outcome.UNKNOWN
+    assert answered["result"] is None
+
+
+def test_which_way_has_this_price_gone(mcp_settings: Settings) -> None:
+    answered = _called(mcp_settings, MOVEMENT_TOOL, {"name": SCIMITAR})
+    assert answered["outcome"] == Outcome.FOUND
+    went = answered["result"]
+    assert went["of"] == SCIMITAR
+    assert went["went"] in {"up", "down", "nowhere"}
+    assert went["opened_on"] < went["closed_on"]
+    assert went["readings"] >= 1
+    assert went["trust"]
+
+
+def test_a_price_is_only_read_over_the_stretch_that_was_asked_for(
+    mcp_settings: Settings,
+) -> None:
+    whole = _called(mcp_settings, MOVEMENT_TOOL, {"name": SCIMITAR})
+    part = _called(
+        mcp_settings, MOVEMENT_TOOL, {"name": SCIMITAR, "since": "2024-06-15"}
+    )
+    assert part["result"]["readings"] < whole["result"]["readings"]
+    assert part["result"]["opened_on"] >= "2024-06-15"
+
+
+def test_a_day_nobody_could_read_is_treated_as_no_day_at_all(
+    mcp_settings: Settings,
+) -> None:
+    whole = _called(mcp_settings, MOVEMENT_TOOL, {"name": SCIMITAR})
+    nonsense = _called(
+        mcp_settings, MOVEMENT_TOOL, {"name": SCIMITAR, "since": "last tuesday"}
+    )
+    assert nonsense["result"]["readings"] == whole["result"]["readings"]
+
+
+def test_something_the_market_never_recorded_says_so_rather_than_guessing(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(mcp_settings, MOVEMENT_TOOL, {"name": "Ashes"})
+    assert answered["outcome"] == Outcome.FOUND
+    assert answered["result"] is None
+    assert answered["note"]
 
 
 # a name is enough, and an identity still works
@@ -549,10 +707,9 @@ def test_nothing_in_this_surface_names_an_attribute_or_a_relationship() -> None:
     from pathlib import Path
 
     import wiki_api.surfaces.mcp as surface
-    from wiki_api.domain.attributes import ATTRIBUTE_SPECS
+    from tests.vocabulary import declared_names
 
-    forbidden = {spec.key for specs in ATTRIBUTE_SPECS.values() for spec in specs}
-    forbidden |= {rel.value for rel in RELATIONSHIP_SPECS}
+    forbidden = declared_names()
     for path in Path(str(surface.__path__[0])).rglob("*.py"):
         source = path.read_text(encoding="utf-8").split("\n# test cases\n")[0]
         named = {

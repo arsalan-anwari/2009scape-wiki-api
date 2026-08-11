@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Final, Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import (
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 ANY_ORIGIN = "*"
 ANY_KEY = "WIKI_API_AUTH_PUBLIC_KEY"
 DEPLOYMENT_FILE_VARIABLE = "WIKI_API_CONFIG_FILE"
+PRICES_DIRNAME: Final = "grand-exchange"
 
 
 def deployment_file() -> Path:
@@ -87,7 +88,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     artifact_filename: str = "knowledge.sqlite3"
     staged_dirname: str = "source"
-    prices_dirname: str = "grand-exchange"
+    prices_dirname: str = PRICES_DIRNAME
     game_data_dir: Path = Path("game_data")
     overlay_dir: Path = Path("overlays")
     identity_dir: Path = Path("identity")

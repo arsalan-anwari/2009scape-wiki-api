@@ -3,7 +3,7 @@
   "source": "grand_exchange",
   "source_file": "gedata",
   "game_version": "2009scape@5a37f2f8",
-  "precedence": 0,
+  "precedence": 1,
   "prices": [
     {
       "item_id": 1065,
@@ -74,6 +74,78 @@
       "item_id": 4588,
       "snapshot_date": "2026-07-25",
       "value": 100000
+    }
+  ],
+  "entities": [
+    {
+      "type": "item",
+      "id": 536,
+      "mode": "patch",
+      "attributes": {
+        "market_price": 2479,
+        "market_confidence": "traded",
+        "market_low": 1999,
+        "market_high": 2479,
+        "market_middle": 2477,
+        "market_entries": 3
+      },
+      "claims": false
+    },
+    {
+      "type": "item",
+      "id": 1065,
+      "mode": "patch",
+      "attributes": {
+        "market_price": 2777,
+        "market_confidence": "traded",
+        "market_low": 2777,
+        "market_high": 2891,
+        "market_middle": 2834,
+        "market_entries": 2
+      },
+      "claims": false
+    },
+    {
+      "type": "item",
+      "id": 3105,
+      "mode": "patch",
+      "attributes": {
+        "market_price": 13797,
+        "market_confidence": "traded",
+        "market_low": 13797,
+        "market_high": 42550,
+        "market_middle": 13913,
+        "market_entries": 3
+      },
+      "claims": false
+    },
+    {
+      "type": "item",
+      "id": 4587,
+      "mode": "patch",
+      "attributes": {
+        "market_price": 108590,
+        "market_confidence": "traded",
+        "market_low": 106049,
+        "market_high": 108601,
+        "market_middle": 107320,
+        "market_entries": 4
+      },
+      "claims": false
+    },
+    {
+      "type": "item",
+      "id": 4588,
+      "mode": "patch",
+      "attributes": {
+        "market_price": 100000,
+        "market_confidence": "static",
+        "market_low": 100000,
+        "market_high": 100000,
+        "market_middle": 100000,
+        "market_entries": 2
+      },
+      "claims": false
     }
   ]
 }

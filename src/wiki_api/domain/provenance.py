@@ -59,11 +59,14 @@ class Provenance(BaseModel):
     game_version: GameVersion
     source_file: str | None = None
     source_ref: str | None = None
+    source_revision: str | None = None
 
     @model_validator(mode="after")
     def _check(self) -> Self:
         if self.source_file is not None and not self.source_file.strip():
             raise ValueError("a source file must not be blank")
+        if self.source_revision is not None and not self.source_revision.strip():
+            raise ValueError("a source revision must not be blank")
         return self
 
 
@@ -138,6 +141,34 @@ def test_a_blank_source_file_is_rejected() -> None:
         Provenance.model_validate(
             {"source": "fixture", "game_version": "test", "source_file": "   "}
         )
+
+
+def test_a_decoded_fact_names_the_revision_it_was_read_from() -> None:
+    provenance = Provenance.model_validate(
+        {
+            "source": "game_cache",
+            "game_version": "2009scape@1f4a2c9",
+            "source_file": "cache/items.json",
+            "source_revision": "index 19 revision 214",
+        }
+    )
+    assert provenance.source_revision == "index 19 revision 214"
+
+
+def test_a_blank_source_revision_is_rejected() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        Provenance.model_validate(
+            {"source": "fixture", "game_version": "test", "source_revision": " "}
+        )
+
+
+def test_a_fact_from_a_git_tracked_source_records_no_revision() -> None:
+    provenance = Provenance.model_validate(
+        {"source": "game_config", "game_version": "2009scape@1f4a2c9"}
+    )
+    assert provenance.source_revision is None
 
 
 def test_a_fact_need_not_name_a_file() -> None:

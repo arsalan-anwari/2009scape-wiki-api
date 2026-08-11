@@ -35,7 +35,10 @@
           "key": "currency",
           "value": {
             "type": "item",
-            "id": 995
+            "id": 995,
+            "slug": "coins",
+            "label": "Coins",
+            "icon_ref": null
           },
           "label": "Currency",
           "group": "shop",
@@ -126,7 +129,10 @@
                 "key": "currency",
                 "value": {
                   "type": "item",
-                  "id": 995
+                  "id": 995,
+                  "slug": "coins",
+                  "label": "Coins",
+                  "icon_ref": null
                 },
                 "label": "Currency",
                 "group": "shop",
@@ -220,7 +226,8 @@
                   "npc_spawn",
                   "ground_spawn",
                   "shop_front",
-                  "quest_start"
+                  "quest_start",
+                  "built_in"
                 ]
               },
               {

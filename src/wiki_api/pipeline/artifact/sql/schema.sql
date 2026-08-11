@@ -10,7 +10,7 @@ CREATE TABLE meta (
 CREATE TABLE entity (
     search_id     INTEGER PRIMARY KEY,
     type          TEXT    NOT NULL
-        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location')),
+        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
     id            INTEGER NOT NULL,
     slug          TEXT    NOT NULL,
     name          TEXT    NOT NULL,
@@ -28,10 +28,11 @@ CREATE TABLE entity (
     attributes    TEXT    NOT NULL,
     source        TEXT    NOT NULL
         CHECK (source IN
-            ('game_config', 'game_code', 'game_cache', 'grand_exchange', 'overlay',
-             'fixture')),
+            ('game_config', 'game_code', 'game_cache', 'grand_exchange',
+             'community_wiki', 'overlay', 'fixture')),
     source_file   TEXT,
     source_ref    TEXT,
+    source_revision TEXT,
     game_version  TEXT    NOT NULL,
     UNIQUE (type, id),
     UNIQUE (type, slug),
@@ -44,7 +45,7 @@ CREATE INDEX entity_by_canonical ON entity (type, canonical_id);
 
 CREATE TABLE entity_alias (
     type       TEXT    NOT NULL
-        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location')),
+        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
     alias_slug TEXT    NOT NULL,
     entity_id  INTEGER NOT NULL,
     kind       TEXT    NOT NULL
@@ -54,23 +55,27 @@ CREATE TABLE entity_alias (
 
 CREATE TABLE edge (
     src_type      TEXT    NOT NULL
-        CHECK (src_type IN ('item', 'npc', 'shop', 'quest', 'location')),
+        CHECK (src_type IN
+            ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
     src_id        INTEGER NOT NULL,
     rel           TEXT    NOT NULL
         CHECK (rel IN ('drops', 'sells', 'staffed_by', 'rewards', 'uses_ammunition',
-                       'located_in', 'part_of')),
+                       'located_in', 'part_of', 'yields', 'makes', 'requires',
+                       'assigns', 'satisfied_by')),
     dst_type      TEXT    NOT NULL
-        CHECK (dst_type IN ('item', 'npc', 'shop', 'quest', 'location')),
+        CHECK (dst_type IN
+            ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
     dst_id        INTEGER NOT NULL,
     discriminator TEXT    NOT NULL DEFAULT '',
     attributes    TEXT    NOT NULL,
     order_key     INTEGER NOT NULL DEFAULT 0,
     source        TEXT    NOT NULL
         CHECK (source IN
-            ('game_config', 'game_code', 'game_cache', 'grand_exchange', 'overlay',
-             'fixture')),
+            ('game_config', 'game_code', 'game_cache', 'grand_exchange',
+             'community_wiki', 'overlay', 'fixture')),
     source_file   TEXT,
     source_ref    TEXT,
+    source_revision TEXT,
     game_version  TEXT    NOT NULL,
     PRIMARY KEY (src_type, src_id, rel, dst_type, dst_id, discriminator)
 );

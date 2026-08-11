@@ -1,7 +1,5 @@
-"""The administrator's side of access: make an issuer key, issue a token for a client,
-stop answering one, and print what a server needs to be told.
-
-This runs on a person's own machine. Nothing that serves requests imports it.
+"""Make an issuer key, issue a token for a client, stop answering one, and print what
+a server needs to be told.
 """
 
 from __future__ import annotations

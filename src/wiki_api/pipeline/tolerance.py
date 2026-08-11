@@ -73,6 +73,18 @@ DECLARED_TOLERANCES: Final[tuple[Tolerance, ...]] = (
         allowed=0,
         because="every scenery definition decodes today, so any refusal is new",
     ),
+    Tolerance(
+        source="cache/datamaps",
+        reason="definition refused",
+        allowed=0,
+        because="all 2196 maps decode today, so any refusal is a new opcode",
+    ),
+    Tolerance(
+        source="cache/maplabels",
+        reason="label refused",
+        allowed=0,
+        because="all 211 labels decode today, so any refusal is a shape we misread",
+    ),
 )
 
 

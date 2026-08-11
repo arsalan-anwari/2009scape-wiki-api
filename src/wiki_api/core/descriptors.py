@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from wiki_api.core.results import PageDescriptor, Section
-from wiki_api.core.values import entity_values
+from wiki_api.core.values import entity_values, naming_of
 from wiki_api.core.walks import BLOCK_PAGE_SIZE, blocks_of
 from wiki_api.domain.presentation import GROUP_META, GroupPlacement
 
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from wiki_api.core.results import AttributeValue, Block
+    from wiki_api.core.values import Naming
     from wiki_api.domain.entity import Entity
     from wiki_api.domain.identity import Link
     from wiki_api.domain.vocabulary import AttributeGroup
@@ -30,9 +31,10 @@ def describe_page(
     canonical_key = entity.canonical_key
     variants = repository.variants_of(canonical_key)
     keys = tuple(dict.fromkeys([canonical_key, *(variant.key for variant in variants)]))
+    naming = naming_of(repository)
     return build_descriptor(
         entity,
-        blocks=blocks_of(repository, entity, keys, limit=limit),
+        blocks=blocks_of(repository, entity, keys, limit=limit, naming=naming),
         canonical=_canonical_link(repository, entity),
         variants=(
             ()
@@ -40,6 +42,7 @@ def describe_page(
             else tuple(variant.to_link() for variant in variants)
         ),
         data_version=data_version,
+        naming=naming,
     )
 
 
@@ -50,9 +53,10 @@ def build_descriptor(
     canonical: Link | None,
     variants: Sequence[Link],
     data_version: str,
+    naming: Naming | None = None,
 ) -> PageDescriptor:
     """Lay an entity out from the values it holds and the blocks already walked."""
-    values = entity_values(entity)
+    values = entity_values(entity, naming)
     return PageDescriptor(
         entity=entity.to_link(),
         type=entity.type,
@@ -122,7 +126,7 @@ def _entity(**overrides: object) -> Entity:
             "shop_price": 100,
             "weight": 1.8,
             "equipment_slot": 3,
-            "weapon_interface": 18,
+            "render_anim": 18,
         },
         "provenance": {"source": "fixture", "game_version": "test"},
     }
@@ -178,7 +182,7 @@ def test_internal_values_reach_neither_the_infobox_nor_a_section() -> None:
     shown = {value.key for value in descriptor.infobox} | {
         value.key for section in descriptor.sections for value in section.attributes
     }
-    assert "weapon_interface" not in shown
+    assert "render_anim" not in shown
 
 
 def test_a_page_with_no_attributes_at_all_still_describes_itself() -> None:

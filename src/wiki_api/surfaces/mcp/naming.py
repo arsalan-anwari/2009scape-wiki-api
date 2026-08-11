@@ -23,6 +23,8 @@ VOWELS = "aeiou"
 
 SORTS_TOOL = "list_sorts"
 CLOSE_NAMES_TOOL = "find_close_names"
+COMPARE_TOOL = "compare_by_number"
+MOVEMENT_TOOL = "how_the_price_moved"
 WRITTEN_TOOLS = (
     "search",
     "get_thing",
@@ -30,6 +32,8 @@ WRITTEN_TOOLS = (
     "about",
     SORTS_TOOL,
     CLOSE_NAMES_TOOL,
+    COMPARE_TOOL,
+    MOVEMENT_TOOL,
 )
 
 
@@ -83,9 +87,14 @@ def described(spec: RelationshipSpec, direction: Direction) -> str:
     )
 
 
-def followable() -> tuple[Followed, ...]:
-    """List every way of following every link the registry declares, in a stable
-    order.
+def followable(
+    held: frozenset[RelationshipType] | None = None,
+) -> tuple[Followed, ...]:
+    """List every way of following a link the registry declares and this build holds,
+    in a stable order.
+
+    Passing no set offers all of them, which is what a caller with no artifact to ask
+    has to do.
     """
     return tuple(
         Followed(
@@ -96,6 +105,7 @@ def followable() -> tuple[Followed, ...]:
             asked=asked_of(spec, direction),
         )
         for spec in sorted(RELATIONSHIP_SPECS.values(), key=lambda spec: spec.order)
+        if held is None or spec.rel in held
         for direction in Direction
     )
 

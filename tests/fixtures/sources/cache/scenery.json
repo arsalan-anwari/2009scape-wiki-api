@@ -40,5 +40,19 @@
    null,
    null
   ]
+ },
+ {
+  "id": 4706,
+  "name": "Veg stall",
+  "size_x": 2,
+  "size_y": 2,
+  "members_only": false,
+  "options": [
+   null,
+   "Steal-from",
+   null,
+   null,
+   null
+  ]
  }
 ]

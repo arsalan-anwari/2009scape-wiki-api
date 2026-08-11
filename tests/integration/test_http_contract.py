@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from wiki_api.domain.attributes import ATTRIBUTE_SPECS
 from wiki_api.domain.page import MAX_PAGE_SIZE
-from wiki_api.domain.relationships import RELATIONSHIP_SPECS
 from wiki_api.surfaces.http import create_app
 from wiki_api.surfaces.http.caching import DATA_VERSION_HEADER
 
@@ -213,6 +211,9 @@ def test_what_types_exist_and_how_do_their_fields_present(client: TestClient) ->
         "shop",
         "quest",
         "location",
+        "scenery",
+        "task",
+        "room",
     }
     assert all(info["attributes"] for info in published)
 
@@ -228,7 +229,7 @@ def test_which_artifact_am_i_reading(client: TestClient) -> None:
 
 def test_an_entity_is_reachable_by_id_and_by_slug(client: TestClient) -> None:
     by_id = _body(client, SCIMITAR)
-    by_slug = _body(client, "/v1/entities/item/dragon-scimitar-4587")
+    by_slug = _body(client, "/v1/entities/item/dragon-scimitar")
     assert by_id == by_slug
 
 
@@ -308,7 +309,7 @@ def test_a_reader_can_ask_what_a_reference_names_without_being_sent_there(
 def test_inspecting_a_live_reference_says_it_is_live(client: TestClient) -> None:
     inspected = _body(client, f"{SCIMITAR}/resolve")
     assert inspected["outcome"] == "found"
-    assert inspected["target"]["slug"] == "dragon-scimitar-4587"
+    assert inspected["target"]["slug"] == "dragon-scimitar"
 
 
 def test_inspecting_an_unpublished_reference_says_so_rather_than_refusing(
@@ -355,7 +356,16 @@ def test_a_canonical_page_owns_up_to_its_variants(client: TestClient) -> None:
 
 @pytest.mark.parametrize(
     "name",
-    ["item-4587", "npc-50", "shop-53", "quest-1", "location-1"],
+    [
+        "item-4587",
+        "npc-50",
+        "shop-53",
+        "quest-1",
+        "location-1",
+        "scenery-1276",
+        "task-1",
+        "room-1",
+    ],
 )
 def test_the_page_served_is_the_page_the_core_described(
     preview_client: TestClient, name: str
@@ -462,6 +472,152 @@ def test_a_listing_tells_a_reader_where_the_next_page_starts(
     listed = _body(client, "/v1/types/item/entities?limit=1")
     assert listed["has_more"] is True
     assert listed["next_offset"] == 1
+
+
+# what a thing has been worth, and how far to believe it
+
+
+def test_what_an_item_has_been_worth_is_read_a_page_at_a_time(
+    client: TestClient,
+) -> None:
+    read = _body(client, "/v1/entities/item/4587/prices")
+    assert read["total"] == 4
+    assert [point["value"] for point in read["items"]] == [
+        106049,
+        106049,
+        108601,
+        108590,
+    ]
+
+
+def test_a_reading_can_start_from_a_day(client: TestClient) -> None:
+    read = _body(client, "/v1/entities/item/4587/prices?since=2026-01-01")
+    assert [point["value"] for point in read["items"]] == [108601, 108590]
+
+
+def test_a_reading_pages_like_every_other_listing(client: TestClient) -> None:
+    read = _body(client, "/v1/entities/item/4587/prices?limit=2")
+    assert len(read["items"]) == 2
+    assert read["next_offset"] == 2
+
+
+def test_a_thing_the_market_never_recorded_answers_empty_rather_than_absent(
+    client: TestClient,
+) -> None:
+    read = _body(client, "/v1/entities/npc/50/prices")
+    assert read["items"] == []
+    assert read["total"] == 0
+
+
+def test_a_reading_asked_of_nothing_is_still_a_not_found(client: TestClient) -> None:
+    assert client.get("/v1/entities/item/999999/prices").status_code == 404
+
+
+def test_an_item_page_says_what_it_is_worth_and_how_far_to_trust_it(
+    client: TestClient,
+) -> None:
+    page = _body(client, "/v1/entities/item/4587")
+    values = {
+        value["key"]: value
+        for section in page["sections"]
+        for value in section["attributes"]
+    }
+    assert values["market_price"]["value"] == 108590
+    assert values["market_confidence"]["value"] == "traded"
+    assert values["market_price"]["derived"] is True
+
+
+# a question whose subject is a number rather than a name
+
+
+def _compared(client: TestClient, asked: str) -> dict[str, Any]:
+    return _body(client, f"/v1/types/item/compare?{asked}")
+
+
+def test_a_listing_can_be_narrowed_by_a_number_it_stores(client: TestClient) -> None:
+    read = _compared(client, "holds=ge_buy_limit&how=at_least&number=10000")
+    assert read["rows"]["total"] == 3
+    assert {row["link"]["label"] for row in read["rows"]["items"]} == {
+        "Bronze bolts",
+        "Dragon bones",
+        "Logs",
+    }
+
+
+def test_one_part_of_a_packed_value_is_compared_on_its_own(
+    client: TestClient,
+) -> None:
+    read = _compared(client, "holds=bonuses.strength&how=more_than&number=10")
+    assert [row["link"]["label"] for row in read["rows"]["items"]] == [
+        "Dragon scimitar"
+    ]
+
+
+def test_a_value_may_be_named_by_the_label_the_registry_publishes(
+    client: TestClient,
+) -> None:
+    by_key = _compared(client, "holds=bonuses.strength&how=more_than&number=10")
+    by_label = _compared(client, "holds=Strength%20bonus&how=more_than&number=10")
+    assert by_key == by_label
+
+
+def test_a_comparison_answers_with_the_values_it_was_made_on(
+    client: TestClient,
+) -> None:
+    read = _compared(client, "holds=bonuses.strength&how=more_than&number=10")
+    shown = read["rows"]["items"][0]["attributes"]
+    assert [value["key"] for value in shown] == ["bonuses.strength"]
+    assert shown[0]["label"] == "Strength bonus"
+    assert shown[0]["value"] == 66
+    assert isinstance(shown[0]["value"], int)
+
+
+def test_a_compared_value_keeps_the_shape_the_record_stores_it_in(
+    client: TestClient,
+) -> None:
+    read = _compared(client, "holds=weight&how=at_least&number=10")
+    shown = read["rows"]["items"][0]["attributes"][0]
+    assert shown["value"] == 10.0
+    assert isinstance(shown["value"], float)
+
+
+def test_a_listing_can_be_ordered_by_a_number_it_stores(client: TestClient) -> None:
+    read = _compared(client, "ordered_by=weight&descending=true&limit=3")
+    assert [row["link"]["label"] for row in read["rows"]["items"]] == [
+        "Kbd heads",
+        "Phoenix crossbow",
+        "Logs",
+    ]
+
+
+def test_the_question_comes_back_beside_the_answer(client: TestClient) -> None:
+    read = _compared(client, "holds=weight&how=at_most&number=1&ordered_by=weight")
+    assert read["where"] == [{"path": "weight", "compare": "at_most", "value": 1.0}]
+    assert read["order"] == {"path": "weight", "descending": False}
+    assert read["type"] == "item"
+
+
+def test_a_comparison_pages_like_every_other_listing(client: TestClient) -> None:
+    read = _compared(client, "ordered_by=weight&limit=2")
+    assert len(read["rows"]["items"]) == 2
+    assert read["rows"]["next_offset"] == 2
+
+
+def test_words_no_declared_value_answers_to_are_refused(client: TestClient) -> None:
+    answered = client.get("/v1/types/item/compare?holds=how%20shiny%20it%20is")
+    assert answered.status_code == 422
+    assert answered.json()["error"]["code"] == "invalid_request"
+
+
+def test_naming_nothing_to_compare_is_refused_rather_than_listed(
+    client: TestClient,
+) -> None:
+    assert client.get("/v1/types/item/compare").status_code == 422
+
+
+def test_a_value_belonging_to_another_type_is_refused(client: TestClient) -> None:
+    answered = client.get("/v1/types/quest/compare?holds=bonuses.strength")
+    assert answered.status_code == 422
 
 
 # caching, because a build never changes underneath a reader
@@ -614,9 +770,9 @@ def test_a_front_end_can_read_the_headers_it_caches_with(client: TestClient) -> 
 
 def test_nothing_in_the_surface_names_an_attribute_or_a_relationship() -> None:
     import wiki_api.surfaces as surfaces
+    from tests.vocabulary import declared_names
 
-    forbidden = {spec.key for specs in ATTRIBUTE_SPECS.values() for spec in specs}
-    forbidden |= {rel.value for rel in RELATIONSHIP_SPECS}
+    forbidden = declared_names()
     for path in Path(str(surfaces.__path__[0])).rglob("*.py"):
         source = path.read_text(encoding="utf-8").split("\n# test cases\n")[0]
         named = {
@@ -652,3 +808,19 @@ def test_a_process_pointed_at_an_unreadable_artifact_refuses_to_start(
     settings = http_settings.model_copy(update={"data_dir": tmp_path})
     with pytest.raises(ArtifactUnreadable), Client(create_app(settings)):
         pass
+
+
+def test_a_type_the_contract_never_knew_serves_a_page_like_any_other(
+    client: TestClient,
+) -> None:
+    page = _body(client, "/v1/entities/scenery/tree")
+    assert page["entity"]["label"] == "Tree"
+    assert page["infobox"]
+    assert [block["label"] for block in page["blocks"]] == ["Yields"]
+
+
+def test_a_walk_from_a_type_the_contract_never_knew_is_paged(
+    client: TestClient,
+) -> None:
+    walked = _body(client, "/v1/entities/scenery/1276/rel/yields?direction=forward")
+    assert [row["link"]["label"] for row in walked["rows"]["items"]] == ["Logs"]

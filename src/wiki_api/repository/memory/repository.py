@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import operator
 import re
-from typing import TYPE_CHECKING
+from collections import Counter
+from typing import TYPE_CHECKING, Final
 
+from wiki_api.domain.attributes import number_at
 from wiki_api.domain.entity import Entity
 from wiki_api.domain.errors import (
     EntityHidden,
@@ -15,17 +18,19 @@ from wiki_api.domain.errors import (
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.manifest import SCHEMA_VERSION
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page, SortOrder
+from wiki_api.domain.query import Comparison
 from wiki_api.domain.relationships import Edge
 from wiki_api.domain.search import NEAR_FLOOR, NEAR_KEEP, NEAR_LIMIT, SearchHit
 from wiki_api.repository.naming import NameIndex, fold
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Callable, Mapping, Sequence
     from datetime import date
 
     from wiki_api.domain.alias import EntityAlias
     from wiki_api.domain.manifest import Manifest
     from wiki_api.domain.prices import PricePoint
+    from wiki_api.domain.query import Condition, Ordering
     from wiki_api.domain.relationships import RelationshipType
 
 NAME_WEIGHT = 10.0
@@ -33,6 +38,14 @@ ALIAS_WEIGHT = 5.0
 DESCRIPTION_WEIGHT = 1.0
 
 _TOKENS = re.compile(r"[0-9a-z]+")
+
+_COMPARISONS: Final[Mapping[Comparison, Callable[[float, float], bool]]] = {
+    Comparison.AT_LEAST: operator.ge,
+    Comparison.MORE_THAN: operator.gt,
+    Comparison.AT_MOST: operator.le,
+    Comparison.LESS_THAN: operator.lt,
+    Comparison.EQUALS: operator.eq,
+}
 
 
 class InMemoryKnowledgeRepository:
@@ -120,6 +133,37 @@ class InMemoryKnowledgeRepository:
         return Page[Entity](
             items=tuple(listed[offset : offset + limit]),
             total=len(listed),
+            limit=limit,
+            offset=offset,
+        )
+
+    def list_by_attribute(
+        self,
+        entity_type: EntityType,
+        *,
+        where: Sequence[Condition] = (),
+        order: Ordering | None = None,
+        limit: int = DEFAULT_PAGE_SIZE,
+        offset: int = 0,
+    ) -> Page[Entity]:
+        matched = [
+            entity
+            for entity in self._entities.values()
+            if entity.key.type is entity_type
+            and entity.is_published
+            and entity.canonical_id is None
+            and (order is None or number_at(entity.attributes, order.path) is not None)
+            and all(_holds(entity, condition) for condition in where)
+        ]
+        matched.sort(key=lambda entity: (entity.name, entity.key.id))
+        if order is not None:
+            matched.sort(
+                key=lambda entity: number_at(entity.attributes, order.path) or 0.0,
+                reverse=order.descending,
+            )
+        return Page[Entity](
+            items=tuple(matched[offset : offset + limit]),
+            total=len(matched),
             limit=limit,
             offset=offset,
         )
@@ -241,6 +285,12 @@ class InMemoryKnowledgeRepository:
         variants.sort(key=lambda entity: entity.key.id)
         return tuple(variants)
 
+    def relationship_totals(self) -> Mapping[RelationshipType, int]:
+        totals: Counter[RelationshipType] = Counter()
+        for edge in self._edges:
+            totals[edge.rel] += 1
+        return dict(totals)
+
     def price_history(
         self, item_id: int, *, since: date | None = None
     ) -> tuple[PricePoint, ...]:
@@ -289,6 +339,13 @@ class InMemoryKnowledgeRepository:
                 return None
             total += weight
         return total
+
+
+def _holds(entity: Entity, condition: Condition) -> bool:
+    value = number_at(entity.attributes, condition.path)
+    if value is None:
+        return False
+    return _COMPARISONS[condition.compare](value, condition.value)
 
 
 def _edge_page(matched: Sequence[Edge], limit: int, offset: int) -> Page[Edge]:

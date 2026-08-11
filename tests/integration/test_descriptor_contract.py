@@ -20,6 +20,9 @@ DESCRIBED = {
     "shop-53": EntityKey(type=EntityType.SHOP, id=53),
     "quest-1": EntityKey(type=EntityType.QUEST, id=1),
     "location-1": EntityKey(type=EntityType.LOCATION, id=1),
+    "scenery-1276": EntityKey(type=EntityType.SCENERY, id=1276),
+    "task-1": EntityKey(type=EntityType.TASK, id=1),
+    "room-1": EntityKey(type=EntityType.ROOM, id=1),
 }
 
 

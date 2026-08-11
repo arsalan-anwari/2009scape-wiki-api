@@ -23,6 +23,7 @@ from wiki_api.pipeline.artifact.errors import (
     DuplicateSourceKey,
     InvalidEdge,
     InvalidEntity,
+    OverlayExpired,
     PatchWithoutTarget,
     UnknownEntity,
     VariantChain,
@@ -47,6 +48,7 @@ class _Draft:
     game_version: GameVersion
     name: str
     source_file: str | None = None
+    source_revision: str | None = None
     source_ref: str | None = None
     source_key: str | None = None
     description: str | None = None
@@ -97,6 +99,7 @@ def _collect_definitions(
                 game_version=document.game_version,
                 name=overlay.name or "",
                 source_file=document.source_file,
+                source_revision=document.source_revision,
                 source_ref=overlay.source_ref,
                 source_key=overlay.source_key,
                 description=overlay.description,
@@ -121,14 +124,38 @@ def _apply_patches(
             draft = drafts.get(overlay.key)
             if draft is None:
                 raise PatchWithoutTarget(overlay.key, source.origin)
+            if overlay.expects is not None:
+                _check_expectation(draft, overlay, source.origin)
             _patch(draft, overlay, source)
 
 
+def _check_expectation(draft: _Draft, overlay: OverlayEntity, origin: str) -> None:
+    expected = overlay.expects
+    if expected is None:
+        return
+    stated: list[tuple[str, Any, Any]] = []
+    if expected.name is not None:
+        stated.append(("name", expected.name, draft.name))
+    if expected.description is not None:
+        stated.append(("description", expected.description, draft.description))
+    stated.extend(
+        (key, value, draft.attributes.get(key))
+        for key, value in expected.attributes.items()
+    )
+    for stated_field, wanted, found in stated:
+        if wanted != found:
+            raise OverlayExpired(overlay.key, origin, stated_field, wanted, found)
+
+
 def _patch(draft: _Draft, overlay: OverlayEntity, source: OverlaySource) -> None:
-    draft.origin = source.origin
-    draft.source = source.document.source
-    draft.source_file = source.document.source_file
-    draft.game_version = source.document.game_version
+    if overlay.claims:
+        draft.origin = source.origin
+        draft.source = source.document.source
+        draft.source_file = source.document.source_file
+        draft.source_revision = source.document.source_revision
+        draft.game_version = source.document.game_version
+        if overlay.source_ref is not None:
+            draft.source_ref = overlay.source_ref
     if overlay.name is not None:
         draft.name = overlay.name
     if overlay.description is not None:
@@ -149,18 +176,23 @@ def _patch(draft: _Draft, overlay: OverlayEntity, source: OverlaySource) -> None
         draft.searchable = overlay.searchable
     if overlay.icon_ref is not None:
         draft.icon_ref = overlay.icon_ref
-    if overlay.source_ref is not None:
-        draft.source_ref = overlay.source_ref
 
 
 def _build_entities(drafts: Mapping[EntityKey, _Draft]) -> tuple[Entity, ...]:
-    slugs = derive_slugs({key: draft.name for key, draft in drafts.items()})
+    slugs = derive_slugs(
+        {key: draft.name for key, draft in drafts.items()},
+        variants={key for key, draft in drafts.items() if _is_copy(draft)},
+    )
     entities: list[Entity] = []
     for key in sorted(drafts, key=lambda key: (key.type.value, key.id)):
         draft = drafts[key]
         visibility = _visibility_of(draft)
         entities.append(_entity_of(key, draft, slugs[key], visibility))
     return tuple(entities)
+
+
+def _is_copy(draft: _Draft) -> bool:
+    return draft.canonical_id is not None
 
 
 def _check_source_keys(
@@ -245,6 +277,7 @@ def _entity_of(
                 game_version=draft.game_version,
                 source_file=draft.source_file,
                 source_ref=draft.source_ref,
+                source_revision=draft.source_revision,
             ),
         )
     except ValidationError as error:
@@ -275,6 +308,7 @@ def _build_edges(
                             game_version=document.game_version,
                             source_file=document.source_file,
                             source_ref=overlay.source_ref,
+                            source_revision=document.source_revision,
                         ),
                     }
                 )
@@ -473,6 +507,55 @@ def test_a_patch_corrects_fields_without_restating_the_entity() -> None:
     }
 
 
+def _claimed(claims: bool) -> Entity:
+    snapshot = merge(
+        [
+            _source(
+                "items.json",
+                source="game_config",
+                entities=[_item(4587, "Dragon scimitar")],
+            ),
+            _source(
+                "grand-exchange",
+                precedence=1,
+                source="grand_exchange",
+                entities=[
+                    {
+                        "type": "item",
+                        "id": 4587,
+                        "mode": "patch",
+                        "claims": claims,
+                        "attributes": {"market_price": 108590},
+                    }
+                ],
+            ),
+        ]
+    )
+    return snapshot.entities[0]
+
+
+def test_a_patch_that_declines_the_entity_leaves_its_source_alone() -> None:
+    entity = _claimed(claims=False)
+    assert entity.provenance.source is SourceKind.GAME_CONFIG
+    assert entity.attributes.model_dump(exclude_none=True) == {"market_price": 108590}
+
+
+def test_a_patch_that_claims_the_entity_takes_its_source_over() -> None:
+    entity = _claimed(claims=True)
+    assert entity.provenance.source is SourceKind.GRAND_EXCHANGE
+
+
+def test_only_a_patch_may_decline_the_entity_it_writes() -> None:
+    import pytest
+
+    from wiki_api.pipeline.artifact.overlay import OverlayEntity
+
+    with pytest.raises(ValueError, match="does not claim"):
+        OverlayEntity.model_validate(
+            {"type": "item", "id": 4587, "name": "Dragon scimitar", "claims": False}
+        )
+
+
 def test_a_patch_without_a_definition_fails_the_build() -> None:
     import pytest
 
@@ -485,6 +568,100 @@ def test_a_patch_without_a_definition_fails_the_build() -> None:
                 )
             ]
         )
+
+
+def test_a_decoded_fact_carries_the_revision_its_document_names() -> None:
+    snapshot = merge(
+        [
+            _source(
+                "cache/items.json",
+                source="game_cache",
+                source_revision="index 19 revision 214",
+                entities=[_item(4587, "Dragon scimitar")],
+            )
+        ]
+    )
+    assert snapshot.entities[0].provenance.source_revision == "index 19 revision 214"
+
+
+def test_a_variant_gives_the_bare_slug_to_the_entity_it_copies() -> None:
+    snapshot = merge(
+        [
+            _source(
+                "items.json",
+                entities=[
+                    _item(4587, "Dragon scimitar"),
+                    _item(
+                        4588,
+                        "Dragon scimitar",
+                        canonical_id=4587,
+                        variant_kind="noted",
+                    ),
+                ],
+            )
+        ]
+    )
+    slugs = {entity.key.id: entity.slug for entity in snapshot.entities}
+    assert slugs == {4587: "dragon-scimitar", 4588: "dragon-scimitar-4588"}
+
+
+def _corrected(expects: dict[str, Any], **source: Any) -> list[OverlaySource]:
+    return [
+        _source(
+            "items.json",
+            entities=[
+                _item(4587, "Dragon scimitar", attributes={"ge_buy_limit": 10}),
+            ],
+            **source,
+        ),
+        _source(
+            "corrections.json",
+            precedence=10,
+            source="overlay",
+            entities=[
+                {
+                    "type": "item",
+                    "id": 4587,
+                    "mode": "patch",
+                    "attributes": {"ge_buy_limit": 20},
+                    "expects": expects,
+                }
+            ],
+        ),
+    ]
+
+
+def test_a_correction_that_still_matches_the_source_applies() -> None:
+    snapshot = merge(_corrected({"attributes": {"ge_buy_limit": 10}}))
+    assert snapshot.entities[0].attributes.model_dump(exclude_none=True) == {
+        "ge_buy_limit": 20
+    }
+
+
+def test_a_correction_fails_once_the_source_says_something_else() -> None:
+    import pytest
+
+    with pytest.raises(OverlayExpired) as caught:
+        merge(_corrected({"attributes": {"ge_buy_limit": 99}}))
+    assert caught.value.field == "ge_buy_limit"
+    assert caught.value.expected == 99
+    assert caught.value.found == 10
+
+
+def test_a_correction_can_state_what_the_source_called_the_entity() -> None:
+    import pytest
+
+    with pytest.raises(OverlayExpired) as caught:
+        merge(_corrected({"name": "Dragon scimmy"}))
+    assert caught.value.field == "name"
+
+
+def test_a_correction_can_state_that_the_source_says_nothing_at_all() -> None:
+    import pytest
+
+    merge(_corrected({"attributes": {"weight": None}}))
+    with pytest.raises(OverlayExpired):
+        merge(_corrected({"attributes": {"ge_buy_limit": None}}))
 
 
 def test_an_unnamed_entity_is_hidden_and_left_out_of_search() -> None:

@@ -17,11 +17,14 @@ from wiki_api.surfaces.mcp import (
     WRITTEN_TOOLS,
     followable,
 )
+from wiki_api.surfaces.mcp.naming import COMPARE_TOOL, MOVEMENT_TOOL
 from wiki_api.surfaces.mcp.server import (
     ABOUT_DESCRIPTION,
     CLOSE_NAMES_DESCRIPTION,
+    COMPARE_DESCRIPTION,
     GET_DESCRIPTION,
     LIST_DESCRIPTION,
+    MOVEMENT_DESCRIPTION,
     SEARCH_DESCRIPTION,
     SORTS_DESCRIPTION,
 )
@@ -216,6 +219,8 @@ def test_the_written_tools_a_reader_meets_are_the_ones_offered() -> None:
         "about": ABOUT_DESCRIPTION,
         SORTS_TOOL: SORTS_DESCRIPTION,
         CLOSE_NAMES_TOOL: CLOSE_NAMES_DESCRIPTION,
+        COMPARE_TOOL: COMPARE_DESCRIPTION,
+        MOVEMENT_TOOL: MOVEMENT_DESCRIPTION,
     }
     assert set(described) == set(WRITTEN_TOOLS)
     assert set(described) <= _offered()

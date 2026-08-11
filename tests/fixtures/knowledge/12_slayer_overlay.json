@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "source": "game_code",
+  "source_file": "Tasks.java",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "task",
+      "id": 1,
+      "name": "Banshee",
+      "description": "A screaming spirit found in the Slayer Tower.",
+      "source_key": "BANSHEE",
+      "source_ref": "Tasks.java#BANSHEE",
+      "attributes": {
+        "slayer_level": 15,
+        "combat_level": 20,
+        "advice": [
+          "Banshees use a piercing scream to shock their enemies.",
+          "You'll need some earmuffs to protect yourself from them."
+        ],
+        "undead": true,
+        "dragonfire": false
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "npc:4559",
+      "rel": "assigns",
+      "dst": "task:1",
+      "order_key": 8,
+      "source_ref": "Master.java#TURAEL",
+      "attributes": {
+        "weight": 8,
+        "min_amount": 15,
+        "max_amount": 50
+      }
+    },
+    {
+      "src": "task:1",
+      "rel": "satisfied_by",
+      "dst": "npc:50",
+      "order_key": 0,
+      "source_ref": "Tasks.java#BANSHEE",
+      "attributes": {}
+    },
+    {
+      "src": "quest:1",
+      "rel": "requires",
+      "dst": "item:3105",
+      "order_key": 0,
+      "source_ref": "wiki/quests.json#death_plateau",
+      "attributes": {
+        "kind": "carried"
+      }
+    }
+  ]
+}

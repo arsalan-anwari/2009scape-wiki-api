@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from datetime import date
+from enum import IntEnum
 from pathlib import Path
 from typing import Annotated, Any, Final, Self
 
@@ -50,6 +51,34 @@ class OverlayMode(GameEnum):
     PATCH = "patch"
 
 
+class OverlayPrecedence(IntEnum):
+    """How far a document outranks another writing the same fact, highest winning."""
+
+    DECLARED = 0
+    DECODED = 1
+    PROPOSED = 5
+    AUTHORED = 10
+
+
+class OverlayExpectation(BaseModel):
+    """What a correction believes the source still says, so it fails once that changes.
+
+    An attribute mapped to null is one the source is expected not to carry at all.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    name: str | None = None
+    description: str | None = None
+    attributes: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _states_something(self) -> Self:
+        if self.name is None and self.description is None and not self.attributes:
+            raise ValueError("an expectation must state something to compare against")
+        return self
+
+
 class OverlayEntity(BaseModel):
     """One entity as a document declares it."""
 
@@ -69,11 +98,21 @@ class OverlayEntity(BaseModel):
     searchable: bool | None = None
     icon_ref: str | None = None
     source_ref: str | None = None
+    expects: OverlayExpectation | None = None
+    claims: bool = True
 
     @model_validator(mode="after")
     def _definitions_need_a_name(self) -> Self:
         if self.mode is OverlayMode.DEFINE and self.name is None:
             raise ValueError(f"{self.type.value}:{self.id} is defined without a name")
+        return self
+
+    @model_validator(mode="after")
+    def _only_a_patch_may_decline_the_entity(self) -> Self:
+        if not self.claims and self.mode is not OverlayMode.PATCH:
+            raise ValueError(
+                f"{self.type.value}:{self.id} defines an entity it does not claim"
+            )
         return self
 
     @property
@@ -131,7 +170,8 @@ class OverlayDocument(BaseModel):
     source: SourceKind
     game_version: GameVersion
     source_file: str | None = None
-    precedence: int = 0
+    source_revision: str | None = None
+    precedence: OverlayPrecedence = OverlayPrecedence.DECLARED
     entities: tuple[OverlayEntity, ...] = ()
     edges: tuple[OverlayEdge, ...] = ()
     aliases: tuple[OverlayAlias, ...] = ()
@@ -201,7 +241,7 @@ def test_a_document_declares_its_schema_source_and_game_version() -> None:
     assert document.schema_version == OVERLAY_SCHEMA
     assert document.source is SourceKind.FIXTURE
     assert document.entities == ()
-    assert document.precedence == 0
+    assert document.precedence is OverlayPrecedence.DECLARED
 
 
 def test_a_document_names_the_kind_of_source_and_the_file_behind_it() -> None:
@@ -232,6 +272,48 @@ def test_a_patch_may_omit_the_name() -> None:
     )
     assert patch.name is None
     assert patch.mode is OverlayMode.PATCH
+
+
+def test_a_correction_states_what_it_expects_the_source_to_say() -> None:
+    patch = OverlayEntity.model_validate(
+        {
+            "type": "item",
+            "id": 5098,
+            "mode": "patch",
+            "attributes": {"requirements": "{19,24}"},
+            "expects": {"attributes": {"requirements": "{24,19}"}},
+        }
+    )
+    assert patch.expects is not None
+    assert patch.expects.attributes == {"requirements": "{24,19}"}
+
+
+def test_an_expectation_that_states_nothing_is_rejected() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        OverlayExpectation.model_validate({})
+
+
+def test_a_definition_states_what_the_record_it_replaced_said() -> None:
+    defined = OverlayEntity.model_validate(
+        {
+            "type": "item",
+            "id": 14422,
+            "name": "Sacred clay pouch",
+            "expects": {"name": "USDT Slot"},
+        }
+    )
+    assert defined.mode is OverlayMode.DEFINE
+    assert defined.expects is not None
+    assert defined.expects.name == "USDT Slot"
+
+
+def test_a_document_names_the_revision_of_the_source_behind_it() -> None:
+    document = OverlayDocument.model_validate(
+        _document(source="game_cache", source_revision="index 19 revision 214")
+    )
+    assert document.source_revision == "index 19 revision 214"
 
 
 def test_edges_reference_entities_by_compact_key() -> None:
@@ -280,6 +362,31 @@ def test_documents_load_in_precedence_then_name_order(tmp_path: Path) -> None:
     _write(tmp_path / "correction.json", precedence=10, source="overlay")
     origins = [source.origin for source in load_documents(tmp_path)]
     assert origins == ["a_source.json", "b_source.json", "correction.json"]
+
+
+def test_a_higher_precedence_wins_however_the_files_are_named(tmp_path: Path) -> None:
+    _write(tmp_path / "z_decoded.json", precedence=OverlayPrecedence.DECODED)
+    _write(
+        tmp_path / "a_authored.json",
+        precedence=OverlayPrecedence.AUTHORED,
+        source="overlay",
+    )
+    origins = [source.origin for source in load_documents(tmp_path)]
+    assert origins == ["z_decoded.json", "a_authored.json"]
+
+
+def test_the_declared_scale_runs_from_a_source_up_to_a_person() -> None:
+    assert list(OverlayPrecedence) == sorted(OverlayPrecedence)
+    assert OverlayPrecedence.DECLARED < OverlayPrecedence.DECODED
+    assert OverlayPrecedence.DECODED < OverlayPrecedence.PROPOSED
+    assert OverlayPrecedence.PROPOSED < OverlayPrecedence.AUTHORED
+
+
+def test_a_precedence_outside_the_declared_scale_is_refused() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        OverlayDocument.model_validate(_document(precedence=7))
 
 
 def test_a_document_from_another_overlay_schema_is_rejected(tmp_path: Path) -> None:

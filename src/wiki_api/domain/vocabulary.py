@@ -4,8 +4,9 @@ form the sources ship and storing one clean name.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, Final, Self
+from typing import TYPE_CHECKING, Annotated, Any, Final, Self
 
 from pydantic import BaseModel, ConfigDict
 
@@ -149,6 +150,46 @@ class QuestLength(GameEnum):
     VERY_LONG = "very_long"
 
 
+class PriceConfidence(GameEnum):
+    """How far a recorded price is worth believing, judged by how its record moved."""
+
+    TRADED = "traded"
+    STATIC = "static"
+    UNTRADED = "untraded"
+
+
+class WeaponType(OrdinalEnum):
+    """What sort of weapon an item is, in the order the game's own list declares them.
+
+    The member names are the game's, and a build refuses to run when the two disagree.
+    """
+
+    UNARMED = "unarmed"
+    STAFF = "staff"
+    AXE = "battleaxe"
+    SCEPTER = "scepter"
+    PICKAXE = "pickaxe"
+    SWORD_DAGGER = "sword_or_dagger"
+    SCIMITAR = "scimitar"
+    TWO_H_SWORD = "two_handed_sword"
+    MACE = "mace"
+    CLAWS = "claws"
+    WARHAMMER_MAUL = "warhammer_or_maul"
+    WHIP = "whip"
+    FLOWERS = "flowers"
+    MUD_PIE = "mud_pie"
+    SPEAR = "spear"
+    HALBERD = "halberd"
+    BOW = "bow"
+    CROSSBOW = "crossbow"
+    THROWN_WEAPONS = "thrown"
+    CHINCHOMPA = "chinchompa"
+    FIXED_DEVICE = "fixed_device"
+    SALAMANDER = "salamander"
+    SCYTHE = "scythe"
+    IVANDIS_FLAIL = "flail"
+
+
 class AttributeGroup(GameEnum):
     """Which part of a page an attribute belongs to, such as the overview box."""
 
@@ -164,6 +205,8 @@ class AttributeGroup(GameEnum):
     RATE = "rate"
     AMOUNT = "amount"
     REWARD = "reward"
+    SKILL = "skill"
+    SLAYER = "slayer"
     INTERNAL = "internal"
 
 
@@ -175,6 +218,9 @@ class RelationshipGroup(GameEnum):
     QUESTS = "quests"
     EQUIPMENT = "equipment"
     MAP = "map"
+    SKILL = "skill"
+    SLAYER = "slayer"
+    PREREQUISITES = "prerequisites"
 
 
 class Unit(GameEnum):
@@ -183,6 +229,41 @@ class Unit(GameEnum):
     KILOGRAMS = "kg"
     TICKS = "ticks"
     TILES = "tiles"
+
+
+class AttributeFormat(StrEnum):
+    """How to draw a value: a plain number, an amount of coins, a coordinate."""
+
+    INT = "int"
+    FLOAT = "float"
+    BOOL = "bool"
+    TEXT = "text"
+    GP = "gp"
+    ID = "id"
+    IDS = "ids"
+    REF = "ref"
+    ENUM = "enum"
+    SKILLS = "skills"
+    BONUSES = "bonuses"
+    ABSORB = "absorb"
+    COORD = "coord"
+    AREA = "area"
+    RATE = "rate"
+    TEXTS = "texts"
+
+
+@dataclass(frozen=True)
+class AttributeMeta:
+    """The presentation facts attached to one attribute field."""
+
+    label: str
+    group: AttributeGroup
+    order: int
+    format: AttributeFormat
+    unit: Unit | None = None
+    display: bool = True
+    derived: bool = False
+    prominent: bool = False
 
 
 class HiddenReason(GameEnum):
@@ -201,6 +282,7 @@ class SourceKind(GameEnum):
     GAME_CODE = "game_code"
     GAME_CACHE = "game_cache"
     GRAND_EXCHANGE = "grand_exchange"
+    COMMUNITY_WIKI = "community_wiki"
     OVERLAY = "overlay"
     FIXTURE = "fixture"
 
@@ -244,32 +326,36 @@ class PackedInts(BaseModel):
         return not any(getattr(self, name) for name in type(self).model_fields)
 
 
+def _bonus(label: str, order: int) -> AttributeMeta:
+    return AttributeMeta(label, AttributeGroup.EQUIPMENT, order, AttributeFormat.INT)
+
+
 class CombatBonuses(PackedInts):
     """The 15 combat bonuses in the order item_configs.json packs them."""
 
-    attack_stab: int = 0
-    attack_slash: int = 0
-    attack_crush: int = 0
-    attack_magic: int = 0
-    attack_ranged: int = 0
-    defence_stab: int = 0
-    defence_slash: int = 0
-    defence_crush: int = 0
-    defence_magic: int = 0
-    defence_ranged: int = 0
-    defence_summoning: int = 0
-    strength: int = 0
-    prayer: int = 0
-    magic_damage: int = 0
-    ranged_strength: int = 0
+    attack_stab: Annotated[int, _bonus("Stab attack bonus", 10)] = 0
+    attack_slash: Annotated[int, _bonus("Slash attack bonus", 20)] = 0
+    attack_crush: Annotated[int, _bonus("Crush attack bonus", 30)] = 0
+    attack_magic: Annotated[int, _bonus("Magic attack bonus", 40)] = 0
+    attack_ranged: Annotated[int, _bonus("Ranged attack bonus", 50)] = 0
+    defence_stab: Annotated[int, _bonus("Stab defence bonus", 60)] = 0
+    defence_slash: Annotated[int, _bonus("Slash defence bonus", 70)] = 0
+    defence_crush: Annotated[int, _bonus("Crush defence bonus", 80)] = 0
+    defence_magic: Annotated[int, _bonus("Magic defence bonus", 90)] = 0
+    defence_ranged: Annotated[int, _bonus("Ranged defence bonus", 100)] = 0
+    defence_summoning: Annotated[int, _bonus("Summoning defence bonus", 110)] = 0
+    strength: Annotated[int, _bonus("Strength bonus", 120)] = 0
+    prayer: Annotated[int, _bonus("Prayer bonus", 130)] = 0
+    magic_damage: Annotated[int, _bonus("Magic damage bonus", 140)] = 0
+    ranged_strength: Annotated[int, _bonus("Ranged strength bonus", 150)] = 0
 
 
 class AbsorbBonuses(PackedInts):
     """The three absorption values."""
 
-    melee: int = 0
-    magic: int = 0
-    ranged: int = 0
+    melee: Annotated[int, _bonus("Melee absorption", 10)] = 0
+    magic: Annotated[int, _bonus("Magic absorption", 20)] = 0
+    ranged: Annotated[int, _bonus("Ranged absorption", 30)] = 0
 
 
 COINS: Final = EntityKey(type=EntityType.ITEM, id=995)

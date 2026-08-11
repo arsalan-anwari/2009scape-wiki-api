@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import StrEnum
 from typing import TYPE_CHECKING, Annotated, Any, Final, Self, get_args
 
@@ -13,54 +12,26 @@ from wiki_api.domain.space import Area, Coordinate, LocationKind
 from wiki_api.domain.vocabulary import (
     COINS,
     AbsorbBonuses,
+    AttributeFormat,
     AttributeGroup,
+    AttributeMeta,
     ClueLevel,
     CombatBonuses,
     CombatStyle,
     EquipmentSlot,
+    PriceConfidence,
     QuestDifficulty,
     QuestLength,
     Skill,
     Unit,
+    WeaponType,
     coerce_item_ref,
 )
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
-
-class AttributeFormat(StrEnum):
-    """How to draw a value: a plain number, an amount of coins, a coordinate."""
-
-    INT = "int"
-    FLOAT = "float"
-    BOOL = "bool"
-    TEXT = "text"
-    GP = "gp"
-    ID = "id"
-    IDS = "ids"
-    REF = "ref"
-    ENUM = "enum"
-    SKILLS = "skills"
-    BONUSES = "bonuses"
-    ABSORB = "absorb"
-    COORD = "coord"
-    AREA = "area"
-    RATE = "rate"
-
-
-@dataclass(frozen=True)
-class AttributeMeta:
-    """The presentation facts attached to one attribute field."""
-
-    label: str
-    group: AttributeGroup
-    order: int
-    format: AttributeFormat
-    unit: Unit | None = None
-    display: bool = True
-    derived: bool = False
-    prominent: bool = False
+PATH_SEPARATOR: Final = "."
 
 
 class AttributeSpec(BaseModel):
@@ -80,6 +51,14 @@ class AttributeSpec(BaseModel):
     derived: bool = False
     prominent: bool = False
     choices: tuple[str, ...] | None = None
+    fields: tuple[AttributeSpec, ...] = ()
+
+    def paths(self) -> tuple[tuple[str, AttributeSpec], ...]:
+        """This value and every part it declares, each with how to address it."""
+        below = tuple(
+            (f"{self.key}{PATH_SEPARATOR}{part.key}", part) for part in self.fields
+        )
+        return ((self.key, self), *below)
 
 
 class MissingAttributeMeta(TypeError):
@@ -139,6 +118,38 @@ def computed_keys(model: type[BaseModel]) -> set[str]:
     return set(model.model_computed_fields)
 
 
+def stored_at(attributes: BaseModel, path: str) -> Any:
+    """The value a record holds at one path, or nothing when it holds none."""
+    held: Any = attributes.model_dump(mode="json", exclude_none=True)
+    for step in path.split(PATH_SEPARATOR):
+        if not isinstance(held, dict):
+            return None
+        held = held.get(step)
+    return held
+
+
+def number_at(attributes: BaseModel, path: str) -> float | None:
+    """The number a record holds at one path, treating a flag as no number at all."""
+    held = stored_at(attributes, path)
+    if isinstance(held, bool) or not isinstance(held, int | float):
+        return None
+    return float(held)
+
+
+def declaring(annotation: Any) -> type[BaseModel] | None:
+    """The nested model behind a field, when that model declares its own parts."""
+    for candidate in get_args(annotation) or (annotation,):
+        if not (isinstance(candidate, type) and issubclass(candidate, BaseModel)):
+            continue
+        nested: type[BaseModel] = candidate
+        if any(
+            meta_of(field.metadata) is not None
+            for field in nested.model_fields.values()
+        ):
+            return nested
+    return None
+
+
 def _spec_of(
     model: type[BaseModel],
     name: str,
@@ -148,6 +159,7 @@ def _spec_of(
     if meta is None:
         raise MissingAttributeMeta(model, name)
     choices = choices_of(annotation)
+    nested = declaring(annotation)
     if choices is not None and meta.format is not AttributeFormat.ENUM:
         raise MisdeclaredAttribute(
             model, name, "holds a vocabulary but is not declared as an enum"
@@ -169,6 +181,7 @@ def _spec_of(
         derived=meta.derived,
         prominent=meta.prominent,
         choices=choices,
+        fields=() if nested is None else specs_of(nested),
     )
 
 
@@ -230,9 +243,59 @@ class ItemAttributes(BaseModel):
             "Low alchemy", AttributeGroup.TRADE, 36, AttributeFormat.GP, derived=True
         ),
     ] = None
+    market_price: Annotated[
+        int | None,
+        AttributeMeta(
+            "Market price",
+            AttributeGroup.TRADE,
+            37,
+            AttributeFormat.GP,
+            derived=True,
+            prominent=True,
+        ),
+    ] = None
+    market_confidence: Annotated[
+        PriceConfidence | None,
+        BeforeValidator(PriceConfidence.coerce),
+        AttributeMeta(
+            "Market confidence",
+            AttributeGroup.TRADE,
+            38,
+            AttributeFormat.ENUM,
+            derived=True,
+        ),
+    ] = None
+    market_low: Annotated[
+        int | None,
+        AttributeMeta(
+            "Market low", AttributeGroup.TRADE, 39, AttributeFormat.GP, derived=True
+        ),
+    ] = None
+    market_high: Annotated[
+        int | None,
+        AttributeMeta(
+            "Market high", AttributeGroup.TRADE, 41, AttributeFormat.GP, derived=True
+        ),
+    ] = None
+    market_middle: Annotated[
+        int | None,
+        AttributeMeta(
+            "Market median", AttributeGroup.TRADE, 42, AttributeFormat.GP, derived=True
+        ),
+    ] = None
+    market_entries: Annotated[
+        int | None,
+        AttributeMeta(
+            "Snapshots read",
+            AttributeGroup.TRADE,
+            43,
+            AttributeFormat.INT,
+            derived=True,
+        ),
+    ] = None
     lendable: Annotated[
         bool | None,
-        AttributeMeta("Lendable", AttributeGroup.TRADE, 40, AttributeFormat.BOOL),
+        AttributeMeta("Lendable", AttributeGroup.TRADE, 44, AttributeFormat.BOOL),
     ] = None
     archery_ticket_price: Annotated[
         int | None,
@@ -272,6 +335,10 @@ class ItemAttributes(BaseModel):
     rare_item: Annotated[
         bool | None,
         AttributeMeta("Rare item", AttributeGroup.GENERAL, 64, AttributeFormat.BOOL),
+    ] = None
+    heals: Annotated[
+        int | None,
+        AttributeMeta("Restores", AttributeGroup.GENERAL, 66, AttributeFormat.INT),
     ] = None
     destroy: Annotated[
         bool | None,
@@ -342,14 +409,11 @@ class ItemAttributes(BaseModel):
             "Fun weapon", AttributeGroup.EQUIPMENT, 145, AttributeFormat.BOOL
         ),
     ] = None
-    weapon_interface: Annotated[
-        int | None,
+    weapon_type: Annotated[
+        WeaponType | None,
+        BeforeValidator(WeaponType.coerce),
         AttributeMeta(
-            "Weapon interface",
-            AttributeGroup.INTERNAL,
-            200,
-            AttributeFormat.ID,
-            display=False,
+            "Weapon type", AttributeGroup.EQUIPMENT, 88, AttributeFormat.ENUM
         ),
     ] = None
     render_anim: Annotated[
@@ -942,6 +1006,18 @@ class QuestAttributes(BaseModel):
         str | None,
         AttributeMeta("Series", AttributeGroup.OVERVIEW, 50, AttributeFormat.TEXT),
     ] = None
+    requirements: Annotated[
+        tuple[SkillRequirement, ...] | None,
+        AttributeMeta(
+            "Skills needed", AttributeGroup.OVERVIEW, 60, AttributeFormat.SKILLS
+        ),
+    ] = None
+    quest_points_needed: Annotated[
+        int | None,
+        AttributeMeta(
+            "Quest points needed", AttributeGroup.OVERVIEW, 70, AttributeFormat.INT
+        ),
+    ] = None
 
 
 class LocationAttributes(BaseModel):
@@ -1019,12 +1095,139 @@ class LocationAttributes(BaseModel):
         return None
 
 
+class SceneryAttributes(BaseModel):
+    """Everything the sources say about a thing standing in the world."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    placement_count: Annotated[
+        int | None,
+        AttributeMeta(
+            "Standing in the world",
+            AttributeGroup.MAP,
+            10,
+            AttributeFormat.INT,
+            derived=True,
+            prominent=True,
+        ),
+    ] = None
+    options: Annotated[
+        list[str] | None,
+        AttributeMeta(
+            "Actions",
+            AttributeGroup.GENERAL,
+            20,
+            AttributeFormat.TEXTS,
+            prominent=True,
+        ),
+    ] = None
+    members: Annotated[
+        bool | None,
+        AttributeMeta(
+            "Members only", AttributeGroup.OVERVIEW, 30, AttributeFormat.BOOL
+        ),
+    ] = None
+    size_x: Annotated[
+        int | None,
+        AttributeMeta(
+            "Width", AttributeGroup.GENERAL, 40, AttributeFormat.INT, unit=Unit.TILES
+        ),
+    ] = None
+    size_y: Annotated[
+        int | None,
+        AttributeMeta(
+            "Depth", AttributeGroup.GENERAL, 50, AttributeFormat.INT, unit=Unit.TILES
+        ),
+    ] = None
+
+
+class TaskAttributes(BaseModel):
+    """Everything the slayer table says about one assignment."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    slayer_level: Annotated[
+        int | None,
+        AttributeMeta(
+            "Slayer level",
+            AttributeGroup.SLAYER,
+            10,
+            AttributeFormat.INT,
+            prominent=True,
+        ),
+    ] = Field(default=None, ge=1, le=99)
+    combat_level: Annotated[
+        int | None,
+        AttributeMeta(
+            "Combat level needed",
+            AttributeGroup.SLAYER,
+            20,
+            AttributeFormat.INT,
+            prominent=True,
+        ),
+    ] = Field(default=None, ge=1)
+    advice: Annotated[
+        list[str] | None,
+        AttributeMeta("Advice", AttributeGroup.GENERAL, 30, AttributeFormat.TEXTS),
+    ] = None
+    undead: Annotated[
+        bool | None,
+        AttributeMeta("Undead", AttributeGroup.SLAYER, 40, AttributeFormat.BOOL),
+    ] = None
+    dragonfire: Annotated[
+        bool | None,
+        AttributeMeta(
+            "Breathes dragonfire", AttributeGroup.SLAYER, 50, AttributeFormat.BOOL
+        ),
+    ] = None
+
+
+class RoomAttributes(BaseModel):
+    """Everything the construction table says about one room of a house."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    level: Annotated[
+        int | None,
+        AttributeMeta(
+            "Construction level",
+            AttributeGroup.SKILL,
+            10,
+            AttributeFormat.INT,
+            prominent=True,
+        ),
+    ] = Field(default=None, ge=1, le=99)
+    build_cost: Annotated[
+        int | None,
+        AttributeMeta(
+            "Build cost", AttributeGroup.SKILL, 20, AttributeFormat.GP, prominent=True
+        ),
+    ] = Field(default=None, ge=0)
+    outdoors: Annotated[
+        bool | None,
+        AttributeMeta("Outdoors", AttributeGroup.OVERVIEW, 30, AttributeFormat.BOOL),
+    ] = None
+    hotspots: Annotated[
+        int | None,
+        AttributeMeta(
+            "Build spots",
+            AttributeGroup.SKILL,
+            40,
+            AttributeFormat.INT,
+            derived=True,
+        ),
+    ] = Field(default=None, ge=0)
+
+
 EntityAttributes = (
     ItemAttributes
     | NpcAttributes
     | ShopAttributes
     | QuestAttributes
     | LocationAttributes
+    | SceneryAttributes
+    | TaskAttributes
+    | RoomAttributes
 )
 
 ATTRIBUTE_MODELS: Final[Mapping[EntityType, type[EntityAttributes]]] = {
@@ -1033,6 +1236,9 @@ ATTRIBUTE_MODELS: Final[Mapping[EntityType, type[EntityAttributes]]] = {
     EntityType.SHOP: ShopAttributes,
     EntityType.QUEST: QuestAttributes,
     EntityType.LOCATION: LocationAttributes,
+    EntityType.SCENERY: SceneryAttributes,
+    EntityType.TASK: TaskAttributes,
+    EntityType.ROOM: RoomAttributes,
 }
 
 ATTRIBUTE_SPECS: Final[Mapping[EntityType, tuple[AttributeSpec, ...]]] = {
@@ -1113,6 +1319,39 @@ def test_the_choices_carry_the_whole_vocabulary() -> None:
     assert slot.choices is not None
     assert "weapon" in slot.choices
     assert len(slot.choices) == len(list(EquipmentSlot))
+
+
+def test_a_packed_value_publishes_a_label_for_every_number_it_holds() -> None:
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    packed = item_specs["bonuses"]
+    assert len(packed.fields) == len(CombatBonuses.model_fields)
+    assert all(part.label for part in packed.fields)
+    assert [part.key for part in packed.fields] == list(CombatBonuses.model_fields)
+
+
+def test_a_nested_value_that_declares_nothing_stays_one_value() -> None:
+    location_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.LOCATION]}
+    assert location_specs["centre"].fields == ()
+    assert location_specs["bounds"].fields == ()
+
+
+def test_a_part_is_addressed_through_the_value_that_holds_it() -> None:
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    addressed = dict(item_specs["bonuses"].paths())
+    assert addressed["bonuses"].format is AttributeFormat.BONUSES
+    assert addressed["bonuses.strength"].format is AttributeFormat.INT
+    assert addressed["bonuses.strength"].label == "Strength bonus"
+
+
+def test_a_value_holding_no_parts_addresses_only_itself() -> None:
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    assert [path for path, _ in item_specs["weight"].paths()] == ["weight"]
+
+
+def test_a_nested_model_is_only_recursed_into_when_it_declares_its_parts() -> None:
+    assert declaring(CombatBonuses | None) is CombatBonuses
+    assert declaring(Coordinate | None) is None
+    assert declaring(int | None) is None
 
 
 def test_a_raw_game_ordinal_becomes_a_named_slot() -> None:
@@ -1212,7 +1451,7 @@ def test_groups_are_declared_from_a_closed_set() -> None:
 
 def test_internal_attributes_are_stored_but_not_displayed() -> None:
     item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
-    assert item_specs["weapon_interface"].display is False
+    assert item_specs["render_anim"].display is False
     assert item_specs["ge_buy_limit"].display is True
 
 
@@ -1241,6 +1480,21 @@ def test_a_derived_attribute_is_declared_as_such() -> None:
     assert item_specs["high_alch_value"].derived is True
     assert item_specs["low_alch_value"].derived is True
     assert item_specs["base_value"].derived is False
+
+
+def test_every_market_value_is_declared_as_one_we_worked_out() -> None:
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    market = [key for key in item_specs if key.startswith("market_")]
+    assert market
+    for key in market:
+        assert item_specs[key].derived is True
+
+
+def test_how_far_to_trust_a_price_is_a_declared_vocabulary() -> None:
+    item_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM]}
+    spec = item_specs["market_confidence"]
+    assert spec.format is AttributeFormat.ENUM
+    assert spec.choices == tuple(member.value for member in PriceConfidence)
 
 
 def test_every_type_declares_something_worth_showing_on_hover() -> None:
@@ -1323,3 +1577,25 @@ def test_the_map_formats_are_declared_for_the_front_end() -> None:
     location_specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.LOCATION]}
     assert location_specs["centre"].format is AttributeFormat.COORD
     assert location_specs["bounds"].format is AttributeFormat.AREA
+
+
+def test_a_thing_in_the_world_says_how_many_of_it_there_are() -> None:
+    scenery = SceneryAttributes.model_validate(
+        {"placement_count": 21, "options": ["Smelt"], "size_x": 2, "size_y": 3}
+    )
+    assert scenery.placement_count == 21
+    assert scenery.options == ["Smelt"]
+
+
+def test_how_many_stand_in_the_world_is_declared_as_worked_out() -> None:
+    specs = {spec.key: spec for spec in ATTRIBUTE_SPECS[EntityType.SCENERY]}
+    assert specs["placement_count"].derived is True
+    assert specs["options"].format is AttributeFormat.TEXTS
+    assert specs["size_x"].unit is Unit.TILES
+
+
+def test_a_thing_in_the_world_takes_no_field_it_never_declared() -> None:
+    import pytest
+
+    with pytest.raises(ValueError):
+        SceneryAttributes.model_validate({"lifepoints": 240})

@@ -1,0 +1,69 @@
+{
+ "enum": "Stall",
+ "source_file": "Stall.java",
+ "language": "java",
+ "columns": [
+  "full_ids",
+  "empty_ids",
+  "level",
+  "rewards",
+  "experience",
+  "delay",
+  "msgItem"
+ ],
+ "constants": [
+  {
+   "name": "VEGETABLE_STALL",
+   "values": {
+    "full_ids": [
+     4706,
+     4708
+    ],
+    "empty_ids": [
+     634
+    ],
+    "level": 2,
+    "rewards": [
+     {
+      "call": "Item",
+      "arguments": [
+       1957,
+       1
+      ]
+     },
+     {
+      "call": "Item",
+      "arguments": [
+       1965,
+       1
+      ]
+     },
+     {
+      "call": "Item",
+      "arguments": [
+       1942,
+       1
+      ]
+     },
+     {
+      "call": "Item",
+      "arguments": [
+       1982,
+       1
+      ]
+     },
+     {
+      "call": "Item",
+      "arguments": [
+       1550,
+       1
+      ]
+     }
+    ],
+    "experience": 10,
+    "delay": 4,
+    "msgItem": "vegetables"
+   }
+  }
+ ]
+}
