@@ -173,7 +173,8 @@
                   "ground_spawn",
                   "shop_front",
                   "quest_start",
-                  "built_in"
+                  "built_in",
+                  "music_region"
                 ]
               },
               {
@@ -263,6 +264,40 @@
                 "choices": null
               }
             ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
+      },
+      "suppressed": 0
+    },
+    {
+      "walk": {
+        "origin": {
+          "type": "quest",
+          "id": 1
+        },
+        "rel": "heard_during",
+        "direction": "reverse"
+      },
+      "label": "Music heard",
+      "group": "quests",
+      "order": 130,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "music",
+              "id": 102,
+              "slug": "tremble",
+              "label": "Tremble",
+              "icon_ref": null
+            },
+            "type": "music",
+            "attributes": []
           }
         ],
         "total": 1,

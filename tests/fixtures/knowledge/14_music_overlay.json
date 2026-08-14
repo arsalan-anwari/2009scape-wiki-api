@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "source": "game_config",
+  "source_file": "music_location_unlocks.txt",
+  "game_version": "2009scape@5a37f2f8",
+  "precedence": 0,
+  "entities": [
+    {
+      "type": "music",
+      "id": 177,
+      "name": "Adventure",
+      "source_ref": "music_location_unlocks.txt#0",
+      "attributes": {
+        "trackset": "Varrock",
+        "unlock_note": "at Varrock Palace",
+        "region_count": 2
+      }
+    },
+    {
+      "type": "music",
+      "id": 102,
+      "name": "Tremble",
+      "source_ref": "music_location_unlocks.txt#2",
+      "attributes": {
+        "unlock_note": "during Death Plateau",
+        "region_count": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "music:177",
+      "rel": "located_in",
+      "dst": "location:2",
+      "source_ref": "music_regions.json#12850",
+      "attributes": {
+        "spawn_kind": "music_region",
+        "amount": 2
+      }
+    },
+    {
+      "src": "music:102",
+      "rel": "heard_during",
+      "dst": "quest:1",
+      "source_ref": "music_location_unlocks.txt#2",
+      "attributes": {}
+    }
+  ]
+}

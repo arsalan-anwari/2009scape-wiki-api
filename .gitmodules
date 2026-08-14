@@ -14,10 +14,6 @@
 	path = game_data/rs09-thanos-tool
 	url = https://gitlab.com/arsalan-anwari/2009-scape-wiki-zaros.git
 	branch = master
-[submodule "game_data/2009scape-telecoordinates"]
-	path = game_data/2009scape-telecoordinates
-	url = https://gitlab.com/arsalan-anwari/2009-scape-wiki-telecoordinates.git
-	branch = main
 [submodule "game_data/2009scape-wiki-website"]
 	path = game_data/2009scape-wiki-website
 	url = https://gitlab.com/arsalan-anwari/2009-scape-wiki-website.git

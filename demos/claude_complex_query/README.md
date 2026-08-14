@@ -1,17 +1,17 @@
 # How much can this wiki actually be asked?
 
-Puts twenty-five questions of different shapes to Claude, one per capability rather than
+Puts thirty-six questions of different shapes to Claude, one per capability rather than
 one per tool, and counts what came back. The point is not that any single answer is
 right; it is the tally at the end, which says how much of the data model a question can
 reach today and which tools nothing thought to call. It verifies nothing, and it talks
 to a real model on a credential of your own, so every run costs whatever that credential
-is billed at, twenty-five questions at a time.
+is billed at, thirty-six questions at a time.
 
 ```bash
 uv run poe demo claude_complex_query --scripted        # the whole sweep, unattended
 uv run poe demo claude_complex_query --list            # what it asks, without asking
 uv run poe demo claude_complex_query --only quest_detail --only multi_hop
-uv run poe demo claude_complex_query --scripted --log runs/sweep.log
+uv run poe demo claude_complex_query --scripted --report runs/sweep.md
 ```
 
 Answers from `data`, the real artifact, since the point is breadth and the test fixture
@@ -40,17 +40,40 @@ expectation: whether it read the wiki at all, whether it read it in as many diff
 ways as the question needs, whether it turned back to you when it had to, and whether
 the answer carries the words only the wiki could have supplied.
 
+## Watching one run
+
+Every call is kept at the moment it is made, then how long the probe took and how many
+steps it spent, so a probe that has stopped and a probe still thinking do not read the
+same. Nothing here can wait indefinitely either: the model is given two minutes to
+answer one turn and a probe ten minutes to finish, after which it is given up on, the
+steps it did reach are kept along with the reason it stopped, and the sweep carries on
+with the questions it has not put yet.
+
+If a probe does stall, re-run that one on its own and the last call it made is the one
+it stopped on:
+
+```bash
+uv run poe demo claude_complex_query --scripted --only reverse_skilling
+```
+
 ## Keeping a run
 
-`--log FILE` writes everything the run prints to that file as well as to the terminal,
-replacing whatever was there before and creating the directory if it has to. Both
-streams are copied, so a run that fails leaves the reason in the file, and a question
-the model asked is logged with the answer typed back at it.
+`--report FILE` writes the run to that file as a markdown document, replacing whatever
+was there before and creating the directory if it has to.
 
-## What it cannot ask
+```text
+  ✅ manifest                2 steps      8s   passed
+  ⚠️ npc_stats               9 steps     52s   fell short
+  [ 3/36] item_value  14s  ✅ 1  ⚠️ 1  ❌ 0  elapsed 1m 14s
+```
+
+## What it does yet tests
 
 - **proximity**, "what is within twenty tiles of Lumbridge Castle?" The tiles are in
-  the artifact, but no tool takes a coordinate. This will be added in a later update. 
+  the artifact, but no tool takes a coordinate. This will be added in a later update.
+- **the largest of the things sharing one name**, "which Bank booth has the most of
+  itself standing in the world?" Comparing by a number goes through a whole sort and
+  takes no name, so answering it means fetching each namesake in turn.
 
 ## Setting up
 

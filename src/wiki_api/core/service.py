@@ -243,10 +243,14 @@ class KnowledgeService:
         direction: Direction = Direction.FORWARD,
         *,
         types: Sequence[EntityType] | None = None,
+        sorts: Sequence[EntityType] | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Named[Block]:
-        """One relationship of the thing a caller named, one page at a time."""
+        """One relationship of the thing a caller named, one page at a time.
+
+        `types` narrows what the name may resolve to, `sorts` what comes back.
+        """
         named = self.lookup(name, types=types)
         if not isinstance(named.resolution, Found):
             return Named[Block](
@@ -261,6 +265,7 @@ class KnowledgeService:
                     named.resolution.value,
                     rel,
                     direction,
+                    sorts=sorts,
                     limit=limit,
                     offset=offset,
                 )

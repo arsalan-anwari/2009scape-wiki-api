@@ -45,8 +45,6 @@ if [[ ! -f .gitmodules ]]; then
   exit 1
 fi
 
-# Every git command that writes goes through this, so --dry-run covers all of
-# them by construction rather than by remembering to guard each one.
 run() {
   if [[ "$DRY_RUN" -eq 1 ]]; then
     printf '  would run: %s\n' "$*"

@@ -52,6 +52,7 @@ class RelationshipType(StrEnum):
     REQUIRES = "requires"
     ASSIGNS = "assigns"
     SATISFIED_BY = "satisfied_by"
+    HEARD_DURING = "heard_during"
 
 
 class DropTableKind(GameEnum):
@@ -391,6 +392,12 @@ class SatisfiedByEdgeAttributes(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
+class HeardDuringEdgeAttributes(BaseModel):
+    """Nothing. Playing while the quest runs is the whole fact."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+
 EdgeAttributes = (
     DropEdgeAttributes
     | SellEdgeAttributes
@@ -404,6 +411,7 @@ EdgeAttributes = (
     | RequiresEdgeAttributes
     | AssignsEdgeAttributes
     | SatisfiedByEdgeAttributes
+    | HeardDuringEdgeAttributes
 )
 
 EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = {
@@ -419,6 +427,7 @@ EDGE_ATTRIBUTE_MODELS: Final[Mapping[RelationshipType, type[EdgeAttributes]]] = 
     RelationshipType.REQUIRES: RequiresEdgeAttributes,
     RelationshipType.ASSIGNS: AssignsEdgeAttributes,
     RelationshipType.SATISFIED_BY: SatisfiedByEdgeAttributes,
+    RelationshipType.HEARD_DURING: HeardDuringEdgeAttributes,
 }
 
 
@@ -517,6 +526,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
                 EntityType.ITEM,
                 EntityType.QUEST,
                 EntityType.SCENERY,
+                EntityType.MUSIC,
             }
         ),
         frozenset({EntityType.LOCATION}),
@@ -576,6 +586,15 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         frozenset({EntityType.NPC}),
         RelationshipGroup.SLAYER,
         120,
+    ),
+    RelationshipType.HEARD_DURING: _spec(
+        RelationshipType.HEARD_DURING,
+        "Heard during",
+        "Music heard",
+        frozenset({EntityType.MUSIC}),
+        frozenset({EntityType.QUEST}),
+        RelationshipGroup.QUESTS,
+        130,
     ),
 }
 

@@ -36,6 +36,7 @@ class SpawnKind(GameEnum):
     SHOP_FRONT = "shop_front"
     QUEST_START = "quest_start"
     BUILT_IN = "built_in"
+    MUSIC_REGION = "music_region"
 
 
 class Coordinate(BaseModel):

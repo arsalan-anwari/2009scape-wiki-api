@@ -40,6 +40,13 @@ class Place(BaseModel):
             self.bounds.max_y - self.bounds.min_y + 1
         )
 
+    @property
+    def point(self) -> Coordinate | None:
+        """The one tile that stands for this place, whichever source gave it."""
+        if self.centre is not None:
+            return self.centre
+        return None if self.bounds is None else self.bounds.centre
+
     def holds(self, point: Coordinate) -> bool:
         return self.bounds is not None and self.bounds.contains(point)
 
@@ -84,6 +91,15 @@ class Gazetteer:
             if found is not None:
                 return found
         return None
+
+    def within(self, area: Area) -> tuple[EntityKey, ...]:
+        """Every place whose own tile falls inside these tiles, lowest id first."""
+        found = [
+            place.key
+            for place in self._all
+            if place.point is not None and area.contains(place.point)
+        ]
+        return tuple(sorted(found, key=lambda key: key.id))
 
     def _containing(self, point: Coordinate) -> EntityKey | None:
         for place in self._bounded:
@@ -189,6 +205,26 @@ def test_a_place_with_neither_tiles_nor_a_point_holds_nothing() -> None:
     assert len(found) == 1
     assert found.bounded == 0
     assert found.holding(Coordinate(x=3222, y=3218)) is None
+
+
+def test_every_place_standing_inside_some_tiles_is_named() -> None:
+    found = Gazetteer([_pointed(2, 3222, 3218), _pointed(1, 3240, 3230)])
+    assert found.within(Area.of_region(12850)) == (_key(1), _key(2))
+
+
+def test_a_place_outside_the_tiles_is_not_named_however_near_it_is() -> None:
+    just_outside = Area.of_region(12850).max_x + 1
+    found = Gazetteer([_pointed(1, just_outside, 3218)])
+    assert found.within(Area.of_region(12850)) == ()
+
+
+def test_a_place_with_tiles_and_no_point_stands_at_the_middle_of_them() -> None:
+    found = Gazetteer([_bounded(1, 12850)])
+    assert found.within(Area.of_region(12850)) == (_key(1),)
+
+
+def test_a_place_standing_nowhere_is_inside_nothing() -> None:
+    assert Gazetteer([Place(key=_key(1))]).within(Area.of_region(12850)) == ()
 
 
 def test_a_tile_above_the_ground_floor_is_asked_about_on_the_surface() -> None:

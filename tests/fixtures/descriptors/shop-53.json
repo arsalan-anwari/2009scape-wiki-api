@@ -227,7 +227,8 @@
                   "ground_spawn",
                   "shop_front",
                   "quest_start",
-                  "built_in"
+                  "built_in",
+                  "music_region"
                 ]
               },
               {

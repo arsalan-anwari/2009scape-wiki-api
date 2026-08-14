@@ -22,11 +22,7 @@ VCS_DIRECTORY: Final = ".git"
 
 
 def game_version_of(checkout: Path, repo: str) -> GameVersion:
-    """Read the commit a checkout sits on, marking it when it has uncommitted work.
-
-    A directory that merely sits inside somebody else's checkout is refused, because
-    git would otherwise answer for the repository above it.
-    """
+    """Read the commit a checkout sits on, marking it when it has uncommitted work."""
     _own_checkout(checkout)
     commit = _git(checkout, "rev-parse", HEAD)
     if _git(checkout, "status", "--porcelain"):
@@ -133,18 +129,22 @@ def test_a_directory_inside_someone_elses_checkout_is_refused(tmp_path: Path) ->
     _commit(tmp_path, "one.json")
     vendored = tmp_path / "vendored"
     vendored.mkdir()
-    (vendored / "locations.txt").write_text("Varrock 3210,3424\n", encoding="utf-8")
+    (vendored / "quest_guides_cooks_assistant.html").write_text(
+        "<p>An opening line.</p>\n", encoding="utf-8"
+    )
     with pytest.raises(UpstreamUnreadable) as caught:
-        game_version_of(vendored, "2009scape-telecoordinates")
+        game_version_of(vendored, "2009scape-wiki-website")
     assert "not one itself" in str(caught.value)
 
 
 def test_a_vendored_directory_is_named_by_what_it_holds(tmp_path: Path) -> None:
     vendored = tmp_path / "vendored"
     vendored.mkdir()
-    (vendored / "locations.txt").write_text("Varrock 3210,3424\n", encoding="utf-8")
-    version = vendored_version_of(vendored, "2009scape-telecoordinates")
-    assert version.repo == "2009scape-telecoordinates"
+    (vendored / "quest_guides_cooks_assistant.html").write_text(
+        "<p>An opening line.</p>\n", encoding="utf-8"
+    )
+    version = vendored_version_of(vendored, "2009scape-wiki-website")
+    assert version.repo == "2009scape-wiki-website"
     assert version.commit is not None
     assert len(version.commit) == CONTENT_DIGEST
 
@@ -152,11 +152,11 @@ def test_a_vendored_directory_is_named_by_what_it_holds(tmp_path: Path) -> None:
 def test_an_edit_to_a_vendored_file_changes_the_version(tmp_path: Path) -> None:
     vendored = tmp_path / "vendored"
     vendored.mkdir()
-    named = vendored / "locations.txt"
-    named.write_text("Varrock 3210,3424\n", encoding="utf-8")
-    before = vendored_version_of(vendored, "telecoordinates")
-    named.write_text("Varrock 3210,3425\n", encoding="utf-8")
-    assert vendored_version_of(vendored, "telecoordinates") != before
+    named = vendored / "quest_guides_cooks_assistant.html"
+    named.write_text("<p>An opening line.</p>\n", encoding="utf-8")
+    before = vendored_version_of(vendored, "wiki-website")
+    named.write_text("<p>Another line.</p>\n", encoding="utf-8")
+    assert vendored_version_of(vendored, "wiki-website") != before
 
 
 def test_a_vendored_directory_reads_the_same_twice(tmp_path: Path) -> None:

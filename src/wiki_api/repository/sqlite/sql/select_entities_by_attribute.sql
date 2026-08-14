@@ -2,7 +2,8 @@
 -- bound word, so no statement is ever assembled out of what a caller sent. A drift test
 -- keeps this list identical to the Comparison vocabulary.
 SELECT
-    e.*
+    e.*,
+    COUNT(*) OVER () AS total
 FROM entity AS e
 WHERE e.type = :type
   AND e.visibility = :visibility

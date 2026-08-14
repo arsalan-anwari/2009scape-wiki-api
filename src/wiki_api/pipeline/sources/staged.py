@@ -9,21 +9,15 @@ from typing import TYPE_CHECKING, Any, Final
 from wiki_api.pipeline.enums.calls import BaseCall
 from wiki_api.pipeline.enums.constants import Constants, ConstantTable
 from wiki_api.pipeline.enums.reader import EnumTable
-from wiki_api.pipeline.places import (
-    AnchorSheet,
-    PlacedRegion,
-    Track,
-    read_placed_regions,
-)
+from wiki_api.pipeline.music import MusicRegion, Track, read_regions
 from wiki_api.pipeline.staging.collectors import PRICES
 from wiki_api.pipeline.staging.declared import (
-    DeclaredAnchors,
     DeclaredConfig,
     DeclaredConstants,
     DeclaredExtract,
+    DeclaredMusic,
     DeclaredScan,
     DeclaredTable,
-    DeclaredTracks,
 )
 from wiki_api.pipeline.staging.errors import StagedFileMissing
 from wiki_api.pipeline.staging.manifest import StagingManifest, read_manifest
@@ -123,19 +117,14 @@ class StagedSources:
         payload = json.loads(self.path(declared.staged).read_text(encoding="utf-8"))
         return {call["constant"]: call["path"] for call in payload["calls"]}
 
-    def placed_regions(self, declared: DeclaredTracks) -> tuple[PlacedRegion, ...]:
-        """Join the staged config keying a region to a track with the dump that says
-        where each track unlocks.
-        """
+    def tracks(self, declared: DeclaredMusic) -> tuple[Track, ...]:
+        """Read the staged music dump as the tracks it describes."""
         payload = json.loads(self.path(declared.staged).read_text(encoding="utf-8"))
-        tracks = tuple(Track.model_validate(track) for track in payload["tracks"])
-        return read_placed_regions(self.records(declared.config), tracks)
+        return tuple(Track.model_validate(track) for track in payload["tracks"])
 
-    def anchors(self, declared: DeclaredAnchors) -> AnchorSheet:
-        """Read the staged teleport list as points a name can be looked up in."""
-        return AnchorSheet.model_validate_json(
-            self.path(declared.staged).read_text(encoding="utf-8")
-        )
+    def music_regions(self, declared: DeclaredMusic) -> tuple[MusicRegion, ...]:
+        """Read the staged config keying a map region to the track heard over it."""
+        return read_regions(self.records(declared.config))
 
     def has_staged(self, staged: str) -> bool:
         """Whether one staged file is there, so a build can say it was not."""

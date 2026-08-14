@@ -13,8 +13,6 @@ CONSTANTS_CHECKOUT: Final = "rs09-constants-library"
 CONSTANTS_ROOT: Final = "src/main/kotlin/org/rs09/consts"
 WIKI_REPO: Final = "2009scape-wiki-website"
 WIKI_CHECKOUT: Final = "2009scape-wiki-website"
-ANCHORS_REPO: Final = "2009scape-telecoordinates"
-ANCHORS_CHECKOUT: Final = "2009scape-telecoordinates"
 CONFIG_ROOT: Final = "Server/data/configs"
 CODE_ROOT: Final = "Server/src/main"
 CACHE_ROOT: Final = "Server/data/cache"
@@ -25,7 +23,7 @@ CACHE_DIRECTORY: Final = "cache"
 CONSTANTS_DIRECTORY: Final = "constants"
 CODE_DIRECTORY: Final = "code"
 WIKI_DIRECTORY: Final = "wiki"
-PLACES_DIRECTORY: Final = "places"
+MUSIC_DIRECTORY: Final = "music"
 
 
 class DeclaredConfig(BaseModel):
@@ -148,7 +146,7 @@ class DeclaredPages(BaseModel):
         return f"{self.namespace}"
 
 
-class DeclaredTracks(BaseModel):
+class DeclaredMusic(BaseModel):
     """The dump saying where each music track unlocks, in a sentence a person wrote."""
 
     model_config = ConfigDict(frozen=True)
@@ -163,29 +161,12 @@ class DeclaredTracks(BaseModel):
 
     @property
     def staged(self) -> str:
-        return f"{PLACES_DIRECTORY}/{self.name}.json"
+        return f"{MUSIC_DIRECTORY}/{self.name}.json"
 
     @property
     def config(self) -> DeclaredConfig:
         """The already staged config keying a region to the track that plays in it."""
         return DeclaredConfig(name=self.partition)
-
-
-class DeclaredAnchors(BaseModel):
-    """The community's teleport list, which names a point rather than an extent."""
-
-    model_config = ConfigDict(frozen=True)
-
-    name: str = Field(min_length=1)
-    file: str = Field(min_length=1)
-
-    @property
-    def upstream(self) -> str:
-        return self.file
-
-    @property
-    def staged(self) -> str:
-        return f"{PLACES_DIRECTORY}/{self.name}.json"
 
 
 DECLARED_CONFIGS: Final[tuple[DeclaredConfig, ...]] = (
@@ -235,13 +216,11 @@ QUEST_PAGES: Final = DeclaredPages(name="quests", namespace="quest_guides")
 
 DECLARED_PAGES: Final[tuple[DeclaredPages, ...]] = (QUEST_PAGES,)
 
-MUSIC_TRACKS: Final = DeclaredTracks(
+MUSIC_TRACKS: Final = DeclaredMusic(
     name="tracks",
     dump="music_location_unlocks.txt",
     partition="music_regions.json",
 )
-
-TELEPORT_ANCHORS: Final = DeclaredAnchors(name="anchors", file="locations.txt")
 
 WEAPON_TYPES: Final = DeclaredTable(
     enum="WeaponInterfaces",
@@ -324,14 +303,9 @@ def test_the_keys_the_map_decode_needs_are_staged() -> None:
 
 def test_the_track_dump_stages_on_its_own_and_names_the_config_it_joins() -> None:
     assert MUSIC_TRACKS.upstream == "dumps/530/music_location_unlocks.txt"
-    assert MUSIC_TRACKS.staged == "places/tracks.json"
+    assert MUSIC_TRACKS.staged == "music/tracks.json"
     assert MUSIC_TRACKS.config.staged == "configs/music_regions.json"
     assert MUSIC_TRACKS.config in DECLARED_CONFIGS
-
-
-def test_the_teleport_list_lands_beside_the_partition() -> None:
-    assert TELEPORT_ANCHORS.staged == "places/anchors.json"
-    assert TELEPORT_ANCHORS.upstream == "locations.txt"
 
 
 def test_the_sources_the_adapters_read_are_all_declared() -> None:

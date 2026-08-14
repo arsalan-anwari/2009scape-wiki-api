@@ -8,9 +8,10 @@ import anyio
 import pytest
 from fastmcp.client import Client
 
-from wiki_api.core import BLOCK_PAGE_SIZE, Direction, KnowledgeService
+from wiki_api.core import BLOCK_PAGE_SIZE, Direction, Found, KnowledgeService
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.relationships import RELATIONSHIP_SPECS, RelationshipType
+from wiki_api.repository.factory import open_repository
 from wiki_api.surfaces.mcp import (
     CLOSE_NAMES_TOOL,
     MOST_RESULT_CHARS,
@@ -30,9 +31,11 @@ if TYPE_CHECKING:
     from mcp.types import Tool
 
     from wiki_api.config import Settings
+    from wiki_api.core import Named, PageDescriptor
 
 DRAGON = "King Black Dragon"
 SCIMITAR = "Dragon scimitar"
+BANSHEE = "Banshee"
 STOCKED = "Wooden stock"
 RETIRED_NAME = "dragon-scimmy"
 UNNAMED_NPC = "npc:3089"
@@ -53,6 +56,16 @@ def _called(
             return content
 
     return _run(call)
+
+
+def _recorded_labels(page: Named[PageDescriptor]) -> set[str]:
+    described = page.resolution
+    assert isinstance(described, Found)
+    descriptor = described.value
+    values = list(descriptor.infobox)
+    for section in descriptor.sections:
+        values.extend(section.attributes)
+    return {value.label for value in values}
 
 
 def _listed(settings: Settings) -> list[Tool]:
@@ -148,6 +161,127 @@ def test_the_whole_surface_costs_less_than_a_single_answer_may(
     assert len(surface) < MOST_RESULT_CHARS * 2
 
 
+def test_no_shape_is_stated_twice_across_the_whole_surface(
+    tools: dict[str, Tool],
+) -> None:
+    import json
+
+    stated = [
+        json.dumps(tool.outputSchema, sort_keys=True)
+        for tool in tools.values()
+        if tool.outputSchema is not None
+    ]
+    assert len(set(stated)) == len(stated)
+
+
+def test_a_generated_tool_says_what_an_argument_is_in_fewer_words(
+    tools: dict[str, Tool], mcp_settings: Settings
+) -> None:
+    written = tools["get_thing"].inputSchema["properties"]["name"]["description"]
+    for followed in followable(_held(mcp_settings)):
+        said = tools[followed.name].inputSchema["properties"]["name"]["description"]
+        assert said
+        assert len(said) < len(written)
+
+
+def test_an_argument_a_generated_tool_repeats_is_never_the_long_way_round(
+    tools: dict[str, Tool], mcp_settings: Settings
+) -> None:
+    """Only the arguments every generated tool carries are measured: one a few tools
+    take for their own reasons is information, not repetition.
+    """
+    followed = followable(_held(mcp_settings))
+    shared = ("name", "offset")
+    repeated = sum(
+        len(json.dumps(tools[one.name].inputSchema["properties"][argument]))
+        for one in followed
+        for argument in shared
+    )
+    assert repeated < len(followed) * 200
+
+
+def test_a_walk_is_narrowed_only_where_it_answers_with_several_sorts(
+    tools: dict[str, Tool], mcp_settings: Settings
+) -> None:
+    """The narrowing argument inlines the whole vocabulary of sorts, so offering it
+    on a link that answers with one sort would buy nothing and cost every reader.
+    """
+    for followed in followable(_held(mcp_settings)):
+        narrowed = "type" in tools[followed.name].inputSchema["properties"]
+        assert narrowed is followed.is_mixed
+
+
+def test_a_narrowed_walk_answers_with_one_sort_and_counts_only_that_sort(
+    mcp_settings: Settings,
+) -> None:
+    mixed = next(
+        followed
+        for followed in followable(_held(mcp_settings))
+        if followed.is_mixed and followed.name == "found_here"
+    )
+    whole = _called(mcp_settings, mixed.name, {"name": "White Wolf Mountain"})
+    narrowed = _called(
+        mcp_settings,
+        mixed.name,
+        {"name": "White Wolf Mountain", "type": EntityType.SHOP.value},
+    )
+    kept = narrowed["result"]["neighbours"]
+    assert {row["type"] for row in kept} == {EntityType.SHOP.value}
+    assert narrowed["result"]["total"] == len(kept)
+    assert narrowed["result"]["total"] < whole["result"]["total"]
+
+
+def test_an_answer_writes_down_no_field_holding_nothing(
+    mcp_settings: Settings,
+) -> None:
+    from wiki_api.surfaces.mcp.projection import says_nothing
+
+    for tool, arguments in (
+        ("get_thing", {"name": SCIMITAR}),
+        ("search", {"words": "dragon"}),
+        ("drops", {"name": DRAGON}),
+    ):
+        answered = _called(mcp_settings, tool, arguments)
+        assert not [key for key, value in answered.items() if says_nothing(value)]
+
+
+def test_a_thing_reads_no_more_of_a_link_than_it_shows(
+    mcp_settings: Settings,
+) -> None:
+    from wiki_api.surfaces.mcp.projection import MOST_EXAMPLES
+
+    answered = _called(mcp_settings, "get_thing", {"name": DRAGON})
+    onwards = answered["result"]["reachable"]
+    assert onwards
+    for one in onwards:
+        assert len(one.get("examples", [])) <= MOST_EXAMPLES
+
+
+def test_a_shrunk_answer_conforms_to_the_shape_its_tool_declares(
+    mcp_settings: Settings,
+) -> None:
+    from wiki_api.surfaces.mcp.answers import Answer
+    from wiki_api.surfaces.mcp.projection import Matches, Thing
+
+    read = Answer[Thing].model_validate(
+        _called(mcp_settings, "get_thing", {"name": SCIMITAR})
+    )
+    assert read.result is not None
+    assert read.result.name == SCIMITAR
+    found = Matches.model_validate(_called(mcp_settings, "search", {"words": "dragon"}))
+    assert found.total >= 1
+
+
+def test_a_shape_a_reader_is_quoted_needs_no_second_lookup(
+    tools: dict[str, Tool],
+) -> None:
+    for tool in tools.values():
+        if tool.outputSchema is None:
+            continue
+        assert "$ref" not in json.dumps(tool.outputSchema)
+        assert "$defs" not in tool.outputSchema
+
+
 def test_the_server_names_itself_for_whoever_connects(mcp_settings: Settings) -> None:
     async def call() -> str | None:
         async with Client(create_server(mcp_settings)) as client:
@@ -222,6 +356,49 @@ def test_what_is_this_item(mcp_settings: Settings) -> None:
 def test_what_are_the_stats_of_this_npc(mcp_settings: Settings) -> None:
     answered = _called(mcp_settings, "get_thing", {"name": DRAGON})
     assert answered["result"]["facts"]
+
+
+def test_a_thing_answers_with_every_value_it_records(
+    mcp_settings: Settings,
+) -> None:
+    """Anything but the few worth a hover used to be dropped here, so a reader was
+    told the wiki holds nothing it had not been shown.
+    """
+    service = KnowledgeService(open_repository(mcp_settings.artifact_path))
+    for name in (SCIMITAR, DRAGON, BANSHEE):
+        answered = _called(mcp_settings, "get_thing", {"name": name})
+        page = service.page_by_name(name)
+        recorded = _recorded_labels(page)
+        assert recorded
+        assert set(answered["result"]["facts"]) == recorded
+
+
+def test_a_value_the_registry_marks_for_no_hover_still_reaches_a_reader(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(mcp_settings, "get_thing", {"name": BANSHEE})
+    said = " ".join(answered["result"]["facts"].values())
+    assert "earmuffs" in said
+
+
+def test_a_packed_value_names_its_parts_and_cuts_none_of_them(
+    mcp_settings: Settings,
+) -> None:
+    """The strength bonus is eleventh of fifteen, which the run of parts used to cut
+    in silence on every weapon in the game.
+    """
+    from wiki_api.domain.attributes import ATTRIBUTE_SPECS
+    from wiki_api.domain.vocabulary import AttributeFormat
+
+    packed = next(
+        spec
+        for spec in ATTRIBUTE_SPECS[EntityType.ITEM]
+        if spec.format is AttributeFormat.BONUSES
+    )
+    answered = _called(mcp_settings, "get_thing", {"name": SCIMITAR})
+    written = answered["result"]["facts"][packed.label]
+    for part in packed.fields:
+        assert part.label in written
 
 
 def test_what_is_this_item_worth(mcp_settings: Settings) -> None:
@@ -332,7 +509,7 @@ def test_words_no_value_answers_to_are_answered_with_the_ones_that_do(
         mcp_settings, COMPARE_TOOL, {"type": EntityType.ITEM, "holds": "how shiny"}
     )
     assert answered["outcome"] == Outcome.UNKNOWN
-    assert answered["result"] is None
+    assert "result" not in answered
     assert "Buy limit" in (answered["note"] or "")
 
 
@@ -341,7 +518,7 @@ def test_naming_nothing_to_compare_is_answered_rather_than_listed(
 ) -> None:
     answered = _called(mcp_settings, COMPARE_TOOL, {"type": EntityType.ITEM})
     assert answered["outcome"] == Outcome.UNKNOWN
-    assert answered["result"] is None
+    assert "result" not in answered
 
 
 def test_which_way_has_this_price_gone(mcp_settings: Settings) -> None:
@@ -381,7 +558,7 @@ def test_something_the_market_never_recorded_says_so_rather_than_guessing(
 ) -> None:
     answered = _called(mcp_settings, MOVEMENT_TOOL, {"name": "Ashes"})
     assert answered["outcome"] == Outcome.FOUND
-    assert answered["result"] is None
+    assert "result" not in answered
     assert answered["note"]
 
 
@@ -419,7 +596,7 @@ def test_a_name_nothing_answers_to_comes_back_as_an_answer(
 ) -> None:
     answered = _called(mcp_settings, "get_thing", {"name": "zzzz nothing zzzz"})
     assert answered["outcome"] == Outcome.UNKNOWN
-    assert answered["result"] is None
+    assert "result" not in answered
     assert answered["note"]
 
 
@@ -443,7 +620,7 @@ def test_absence_reaches_a_walk_the_same_way_it_reaches_a_thing(
 ) -> None:
     answered = _called(mcp_settings, "drops", {"name": "zzzz nothing zzzz"})
     assert answered["outcome"] == Outcome.UNKNOWN
-    assert answered["result"] is None
+    assert "result" not in answered
 
 
 def test_a_near_miss_offers_the_names_that_were_close(mcp_settings: Settings) -> None:
@@ -498,8 +675,7 @@ def test_close_names_carry_nothing_that_could_be_answered_from(
     )
     assert answered["found"]
     for found in answered["found"]:
-        assert found["summary"] is None
-        assert set(found) == {"name", "type", "id", "summary"}
+        assert set(found) == {"name", "type", "id"}
 
 
 def test_close_names_cannot_be_asked_for_without_saying_what_sort_of_thing(
@@ -520,7 +696,7 @@ def test_nothing_close_enough_is_an_empty_answer_rather_than_a_guess(
         CLOSE_NAMES_TOOL,
         {"name": "zzzqqqwww", "type": EntityType.ITEM.value},
     )
-    assert answered["found"] == []
+    assert "found" not in answered
     assert answered["total"] == 0
 
 
@@ -615,7 +791,7 @@ def test_a_page_of_a_walk_is_the_smaller_one_a_reader_can_afford(
 def test_a_page_says_exactly_what_to_pass_back(mcp_settings: Settings) -> None:
     first = _called(mcp_settings, "drops", {"name": DRAGON, "offset": 0})
     assert first["result"]["offset"] == 0
-    if first["result"]["next_offset"] is not None:
+    if first["result"].get("next_offset") is not None:
         following = _called(
             mcp_settings, "drops", {"name": DRAGON, "offset": first["next_offset"]}
         )
@@ -633,7 +809,7 @@ def test_paging_a_walk_to_the_end_yields_every_row_once(
         reached = answered["result"]
         total = reached["total"]
         seen.extend(neighbour["name"] for neighbour in reached["neighbours"])
-        if reached["next_offset"] is None:
+        if reached.get("next_offset") is None:
             break
         offset = reached["next_offset"]
     assert len(seen) == total

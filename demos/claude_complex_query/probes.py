@@ -3,7 +3,21 @@ the wiki holds."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+MORE = "ask_for_more"
+CHOOSE = "ask_to_choose"
+DENIALS: tuple[str, ...] = (
+    "does not hold",
+    "doesn't hold",
+    "no record",
+    "not recorded",
+    "holds nothing",
+    "nothing on",
+    "no combat",
+    "cannot tell you",
+    "can't tell you",
+)
 
 
 @dataclass(frozen=True)
@@ -16,8 +30,10 @@ class Probe:
     reaches: int = 1
     says: tuple[str, ...] = ()
     says_any: tuple[str, ...] = ()
+    never_says: tuple[str, ...] = ()
     answers: tuple[str, ...] = ()
     human_turn: bool = False
+    may_ask: tuple[str, ...] = field(default=(MORE,))
 
 
 #: The sweep, in the order it runs. Every entity type and every link this build holds
@@ -51,14 +67,16 @@ PROBES: tuple[Probe, ...] = (
             "How much is Statius's warhammer worth on the market, how much can I "
             "trust that price, and what does it do for my strength?"
         ),
-        says=("traded",),
+        says=("traded", "114"),
+        never_says=DENIALS,
     ),
     Probe(
         tag="npc_stats",
         reaches=1,
         covers="npc combat attributes, and a name eighteen things answer to",
         question="How dangerous is a Tormented demon? Give me its combat stats.",
-        says=("326",),
+        says=("326", "85"),
+        never_says=DENIALS,
         answers=("the strongest one you have",),
         human_turn=True,
     ),
@@ -69,6 +87,7 @@ PROBES: tuple[Probe, ...] = (
         question="What can I do with a Bank booth, and how many are in the world?",
         says=("Collect",),
         answers=("whichever has the most placements",),
+        may_ask=(MORE, CHOOSE),
     ),
     Probe(
         tag="quest_detail",
@@ -78,7 +97,7 @@ PROBES: tuple[Probe, ...] = (
             "How hard is Desert Treasure, how long does it take, what series is it "
             "part of, which skills does it want, and what must I bring with me?"
         ),
-        says=("master", "Mahjarrat"),
+        says=("master", "Mahjarrat", "thieving"),
     ),
     Probe(
         tag="slayer_task",
@@ -88,7 +107,8 @@ PROBES: tuple[Probe, ...] = (
             "What Slayer level do I need before I can be sent after Skeletal wyverns, "
             "and what does the game warn me about them?"
         ),
-        says=("72",),
+        says=("72", "elemental"),
+        never_says=DENIALS,
     ),
     Probe(
         tag="shop_currency",
@@ -99,13 +119,41 @@ PROBES: tuple[Probe, ...] = (
     ),
     Probe(
         tag="place_hierarchy",
-        reaches=3,
+        reaches=1,
         covers="locations, their tiles, and the part_of / contains pair",
         question=(
             "Where is Draynor Manor on the map, what larger place is it part of, and "
             "what does Burthorpe contain?"
         ),
-        says=("Draynor Village", "Heroes' Guild"),
+        says=("Draynor Village", "Heroes' Guild", "3108"),
+        never_says=DENIALS,
+    ),
+    Probe(
+        tag="music_track",
+        reaches=1,
+        covers="music as an entity type, with the set and the sentence it carries",
+        question=(
+            "Tell me about the music track Adventure: which set is it part of, and "
+            "how is it unlocked?"
+        ),
+        says=("Varrock Palace",),
+    ),
+    Probe(
+        tag="music_place",
+        reaches=2,
+        covers="located_in with music at one end, from the track and from the place",
+        question="Where is the track Fanfare heard, and what does Varrock Palace hold?",
+        says=("Falador", "Adventure"),
+    ),
+    Probe(
+        tag="quest_music",
+        reaches=2,
+        covers="heard_during and music_heard, the newest link read both ways",
+        question=(
+            "Which pieces of music play during Dream Mentor, and which quest is the "
+            "track Suspicious heard during?"
+        ),
+        says=("Monkey Madness", "Everlasting"),
     ),
     Probe(
         tag="drops_paged",
@@ -137,6 +185,17 @@ PROBES: tuple[Probe, ...] = (
         says=("Black Knights",),
     ),
     Probe(
+        tag="narrowed_walk",
+        reaches=1,
+        covers="a link answering with several sorts, narrowed to one of them",
+        question=(
+            "Animal Magnetism needs other quests finished and items carried. Ignore "
+            "the quests: which items does it ask me to bring, and how many are there?"
+        ),
+        says=("3",),
+        never_says=DENIALS,
+    ),
+    Probe(
         tag="shop_lines",
         reaches=2,
         covers="shops from both ends, with price and who stands behind the counter",
@@ -145,6 +204,7 @@ PROBES: tuple[Probe, ...] = (
             "you find them in?"
         ),
         says=("Ava",),
+        may_ask=(MORE, CHOOSE),
     ),
     Probe(
         tag="slayer_chain",
@@ -165,6 +225,7 @@ PROBES: tuple[Probe, ...] = (
             "shrimps turn into when I cook them?"
         ),
         says=("Shrimps",),
+        may_ask=(MORE, CHOOSE),
     ),
     Probe(
         tag="ammunition",
@@ -175,6 +236,7 @@ PROBES: tuple[Probe, ...] = (
             "fire Bronze bolts?"
         ),
         says=("bolts",),
+        may_ask=(MORE, CHOOSE),
     ),
     Probe(
         tag="spawns",
@@ -234,12 +296,31 @@ PROBES: tuple[Probe, ...] = (
         says=("dragon",),
     ),
     Probe(
+        tag="music_chain",
+        reaches=2,
+        covers="a quest, the music it unlocks, and where in the world that music plays",
+        question=(
+            "If I finish The Fremennik Isles, which music does it unlock, and "
+            "whereabouts in the world do those tracks play?"
+        ),
+        says=("Volcanic Vikings", "Neitiznot"),
+    ),
+    Probe(
         tag="fuzzy_name",
         reaches=2,
         covers="a misspelt name settled by asking rather than by guessing",
         question="tell me about the abysal wipe",
         says=("Abyssal whip",),
         answers=("item", "Abyssal whip"),
+        human_turn=True,
+    ),
+    Probe(
+        tag="music_name",
+        reaches=1,
+        covers="one name held by two sorts of thing, settled by asking which was meant",
+        question="tell me about Monkey Madness",
+        says=("Ape Atoll",),
+        answers=("the music track, not the quest",),
         human_turn=True,
     ),
     Probe(
@@ -256,6 +337,14 @@ PROBES: tuple[Probe, ...] = (
         reaches=1,
         covers="a fact this build lacks, which should be said rather than invented",
         question="What does completing Desert Treasure reward you with?",
+        says_any=("no", "not", "cannot", "does not", "nothing"),
+    ),
+    Probe(
+        tag="music_gap",
+        reaches=1,
+        covers="a track unlocked by content this build holds no entity for",
+        question="Which quest do I have to finish to unlock the track Melodrama?",
+        says=("Castle Wars",),
         says_any=("no", "not", "cannot", "does not", "nothing"),
     ),
     Probe(
@@ -279,6 +368,16 @@ PROBES: tuple[Probe, ...] = (
         says_any=("batta", "legs", "hole", "toad"),
     ),
     Probe(
+        tag="music_spread",
+        reaches=1,
+        covers="a number the newest sort of thing records, ordered largest first",
+        question=(
+            "Which music plays across the most map squares in the world, and how many "
+            "does it play in?"
+        ),
+        says=("Bounty Hunter",),
+    ),
+    Probe(
         tag="price_over_time",
         reaches=1,
         covers="how a price moved, rather than what it is now",
@@ -286,6 +385,7 @@ PROBES: tuple[Probe, ...] = (
             "Has the Abyssal whip gone up or down over the last year, and by how much?"
         ),
         says_any=("up", "down", "fell", "rose"),
+        may_ask=(MORE, CHOOSE),
     ),
 )
 

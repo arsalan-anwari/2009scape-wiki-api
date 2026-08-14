@@ -15,6 +15,7 @@ from wiki_api.pipeline.sources import (
     drops,
     food,
     items,
+    music,
     npcs,
     placements,
     places,
@@ -102,8 +103,8 @@ def read_sources(
         scenery.read_scenery(staged, overridden),
         slayer.read_tasks(staged, _allocated(given, EntityType.TASK)),
         places.read_map_places(staged, _allocated(given, EntityType.LOCATION)),
-        places.read_agreed_places(staged, _allocated(given, EntityType.LOCATION)),
         rooms.read_rooms(staged, _allocated(given, EntityType.ROOM)),
+        music.read_music(staged),
     ]
     known = overridden | _keys(described)
     extents = places_in([outcome.read for outcome in described] + list(overlays))
@@ -124,6 +125,8 @@ def read_sources(
             skills.read_gathering(staged, known),
             skills.read_making(staged, known),
             slayer.read_slayer_edges(staged, known, _keyed(described, EntityType.TASK)),
+            music.read_music_regions(staged, known, extents),
+            music.read_quest_music(staged, known, named_quests),
             prices.read_prices(staged, known),
         ]
     )

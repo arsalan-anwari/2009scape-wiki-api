@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from wiki_api.core.values import Naming
     from wiki_api.domain.entity import Entity
-    from wiki_api.domain.identity import EntityKey
+    from wiki_api.domain.identity import EntityKey, EntityType
     from wiki_api.domain.relationships import Edge, RelationshipType
     from wiki_api.repository.protocol import KnowledgeRepository
 
@@ -38,16 +38,22 @@ def walk(
     rel: RelationshipType,
     direction: Direction,
     *,
+    sorts: Sequence[EntityType] | None = None,
     limit: int = BLOCK_PAGE_SIZE,
     offset: int = 0,
 ) -> Block:
-    """One page of one relationship, with its neighbours already resolved."""
+    """One page of one relationship, with its neighbours already resolved.
+
+    Narrowing to `sorts` is done where the edges are counted, so the total counts
+    what a caller is about to be sent.
+    """
     return walk_keys(
         repository,
         entity.key,
         key_set(repository, entity),
         rel,
         direction,
+        sorts=sorts,
         limit=limit,
         offset=offset,
     )
@@ -60,15 +66,20 @@ def walk_keys(
     rel: RelationshipType,
     direction: Direction,
     *,
+    sorts: Sequence[EntityType] | None = None,
     limit: int = BLOCK_PAGE_SIZE,
     offset: int = 0,
     naming: Naming | None = None,
 ) -> Block:
     """Walk over a key set the caller has already worked out."""
     if direction is Direction.FORWARD:
-        edges = repository.edges_from(keys, rel=rel, limit=limit, offset=offset)
+        edges = repository.edges_from(
+            keys, rel=rel, sorts=sorts, limit=limit, offset=offset
+        )
     else:
-        edges = repository.edges_to(keys, rel=rel, limit=limit, offset=offset)
+        edges = repository.edges_to(
+            keys, rel=rel, sorts=sorts, limit=limit, offset=offset
+        )
     neighbours = repository.get_entities(
         [far_key(edge, direction) for edge in edges.items]
     )

@@ -23,6 +23,7 @@ DESCRIBED = {
     "scenery-1276": EntityKey(type=EntityType.SCENERY, id=1276),
     "task-1": EntityKey(type=EntityType.TASK, id=1),
     "room-1": EntityKey(type=EntityType.ROOM, id=1),
+    "music-177": EntityKey(type=EntityType.MUSIC, id=177),
 }
 
 

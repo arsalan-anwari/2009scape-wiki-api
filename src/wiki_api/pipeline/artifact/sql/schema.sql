@@ -10,7 +10,8 @@ CREATE TABLE meta (
 CREATE TABLE entity (
     search_id     INTEGER PRIMARY KEY,
     type          TEXT    NOT NULL
-        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
+        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task',
+                        'room', 'music')),
     id            INTEGER NOT NULL,
     slug          TEXT    NOT NULL,
     name          TEXT    NOT NULL,
@@ -45,7 +46,8 @@ CREATE INDEX entity_by_canonical ON entity (type, canonical_id);
 
 CREATE TABLE entity_alias (
     type       TEXT    NOT NULL
-        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
+        CHECK (type IN ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task',
+                        'room', 'music')),
     alias_slug TEXT    NOT NULL,
     entity_id  INTEGER NOT NULL,
     kind       TEXT    NOT NULL
@@ -56,15 +58,17 @@ CREATE TABLE entity_alias (
 CREATE TABLE edge (
     src_type      TEXT    NOT NULL
         CHECK (src_type IN
-            ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
+            ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room',
+             'music')),
     src_id        INTEGER NOT NULL,
     rel           TEXT    NOT NULL
         CHECK (rel IN ('drops', 'sells', 'staffed_by', 'rewards', 'uses_ammunition',
                        'located_in', 'part_of', 'yields', 'makes', 'requires',
-                       'assigns', 'satisfied_by')),
+                       'assigns', 'satisfied_by', 'heard_during')),
     dst_type      TEXT    NOT NULL
         CHECK (dst_type IN
-            ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room')),
+            ('item', 'npc', 'shop', 'quest', 'location', 'scenery', 'task', 'room',
+             'music')),
     dst_id        INTEGER NOT NULL,
     discriminator TEXT    NOT NULL DEFAULT '',
     attributes    TEXT    NOT NULL,

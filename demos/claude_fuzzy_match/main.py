@@ -170,7 +170,7 @@ def answering(given: Iterator[str]) -> Callable[[str, list[str]], str]:
             except EOFError:
                 answer = ""
         else:
-            print(f"  your answer: {answer}   (given rather than typed)")
+            print(f"  your answer: {answer}   ")
         return answer or "I do not know, offer me what you have"
 
     return ask_user

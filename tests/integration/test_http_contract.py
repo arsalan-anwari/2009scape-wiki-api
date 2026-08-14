@@ -214,6 +214,7 @@ def test_what_types_exist_and_how_do_their_fields_present(client: TestClient) ->
         "scenery",
         "task",
         "room",
+        "music",
     }
     assert all(info["attributes"] for info in published)
 

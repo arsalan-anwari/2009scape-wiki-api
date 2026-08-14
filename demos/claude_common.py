@@ -10,7 +10,8 @@ import time
 from contextlib import closing, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from tempfile import TemporaryFile
+from typing import IO, TYPE_CHECKING
 
 from dotenv import load_dotenv
 
@@ -136,43 +137,62 @@ def served(*, data_dir: str = TEST_DATA, wait: float = MOST_WAIT) -> Generator[W
         "WIKI_API_AUTH_MODE": "required",
     }
     environment.setdefault("WIKI_API_DATA_DIR", data_dir)
-    running = subprocess.Popen(
-        [command, *arguments],
-        env=environment,
-        cwd=str(ROOT),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    try:
-        _listening(running, port, wait)
-        yield Wiki(
-            url=f"http://{LOCALHOST}:{port}/mcp/",
-            headers=held.header,
-            key_id=held.kid,
-            kept=held.label or WIKI_LABEL,
+    # Into a file rather than a pipe: the wiki logs a line per request and nothing here
+    # reads it back until something goes wrong, and a pipe nobody drains stops the
+    # server dead once it holds 64k, halfway through a long sweep.
+    with TemporaryFile("w+", encoding="utf-8", errors="replace") as spoken:
+        running = subprocess.Popen(
+            [command, *arguments],
+            env=environment,
+            cwd=str(ROOT),
+            stdout=spoken,
+            stderr=subprocess.STDOUT,
+            text=True,
         )
-    finally:
-        running.terminate()
         try:
-            running.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            running.kill()
+            _listening(running, spoken, port, wait)
+            yield Wiki(
+                url=f"http://{LOCALHOST}:{port}/mcp/",
+                headers=held.header,
+                key_id=held.kid,
+                kept=held.label or WIKI_LABEL,
+            )
+        finally:
+            running.terminate()
+            try:
+                running.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                running.kill()
 
 
-def _listening(running: subprocess.Popen[str], port: int, wait: float) -> None:
+def _spoken(spoken: IO[str]) -> str:
+    """Everything the wiki has said so far, without disturbing where it writes."""
+    where = spoken.tell()
+    spoken.seek(0)
+    try:
+        return spoken.read()
+    finally:
+        spoken.seek(where)
+
+
+def _listening(
+    running: subprocess.Popen[str], spoken: IO[str], port: int, wait: float
+) -> None:
     """Wait until the wiki is answering, or say what it said instead."""
     until = time.monotonic() + wait
     while time.monotonic() < until:
         if running.poll() is not None:
-            said = running.stdout.read() if running.stdout else ""
+            said = _spoken(spoken)
             raise RuntimeError(f"the wiki stopped before it served anything:\n{said}")
         with closing(socket.socket()) as trying:
             trying.settimeout(0.5)
             if trying.connect_ex((LOCALHOST, port)) == 0:
                 return
         time.sleep(0.2)
-    raise RuntimeError(f"the wiki was not listening on {port} after {wait:.0f}s")
+    raise RuntimeError(
+        f"the wiki was not listening on {port} after {wait:.0f}s, having said:\n"
+        f"{_spoken(spoken)}"
+    )
 
 
 def dataset() -> Path:

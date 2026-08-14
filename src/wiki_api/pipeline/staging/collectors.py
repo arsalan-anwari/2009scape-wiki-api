@@ -17,10 +17,8 @@ from wiki_api.pipeline.enums import read_enum
 from wiki_api.pipeline.enums.calls import read_base_calls
 from wiki_api.pipeline.enums.constants import read_constants
 from wiki_api.pipeline.enums.gates import read_gates
-from wiki_api.pipeline.places import read_anchors, read_tracks
+from wiki_api.pipeline.music import read_tracks
 from wiki_api.pipeline.staging.declared import (
-    ANCHORS_CHECKOUT,
-    ANCHORS_REPO,
     CACHE_ROOT,
     CONFIG_ROOT,
     CONSTANTS_CHECKOUT,
@@ -34,7 +32,7 @@ from wiki_api.pipeline.staging.declared import (
     GAME_CHECKOUT,
     GAME_REPO,
     MUSIC_TRACKS,
-    TELEPORT_ANCHORS,
+    QUEST_PAGES,
     WIKI_CHECKOUT,
     WIKI_REPO,
     DeclaredExtract,
@@ -68,7 +66,7 @@ CACHE: Final = "cache"
 CONSTANTS: Final = "constants"
 CODE: Final = "code"
 WIKI: Final = "wiki"
-PLACES: Final = "places"
+MUSIC: Final = "music"
 CONFIG_VERSION: Final = 1
 TABLE_VERSION: Final = 1
 PRICE_VERSION: Final = 1
@@ -76,7 +74,7 @@ CACHE_VERSION: Final = 1
 CONSTANTS_VERSION: Final = 1
 CODE_VERSION: Final = 2
 WIKI_VERSION: Final = 1
-PLACES_VERSION: Final = 1
+MUSIC_VERSION: Final = 1
 CODE_SUFFIXES: Final = (".kt", ".java")
 PAGE_SUFFIX: Final = ".html"
 PARTIAL_SUFFIX: Final = ".staging"
@@ -103,10 +101,6 @@ class StagingRun:
     @property
     def pages(self) -> Path:
         return self.game_data / WIKI_CHECKOUT
-
-    @property
-    def anchors(self) -> Path:
-        return self.game_data / ANCHORS_CHECKOUT
 
     def upstream(self, collector: str, relative: str) -> Path:
         return self.under(self.checkout, collector, relative)
@@ -338,54 +332,25 @@ def _snapshot_version(run: StagingRun) -> GameVersion:
     return vendored_version_of(run.pages, WIKI_REPO)
 
 
-def stage_places(run: StagingRun, version: GameVersion) -> CollectorReport:
-    """Read the two sources that say where a part of the world is and what it is
-    called: the game's own music track dump, and the community's teleport list.
-    """
-    staged = [
-        _music_tracks(run, version),
-        _teleport_anchors(run),
-    ]
-    return CollectorReport(
-        collector=PLACES,
-        files=tuple(file for file, _ in staged),
-        notes=tuple(note for _, note in staged),
-    )
-
-
-def _music_tracks(run: StagingRun, version: GameVersion) -> tuple[StagedFile, str]:
+def stage_music(run: StagingRun, version: GameVersion) -> CollectorReport:
+    """Read the game's own music track dump."""
     declared = MUSIC_TRACKS
-    dump = run.upstream(PLACES, declared.upstream)
+    dump = run.upstream(MUSIC, declared.upstream)
     said = dump.read_text(encoding="utf-8", errors="replace")
     tracks = read_tracks(said, declared.dump)
     file = _write(
         run.destination / declared.staged,
         _as_json({"tracks": [track.model_dump(mode="json") for track in tracks]}),
-        collector=PLACES,
-        version=PLACES_VERSION,
+        collector=MUSIC,
+        version=MUSIC_VERSION,
         game_version=version,
         upstream=declared.upstream,
         relative=declared.staged,
     )
-    return file, f"tracks: {len(tracks)} tracks read from the dump"
-
-
-def _teleport_anchors(run: StagingRun) -> tuple[StagedFile, str]:
-    declared = TELEPORT_ANCHORS
-    source = run.under(run.anchors, PLACES, declared.upstream)
-    sheet = read_anchors(source.read_text(encoding="utf-8", errors="replace"))
-    file = _write(
-        run.destination / declared.staged,
-        _as_json(sheet.model_dump(mode="json")),
-        collector=PLACES,
-        version=PLACES_VERSION,
-        game_version=vendored_version_of(run.anchors, ANCHORS_REPO),
-        upstream=declared.upstream,
-        relative=declared.staged,
-    )
-    return file, (
-        f"anchors: {len(sheet.anchors)} named points, "
-        f"{sheet.unread} of {sheet.lines} lines unread"
+    return CollectorReport(
+        collector=MUSIC,
+        files=(file,),
+        notes=(f"tracks: {len(tracks)} tracks read from the dump",),
     )
 
 
@@ -470,7 +435,7 @@ COLLECTORS: Final[dict[str, Callable[[StagingRun, GameVersion], CollectorReport]
     CODE: stage_code,
     CACHE: stage_cache,
     WIKI: stage_wiki,
-    PLACES: stage_places,
+    MUSIC: stage_music,
     PRICES: stage_prices,
 }
 
@@ -582,7 +547,7 @@ def _committed(checkout: Path) -> None:
 
 
 def _checkout(tmp_path: Path) -> StagingRun:
-    from wiki_api.pipeline.places.music import DUMP
+    from wiki_api.pipeline.music.tracks import DUMP
 
     checkout = tmp_path / "game_data" / GAME_CHECKOUT
     (checkout / "Server/data/configs").mkdir(parents=True)
@@ -604,15 +569,21 @@ def _checkout(tmp_path: Path) -> StagingRun:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(_declaration(table.enum, table.filename), encoding="utf-8")
     _committed(checkout)
-    anchors = tmp_path / "game_data" / ANCHORS_CHECKOUT
-    anchors.mkdir(parents=True)
-    (anchors / TELEPORT_ANCHORS.upstream).write_text(
-        "Varrock ::tele 3210,3424\nnonsense\n", encoding="utf-8"
-    )
+    _saved_pages(tmp_path / "game_data" / WIKI_CHECKOUT)
     return StagingRun(
         game_data=tmp_path / "game_data",
         destination=tmp_path / "data" / "source",
         prices_url="https://example.test/gedata/",
+    )
+
+
+def _saved_pages(pages: Path) -> None:
+    """A vendored directory of saved pages, which is the one staging still reads."""
+    from wiki_api.pipeline.wiki.pages import SAMPLE
+
+    pages.mkdir(parents=True)
+    (pages / f"{QUEST_PAGES.namespace}_cooks_assistant{PAGE_SUFFIX}").write_text(
+        SAMPLE, encoding="utf-8"
     )
 
 
@@ -793,55 +764,52 @@ def test_the_cache_report_states_every_ceiling_it_stayed_under(tmp_path: Path) -
     assert "cache/placements: 0 of 330 allowed" in told
 
 
-def test_staging_places_writes_the_tracks_and_the_teleport_list(
+def test_staging_music_writes_the_dump_and_nothing_else(
     tmp_path: Path,
 ) -> None:
     run = _checkout(tmp_path)
-    report = stage(run, only=[PLACES])
-    assert report.count == 2
-    dumped = json.loads((run.destination / "places/tracks.json").read_text())
+    report = stage(run, only=[MUSIC])
+    assert report.count == 1
+    dumped = json.loads((run.destination / "music/tracks.json").read_text())
     assert dumped["tracks"][0]["name"] == "Adventure"
     assert dumped["tracks"][0]["unlock"] == "at Varrock Palace."
-    sheet = json.loads((run.destination / "places/anchors.json").read_text())
-    assert sheet["anchors"][0]["name"] == "Varrock"
-    assert sheet["unread"] == 1
 
 
 def test_staging_writes_no_judgement_of_its_own_beside_the_dump(
     tmp_path: Path,
 ) -> None:
     run = _checkout(tmp_path)
-    stage(run, only=[PLACES])
-    dumped = json.loads((run.destination / "places/tracks.json").read_text())
+    stage(run, only=[MUSIC])
+    dumped = json.loads((run.destination / "music/tracks.json").read_text())
     assert set(dumped) == {"tracks"}
     assert "place" not in dumped["tracks"][0]
 
 
-def test_the_teleport_list_is_named_by_the_directory_it_came_from(
+def test_the_saved_pages_are_named_by_the_directory_they_came_from(
     tmp_path: Path,
 ) -> None:
     from wiki_api.pipeline.staging.manifest import read_manifest
 
     run = _checkout(tmp_path)
-    stage(run, only=[PLACES])
-    entry = read_manifest(run.destination).entry("places/anchors.json")
-    assert entry.game_version.repo == ANCHORS_REPO
-    assert entry.collector == PLACES
+    stage(run, only=[WIKI])
+    entry = read_manifest(run.destination).entry(QUEST_PAGES.staged)
+    assert entry.game_version.repo == WIKI_REPO
+    assert entry.collector == WIKI
 
 
 def test_a_vendored_source_is_versioned_by_content_not_by_the_repo_above_it(
     tmp_path: Path,
 ) -> None:
     from wiki_api.pipeline.staging.manifest import read_manifest
+    from wiki_api.pipeline.wiki.pages import SAMPLE
 
     run = _checkout(tmp_path)
-    stage(run, only=[PLACES])
-    before = read_manifest(run.destination).entry("places/anchors.json").game_version
-    (run.anchors / TELEPORT_ANCHORS.upstream).write_text(
-        "Varrock ::tele 3210,3425\nnonsense\n", encoding="utf-8"
-    )
-    stage(run, only=[PLACES])
-    after = read_manifest(run.destination).entry("places/anchors.json").game_version
+    stage(run, only=[WIKI])
+    before = read_manifest(run.destination).entry(QUEST_PAGES.staged).game_version
+    saved = run.pages / f"{QUEST_PAGES.namespace}_cooks_assistant{PAGE_SUFFIX}"
+    saved.write_text(SAMPLE.replace("An opening line.", "Another."), encoding="utf-8")
+    stage(run, only=[WIKI])
+    after = read_manifest(run.destination).entry(QUEST_PAGES.staged).game_version
     assert after != before
     assert str(before) != str(_game_version(run))
 
@@ -850,30 +818,30 @@ def _game_version(run: StagingRun) -> GameVersion:
     return game_version_of(run.checkout, GAME_REPO)
 
 
-def test_the_places_report_says_how_much_of_each_source_was_read(
+def test_the_music_report_says_how_much_of_the_dump_was_read(
     tmp_path: Path,
 ) -> None:
-    told = "\n".join(stage(_checkout(tmp_path), only=[PLACES]).lines())
-    assert "tracks: 3 tracks read from the dump" in told
-    assert "1 of 2 lines unread" in told
-
-
-def test_staging_places_twice_writes_the_same_bytes(tmp_path: Path) -> None:
     run = _checkout(tmp_path)
-    stage(run, only=[PLACES])
-    first = (run.destination / "places/tracks.json").read_bytes()
-    stage(run, only=[PLACES])
-    assert (run.destination / "places/tracks.json").read_bytes() == first
+    told = "\n".join(stage(run, only=[MUSIC]).lines())
+    assert "tracks: 4 tracks read from the dump" in told
 
 
-def test_a_missing_teleport_list_names_the_collector(tmp_path: Path) -> None:
+def test_staging_music_twice_writes_the_same_bytes(tmp_path: Path) -> None:
+    run = _checkout(tmp_path)
+    stage(run, only=[MUSIC])
+    first = (run.destination / "music/tracks.json").read_bytes()
+    stage(run, only=[MUSIC])
+    assert (run.destination / "music/tracks.json").read_bytes() == first
+
+
+def test_a_missing_music_dump_names_the_collector(tmp_path: Path) -> None:
     import pytest
 
     run = _checkout(tmp_path)
-    (run.anchors / TELEPORT_ANCHORS.upstream).unlink()
+    (run.checkout / MUSIC_TRACKS.upstream).unlink()
     with pytest.raises(UpstreamMissing) as caught:
-        stage(run, only=[PLACES])
-    assert PLACES in str(caught.value)
+        stage(run, only=[MUSIC])
+    assert MUSIC in str(caught.value)
 
 
 def test_a_cache_that_decodes_worse_than_declared_stops_staging(

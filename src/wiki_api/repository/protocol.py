@@ -82,6 +82,7 @@ class KnowledgeRepository(Protocol):
         keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        sorts: Sequence[EntityType] | None = None,
         include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
@@ -92,6 +93,7 @@ class KnowledgeRepository(Protocol):
         keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        sorts: Sequence[EntityType] | None = None,
         include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
@@ -145,6 +147,16 @@ def test_every_listing_operation_is_paginated() -> None:
         signature = inspect.signature(getattr(KnowledgeRepository, name))
         assert {"limit", "offset"} <= set(signature.parameters)
         assert signature.return_annotation.startswith("Page[")
+
+
+def test_a_walk_can_be_narrowed_to_the_sorts_a_caller_wants() -> None:
+    import inspect
+
+    for name in ("edges_from", "edges_to"):
+        signature = inspect.signature(getattr(KnowledgeRepository, name))
+        narrowing = signature.parameters["sorts"]
+        assert narrowing.default is None
+        assert narrowing.kind is inspect.Parameter.KEYWORD_ONLY
 
 
 def test_a_near_name_question_is_always_about_one_sort_of_thing() -> None:

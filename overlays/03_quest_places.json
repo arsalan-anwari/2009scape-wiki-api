@@ -309,7 +309,7 @@
       "name": "Uzer",
       "description": "The ruined city east of the Shantay Pass.",
       "source_key": "uzer",
-      "source_ref": "wiki/quests.json#kharidian/uzer; centre from places/anchors.json#uzer",
+      "source_ref": "wiki/quests.json#kharidian/uzer; centre stated here, no map label names it",
       "attributes": {
         "kind": "area",
         "centre": {

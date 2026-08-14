@@ -46,6 +46,12 @@ class Followed:
     name: str
     description: str
     asked: tuple[EntityType, ...]
+    answers: tuple[EntityType, ...]
+
+    @property
+    def is_mixed(self) -> bool:
+        """Say whether this way of following answers with more than one sort."""
+        return len(self.answers) > 1
 
 
 def tool_name(spec: RelationshipSpec, direction: Direction) -> str:
@@ -81,9 +87,7 @@ def described(spec: RelationshipSpec, direction: Direction) -> str:
     answered = _words(answered_with(spec, direction), plural=True)
     return (
         f'"{label}". Give the name of {_article(asked)} {asked} and this answers '
-        f"with the {answered} it is joined to that way. The answer arrives one page "
-        "at a time; to read further, call it again with the offset the last answer "
-        "reported."
+        f"with the {answered} it is joined to that way, one page at a time."
     )
 
 
@@ -103,6 +107,7 @@ def followable(
             name=tool_name(spec, direction),
             description=described(spec, direction),
             asked=asked_of(spec, direction),
+            answers=answered_with(spec, direction),
         )
         for spec in sorted(RELATIONSHIP_SPECS.values(), key=lambda spec: spec.order)
         if held is None or spec.rel in held
@@ -192,7 +197,16 @@ def test_the_two_directions_ask_for_opposite_ends() -> None:
 def test_a_description_says_what_to_give_and_what_comes_back() -> None:
     for followed in followable():
         assert followed.description
-        assert "offset" in followed.description
+        assert "Give the name of" in followed.description
+        assert "one page at a time" in followed.description
+
+
+def test_how_to_read_the_next_page_is_said_once_rather_than_in_every_tool() -> None:
+    """The offset argument documents itself, and 27 generated tools repeating that
+    prose cost more of the surface than the whole of two tools.
+    """
+    for followed in followable():
+        assert "offset" not in followed.description
 
 
 def test_no_two_descriptions_read_the_same() -> None:
@@ -223,3 +237,19 @@ def test_the_tools_a_reader_is_pointed_at_are_tools_that_exist() -> None:
 def test_a_word_beginning_with_a_vowel_gets_the_other_article() -> None:
     assert _article("item") == "an"
     assert _article("shop") == "a"
+
+
+def test_a_way_of_following_says_what_comes_back_as_well_as_what_to_give() -> None:
+    for followed in followable():
+        spec = RELATIONSHIP_SPECS[followed.rel]
+        assert followed.answers == answered_with(spec, followed.direction)
+        assert followed.asked == asked_of(spec, followed.direction)
+
+
+def test_only_a_link_answering_with_several_sorts_counts_as_mixed() -> None:
+    mixed = [followed for followed in followable() if followed.is_mixed]
+    assert mixed
+    assert all(len(followed.answers) > 1 for followed in mixed)
+    assert all(
+        len(followed.answers) == 1 for followed in followable() if not followed.is_mixed
+    )

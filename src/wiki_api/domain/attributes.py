@@ -1219,6 +1219,43 @@ class RoomAttributes(BaseModel):
     ] = Field(default=None, ge=0)
 
 
+class MusicAttributes(BaseModel):
+    """Everything the game's own track list says about one piece of music."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    trackset: Annotated[
+        str | None,
+        AttributeMeta(
+            "Set",
+            AttributeGroup.OVERVIEW,
+            10,
+            AttributeFormat.TEXT,
+            prominent=True,
+        ),
+    ] = None
+    unlock_note: Annotated[
+        str | None,
+        AttributeMeta(
+            "How it is unlocked",
+            AttributeGroup.GENERAL,
+            20,
+            AttributeFormat.TEXT,
+            prominent=True,
+        ),
+    ] = None
+    region_count: Annotated[
+        int | None,
+        AttributeMeta(
+            "Map squares it plays in",
+            AttributeGroup.MAP,
+            30,
+            AttributeFormat.INT,
+            derived=True,
+        ),
+    ] = Field(default=None, ge=0)
+
+
 EntityAttributes = (
     ItemAttributes
     | NpcAttributes
@@ -1228,6 +1265,7 @@ EntityAttributes = (
     | SceneryAttributes
     | TaskAttributes
     | RoomAttributes
+    | MusicAttributes
 )
 
 ATTRIBUTE_MODELS: Final[Mapping[EntityType, type[EntityAttributes]]] = {
@@ -1239,6 +1277,7 @@ ATTRIBUTE_MODELS: Final[Mapping[EntityType, type[EntityAttributes]]] = {
     EntityType.SCENERY: SceneryAttributes,
     EntityType.TASK: TaskAttributes,
     EntityType.ROOM: RoomAttributes,
+    EntityType.MUSIC: MusicAttributes,
 }
 
 ATTRIBUTE_SPECS: Final[Mapping[EntityType, tuple[AttributeSpec, ...]]] = {

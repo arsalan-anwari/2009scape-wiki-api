@@ -6,9 +6,13 @@ import re
 import sys
 import tomllib
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+import anyio
 import pytest
+from pydantic_ai import Agent
+from pydantic_ai.messages import ModelResponse, TextPart, ToolCallPart
+from pydantic_ai.models.function import AgentInfo, FunctionModel
 
 from wiki_api.surfaces.mcp import (
     CLOSE_NAMES_TOOL,
@@ -30,7 +34,11 @@ from wiki_api.surfaces.mcp.server import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from types import ModuleType
+
+    from pydantic_ai.messages import ModelMessage
+    from pydantic_ai.run import AgentRunResult
 
 ROOT = Path(__file__).parent.parent.parent
 DEMOS = ROOT / "demos"
@@ -224,3 +232,182 @@ def test_the_written_tools_a_reader_meets_are_the_ones_offered() -> None:
     }
     assert set(described) == set(WRITTEN_TOOLS)
     assert set(described) <= _offered()
+
+
+def _sweep() -> ModuleType:
+    return _loaded(DEMOS / "claude_complex_query" / ENTRY)
+
+
+def _replies(
+    turns: list[ModelResponse],
+) -> Callable[[list[ModelMessage], AgentInfo], ModelResponse]:
+    spent: list[int] = []
+
+    def replying(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
+        spent.append(len(messages))
+        return turns[min(len(spent) - 1, len(turns) - 1)]
+
+    return replying
+
+
+def _notes(tag: str = "asked", covers: str = "one question") -> Any:
+    """Somewhere for a stub run to keep what it did."""
+    from claude_complex_query.probes import Probe
+    from claude_complex_query.report import Notes
+
+    return Notes(probe=Probe(tag=tag, covers=covers, question="what drops these?"))
+
+
+def _asked(
+    turns: list[ModelResponse], question: str = "where do these come from?"
+) -> tuple[ModuleType, AgentRunResult[str], Any]:
+    """Put one question to a stub model, never to a real one."""
+    from claude_complex_query.report import Loud
+
+    sweep = _sweep()
+    notes = _notes()
+    agent = Agent(FunctionModel(_replies(turns)), output_type=str)
+
+    @agent.tool_plain
+    def look_up(name: str) -> str:
+        """Look one thing up."""
+        return f"read {name}"
+
+    answered = anyio.run(lambda: sweep.stepped(agent, question, notes, Loud()))
+    return sweep, answered, notes
+
+
+def _showed(sweep: ModuleType, probe: Any, called: list[str], said: str) -> bool:
+    """Whether a probe met every expectation it declared."""
+    from claude_common import WORKED
+
+    lines = sweep.checked(probe, called, said, said)
+    return all(outcome == WORKED for outcome, _ in lines)
+
+
+def test_a_step_is_kept_when_it_is_taken_rather_than_when_the_probe_ends(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A probe that has stopped and a probe still thinking read identically when
+    nothing is kept until the end, and one of them is worth interrupting.
+    """
+    turns = [
+        ModelResponse(parts=[ToolCallPart("look_up", {"name": "Raw salmon"})]),
+        ModelResponse(parts=[TextPart("They come from fishing spots.")]),
+    ]
+    _, answered, notes = _asked(turns)
+    printed = capsys.readouterr().out
+    assert "called look_up(name='Raw salmon')" in printed
+    assert [event.written() for event in notes.events] == ["look_up(name='Raw salmon')"]
+    assert answered.output == "They come from fishing spots."
+
+
+def test_the_closing_answer_is_kept_once_rather_than_twice() -> None:
+    """The last turn calls nothing and its words are the answer, which the document
+    holds whole; keeping them among the steps as well would print it twice.
+    """
+    turns = [
+        ModelResponse(parts=[ToolCallPart("look_up", {"name": "Raw salmon"})]),
+        ModelResponse(parts=[TextPart("They come from fishing spots.")]),
+    ]
+    _, answered, notes = _asked(turns)
+    assert answered.output not in [
+        getattr(event, "words", "") for event in notes.events
+    ]
+
+
+def test_what_a_probe_says_while_reading_counts_as_something_it_said() -> None:
+    """A long answer read a page at a time says half of itself before it asks whether
+    to read on, and that half was still said to whoever asked.
+    """
+    turns = [
+        ModelResponse(
+            parts=[
+                TextPart("Here are the first ten, starting with Dragon bones."),
+                ToolCallPart("look_up", {"name": "Dragon bones"}),
+            ]
+        ),
+        ModelResponse(parts=[TextPart("That is all of them.")]),
+    ]
+    sweep, answered, _ = _asked(turns)
+    said = sweep.spoken(answered.all_messages())
+    assert "Dragon bones" in said
+    assert "Dragon bones" not in answered.output
+
+
+def test_a_probe_that_asks_when_it_may_is_not_marked_down_for_it() -> None:
+    """The instructions tell the model to ask before spending another page, so a
+    probe scoring that as a fault marks it down for following them.
+    """
+    sweep = _sweep()
+    from claude_complex_query.probes import MORE, Probe
+
+    probe = Probe(tag="paged", covers="a long answer", question="what drops these?")
+    assert MORE in probe.may_ask
+    assert _showed(sweep, probe, ["drops", MORE, "drops"], "the answer")
+
+
+def test_a_probe_fails_when_it_says_the_wiki_holds_what_it_holds() -> None:
+    sweep = _sweep()
+    from claude_complex_query.probes import DENIALS, Probe
+
+    probe = Probe(
+        tag="denied",
+        covers="a fact the artifact carries",
+        question="what warns me about these?",
+        says=(),
+        never_says=DENIALS,
+    )
+    denied = f"Slayer level 72, and the wiki {DENIALS[0]} a warning."
+    assert not _showed(sweep, probe, ["get_thing"], denied)
+    assert _showed(sweep, probe, ["get_thing"], "Slayer level 72.")
+
+
+def _document(where: Path) -> tuple[Any, Any]:
+    """A document with one probe in it, and the notes that probe left."""
+    from datetime import datetime
+
+    from claude_complex_query.report import Document
+
+    notes = _notes(tag="paged", covers="a long answer")
+    return Document(where=where, started=datetime.now(), total=1), notes
+
+
+def test_an_answer_written_in_markdown_stays_inside_the_block_that_holds_it(
+    tmp_path: Path,
+) -> None:
+    """A model that answers in fenced markdown would end the block early at three
+    backticks, and the rest of its answer would be read as the page around it.
+    """
+    document, notes = _document(tmp_path / "run.md")
+    notes.said = 'Here is the shape of it:\n\n```json\n{"schema": 9}\n```'
+    document.add(notes)
+    written = (tmp_path / "run.md").read_text(encoding="utf-8")
+    assert "````markdown" in written
+    assert '{"schema": 9}' in written
+
+
+def test_a_probe_that_came_apart_still_leaves_what_it_reached(tmp_path: Path) -> None:
+    """The document is written after every probe, so a sweep given up on halfway is
+    still a document rather than nothing.
+    """
+    from claude_complex_query.report import Call
+
+    document, notes = _document(tmp_path / "run.md")
+    notes.events = [Call("look_up", {"name": "Raw salmon"})]
+    notes.broke = "this probe was given up on after 10m 00s"
+    document.add(notes)
+    written = (tmp_path / "run.md").read_text(encoding="utf-8")
+    assert "look_up(name='Raw salmon')" in written
+    assert "given up on" in written
+    assert "## paged" in written
+
+
+def test_every_probe_can_be_reached_from_the_table_at_the_top(tmp_path: Path) -> None:
+    document, notes = _document(tmp_path / "run.md")
+    document.add(notes)
+    document.close(["look_up"], {"look_up": 1}, {}, 12.0)
+    written = (tmp_path / "run.md").read_text(encoding="utf-8")
+    assert "(#paged)" in written
+    assert "## paged" in written
+    assert "## At a glance" in written

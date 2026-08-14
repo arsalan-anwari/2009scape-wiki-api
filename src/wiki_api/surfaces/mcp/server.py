@@ -37,6 +37,7 @@ from wiki_api.surfaces.mcp.naming import (
     followable,
 )
 from wiki_api.surfaces.mcp.projection import (
+    MOST_EXAMPLES,
     Matches,
     Movement,
     Ranking,
@@ -125,6 +126,19 @@ NameArg = Annotated[
         description=(
             "What the thing is called, as a player would say it. An exact identity "
             "such as `item:4587` also works when one is already known."
+        )
+    ),
+]
+FollowedNameArg = Annotated[
+    str, Field(description="What the thing to start from is called.")
+]
+FollowedOffsetArg = Annotated[int, Field(ge=0, description="How many answers to skip.")]
+NarrowedTypeArg = Annotated[
+    EntityType | None,
+    Field(
+        description=(
+            "Keep only one sort of thing in the answer, and count only that sort. "
+            "Leave out for all of them."
         )
     ),
 ]
@@ -272,15 +286,14 @@ def _day(written: str | None) -> date | None:
         return None
 
 
+def shape_of(answer: Callable[..., object]) -> str:
+    """Name the shape a tool answers with, so the surface can state each one once."""
+    return str(answer.__annotations__["return"])
+
+
 def _offer_asking(
     server: FastMCP, provider: RepositoryProvider, settings: Settings
 ) -> None:
-    @server.tool(
-        name="search",
-        description=SEARCH_DESCRIPTION,
-        annotations=READ_ONLY,
-        meta=BUDGET,
-    )
     def search(words: WordsArg, type: TypeArg = None, offset: OffsetArg = 0) -> Matches:
         service = _service(provider, settings)
         return matches_of(
@@ -293,29 +306,17 @@ def _offer_asking(
             service.about().data_version,
         )
 
-    @server.tool(
-        name="get_thing",
-        description=GET_DESCRIPTION,
-        annotations=READ_ONLY,
-        meta=BUDGET,
-    )
     def get_thing(name: NameArg, type: TypeArg = None) -> Answer[Thing]:
         service = _service(provider, settings)
         return about_thing(
             service.page_by_name(
                 name,
                 types=[type] if type is not None else None,
-                limit=settings.mcp_rows,
+                limit=MOST_EXAMPLES,
             ),
             service.about().data_version,
         )
 
-    @server.tool(
-        name="list_things",
-        description=LIST_DESCRIPTION,
-        annotations=READ_ONLY,
-        meta=BUDGET,
-    )
     def list_things(
         type: OneTypeArg, offset: OffsetArg = 0, limit: LimitArg = 20
     ) -> Matches:
@@ -325,21 +326,9 @@ def _offer_asking(
             service.about().data_version,
         )
 
-    @server.tool(
-        name="about",
-        description=ABOUT_DESCRIPTION,
-        annotations=READ_ONLY,
-        meta=BUDGET,
-    )
     def about() -> Manifest:
         return _service(provider, settings).about()
 
-    @server.tool(
-        name=SORTS_TOOL,
-        description=SORTS_DESCRIPTION,
-        annotations=READ_ONLY,
-        meta=BUDGET,
-    )
     def list_sorts() -> Sorts:
         service = _service(provider, settings)
         described = service.describe_types()
@@ -352,13 +341,6 @@ def _offer_asking(
             service.about().data_version,
         )
 
-    @server.tool(
-        name=COMPARE_TOOL,
-        description=COMPARE_DESCRIPTION,
-        annotations=READ_ONLY,
-        output_schema=None,
-        meta=BUDGET,
-    )
     def compare_by_number(
         type: OneTypeArg,
         holds: HoldsArg = None,
@@ -383,13 +365,6 @@ def _offer_asking(
             service.about().data_version,
         )
 
-    @server.tool(
-        name=MOVEMENT_TOOL,
-        description=MOVEMENT_DESCRIPTION,
-        annotations=READ_ONLY,
-        output_schema=None,
-        meta=BUDGET,
-    )
     def how_the_price_moved(name: NameArg, since: SinceArg = None) -> Answer[Movement]:
         service = _service(provider, settings)
         return about_movement(
@@ -397,12 +372,6 @@ def _offer_asking(
             service.about().data_version,
         )
 
-    @server.tool(
-        name=CLOSE_NAMES_TOOL,
-        description=CLOSE_NAMES_DESCRIPTION,
-        annotations=READ_ONLY,
-        meta=BUDGET,
-    )
     def find_close_names(
         name: MisspeltArg,
         type: NamedTypeArg,
@@ -416,6 +385,26 @@ def _offer_asking(
             ),
             service.about().data_version,
         )
+
+    stated: set[str] = set()
+    for name, description, answer, declares in (
+        ("search", SEARCH_DESCRIPTION, search, True),
+        ("get_thing", GET_DESCRIPTION, get_thing, True),
+        ("list_things", LIST_DESCRIPTION, list_things, True),
+        ("about", ABOUT_DESCRIPTION, about, True),
+        (SORTS_TOOL, SORTS_DESCRIPTION, list_sorts, True),
+        (COMPARE_TOOL, COMPARE_DESCRIPTION, compare_by_number, False),
+        (MOVEMENT_TOOL, MOVEMENT_DESCRIPTION, how_the_price_moved, False),
+        (CLOSE_NAMES_TOOL, CLOSE_NAMES_DESCRIPTION, find_close_names, True),
+    ):
+        server.tool(
+            name=name,
+            description=description,
+            annotations=READ_ONLY,
+            output_schema=... if declares and shape_of(answer) not in stated else None,
+            meta=BUDGET,
+        )(answer)
+        stated.add(shape_of(answer))
 
 
 def _offer_following(
@@ -433,8 +422,12 @@ def _offer_following(
 
 def _following(
     provider: RepositoryProvider, settings: Settings, followed: Followed
-) -> Callable[[str, int], Answer[Related]]:
-    def follow(name: NameArg, offset: OffsetArg = 0) -> Answer[Related]:
+) -> Callable[..., Answer[Related]]:
+    """Build the tool that follows one link, taking a narrowing argument only where
+    the link answers with more than one sort.
+    """
+
+    def walked(name: str, offset: int, sorts: EntityType | None) -> Answer[Related]:
         service = _service(provider, settings)
         return about_related(
             service.walk_by_name(
@@ -442,13 +435,24 @@ def _following(
                 followed.rel,
                 followed.direction,
                 types=followed.asked,
+                sorts=None if sorts is None else [sorts],
                 limit=settings.mcp_rows,
                 offset=offset,
             ),
             service.about().data_version,
         )
 
-    return follow
+    def follow(name: FollowedNameArg, offset: FollowedOffsetArg = 0) -> Answer[Related]:
+        return walked(name, offset, None)
+
+    def follow_one_sort(
+        name: FollowedNameArg,
+        type: NarrowedTypeArg = None,
+        offset: FollowedOffsetArg = 0,
+    ) -> Answer[Related]:
+        return walked(name, offset, type)
+
+    return follow_one_sort if followed.is_mixed else follow
 
 
 if __name__ == "__main__":
@@ -482,6 +486,47 @@ def test_everything_this_surface_answers_is_read_only() -> None:
 def test_an_answer_declares_a_ceiling_a_reader_can_afford() -> None:
     assert BUDGET["anthropic/maxResultSizeChars"] == MOST_RESULT_CHARS
     assert MOST_RESULT_CHARS < 40_000
+
+
+def test_a_shape_is_named_by_what_a_tool_answers_with() -> None:
+    def answering_one() -> Matches:
+        raise NotImplementedError
+
+    def answering_another() -> Matches:
+        raise NotImplementedError
+
+    def answering_something_else() -> Sorts:
+        raise NotImplementedError
+
+    assert shape_of(answering_one) == shape_of(answering_another)
+    assert shape_of(answering_one) != shape_of(answering_something_else)
+
+
+def test_a_link_is_followed_from_a_name_said_in_fewer_words() -> None:
+    for short, written in (
+        (FollowedNameArg, NameArg),
+        (FollowedOffsetArg, OffsetArg),
+    ):
+        assert len(_described(short)) < len(_described(written))
+        assert _described(short)
+
+
+def _described(annotated: object) -> str:
+    from typing import get_args
+
+    for piece in get_args(annotated):
+        said = getattr(piece, "description", None)
+        if isinstance(said, str):
+            return said
+    return ""
+
+
+def test_a_thing_is_read_at_the_width_it_is_answered_with() -> None:
+    import inspect
+
+    body = inspect.getsource(_offer_asking)
+    assert "limit=MOST_EXAMPLES" in body
+    assert Settings().mcp_rows > MOST_EXAMPLES
 
 
 def test_the_words_a_model_reads_first_explain_how_to_ask() -> None:

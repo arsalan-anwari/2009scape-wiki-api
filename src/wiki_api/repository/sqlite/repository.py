@@ -147,7 +147,11 @@ class SqliteKnowledgeRepository:
         )
         return Page[Entity](
             items=tuple(entity_from_row(row) for row in rows),
-            total=self._total(queries.COUNT_ENTITIES_BY_ATTRIBUTE, parameters),
+            total=(
+                int(rows[0]["total"])
+                if rows
+                else self._total(queries.COUNT_ENTITIES_BY_ATTRIBUTE, parameters)
+            ),
             limit=limit,
             offset=offset,
         )
@@ -202,6 +206,7 @@ class SqliteKnowledgeRepository:
         keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        sorts: Sequence[EntityType] | None = None,
         include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
@@ -211,6 +216,7 @@ class SqliteKnowledgeRepository:
             queries.COUNT_EDGES_FROM,
             keys,
             rel,
+            sorts,
             include_hidden,
             limit,
             offset,
@@ -221,6 +227,7 @@ class SqliteKnowledgeRepository:
         keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        sorts: Sequence[EntityType] | None = None,
         include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
@@ -230,6 +237,7 @@ class SqliteKnowledgeRepository:
             queries.COUNT_EDGES_TO,
             keys,
             rel,
+            sorts,
             include_hidden,
             limit,
             offset,
@@ -267,6 +275,7 @@ class SqliteKnowledgeRepository:
         counter: str,
         keys: Sequence[EntityKey],
         rel: RelationshipType | None,
+        sorts: Sequence[EntityType] | None,
         include_hidden: bool,
         limit: int,
         offset: int,
@@ -274,6 +283,7 @@ class SqliteKnowledgeRepository:
         parameters: dict[str, object] = {
             "keys": _as_json_keys(keys),
             "rel": rel.value if rel else None,
+            "sorts": _as_json_sorts(sorts),
             "include_hidden": include_hidden,
             "hidden": Visibility.HIDDEN.value,
         }
@@ -334,6 +344,14 @@ def _as_json_keys(keys: Sequence[EntityKey]) -> str:
         [{"type": key.type.value, "id": key.id} for key in unique],
         separators=(",", ":"),
     )
+
+
+def _as_json_sorts(sorts: Sequence[EntityType] | None) -> str | None:
+    """List the sorts a walk narrows to, or nothing where it narrows to none."""
+    if sorts is None:
+        return None
+    unique = dict.fromkeys(entity_type.value for entity_type in sorts)
+    return json.dumps(list(unique), separators=(",", ":"))
 
 
 def _json_path(path: str) -> str:

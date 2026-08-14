@@ -92,6 +92,7 @@ def test_the_words_a_vocabulary_holds_today_are_still_written_down(
         "scenery",
         "task",
         "room",
+        "music",
     }
 
 

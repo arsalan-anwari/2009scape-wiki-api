@@ -6,11 +6,13 @@ would fetch it.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final
+import json
+from typing import TYPE_CHECKING, Any, Final
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_serializer
 
 from wiki_api.core import prominent_values
+from wiki_api.domain.attributes import ATTRIBUTE_SPECS
 from wiki_api.domain.identity import EntityType
 from wiki_api.domain.relationships import RELATIONSHIP_SPECS
 from wiki_api.surfaces.mcp.naming import tool_name
@@ -18,6 +20,10 @@ from wiki_api.surfaces.mcp.values import labelled
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
+
+    from pydantic import GetJsonSchemaHandler, SerializerFunctionWrapHandler
+    from pydantic.json_schema import JsonSchemaValue
+    from pydantic_core import CoreSchema
 
     from wiki_api.core import (
         AttributeValue,
@@ -29,20 +35,74 @@ if TYPE_CHECKING:
         SearchResult,
         TypeInfo,
     )
+    from wiki_api.domain.attributes import AttributeSpec
     from wiki_api.domain.identity import Link
     from wiki_api.domain.page import Page
     from wiki_api.domain.prices import PriceMovement
 
 MOST_EXAMPLES: Final = 3
+DEFINITIONS: Final = "$defs"
+POINTER: Final = "$ref"
+DEFINITION_PREFIX: Final = "#/$defs/"
 UP: Final = "up"
 DOWN: Final = "down"
 NOWHERE: Final = "nowhere"
 
 
-class Neighbour(BaseModel):
-    """One thing an answer names, and the values that came with it."""
+def inlined(schema: JsonSchemaValue) -> JsonSchemaValue:
+    """Fold a schema's definitions into the places that point at them, so it stands on
+    its own wherever it is quoted.
+    """
+    held: Mapping[str, JsonSchemaValue] = schema.get(DEFINITIONS, {})
+    standalone = {key: value for key, value in schema.items() if key != DEFINITIONS}
+    folded: JsonSchemaValue = _resolved(standalone, held)
+    return folded
+
+
+def _resolved(node: object, held: Mapping[str, JsonSchemaValue]) -> Any:
+    if isinstance(node, dict):
+        pointed = node.get(POINTER)
+        if isinstance(pointed, str) and pointed.startswith(DEFINITION_PREFIX):
+            return _resolved(held[pointed.removeprefix(DEFINITION_PREFIX)], held)
+        return {key: _resolved(value, held) for key, value in node.items()}
+    if isinstance(node, list):
+        return [_resolved(value, held) for value in node]
+    return node
+
+
+def says_nothing(value: object) -> bool:
+    """Say whether a field carries no answer, so writing it down would cost a reader
+    without telling them anything.
+    """
+    if isinstance(value, str):
+        return False
+    return value is None or (isinstance(value, list | tuple | dict | set) and not value)
+
+
+class Compact(BaseModel):
+    """Write only the fields that carry an answer, because a reader is charged for
+    every field either way.
+    """
 
     model_config = ConfigDict(frozen=True)
+
+    @model_serializer(mode="wrap")
+    def _kept(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        written: dict[str, Any] = handler(self)
+        return {key: value for key, value in written.items() if not says_nothing(value)}
+
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, core_schema: CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        if handler.mode == "serialization":
+            return inlined(cls.model_json_schema(mode="validation"))
+        declared: JsonSchemaValue = handler(core_schema)
+        return declared
+
+
+class Neighbour(Compact):
+    """One thing an answer names, and the values that came with it."""
 
     name: str
     type: EntityType
@@ -50,10 +110,8 @@ class Neighbour(BaseModel):
     facts: dict[str, str] = Field(default_factory=dict)
 
 
-class Reachable(BaseModel):
+class Reachable(Compact):
     """One way onwards from a thing: how much there is, and what to call for it."""
-
-    model_config = ConfigDict(frozen=True)
 
     tool: str
     label: str
@@ -61,12 +119,10 @@ class Reachable(BaseModel):
     examples: tuple[str, ...] = ()
 
 
-class Thing(BaseModel):
+class Thing(Compact):
     """One thing, its values worth knowing, and every way onwards from it as a count
     rather than contents.
     """
-
-    model_config = ConfigDict(frozen=True)
 
     name: str
     type: EntityType
@@ -78,10 +134,8 @@ class Thing(BaseModel):
     reachable: tuple[Reachable, ...] = ()
 
 
-class Related(BaseModel):
+class Related(Compact):
     """One page of one way onwards, and what to pass back to read the next."""
-
-    model_config = ConfigDict(frozen=True)
 
     of: str
     label: str
@@ -92,10 +146,8 @@ class Related(BaseModel):
     left_out: int = Field(default=0, ge=0)
 
 
-class Candidate(BaseModel):
+class Candidate(Compact):
     """One thing a set of words turned up, named well enough to ask about."""
-
-    model_config = ConfigDict(frozen=True)
 
     name: str
     type: EntityType
@@ -103,10 +155,8 @@ class Candidate(BaseModel):
     summary: str | None = None
 
 
-class Matches(BaseModel):
+class Matches(Compact):
     """Whatever a question turned up, and what to pass back for the rest."""
-
-    model_config = ConfigDict(frozen=True)
 
     total: int = Field(ge=0)
     offset: int = Field(ge=0)
@@ -115,10 +165,8 @@ class Matches(BaseModel):
     data_version: str
 
 
-class Sort(BaseModel):
+class Sort(Compact):
     """One sort of thing this build knows about, and how many of them there are."""
-
-    model_config = ConfigDict(frozen=True)
 
     type: EntityType
     label: str
@@ -126,19 +174,15 @@ class Sort(BaseModel):
     total: int = Field(ge=0)
 
 
-class Sorts(BaseModel):
+class Sorts(Compact):
     """Every sort of thing that can be asked about."""
-
-    model_config = ConfigDict(frozen=True)
 
     sorts: tuple[Sort, ...] = ()
     data_version: str
 
 
-class Ranking(BaseModel):
+class Ranking(Compact):
     """One page of things a number picked out, and what to pass back for the rest."""
-
-    model_config = ConfigDict(frozen=True)
 
     total: int = Field(ge=0)
     offset: int = Field(ge=0)
@@ -146,10 +190,8 @@ class Ranking(BaseModel):
     next_offset: int | None = None
 
 
-class Movement(BaseModel):
+class Movement(Compact):
     """Which way one thing's worth went over a stretch of the record, and how far."""
-
-    model_config = ConfigDict(frozen=True)
 
     of: str
     went: str
@@ -202,14 +244,18 @@ def _which_way(change: int) -> str:
 
 
 def thing_of(descriptor: PageDescriptor) -> Thing:
-    """Shrink a whole page to what a reader would use."""
+    """Shrink a whole page to what a reader would use.
+
+    Every value the thing records is written down: a reader that cannot see one asks
+    no follow-up question, it says the wiki does not hold it.
+    """
     return Thing(
         name=descriptor.entity.label,
         type=descriptor.type,
         id=descriptor.entity.id,
         slug=descriptor.entity.slug,
         summary=descriptor.description,
-        facts=labelled(prominent_values(_all_values(descriptor))),
+        facts=labelled(_all_values(descriptor), ATTRIBUTE_SPECS[descriptor.type]),
         same_thing_as=_named(descriptor.canonical),
         reachable=tuple(_reachable(block) for block in descriptor.blocks),
     )
@@ -217,12 +263,13 @@ def thing_of(descriptor: PageDescriptor) -> Thing:
 
 def related_of(block: Block, of: str) -> Related:
     """Shrink one page of one way onwards."""
+    declared = RELATIONSHIP_SPECS[block.walk.rel].edge_attributes
     return Related(
         of=of,
         label=block.label,
         total=block.rows.total,
         offset=block.rows.offset,
-        neighbours=tuple(_neighbour(row) for row in block.rows.items),
+        neighbours=tuple(_neighbour(row, declared) for row in block.rows.items),
         next_offset=block.rows.next_offset,
         left_out=block.suppressed,
     )
@@ -288,12 +335,12 @@ def _reachable(block: Block) -> Reachable:
     )
 
 
-def _neighbour(row: Row) -> Neighbour:
+def _neighbour(row: Row, declared: Sequence[AttributeSpec] = ()) -> Neighbour:
     return Neighbour(
         name=row.link.label,
         type=row.type,
         id=row.link.id,
-        facts=labelled(prominent_values(row.attributes)),
+        facts=labelled(prominent_values(row.attributes), declared),
     )
 
 
@@ -421,6 +468,57 @@ def test_a_neighbour_keeps_only_what_the_registry_marks_worth_keeping() -> None:
     assert neighbour.name == "Dragon bones"
 
 
+def _recorded(entity_type: EntityType) -> PageDescriptor:
+    from wiki_api.core import PageDescriptor as Described
+    from wiki_api.core.values import declared_values
+
+    specs = [spec for spec in ATTRIBUTE_SPECS[entity_type] if spec.display]
+    values = declared_values(
+        specs,
+        {
+            spec.key: {part.key: 1 for part in spec.fields} if spec.fields else 1
+            for spec in specs
+        },
+    )
+    return Described(
+        entity=_link(entity_type),
+        type=entity_type,
+        infobox=values,
+        data_version="fixture-0001",
+    )
+
+
+def _link(entity_type: EntityType) -> Link:
+    from wiki_api.domain.identity import Link as Pointer
+
+    return Pointer(type=entity_type, id=1, slug="recorded", label="Recorded")
+
+
+def test_a_thing_writes_down_every_value_it_records() -> None:
+    for entity_type in EntityType:
+        descriptor = _recorded(entity_type)
+        written = thing_of(descriptor).facts
+        assert set(written) == {value.label for value in _all_values(descriptor)}
+
+
+def test_a_value_a_reader_could_not_see_before_is_one_a_question_can_reach() -> None:
+    """Everything but the few marked worth a hover used to be dropped, so a reader
+    was told the wiki holds nothing it had not been shown.
+    """
+    descriptor = _recorded(EntityType.NPC)
+    shown = thing_of(descriptor).facts
+    hidden = [value.label for value in _all_values(descriptor) if not value.prominent]
+    assert hidden
+    assert set(hidden) <= set(shown)
+
+
+def test_a_thing_names_the_parts_of_a_value_that_declares_them() -> None:
+    packed = next(spec for spec in ATTRIBUTE_SPECS[EntityType.ITEM] if spec.fields)
+    written = thing_of(_recorded(EntityType.ITEM)).facts[packed.label]
+    for part in packed.fields:
+        assert part.label in written
+
+
 def test_a_page_says_what_to_pass_back_to_read_the_rest() -> None:
     related = related_of(_block(total=50), of="King Black Dragon")
     assert related.next_offset == 1
@@ -488,3 +586,89 @@ def test_a_projection_is_far_smaller_than_the_page_it_came_from() -> None:
     assert len(thing_of(descriptor).model_dump_json()) < len(
         descriptor.model_dump_json()
     )
+
+
+def test_a_field_holding_nothing_is_recognised_as_saying_nothing() -> None:
+    empty: tuple[object, ...] = (None, (), [], {}, set())
+    for nothing in empty:
+        assert says_nothing(nothing)
+
+
+def test_a_number_or_a_word_always_says_something() -> None:
+    filled: tuple[object, ...] = (0, 0.0, False, "", "no", (1,), {"a": 1})
+    for something in filled:
+        assert not says_nothing(something)
+
+
+def test_a_field_with_nothing_in_it_is_never_written_down() -> None:
+    written = thing_of(_descriptor()).model_dump()
+    assert "same_thing_as" not in written
+    assert "reachable" not in written
+    assert "facts" not in written
+
+
+def test_a_field_that_answers_survives_being_shrunk() -> None:
+    written = thing_of(_descriptor()).model_dump()
+    assert written["name"] == "King Black Dragon"
+    assert written["id"] == 50
+    assert written["summary"]
+
+
+def test_a_zero_is_an_answer_rather_than_a_blank() -> None:
+    written = related_of(_block(total=1), of="King Black Dragon").model_dump()
+    assert written["offset"] == 0
+    assert "next_offset" not in written
+
+
+def test_shrinking_changes_what_is_written_and_never_what_it_says() -> None:
+    thing = thing_of(_descriptor().model_copy(update={"blocks": (_block(),)}))
+    written = thing.model_dump()
+    assert written == {
+        key: value
+        for key, value in thing.model_dump(warnings=False).items()
+        if not says_nothing(value)
+    }
+    assert Thing.model_validate({**written, "reachable": []}).name == thing.name
+
+
+def test_the_shape_a_reader_is_told_about_still_declares_every_field() -> None:
+    declared = Thing.model_json_schema()["properties"]
+    assert "same_thing_as" in declared
+    assert "reachable" in declared
+
+
+def test_the_shape_quoted_to_a_reader_stands_on_its_own() -> None:
+    quoted = Thing.model_json_schema(mode="serialization")
+    assert DEFINITIONS not in quoted
+    assert POINTER not in json.dumps(quoted)
+    assert quoted["properties"]["reachable"]["items"]["properties"]["tool"]
+
+
+def test_the_shape_quoted_says_the_same_as_the_shape_declared() -> None:
+    quoted = Thing.model_json_schema(mode="serialization")
+    declared = Thing.model_json_schema(mode="validation")
+    assert set(quoted["properties"]) == set(declared["properties"])
+    assert quoted["required"] == declared["required"]
+
+
+def test_a_definition_pointed_at_twice_is_folded_in_both_times() -> None:
+    folded = inlined(
+        {
+            DEFINITIONS: {"Word": {"type": "string"}},
+            "properties": {
+                "one": {POINTER: f"{DEFINITION_PREFIX}Word"},
+                "two": {"items": {POINTER: f"{DEFINITION_PREFIX}Word"}},
+            },
+        }
+    )
+    assert folded == {
+        "properties": {
+            "one": {"type": "string"},
+            "two": {"items": {"type": "string"}},
+        }
+    }
+
+
+def test_a_shrunk_answer_still_reads_back_as_the_shape_it_declares() -> None:
+    thing = thing_of(_descriptor().model_copy(update={"blocks": (_block(),)}))
+    assert Thing.model_validate(thing.model_dump()) == thing

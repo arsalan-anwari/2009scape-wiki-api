@@ -294,6 +294,37 @@ def test_comparing_pages_and_counts_like_every_other_listing(
     assert not set(first.items) & set(second.items)
 
 
+def test_comparing_past_the_last_page_still_says_how_many_there_were(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Ordering
+
+    order = Ordering(path="weight", descending=True)
+    whole = repository.list_by_attribute(EntityType.ITEM, order=order, limit=100)
+    beyond = repository.list_by_attribute(
+        EntityType.ITEM, order=order, limit=3, offset=whole.total + 10
+    )
+    assert whole.total > 0
+    assert beyond.items == ()
+    assert beyond.total == whole.total
+
+
+def test_a_comparison_counts_what_it_narrowed_rather_than_the_whole_type(
+    repository: KnowledgeRepository,
+) -> None:
+    from wiki_api.domain.query import Comparison, Condition
+
+    narrowed = repository.list_by_attribute(
+        EntityType.ITEM,
+        where=[
+            Condition(path="ge_buy_limit", compare=Comparison.AT_LEAST, value=10_000)
+        ],
+        limit=1,
+    )
+    assert len(narrowed.items) == 1
+    assert narrowed.total == 3
+
+
 def test_comparing_shows_neither_variants_nor_hidden_entities(
     repository: KnowledgeRepository,
 ) -> None:
@@ -596,6 +627,80 @@ def test_a_filtered_walk_pages_without_gaps_or_repeats(
         offset = page.next_offset
     assert len(collected) == walked.total
     assert len({edge.src for edge in collected}) == walked.total
+
+
+def test_a_walk_narrowed_to_one_sort_answers_with_that_sort_alone(
+    repository: KnowledgeRepository,
+) -> None:
+    here = repository.edges_to(
+        (WHITE_WOLF_MOUNTAIN,),
+        rel=RelationshipType.LOCATED_IN,
+        sorts=(EntityType.SHOP,),
+    )
+    assert {edge.src.type for edge in here.items} == {EntityType.SHOP}
+    assert here.total == 1
+
+
+def test_a_narrowed_walk_counts_what_it_answers_with_rather_than_the_whole_link(
+    repository: KnowledgeRepository,
+) -> None:
+    """A total counted before the narrowing would promise pages that never arrive."""
+    whole = repository.edges_to((WHITE_WOLF_MOUNTAIN,), rel=RelationshipType.LOCATED_IN)
+    narrowed = repository.edges_to(
+        (WHITE_WOLF_MOUNTAIN,),
+        rel=RelationshipType.LOCATED_IN,
+        sorts=(EntityType.SHOP,),
+    )
+    assert narrowed.total < whole.total
+    assert narrowed.total == len(narrowed.items)
+
+
+def test_narrowing_to_every_sort_that_answers_reads_as_the_whole_walk(
+    repository: KnowledgeRepository,
+) -> None:
+    whole = repository.edges_to((WHITE_WOLF_MOUNTAIN,), rel=RelationshipType.LOCATED_IN)
+    narrowed = repository.edges_to(
+        (WHITE_WOLF_MOUNTAIN,),
+        rel=RelationshipType.LOCATED_IN,
+        sorts=tuple({edge.src.type for edge in whole.items}),
+    )
+    assert narrowed.items == whole.items
+    assert narrowed.total == whole.total
+
+
+def test_narrowing_to_a_sort_nothing_answers_with_says_so(
+    repository: KnowledgeRepository,
+) -> None:
+    here = repository.edges_to(
+        (WHITE_WOLF_MOUNTAIN,),
+        rel=RelationshipType.LOCATED_IN,
+        sorts=(EntityType.ROOM,),
+    )
+    assert here.items == ()
+    assert here.total == 0
+
+
+def test_a_narrowed_walk_still_leaves_out_what_a_reader_may_not_see(
+    repository: KnowledgeRepository,
+) -> None:
+    here = repository.edges_to(
+        (WHITE_WOLF_MOUNTAIN,),
+        rel=RelationshipType.LOCATED_IN,
+        sorts=(EntityType.NPC,),
+    )
+    assert UNNAMED_NPC not in {edge.src for edge in here.items}
+    assert here.total == 1
+
+
+def test_a_narrowed_walk_forward_answers_with_that_sort_alone(
+    repository: KnowledgeRepository,
+) -> None:
+    sold = repository.edges_from(
+        (CROSSBOW_SHOP,),
+        sorts=(EntityType.ITEM,),
+    )
+    assert {edge.dst.type for edge in sold.items} == {EntityType.ITEM}
+    assert sold.total == len(sold.items)
 
 
 def test_edge_attributes_survive_the_round_trip(

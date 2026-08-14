@@ -21,6 +21,7 @@ class EntityType(StrEnum):
     SCENERY = "scenery"
     TASK = "task"
     ROOM = "room"
+    MUSIC = "music"
 
 
 class EntityKey(BaseModel):

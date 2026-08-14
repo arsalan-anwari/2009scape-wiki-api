@@ -221,16 +221,19 @@ class InMemoryKnowledgeRepository:
         keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        sorts: Sequence[EntityType] | None = None,
         include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]:
         wanted = frozenset(keys)
+        narrowed = None if sorts is None else frozenset(sorts)
         matched = [
             edge
             for edge in self._edges
             if edge.src in wanted
             and (rel is None or edge.rel is rel)
+            and (narrowed is None or edge.dst.type in narrowed)
             and (include_hidden or not self._is_hidden(edge.dst))
         ]
         matched.sort(
@@ -251,16 +254,19 @@ class InMemoryKnowledgeRepository:
         keys: Sequence[EntityKey],
         *,
         rel: RelationshipType | None = None,
+        sorts: Sequence[EntityType] | None = None,
         include_hidden: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Edge]:
         wanted = frozenset(keys)
+        narrowed = None if sorts is None else frozenset(sorts)
         matched = [
             edge
             for edge in self._edges
             if edge.dst in wanted
             and (rel is None or edge.rel is rel)
+            and (narrowed is None or edge.src.type in narrowed)
             and (include_hidden or not self._is_hidden(edge.src))
         ]
         matched.sort(

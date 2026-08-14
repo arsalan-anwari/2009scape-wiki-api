@@ -1,0 +1,121 @@
+{
+  "entity": {
+    "type": "music",
+    "id": 177,
+    "slug": "adventure",
+    "label": "Adventure",
+    "icon_ref": null
+  },
+  "type": "music",
+  "description": null,
+  "canonical": null,
+  "variants": [],
+  "infobox": [
+    {
+      "key": "trackset",
+      "value": "Varrock",
+      "label": "Set",
+      "group": "overview",
+      "order": 10,
+      "format": "text",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "unlock_note",
+      "value": "at Varrock Palace",
+      "label": "How it is unlocked",
+      "group": "general",
+      "order": 20,
+      "format": "text",
+      "unit": null,
+      "derived": false,
+      "prominent": true,
+      "choices": null
+    },
+    {
+      "key": "region_count",
+      "value": 2,
+      "label": "Map squares it plays in",
+      "group": "map",
+      "order": 30,
+      "format": "int",
+      "unit": null,
+      "derived": true,
+      "prominent": false,
+      "choices": null
+    }
+  ],
+  "sections": [],
+  "blocks": [
+    {
+      "walk": {
+        "origin": {
+          "type": "music",
+          "id": 177
+        },
+        "rel": "located_in",
+        "direction": "forward"
+      },
+      "label": "Found in",
+      "group": "map",
+      "order": 60,
+      "rows": {
+        "items": [
+          {
+            "link": {
+              "type": "location",
+              "id": 2,
+              "slug": "wilderness",
+              "label": "Wilderness",
+              "icon_ref": null
+            },
+            "type": "location",
+            "attributes": [
+              {
+                "key": "spawn_kind",
+                "value": "music_region",
+                "label": "Kind",
+                "group": "map",
+                "order": 20,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": [
+                  "npc_spawn",
+                  "ground_spawn",
+                  "shop_front",
+                  "quest_start",
+                  "built_in",
+                  "music_region"
+                ]
+              },
+              {
+                "key": "amount",
+                "value": 2,
+                "label": "Amount",
+                "group": "map",
+                "order": 40,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": false,
+                "choices": null
+              }
+            ]
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "has_more": false,
+        "next_offset": null
+      },
+      "suppressed": 0
+    }
+  ],
+  "data_version": "fixture-0001"
+}

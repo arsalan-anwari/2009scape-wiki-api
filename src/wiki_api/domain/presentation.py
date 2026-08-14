@@ -1,6 +1,4 @@
-"""Where a group of attributes belongs on a page and what an entity type is called,
-declared rather than written in code.
-"""
+"""Where a group of attributes belongs on a page and what an entity type is called."""
 
 from __future__ import annotations
 
@@ -69,6 +67,7 @@ ENTITY_TYPE_META: Final[Mapping[EntityType, EntityTypeMeta]] = {
     EntityType.SCENERY: EntityTypeMeta("Scenery object", "Scenery objects", 60),
     EntityType.TASK: EntityTypeMeta("Slayer task", "Slayer tasks", 70),
     EntityType.ROOM: EntityTypeMeta("House room", "House rooms", 80),
+    EntityType.MUSIC: EntityTypeMeta("Music track", "Music tracks", 90),
 }
 
 

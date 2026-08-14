@@ -1,20 +1,18 @@
-"""Answer a name that meant nothing, or meant something else.
-
-On this surface an absence is part of the answer, never a raised error.
-"""
+"""Answer a name that meant nothing, or meant something else."""
 
 from __future__ import annotations
 
 from enum import StrEnum
 from typing import TYPE_CHECKING, Final
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from wiki_api.core import Found, Hidden, Missing, Moved
 from wiki_api.core.results import Uncomparable
 from wiki_api.domain.identity import EntityType
 from wiki_api.surfaces.mcp.naming import CLOSE_NAMES_TOOL, SORTS_TOOL
 from wiki_api.surfaces.mcp.projection import (
+    Compact,
     Movement,
     Ranking,
     Related,
@@ -70,23 +68,19 @@ class Outcome(StrEnum):
     UNKNOWN = "unknown"
 
 
-class Suggestion(BaseModel):
+class Suggestion(Compact):
     """One other name worth trying, with the identity behind it."""
-
-    model_config = ConfigDict(frozen=True)
 
     name: str
     type: EntityType
     id: int = Field(ge=0)
 
 
-class Answer[T](BaseModel):
+class Answer[T](Compact):
     """An answer, or the reason there isn't one.
 
     `note` says what went wrong; `others` offers names worth trying instead.
     """
-
-    model_config = ConfigDict(frozen=True)
 
     outcome: Outcome
     result: T | None = None

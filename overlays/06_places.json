@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "source_file": "cache/maplabels.json",
+  "game_version": "2009scape@91bb6be123bdc08e1d022ddb310a901d1b363269",
+  "precedence": 10,
+  "entities": [
+    {
+      "type": "location",
+      "id": 23,
+      "name": "TzHaar",
+      "source_key": "tzhaar",
+      "description": "The city of the TzHaar, under the Karamja volcano.",
+      "source_ref": "authored. the world map draws no label for it, so its centre is stated here rather than derived from game data.",
+      "attributes": {
+        "kind": "city",
+        "centre": {
+          "x": 2480,
+          "y": 5175,
+          "plane": 0
+        },
+        "region_id": 9808
+      }
+    }
+  ]
+}
