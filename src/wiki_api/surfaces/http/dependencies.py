@@ -149,6 +149,16 @@ DescendingQuery = Annotated[
     bool,
     Query(description="Sort from the largest down rather than from the smallest up."),
 ]
+NamedQuery = Annotated[
+    str | None,
+    Query(
+        description=(
+            "Keep only the entities called exactly this, matched whole and case "
+            "sensitively. Many entities share one name, so this is how a caller "
+            "counts or compares the set behind a single name."
+        )
+    ),
+]
 RowsQuery = Annotated[
     int | None,
     Query(

@@ -5,13 +5,12 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import TYPE_CHECKING, Final
 
-from pydantic import Field
-
 from wiki_api.core import Found, Hidden, Missing, Moved
 from wiki_api.core.results import Uncomparable
 from wiki_api.domain.identity import EntityType
 from wiki_api.surfaces.mcp.naming import CLOSE_NAMES_TOOL, SORTS_TOOL
 from wiki_api.surfaces.mcp.projection import (
+    Addressed,
     Compact,
     Movement,
     Ranking,
@@ -19,6 +18,7 @@ from wiki_api.surfaces.mcp.projection import (
     Thing,
     movement_of,
     ranking_of,
+    ref_of,
     related_of,
     thing_of,
 )
@@ -57,6 +57,11 @@ UNKNOWN_NOTE = (
     "names to whoever asked and use the one they choose; do not choose for them"
 )
 UNKNOWN_WITH_OTHERS = f"{UNKNOWN_NOTE}. One of the names below may be the one meant"
+AMBIGUOUS_NOTE = (
+    "several different sorts of thing answer to that name, and which one was meant "
+    "is for whoever asked to say. Put the sorts below to them and ask again naming "
+    "the sort they choose"
+)
 
 
 class Outcome(StrEnum):
@@ -66,14 +71,11 @@ class Outcome(StrEnum):
     RENAMED = "renamed"
     WITHHELD = "withheld"
     UNKNOWN = "unknown"
+    AMBIGUOUS = "ambiguous"
 
 
-class Suggestion(Compact):
-    """One other name worth trying, with the identity behind it."""
-
-    name: str
-    type: EntityType
-    id: int = Field(ge=0)
+class Suggestion(Addressed):
+    """One other name worth trying, with the handle that reaches it."""
 
 
 class Answer[T](Compact):
@@ -92,7 +94,7 @@ class Answer[T](Compact):
 def suggested(links: tuple[Link, ...]) -> tuple[Suggestion, ...]:
     """Pick the few other names worth putting in front of a reader."""
     return tuple(
-        Suggestion(name=link.label, type=link.type, id=link.id)
+        Suggestion(name=link.label, type=link.type, ref=ref_of(link))
         for link in links[:MOST_OTHERS]
     )
 
@@ -107,11 +109,20 @@ def refusal(absent: Absent) -> tuple[Outcome, str, tuple[Suggestion, ...]]:
 
 
 def about_thing(named: Named[PageDescriptor], data_version: str) -> Answer[Thing]:
-    """Answer with one thing, or with why that name did not reach one."""
+    """Answer with one thing, with the sorts it was a tie between, or with why that
+    name did not reach one.
+    """
+    if named.tied:
+        return Answer[Thing](
+            outcome=Outcome.AMBIGUOUS,
+            note=AMBIGUOUS_NOTE,
+            others=suggested((named.subject, *named.tied) if named.subject else ()),
+            data_version=data_version,
+        )
     if isinstance(named.resolution, Found):
         return Answer[Thing](
             outcome=Outcome.FOUND,
-            result=thing_of(named.resolution.value),
+            result=thing_of(named.resolution.value, named.namesakes),
             others=suggested(named.alternatives),
             data_version=data_version,
         )
@@ -299,7 +310,7 @@ def test_a_near_miss_points_at_what_was_close() -> None:
     answer = about_thing(named, "fixture-0001")
     assert answer.outcome is Outcome.UNKNOWN
     assert answer.note == UNKNOWN_WITH_OTHERS
-    assert answer.others[0].id == 4587
+    assert answer.others[0].ref == "item:4587"
 
 
 def test_a_thing_that_moved_is_answered_with_where_it_moved_to() -> None:
@@ -379,4 +390,49 @@ def test_an_outcome_is_a_word_a_reader_can_branch_on() -> None:
         "renamed",
         "withheld",
         "unknown",
+        "ambiguous",
     }
+
+
+def _pointer(entity_type: str, entity_id: int, label: str) -> Link:
+    from wiki_api.domain.identity import Link as Pointer
+
+    return Pointer.model_validate(
+        {
+            "type": entity_type,
+            "id": entity_id,
+            "slug": label.lower().replace(" ", "-"),
+            "label": label,
+        }
+    )
+
+
+def test_a_name_several_sorts_answer_to_is_handed_back_rather_than_settled() -> None:
+    from wiki_api.core import Named as Meant
+    from wiki_api.core import PageDescriptor as Described
+
+    named = _named_page()
+    tied = Meant[Described](
+        resolution=named.resolution,
+        subject=named.subject,
+        tied=(_pointer("music", 303, "Dragon scimitar"),),
+    )
+    answer = about_thing(tied, "fixture-0001")
+    assert answer.outcome is Outcome.AMBIGUOUS
+    assert answer.result is None
+    assert {one.type for one in answer.others} == {EntityType.ITEM, EntityType.MUSIC}
+    assert answer.note is not None
+
+
+def test_a_name_one_sort_answers_to_many_times_says_how_many_and_answers() -> None:
+    from wiki_api.core import Named as Meant
+    from wiki_api.core import PageDescriptor as Described
+
+    named = _named_page()
+    many = Meant[Described](
+        resolution=named.resolution, subject=named.subject, namesakes=17
+    )
+    answer = about_thing(many, "fixture-0001")
+    assert answer.outcome is Outcome.FOUND
+    assert answer.result is not None
+    assert answer.result.others_with_this_name == 17

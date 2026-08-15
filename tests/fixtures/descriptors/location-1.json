@@ -21,6 +21,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": [
         "city",
         "town",
@@ -41,6 +42,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -53,6 +55,7 @@
       "unit": null,
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     },
     {
@@ -69,6 +72,7 @@
       "unit": null,
       "derived": false,
       "prominent": false,
+      "technical": true,
       "choices": null
     },
     {
@@ -81,6 +85,7 @@
       "unit": null,
       "derived": true,
       "prominent": false,
+      "technical": true,
       "choices": null
     }
   ],
@@ -124,6 +129,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": true,
                 "choices": null
               },
               {
@@ -136,6 +142,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "npc_spawn",
                   "ground_spawn",
@@ -155,6 +162,35 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "lifepoints",
+                "value": 240,
+                "label": "Lifepoints",
+                "group": "combat",
+                "order": 10,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "aggressive",
+                "value": true,
+                "label": "Aggressive",
+                "group": "behaviour",
+                "order": 100,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]
@@ -191,7 +227,30 @@
               "icon_ref": null
             },
             "type": "location",
-            "attributes": []
+            "attributes": [],
+            "about": [
+              {
+                "key": "kind",
+                "value": "area",
+                "label": "Kind",
+                "group": "overview",
+                "order": 10,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "city",
+                  "town",
+                  "village",
+                  "building",
+                  "dungeon",
+                  "area",
+                  "island"
+                ]
+              }
+            ]
           }
         ],
         "total": 1,

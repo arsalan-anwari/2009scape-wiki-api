@@ -3,24 +3,16 @@
 from __future__ import annotations
 
 import os
-import socket
-import subprocess
 import sys
-import time
-from contextlib import closing, contextmanager
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from tempfile import TemporaryFile
-from typing import IO, TYPE_CHECKING
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
 
 from dotenv import load_dotenv
+from fastmcp.client.transports import StdioTransport
 
-from wiki_api.access import (
-    Credential,
-    credential_from_file,
-    find_token,
-)
-from wiki_api.access.paths import config_dir, tokens_dir
 from wiki_api.config import get_settings
 
 if TYPE_CHECKING:
@@ -36,13 +28,12 @@ KEY_VARIABLE = "ANTHROPIC_API_KEY"
 CREDENTIALS = (TOKEN_VARIABLE, KEY_VARIABLE, "ANTHROPIC_AUTH_TOKEN")
 SIGNED_IN = Path.home() / ".claude" / ".credentials.json"
 
-WIKI_TOKEN_FILE_VARIABLE = "DEMO_TOKEN_FILE"
-WIKI_LABEL = "demos"
 CONSOLE_SCRIPT = "scape2009-wiki-mcp"
 SERVER_MODULE = "wiki_api.surfaces.mcp.server"
-TEST_DATA = "data/tests"
-LOCALHOST = "127.0.0.1"
-MOST_WAIT = 30.0
+
+FULL_DATA = "data"
+DATA_VARIABLE = "WIKI_API_DATA_DIR"
+SERVER_LOG = "wiki.log"
 
 OAUTH_BETA = "oauth-2025-04-20"
 CLAUDE_CODE = "You are Claude Code, Anthropic's official CLI for Claude."
@@ -62,6 +53,12 @@ def read_env(folder: Path) -> None:
     load_dotenv(env_of(folder))
 
 
+def local_data(data_dir: str = FULL_DATA) -> str:
+    """Pin this run to the knowledge base built in this checkout."""
+    os.environ[DATA_VARIABLE] = data_dir
+    return data_dir
+
+
 def wanted_env(folder: Path) -> str:
     """Write what belongs in that file, for a reader who has not made one."""
     return f"""no {ENV_NAME} beside this demonstration. Create {env_of(folder)} with:
@@ -72,37 +69,14 @@ That signs in to Anthropic so there is a model to ask. Generate it with
 `claude setup-token`, which uses your Claude subscription rather than pay-per-token
 api credits, or put an {KEY_VARIABLE} there instead.
 
-The key this wiki issued takes no line here: issue it with `uv run poe keys issue
---label {WIKI_LABEL}` beforehand and it is read from the file that keeps, or name
-another with a {WIKI_TOKEN_FILE_VARIABLE} line. Any WIKI_API_ setting put in the same
-{ENV_NAME} is picked up too."""
+Nothing else belongs there. The wiki is started by this demonstration as a process of
+its own, spoken to down a pipe, and reads the knowledge base in {FULL_DATA}: it is
+reachable by nothing but its parent, so it issues no key and asks for none."""
 
 
 def credential() -> str | None:
     """Name the variable this run signs in to Anthropic with, if any."""
     return next((name for name in CREDENTIALS if os.environ.get(name)), None)
-
-
-def wiki_credential() -> Credential | None:
-    """Read the key this run presents to the wiki.
-
-    The file `poe keys issue --label demos` keeps, unless DEMO_TOKEN_FILE names another.
-    """
-    named = os.environ.get(WIKI_TOKEN_FILE_VARIABLE)
-    if named:
-        return credential_from_file(Path(named).expanduser())
-    kept = find_token(config_dir(), WIKI_LABEL)
-    return credential_from_file(kept) if kept is not None else None
-
-
-@dataclass(frozen=True)
-class Wiki:
-    """A running wiki, and what it takes to be answered by it."""
-
-    url: str
-    headers: dict[str, str]
-    key_id: str
-    kept: str
 
 
 def server_command() -> tuple[str, list[str]]:
@@ -113,86 +87,71 @@ def server_command() -> tuple[str, list[str]]:
     return sys.executable, ["-m", SERVER_MODULE]
 
 
-def free_port() -> int:
-    """Pick a port nothing is listening on, for a server lasting one run."""
-    with closing(socket.socket()) as held:
-        held.bind((LOCALHOST, 0))
-        port: int = held.getsockname()[1]
-    return port
+@dataclass(frozen=True)
+class Wiki:
+    """The wiki as a local process, and what it takes to be answered by it."""
+
+    command: str
+    arguments: tuple[str, ...]
+    settings: dict[str, str]
+    cwd: str
+    data_dir: str
+    log: Path
+
+    @property
+    def spawned(self) -> str:
+        """The command a client runs to have a wiki of its own, as typed."""
+        return " ".join([Path(self.command).name, *self.arguments])
+
+    @property
+    def environment(self) -> dict[str, str]:
+        """The whole environment to start the wiki in, this run's settings on top.
+
+        Spawning it replaces the environment rather than adding to it, so what the
+        interpreter needs to run at all has to be carried across as well.
+        """
+        return {**os.environ, **self.settings}
+
+    def transport(self) -> StdioTransport:
+        """A wiki of one client's own, living exactly as long as that client.
+
+        `keep_alive` is off so the process ends with the connection rather than
+        outliving the question it was started for.
+        """
+        return StdioTransport(
+            command=self.command,
+            args=list(self.arguments),
+            env=self.environment,
+            cwd=self.cwd,
+            keep_alive=False,
+            log_file=self.log,
+        )
+
+    def spoken(self) -> str:
+        """Everything the wiki has written to its error stream so far."""
+        if not self.log.exists():
+            return ""
+        return self.log.read_text(encoding="utf-8", errors="replace")
 
 
 @contextmanager
-def served(*, data_dir: str = TEST_DATA, wait: float = MOST_WAIT) -> Generator[Wiki]:
-    """Run the wiki over http for the length of one demonstration."""
-    held = wiki_credential()
-    if held is None:
-        raise RuntimeError(f"no key to present to the wiki, see {WIKI_LABEL}")
-    port = free_port()
+def served(*, data_dir: str = FULL_DATA) -> Generator[Wiki]:
+    """Hand out a local wiki for the length of one demonstration."""
     command, arguments = server_command()
-    environment = {
-        **os.environ,
-        "WIKI_API_MCP_TRANSPORT": "http",
-        "WIKI_API_MCP_HOST": LOCALHOST,
-        "WIKI_API_MCP_PORT": str(port),
-        "WIKI_API_AUTH_MODE": "required",
+    settings = {
+        "WIKI_API_MCP_TRANSPORT": "stdio",
+        "WIKI_API_AUTH_MODE": "off",
+        DATA_VARIABLE: data_dir,
     }
-    environment.setdefault("WIKI_API_DATA_DIR", data_dir)
-    # Into a file rather than a pipe: the wiki logs a line per request and nothing here
-    # reads it back until something goes wrong, and a pipe nobody drains stops the
-    # server dead once it holds 64k, halfway through a long sweep.
-    with TemporaryFile("w+", encoding="utf-8", errors="replace") as spoken:
-        running = subprocess.Popen(
-            [command, *arguments],
-            env=environment,
+    with TemporaryDirectory() as kept:
+        yield Wiki(
+            command=command,
+            arguments=tuple(arguments),
+            settings=settings,
             cwd=str(ROOT),
-            stdout=spoken,
-            stderr=subprocess.STDOUT,
-            text=True,
+            data_dir=data_dir,
+            log=Path(kept) / SERVER_LOG,
         )
-        try:
-            _listening(running, spoken, port, wait)
-            yield Wiki(
-                url=f"http://{LOCALHOST}:{port}/mcp/",
-                headers=held.header,
-                key_id=held.kid,
-                kept=held.label or WIKI_LABEL,
-            )
-        finally:
-            running.terminate()
-            try:
-                running.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                running.kill()
-
-
-def _spoken(spoken: IO[str]) -> str:
-    """Everything the wiki has said so far, without disturbing where it writes."""
-    where = spoken.tell()
-    spoken.seek(0)
-    try:
-        return spoken.read()
-    finally:
-        spoken.seek(where)
-
-
-def _listening(
-    running: subprocess.Popen[str], spoken: IO[str], port: int, wait: float
-) -> None:
-    """Wait until the wiki is answering, or say what it said instead."""
-    until = time.monotonic() + wait
-    while time.monotonic() < until:
-        if running.poll() is not None:
-            said = _spoken(spoken)
-            raise RuntimeError(f"the wiki stopped before it served anything:\n{said}")
-        with closing(socket.socket()) as trying:
-            trying.settimeout(0.5)
-            if trying.connect_ex((LOCALHOST, port)) == 0:
-                return
-        time.sleep(0.2)
-    raise RuntimeError(
-        f"the wiki was not listening on {port} after {wait:.0f}s, having said:\n"
-        f"{_spoken(spoken)}"
-    )
 
 
 def dataset() -> Path:
@@ -211,17 +170,9 @@ def unready(folder: Path, *, signed_in_counts: bool = True) -> str | None:
     artifact = dataset()
     if not artifact.exists():
         return (
-            f"no dataset at {artifact}: run `uv run poe build-test-artifact` for the "
-            "hand-made one, or `uv run poe build-artifact <documents>` for a real "
-            "build, and point WIKI_API_DATA_DIR at whichever you built"
-        )
-    if wiki_credential() is None:
-        return (
-            "this wiki answers holders of a key it issued, and there is none to "
-            f"present. Run `uv run poe keys init` once, then `uv run poe keys issue "
-            f"--label {WIKI_LABEL}`, which keeps one in "
-            f"{tokens_dir(config_dir())}. Name another with "
-            f"{WIKI_TOKEN_FILE_VARIABLE} in {env_of(folder)} to use that instead"
+            f"no knowledge base at {artifact}: run `uv run poe build-artifact "
+            "<documents>` to build one. These demonstrations read the build in "
+            f"{FULL_DATA} and nothing else, so building it elsewhere will not do"
         )
     if credential() is not None:
         return None

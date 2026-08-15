@@ -17,7 +17,7 @@ from claude_agent_sdk import (
     ToolUseBlock,
     query,
 )
-from claude_agent_sdk.types import McpHttpServerConfig, McpServerConfig
+from claude_agent_sdk.types import McpServerConfig, McpStdioServerConfig
 
 from wiki_api.surfaces.mcp import SERVER_NAME, WRITTEN_TOOLS, followable
 
@@ -29,6 +29,8 @@ from claude_common import (
     UNSURE,
     WORKED,
     Wiki,
+    dataset,
+    local_data,
     read_env,
     served,
     told,
@@ -67,13 +69,14 @@ ASKED = (
 
 
 def attached(wiki: Wiki) -> dict[str, McpServerConfig]:
-    """Write down where the wiki is and what to present to it, as a client would."""
-    reached: McpHttpServerConfig = {
-        "type": "http",
-        "url": wiki.url,
-        "headers": wiki.headers,
+    """Write down how to start the wiki, the way a client's own settings would."""
+    spawned: McpStdioServerConfig = {
+        "type": "stdio",
+        "command": wiki.command,
+        "args": list(wiki.arguments),
+        "env": dict(wiki.settings),
     }
-    return {SERVER_NAME: reached}
+    return {SERVER_NAME: spawned}
 
 
 def tool_names() -> list[str]:
@@ -135,8 +138,9 @@ def _ready() -> str | None:
 async def _main(questions: Sequence[Question]) -> int:
     worked = 0
     with served() as wiki:
-        print(f"  the wiki is answering at {wiki.url}")
-        print(f"  presenting the key issued to {wiki.kept}, id {wiki.key_id}")
+        print(
+            f"  claude starts the wiki itself as `{wiki.spawned}`, reading {dataset()}"
+        )
         for question in questions:
             print(f"\n  asked: {question.asked}")
             if await ask(question, wiki):
@@ -148,6 +152,7 @@ async def _main(questions: Sequence[Question]) -> int:
 def main() -> None:
     """Ask whatever was given on the command line, or the built in questions."""
     read_env(HERE)
+    local_data()
     blocked = _ready()
     if blocked is not None:
         print(blocked)

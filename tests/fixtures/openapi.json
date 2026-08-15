@@ -817,6 +817,24 @@
             "description": "Sort from the largest down rather than from the smallest up."
           },
           {
+            "name": "named",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Keep only the entities called exactly this, matched whole and case sensitively. Many entities share one name, so this is how a caller counts or compares the set behind a single name.",
+              "title": "Named"
+            },
+            "description": "Keep only the entities called exactly this, matched whole and case sensitively. Many entities share one name, so this is how a caller counts or compares the set behind a single name."
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
@@ -1291,6 +1309,16 @@
             "title": "Prominent",
             "default": false
           },
+          "technical": {
+            "type": "boolean",
+            "title": "Technical",
+            "default": false
+          },
+          "totalled": {
+            "type": "boolean",
+            "title": "Totalled",
+            "default": false
+          },
           "choices": {
             "anyOf": [
               {
@@ -1366,6 +1394,11 @@
           "prominent": {
             "type": "boolean",
             "title": "Prominent",
+            "default": false
+          },
+          "technical": {
+            "type": "boolean",
+            "title": "Technical",
             "default": false
           },
           "choices": {
@@ -2334,6 +2367,14 @@
             },
             "type": "array",
             "title": "Attributes"
+          },
+          "about": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array",
+            "title": "About",
+            "default": []
           }
         },
         "type": "object",
@@ -2343,7 +2384,7 @@
           "attributes"
         ],
         "title": "Row",
-        "description": "One entity reached over a relationship, plus what the link itself records."
+        "description": "One entity reached over a relationship, what the link itself records, and the\nfew values the entity at the far end is worth knowing by."
       },
       "SearchResult": {
         "properties": {

@@ -50,7 +50,7 @@
       "rel": "requires",
       "dst": "item:3105",
       "order_key": 0,
-      "source_ref": "wiki/quests.json#death_plateau",
+      "source_ref": "authored. Death Plateau",
       "attributes": {
         "kind": "carried"
       }

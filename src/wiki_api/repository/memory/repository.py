@@ -143,6 +143,7 @@ class InMemoryKnowledgeRepository:
         *,
         where: Sequence[Condition] = (),
         order: Ordering | None = None,
+        named: str | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Entity]:
@@ -152,6 +153,7 @@ class InMemoryKnowledgeRepository:
             if entity.key.type is entity_type
             and entity.is_published
             and entity.canonical_id is None
+            and (named is None or entity.name == named)
             and (order is None or number_at(entity.attributes, order.path) is not None)
             and all(_holds(entity, condition) for condition in where)
         ]

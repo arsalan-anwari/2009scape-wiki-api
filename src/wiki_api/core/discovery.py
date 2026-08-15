@@ -1,7 +1,4 @@
-"""Find things without knowing their identity, and say what there is to find.
-
-Searching ranks; finding decides.
-"""
+"""Find things without knowing their identity, and say what there is to find."""
 
 from __future__ import annotations
 
@@ -94,10 +91,34 @@ def lookup(
     match = find(repository, name, types=types, limit=limit)
     if match.best_match is None:
         return Named[Entity](resolution=Missing(reference=name))
+    chosen = match.best_match
     return _named(
-        resolve(repository, match.best_match.key),
-        alternatives=_besides(match, match.best_match),
+        resolve(repository, chosen.key),
+        alternatives=_besides(match, chosen),
+        tied=_tied(match, chosen, name),
+        namesakes=_namesakes(repository, chosen),
     )
+
+
+def _tied(match: Match, chosen: Link, asked: str) -> tuple[Link, ...]:
+    """One thing per other sort answering to exactly the name that was asked for."""
+    exact = [
+        result.link
+        for result in match.results.items
+        if result.link.label.casefold() == asked.casefold()
+    ]
+    if not exact or chosen.label.casefold() != asked.casefold():
+        return ()
+    first: dict[EntityType, Link] = {}
+    for link in exact:
+        first.setdefault(link.type, link)
+    return tuple(link for sort, link in first.items() if sort is not chosen.type)
+
+
+def _namesakes(repository: KnowledgeRepository, chosen: Link) -> int:
+    """How many other published things of one sort answer to exactly this name."""
+    page = repository.list_by_attribute(chosen.type, named=chosen.label, limit=1)
+    return max(page.total - 1, 0)
 
 
 def near_names(
@@ -110,11 +131,7 @@ def near_names(
     floor: float = NEAR_FLOOR,
 ) -> Page[SearchResult]:
     """Return the real names a misspelt one may have meant, or nothing when none is
-    close enough.
-
-    Each candidate carries identity only, so whoever asked has to choose one and ask
-    again rather than be answered from a guess.
-    """
+    close enough."""
     hits = repository.nearest(name, entity_type, limit=limit, keep=keep, floor=floor)
     return Page[SearchResult](
         items=tuple(
@@ -204,13 +221,18 @@ def _written_identity(
 
 
 def _named(
-    resolution: EntityResolution, alternatives: tuple[Link, ...] = ()
+    resolution: EntityResolution,
+    alternatives: tuple[Link, ...] = (),
+    tied: tuple[Link, ...] = (),
+    namesakes: int = 0,
 ) -> Named[Entity]:
     found = entity_of(resolution)
     return Named[Entity](
         resolution=resolution,
         subject=found.to_link() if found is not None else None,
         alternatives=alternatives,
+        tied=tied,
+        namesakes=namesakes,
     )
 
 

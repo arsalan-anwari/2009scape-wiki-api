@@ -21,6 +21,7 @@
       "unit": null,
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     },
     {
@@ -35,6 +36,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -47,6 +49,7 @@
       "unit": "tiles",
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     },
     {
@@ -59,6 +62,7 @@
       "unit": "tiles",
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     },
     {
@@ -71,6 +75,7 @@
       "unit": null,
       "derived": true,
       "prominent": true,
+      "technical": false,
       "choices": null
     }
   ],
@@ -110,6 +115,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": [
                   "attack",
                   "defence",
@@ -147,6 +153,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -159,6 +166,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -171,6 +179,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -183,6 +192,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -195,6 +205,7 @@
                 "unit": "ticks",
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -207,6 +218,35 @@
                 "unit": "ticks",
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "tradeable",
+                "value": true,
+                "label": "Tradeable",
+                "group": "trade",
+                "order": 10,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "weight",
+                "value": 2.0,
+                "label": "Weight",
+                "group": "general",
+                "order": 60,
+                "format": "float",
+                "unit": "kg",
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]

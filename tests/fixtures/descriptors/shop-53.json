@@ -29,6 +29,7 @@
           "unit": null,
           "derived": false,
           "prominent": true,
+          "technical": false,
           "choices": null
         },
         {
@@ -47,6 +48,7 @@
           "unit": null,
           "derived": false,
           "prominent": true,
+          "technical": false,
           "choices": null
         },
         {
@@ -59,6 +61,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         }
       ]
@@ -99,6 +102,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -111,6 +115,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -123,6 +128,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -141,7 +147,64 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "tradeable",
+                "value": true,
+                "label": "Tradeable",
+                "group": "trade",
+                "order": 10,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "shop_price",
+                "value": 8,
+                "label": "Shop price",
+                "group": "trade",
+                "order": 30,
+                "format": "gp",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "equipment_slot",
+                "value": "weapon",
+                "label": "Equipment slot",
+                "group": "equipment",
+                "order": 90,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "head",
+                  "cape",
+                  "neck",
+                  "weapon",
+                  "chest",
+                  "shield",
+                  "hidden_1",
+                  "legs",
+                  "hidden_2",
+                  "hands",
+                  "feet",
+                  "hidden_3",
+                  "ring",
+                  "ammo"
+                ]
               }
             ]
           }
@@ -177,7 +240,8 @@
               "icon_ref": null
             },
             "type": "npc",
-            "attributes": []
+            "attributes": [],
+            "about": []
           }
         ],
         "total": 1,
@@ -222,6 +286,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "npc_spawn",
                   "ground_spawn",
@@ -241,6 +306,43 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "kind",
+                "value": "area",
+                "label": "Kind",
+                "group": "overview",
+                "order": 10,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "city",
+                  "town",
+                  "village",
+                  "building",
+                  "dungeon",
+                  "area",
+                  "island"
+                ]
+              },
+              {
+                "key": "members",
+                "value": true,
+                "label": "Members only",
+                "group": "overview",
+                "order": 50,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]

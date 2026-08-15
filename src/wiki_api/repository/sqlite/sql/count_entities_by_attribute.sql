@@ -4,6 +4,7 @@ FROM entity AS e
 WHERE e.type = :type
   AND e.visibility = :visibility
   AND e.canonical_id IS NULL
+  AND (:named IS NULL OR e.name = :named)
   AND (:order_path IS NULL OR json_extract(e.attributes, :order_path) IS NOT NULL)
   AND NOT EXISTS (
       SELECT 1

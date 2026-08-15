@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
 from pydantic import ValidationError
 
 from wiki_api.domain.alias import EntityAlias
-from wiki_api.domain.attributes import ATTRIBUTE_MODELS
+from wiki_api.domain.attributes import ATTRIBUTE_MODELS, ATTRIBUTE_SPECS
 from wiki_api.domain.entity import Entity, VariantKind, Visibility
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.prices import PricePoint
@@ -68,13 +68,14 @@ def merge(
     ordered = sorted(sources, key=lambda source: source.sort_key)
     drafts = _collect_definitions(ordered)
     _apply_patches(ordered, drafts)
+    _fold_namesakes(drafts)
     entities = _build_entities(drafts)
     _check_source_keys(entities, drafts)
     by_key = {entity.key: entity for entity in entities}
     _check_canonical(entities, drafts, by_key)
     return KnowledgeSnapshot(
         entities=entities,
-        edges=_build_edges(ordered, by_key),
+        edges=_fold_edges(_build_edges(ordered, by_key), by_key),
         aliases=_build_aliases(ordered, by_key, entities),
         prices=_build_prices(ordered, by_key, strict=strict),
     )
@@ -176,6 +177,99 @@ def _patch(draft: _Draft, overlay: OverlayEntity, source: OverlaySource) -> None
         draft.searchable = overlay.searchable
     if overlay.icon_ref is not None:
         draft.icon_ref = overlay.icon_ref
+
+
+def _fold_namesakes(drafts: dict[EntityKey, _Draft]) -> None:
+    """Leave one record standing for each name a sort of thing answers to, and make
+    every other one a copy of it."""
+    moved: dict[EntityKey, int] = {}
+    for group in _by_name(drafts).values():
+        if len(group) < 2:
+            continue
+        standing, *copies = group
+        _total_onto(drafts[standing], [drafts[key] for key in copies])
+        for key in copies:
+            drafts[key].canonical_id = standing.id
+            drafts[key].variant_kind = VariantKind.DUPLICATE
+            moved[key] = standing.id
+    _repoint(drafts, moved)
+
+
+def _repoint(
+    drafts: Mapping[EntityKey, _Draft], moved: Mapping[EntityKey, int]
+) -> None:
+    """Send every copy the sources already declared to the record still standing."""
+    for key, draft in drafts.items():
+        if draft.canonical_id is None or key in moved:
+            continue
+        standing = moved.get(EntityKey(type=key.type, id=draft.canonical_id))
+        if standing is not None:
+            draft.canonical_id = standing
+
+
+def _by_name(
+    drafts: Mapping[EntityKey, _Draft],
+) -> dict[tuple[str, str], list[EntityKey]]:
+    """Every publishable record grouped under the name it answers to, richest first."""
+    copied = _already_copied(drafts)
+    found: dict[tuple[str, str], list[EntityKey]] = {}
+    for key in sorted(drafts, key=lambda key: (key.type.value, key.id)):
+        draft = drafts[key]
+        if _is_copy(draft) or _visibility_of(draft) is not Visibility.PUBLISHED:
+            continue
+        found.setdefault((key.type.value, draft.name.casefold()), []).append(key)
+    return {
+        name: sorted(
+            keys,
+            key=lambda key: (key not in copied, -_recorded(drafts[key]), key.id),
+        )
+        for name, keys in found.items()
+    }
+
+
+def _already_copied(drafts: Mapping[EntityKey, _Draft]) -> frozenset[EntityKey]:
+    """Every record the sources already point a copy at."""
+    return frozenset(
+        EntityKey(type=key.type, id=draft.canonical_id)
+        for key, draft in drafts.items()
+        if draft.canonical_id is not None
+    )
+
+
+def _recorded(draft: _Draft) -> int:
+    """How much one record actually says, counting a value it leaves empty as
+    nothing said.
+    """
+    said = sum(1 for value in draft.attributes.values() if value not in (None, [], ""))
+    return said + bool(draft.description)
+
+
+def _total_onto(standing: _Draft, copies: Sequence[_Draft]) -> None:
+    """Add every count of the world the copies hold onto the record that stays."""
+    for key in _TOTALLED:
+        counted = [_count(draft.attributes.get(key)) for draft in (standing, *copies)]
+        if any(number is not None for number in counted):
+            standing.attributes[key] = sum(
+                number for number in counted if number is not None
+            )
+
+
+def _count(value: object) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return value
+
+
+def _totalled_keys() -> frozenset[str]:
+    return frozenset(
+        spec.key
+        for specs in ATTRIBUTE_SPECS.values()
+        for spec in specs
+        if spec.totalled
+    )
+
+
+_TOTALLED: Final = _totalled_keys()
 
 
 def _build_entities(drafts: Mapping[EntityKey, _Draft]) -> tuple[Entity, ...]:
@@ -328,6 +422,46 @@ def _build_edges(
                 raise DuplicateEdge(str(overlay))
             edges[identity] = edge
     return tuple(edges[identity] for identity in sorted(edges))
+
+
+def _fold_edges(
+    edges: Sequence[Edge], by_key: Mapping[EntityKey, Entity]
+) -> tuple[Edge, ...]:
+    """Move every link that ends on a copy onto the record its name stands behind, and
+    keep one of any two that land on top of each other."""
+    folded: dict[tuple[str, int, str, str, int, str], tuple[int, Edge]] = {}
+    for edge in edges:
+        src = _standing(edge.src, by_key)
+        dst = _standing(edge.dst, by_key)
+        written = (src, dst) == (edge.src, edge.dst)
+        if not written and src == dst:
+            continue
+        identity = (
+            src.type.value,
+            src.id,
+            edge.rel.value,
+            dst.type.value,
+            dst.id,
+            edge.discriminator,
+        )
+        rank = 0 if written else 1
+        held = folded.get(identity)
+        if held is None or rank < held[0]:
+            folded[identity] = (rank, edge if written else _moved(edge, src, dst))
+    return tuple(folded[identity][1] for identity in sorted(folded))
+
+
+def _standing(key: EntityKey, by_key: Mapping[EntityKey, Entity]) -> EntityKey:
+    """The record one key answers for, which is itself unless it is a
+    copy of another."""
+    entity = by_key.get(key)
+    if entity is None or entity.variant_kind is None:
+        return key
+    return entity.canonical_key
+
+
+def _moved(edge: Edge, src: EntityKey, dst: EntityKey) -> Edge:
+    return edge.model_copy(update={"src": src, "dst": dst})
 
 
 def _build_aliases(
@@ -1103,3 +1237,289 @@ def test_an_overlay_can_attach_a_source_key_to_an_existing_entity() -> None:
         ]
     )
     assert snapshot.entities[0].source_key == "DEATH_PLATEAU"
+
+
+def _scenery(scenery_id: int, name: str, **overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {"type": "scenery", "id": scenery_id, "name": name}
+    payload.update(overrides)
+    return payload
+
+
+def test_one_name_a_sort_of_thing_answers_to_leaves_one_record_standing() -> None:
+    """Eighteen records answer to `Tormented demon`, and a reader can tell them apart
+    only by numbers it is never allowed to say.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "npcs.json",
+                entities=[_npc(number, "Tormented demon") for number in (8349, 8350)],
+            )
+        ]
+    )
+    standing = [entity for entity in snapshot.entities if not entity.is_variant]
+    assert [entity.key.id for entity in standing] == [8349]
+    copied = [entity for entity in snapshot.entities if entity.is_variant]
+    assert copied[0].canonical_key == standing[0].key
+    assert copied[0].variant_kind is VariantKind.DUPLICATE
+    assert copied[0].searchable is False
+
+
+def test_the_record_that_says_the_most_is_the_one_the_name_keeps() -> None:
+    """Of three fishing spots, the one that says what it is beats the one that says
+    only that it is there, whatever order their numbers fall in.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "scenery.json",
+                entities=[
+                    _scenery(2026, "Fishing spot"),
+                    _scenery(
+                        8986,
+                        "Fishing spot",
+                        description="I can see fish swimming in the water.",
+                        attributes={"options": ["Net", "Bait"]},
+                    ),
+                    _scenery(14428, "Fishing spot"),
+                ],
+            )
+        ]
+    )
+    standing = [entity for entity in snapshot.entities if not entity.is_variant]
+    assert [entity.key.id for entity in standing] == [8986]
+
+
+def test_a_count_of_the_world_adds_up_over_everything_folded_onto_one_name() -> None:
+    """Sixteen booths stand under the number the fold keeps and fifty stand in the
+    world, and the answer has to be fifty.
+    """
+    from wiki_api.domain.attributes import SceneryAttributes
+
+    snapshot = merge(
+        [
+            _source(
+                "scenery.json",
+                entities=[
+                    _scenery(2213, "Bank booth", attributes={"placement_count": 16}),
+                    _scenery(2214, "Bank booth", attributes={"placement_count": 6}),
+                    _scenery(2215, "Bank booth", attributes={"placement_count": 28}),
+                ],
+            )
+        ]
+    )
+    standing = next(one for one in snapshot.entities if not one.is_variant)
+    assert isinstance(standing.attributes, SceneryAttributes)
+    assert standing.attributes.placement_count == 50
+
+
+def test_two_sorts_of_thing_sharing_a_name_are_never_folded_together() -> None:
+    """`Monkey Madness` is a quest and a piece of music, and which was meant is a
+    question for whoever asked, not something to settle by folding.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "mixed.json",
+                entities=[
+                    {"type": "quest", "id": 75, "name": "Monkey Madness"},
+                    {"type": "music", "id": 303, "name": "Monkey Madness"},
+                ],
+            )
+        ]
+    )
+    assert not [entity for entity in snapshot.entities if entity.is_variant]
+
+
+def test_a_name_only_one_record_answers_to_is_left_exactly_as_it_was() -> None:
+    snapshot = merge([_source("items.json", entities=[_item(4587, "Dragon scimitar")])])
+    assert snapshot.entities[0].canonical_id is None
+    assert snapshot.entities[0].searchable is True
+
+
+def test_a_record_the_build_never_publishes_is_not_folded_onto_a_name() -> None:
+    """A hidden record is not an answer, so folding it would only make the name it
+    was given look busier than it is.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "npcs.json",
+                entities=[
+                    _npc(1, "Tormented demon"),
+                    _npc(2, "Tormented demon", visibility="hidden"),
+                ],
+            )
+        ]
+    )
+    assert not [entity for entity in snapshot.entities if entity.is_variant]
+
+
+def test_a_copy_the_sources_already_declared_is_never_folded_again() -> None:
+    snapshot = merge(
+        [
+            _source(
+                "items.json",
+                entities=[
+                    _item(4587, "Dragon scimitar"),
+                    _item(
+                        4588,
+                        "Dragon scimitar",
+                        canonical_id=4587,
+                        variant_kind="noted",
+                    ),
+                ],
+            )
+        ]
+    )
+    copied = next(one for one in snapshot.entities if one.is_variant)
+    assert copied.variant_kind is VariantKind.NOTED
+
+
+def test_every_count_the_registry_calls_totalled_is_one_the_fold_adds_up() -> None:
+    assert frozenset({"placement_count"}) == _TOTALLED
+
+
+def _drop(src: str, dst: str) -> dict[str, Any]:
+    return {
+        "src": src,
+        "rel": "drops",
+        "dst": dst,
+        "attributes": {"weight": 1.0, "denominator": 128.0},
+    }
+
+
+def test_a_link_arriving_at_a_folded_copy_arrives_at_the_name_instead() -> None:
+    """`dropped_by` used to answer with the same creature twice over, told apart only
+    by numbers no answer is allowed to print.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "drops.json",
+                entities=[
+                    _npc(1592, "Steel dragon"),
+                    _npc(3590, "Steel dragon"),
+                    _item(536, "Dragon bones"),
+                ],
+                edges=[
+                    _drop("npc:1592", "item:536"),
+                    _drop("npc:3590", "item:536"),
+                ],
+            )
+        ]
+    )
+    assert [str(edge.src) for edge in snapshot.edges] == ["npc:1592"]
+
+
+def test_a_link_between_two_records_one_name_folds_is_dropped_not_looped() -> None:
+    """Two places called `Varrock` cannot sensibly be part of each other once one
+    name stands for both.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "places.json",
+                entities=[
+                    {"type": "location", "id": 1, "name": "Varrock"},
+                    {"type": "location", "id": 2, "name": "Varrock"},
+                ],
+                edges=[{"src": "location:2", "rel": "part_of", "dst": "location:1"}],
+            )
+        ]
+    )
+    assert snapshot.edges == ()
+
+
+def test_a_link_the_fold_never_touched_keeps_the_ends_it_was_written_with() -> None:
+    snapshot = merge(
+        [
+            _source(
+                "drops.json",
+                entities=[_npc(50, KBD), _item(536, "Dragon bones")],
+                edges=[_drop("npc:50", "item:536")],
+            )
+        ]
+    )
+    edge = snapshot.edges[0]
+    assert (str(edge.src), str(edge.dst)) == ("npc:50", "item:536")
+
+
+def test_a_link_written_to_a_copy_the_sources_declared_moves_too() -> None:
+    """A written-up ore is the same ore to whoever asked, and the record it copies is
+    the one carrying a price. A shop stocking eight of these used to answer with eight
+    names and not a price among them.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "items.json",
+                entities=[
+                    _item(4587, "Dragon scimitar"),
+                    _item(
+                        4588,
+                        "Dragon scimitar",
+                        canonical_id=4587,
+                        variant_kind="noted",
+                    ),
+                    _npc(50, KBD),
+                ],
+                edges=[_drop("npc:50", "item:4588")],
+            )
+        ]
+    )
+    assert str(snapshot.edges[0].dst) == "item:4587"
+
+
+def test_where_a_link_and_a_moved_one_collide_the_written_one_survives() -> None:
+    """Thirty-five creatures drop both an ore and the written-up form of it, and the
+    rate that should stand is the one recorded against the ore itself.
+    """
+    from wiki_api.domain.relationships import DropEdgeAttributes
+
+    written = _drop("npc:50", "item:4587")
+    written["attributes"] = {"weight": 25.0, "denominator": 128.0}
+    snapshot = merge(
+        [
+            _source(
+                "items.json",
+                entities=[
+                    _item(4587, "Dragon scimitar"),
+                    _item(
+                        4588,
+                        "Dragon scimitar",
+                        canonical_id=4587,
+                        variant_kind="noted",
+                    ),
+                    _npc(50, KBD),
+                ],
+                edges=[_drop("npc:50", "item:4588"), written],
+            )
+        ]
+    )
+    assert len(snapshot.edges) == 1
+    kept = snapshot.edges[0].attributes
+    assert isinstance(kept, DropEdgeAttributes)
+    assert kept.weight == 25.0
+
+
+def test_a_link_a_thing_had_with_itself_all_along_is_kept() -> None:
+    """A hundred and fifteen weapons are their own ammunition, and a fold that reads
+    every loop as one it made would throw all of them away.
+    """
+    snapshot = merge(
+        [
+            _source(
+                "items.json",
+                entities=[_item(732, "Holy water")],
+                edges=[
+                    {
+                        "src": "item:732",
+                        "rel": "uses_ammunition",
+                        "dst": "item:732",
+                    }
+                ],
+            )
+        ]
+    )
+    assert [str(edge.dst) for edge in snapshot.edges] == ["item:732"]

@@ -26,6 +26,7 @@ from wiki_api.domain.vocabulary import (
     Unit,
     WeaponType,
     coerce_item_ref,
+    coerce_npc_ref,
 )
 
 if TYPE_CHECKING:
@@ -50,6 +51,8 @@ class AttributeSpec(BaseModel):
     display: bool = True
     derived: bool = False
     prominent: bool = False
+    technical: bool = False
+    totalled: bool = False
     choices: tuple[str, ...] | None = None
     fields: tuple[AttributeSpec, ...] = ()
 
@@ -139,14 +142,17 @@ def number_at(attributes: BaseModel, path: str) -> float | None:
 def declaring(annotation: Any) -> type[BaseModel] | None:
     """The nested model behind a field, when that model declares its own parts."""
     for candidate in get_args(annotation) or (annotation,):
-        if not (isinstance(candidate, type) and issubclass(candidate, BaseModel)):
-            continue
-        nested: type[BaseModel] = candidate
-        if any(
-            meta_of(field.metadata) is not None
-            for field in nested.model_fields.values()
-        ):
-            return nested
+        if isinstance(candidate, type) and issubclass(candidate, BaseModel):
+            nested: type[BaseModel] = candidate
+            if any(
+                meta_of(field.metadata) is not None
+                for field in nested.model_fields.values()
+            ):
+                return nested
+        elif get_args(candidate):
+            found = declaring(candidate)
+            if found is not None:
+                return found
     return None
 
 
@@ -180,6 +186,8 @@ def _spec_of(
         display=meta.display,
         derived=meta.derived,
         prominent=meta.prominent,
+        technical=meta.technical,
+        totalled=meta.totalled,
         choices=choices,
         fields=() if nested is None else specs_of(nested),
     )
@@ -190,8 +198,29 @@ class SkillRequirement(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    skill: Annotated[Skill, BeforeValidator(Skill.coerce)]
-    level: int = Field(ge=1, le=99)
+    skill: Annotated[
+        Skill,
+        BeforeValidator(Skill.coerce),
+        AttributeMeta("Skill", AttributeGroup.SKILL, 10, AttributeFormat.ENUM),
+    ]
+    level: Annotated[
+        int, AttributeMeta("Level", AttributeGroup.SKILL, 20, AttributeFormat.INT)
+    ] = Field(ge=1, le=99)
+
+
+class SkillReward(BaseModel):
+    """Experience in one skill that finishing something hands over."""
+
+    model_config = ConfigDict(frozen=True)
+
+    skill: Annotated[
+        Skill,
+        BeforeValidator(Skill.coerce),
+        AttributeMeta("Skill", AttributeGroup.SKILL, 10, AttributeFormat.ENUM),
+    ]
+    experience: Annotated[
+        int, AttributeMeta("Experience", AttributeGroup.SKILL, 20, AttributeFormat.INT)
+    ] = Field(ge=1)
 
 
 class ItemAttributes(BaseModel):
@@ -741,7 +770,13 @@ class NpcAttributes(BaseModel):
     ] = None
     slayer_task: Annotated[
         int | None,
-        AttributeMeta("Slayer task", AttributeGroup.DROPS, 145, AttributeFormat.ID),
+        AttributeMeta(
+            "Slayer task",
+            AttributeGroup.DROPS,
+            145,
+            AttributeFormat.ID,
+            technical=True,
+        ),
     ] = None
     combat_audio: Annotated[
         tuple[int, ...] | None,
@@ -1012,10 +1047,51 @@ class QuestAttributes(BaseModel):
             "Skills needed", AttributeGroup.OVERVIEW, 60, AttributeFormat.SKILLS
         ),
     ] = None
+    recommended_skills: Annotated[
+        tuple[SkillRequirement, ...] | None,
+        AttributeMeta(
+            "Skills worth having", AttributeGroup.OVERVIEW, 65, AttributeFormat.SKILLS
+        ),
+    ] = None
     quest_points_needed: Annotated[
         int | None,
         AttributeMeta(
             "Quest points needed", AttributeGroup.OVERVIEW, 70, AttributeFormat.INT
+        ),
+    ] = None
+    playable: Annotated[
+        bool | None,
+        AttributeMeta(
+            "Playable in this game",
+            AttributeGroup.OVERVIEW,
+            5,
+            AttributeFormat.BOOL,
+            prominent=True,
+        ),
+    ] = None
+    start_npc: Annotated[
+        EntityKey | None,
+        BeforeValidator(coerce_npc_ref),
+        AttributeMeta(
+            "Start by talking to", AttributeGroup.OVERVIEW, 75, AttributeFormat.REF
+        ),
+    ] = None
+    experience_rewards: Annotated[
+        tuple[SkillReward, ...] | None,
+        AttributeMeta(
+            "Experience for finishing",
+            AttributeGroup.OVERVIEW,
+            80,
+            AttributeFormat.SKILLS,
+        ),
+    ] = None
+    unlocks: Annotated[
+        tuple[str, ...] | None,
+        AttributeMeta(
+            "What finishing it opens up",
+            AttributeGroup.OVERVIEW,
+            90,
+            AttributeFormat.TEXTS,
         ),
     ] = None
 
@@ -1038,16 +1114,25 @@ class LocationAttributes(BaseModel):
     ] = None
     centre: Annotated[
         Coordinate | None,
-        AttributeMeta("Centre", AttributeGroup.MAP, 20, AttributeFormat.COORD),
+        AttributeMeta(
+            "Centre", AttributeGroup.MAP, 20, AttributeFormat.COORD, technical=True
+        ),
     ] = None
     bounds: Annotated[
         Area | None,
-        AttributeMeta("Extent", AttributeGroup.MAP, 30, AttributeFormat.AREA),
+        AttributeMeta(
+            "Extent", AttributeGroup.MAP, 30, AttributeFormat.AREA, technical=True
+        ),
     ] = None
     region_id: Annotated[
         int | None,
         AttributeMeta(
-            "Region", AttributeGroup.MAP, 40, AttributeFormat.ID, derived=True
+            "Region",
+            AttributeGroup.MAP,
+            40,
+            AttributeFormat.ID,
+            derived=True,
+            technical=True,
         ),
     ] = None
     members: Annotated[
@@ -1109,6 +1194,7 @@ class SceneryAttributes(BaseModel):
             AttributeFormat.INT,
             derived=True,
             prominent=True,
+            totalled=True,
         ),
     ] = None
     options: Annotated[
@@ -1474,6 +1560,39 @@ def test_quest_difficulty_and_length_are_closed_vocabularies() -> None:
 
 def test_a_quest_start_point_is_a_relationship_not_an_attribute() -> None:
     assert "start_location" not in QuestAttributes.model_fields
+
+
+def test_what_finishing_a_quest_gives_you_is_read_apart_rather_than_as_a_note() -> None:
+    """This used to be one `reward_note` string copied whole out of a community guide,
+    credits and index links and all, which nothing could sort, filter or add up.
+    """
+    assert "reward_note" not in QuestAttributes.model_fields
+    attributes = QuestAttributes.model_validate(
+        {
+            "experience_rewards": [{"skill": "magic", "experience": 20000}],
+            "unlocks": ["The Ancient Magicks spellbook"],
+        }
+    )
+    assert attributes.experience_rewards is not None
+    assert attributes.experience_rewards[0].skill is Skill.MAGIC
+    assert attributes.experience_rewards[0].experience == 20000
+    assert attributes.unlocks == ("The Ancient Magicks spellbook",)
+
+
+def test_the_person_a_quest_starts_with_is_pointed_at_rather_than_named() -> None:
+    attributes = QuestAttributes.model_validate({"start_npc": "npc:970"})
+    assert attributes.start_npc == EntityKey(type=EntityType.NPC, id=970)
+
+
+def test_a_reward_of_no_experience_at_all_is_left_out_rather_than_written_as_none() -> (
+    None
+):
+    import pytest
+
+    with pytest.raises(ValueError):
+        QuestAttributes.model_validate(
+            {"experience_rewards": [{"skill": "magic", "experience": 0}]}
+        )
 
 
 def test_units_are_declared_from_a_closed_set() -> None:

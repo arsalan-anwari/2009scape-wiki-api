@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Any
 
 from anthropic import AsyncAnthropic
 from fastmcp import Client
-from fastmcp.client.transports import StreamableHttpTransport
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai.messages import ToolCallPart, ToolReturnPart
@@ -27,12 +26,12 @@ from claude_common import (
     CLAUDE_CODE,
     MISSED,
     OAUTH_BETA,
-    TEST_DATA,
     TOKEN_VARIABLE,
     UNSURE,
     WORKED,
     Wiki,
     dataset,
+    local_data,
     read_env,
     served,
     told,
@@ -42,6 +41,7 @@ from claude_common import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
+    from fastmcp.client.transports import StdioTransport
     from pydantic_ai.messages import ModelMessage
 
 HERE = Path(__file__).resolve().parent
@@ -98,9 +98,9 @@ def parser() -> argparse.ArgumentParser:
     return declared
 
 
-def reaching(wiki: Wiki) -> StreamableHttpTransport:
-    """How a client reaches the running wiki, key and all."""
-    return StreamableHttpTransport(wiki.url, headers=wiki.headers)
+def reaching(wiki: Wiki) -> StdioTransport:
+    """A wiki of this client's own, started here and spoken to down a pipe."""
+    return wiki.transport()
 
 
 def subscribed() -> bool:
@@ -268,8 +268,10 @@ async def run(wiki: Wiki, question: str, given: Iterator[str]) -> bool:
 
 async def _main(question: str, given: Iterator[str]) -> int:
     with served() as wiki:
-        print(f"  the wiki is answering at {wiki.url}, reading {dataset()}")
-        print(f"  presenting the key issued to {wiki.kept}, id {wiki.key_id}")
+        print(
+            f"  the wiki is answering down a pipe as `{wiki.spawned}`, "
+            f"reading {dataset()}"
+        )
         await how_close(wiki)
         return 0 if await run(wiki, question, given) else 1
 
@@ -277,7 +279,7 @@ async def _main(question: str, given: Iterator[str]) -> int:
 def main() -> None:
     """Run the demonstration, typed at or scripted."""
     read_env(HERE)
-    os.environ.setdefault("WIKI_API_DATA_DIR", TEST_DATA)
+    local_data()
     asked = parser().parse_args()
     blocked = unready(HERE, signed_in_counts=False)
     if blocked is not None:

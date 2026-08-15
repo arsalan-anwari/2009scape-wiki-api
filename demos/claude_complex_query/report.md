@@ -2,68 +2,69 @@
 
 *Questions of every shape this wiki can be asked, put to one model, with everything it read and everything it said.*
 
-`2026-08-14 16:38`
+`2026-08-15 20:11`
 
 |  |  |
 | --- | --- |
 | **model** | `claude-opus-5` |
 | **dataset** | `data/knowledge.sqlite3` |
-| **wiki** | 32 tools, keyed to `demos` |
-| **probes** | 36 |
+| **wiki** | 32 tools, started as `scape2009-wiki-mcp` |
+| **probes** | 41 |
 | **answers** | scripted |
 
 ## At a glance
 
-**32 of 36** probes showed everything asked of them, in 9m 07s.
-
-Fell short: `npc_stats`, `scenery_use`, `drops_paged`, `music_name`.
+**41 of 41** probes showed everything asked of them, in 10m 17s.
 
 |  | probe | steps | took | what it covers |
 | :-: | --- | --: | --: | --- |
-| ✅ | [manifest](#manifest) | 2 | 7s | the written surface: what this build is and what sorts it holds |
-| ✅ | [browse_rooms](#browse_rooms) | 5 | 18s | listing a whole sort, and construction room attributes |
-| ✅ | [item_value](#item_value) | 2 | 8s | item attributes: market price, price confidence and equipment bonuses |
-| ⚠️ | [npc_stats](#npc_stats) | 3 | 14s | npc combat attributes, and a name eighteen things answer to |
-| ⚠️ | [scenery_use](#scenery_use) | 28 | 40s | scenery as an entity type, with the options the game gives it |
-| ✅ | [quest_detail](#quest_detail) | 2 | 10s | quest attributes authored by hand, and what a quest asks you to bring |
-| ✅ | [slayer_task](#slayer_task) | 2 | 9s | the task entity type and the advice it carries |
+| ✅ | [manifest](#manifest) | 2 | 8s | the written surface: what this build is and what sorts it holds |
+| ✅ | [browse_rooms](#browse_rooms) | 6 | 26s | listing a whole sort, and construction room attributes |
+| ✅ | [item_value](#item_value) | 2 | 11s | item attributes: market price, price confidence and equipment bonuses |
+| ✅ | [npc_stats](#npc_stats) | 2 | 11s | npc combat attributes, under a name eighteen records used to answer to |
+| ✅ | [scenery_use](#scenery_use) | 2 | 8s | scenery as an entity type, with the options the game gives it |
+| ✅ | [quest_detail](#quest_detail) | 5 | 21s | quest attributes authored by hand, and what a quest asks you to bring |
+| ✅ | [slayer_task](#slayer_task) | 3 | 11s | the task entity type and the advice it carries |
 | ✅ | [shop_currency](#shop_currency) | 1 | 6s | a pointer attribute resolving to a named thing rather than an id |
-| ✅ | [place_hierarchy](#place_hierarchy) | 2 | 7s | locations, their tiles, and the part_of / contains pair |
-| ✅ | [music_track](#music_track) | 1 | 6s | music as an entity type, with the set and the sentence it carries |
-| ✅ | [music_place](#music_place) | 4 | 11s | located_in with music at one end, from the track and from the place |
-| ✅ | [quest_music](#quest_music) | 2 | 6s | heard_during and music_heard, the newest link read both ways |
-| ⚠️ | [drops_paged](#drops_paged) | 5 | 19s | a drop table too long for one answer, so the reader is asked first |
-| ✅ | [who_drops_it](#who_drops_it) | 5 | 16s | following a link backwards, from an item to everything that drops it |
-| ✅ | [what_wants_it](#what_wants_it) | 2 | 8s | the requires / needed_for pair, which the quest overlays feed |
-| ✅ | [narrowed_walk](#narrowed_walk) | 1 | 5s | a link answering with several sorts, narrowed to one of them |
-| ✅ | [shop_lines](#shop_lines) | 4 | 9s | shops from both ends, with price and who stands behind the counter |
-| ✅ | [slayer_chain](#slayer_chain) | 2 | 7s | assigns / assigned_by and satisfied_by, the two slayer links |
-| ✅ | [skilling](#skilling) | 10 | 34s | yields and makes: gathering a resource and turning it into something |
-| ✅ | [ammunition](#ammunition) | 6 | 18s | the uses_ammunition pair, followed both ways between two items |
-| ✅ | [spawns](#spawns) | 4 | 10s | located_in both ways: what lies in a place, and where a thing lies |
-| ✅ | [reverse_skilling](#reverse_skilling) | 4 | 17s | gathered_from and made_from, the two skilling links read backwards |
-| ✅ | [shop_from_npc](#shop_from_npc) | 3 | 11s | runs_shop and sells, a shop reached from the person behind the counter |
-| ✅ | [master_tasks](#master_tasks) | 10 | 38s | assigns and counts_towards, the slayer links read the other way |
-| ✅ | [search_words](#search_words) | 1 | 9s | full text search over names and descriptions, rather than a lookup |
-| ✅ | [multi_hop](#multi_hop) | 25 | 35s | three links in a row, which no single tool answers |
-| ✅ | [music_chain](#music_chain) | 11 | 16s | a quest, the music it unlocks, and where in the world that music plays |
-| ✅ | [fuzzy_name](#fuzzy_name) | 7 | 27s | a misspelt name settled by asking rather than by guessing |
-| ⚠️ | [music_name](#music_name) | 1 | 7s | one name held by two sorts of thing, settled by asking which was meant |
-| ✅ | [vague_question](#vague_question) | 10 | 45s | a question too vague to look anything up for, so it must be narrowed |
-| ✅ | [honest_gap](#honest_gap) | 2 | 11s | a fact this build lacks, which should be said rather than invented |
+| ✅ | [place_hierarchy](#place_hierarchy) | 1 | 7s | a place described by what it is and what it sits inside, not by tiles |
+| ✅ | [place_contents](#place_contents) | 2 | 7s | the part_of / contains pair, a place read from both ends |
+| ✅ | [music_track](#music_track) | 1 | 7s | music as an entity type, with the set and the sentence it carries |
+| ✅ | [music_place](#music_place) | 4 | 13s | located_in with music at one end, from the track and from the place |
+| ✅ | [quest_music](#quest_music) | 2 | 7s | heard_during and music_heard, the newest link read both ways |
+| ✅ | [drops_paged](#drops_paged) | 7 | 23s | a drop table too long for one answer, so the reader is asked first |
+| ✅ | [rare_drops](#rare_drops) | 7 | 19s | a roll on a table many monsters share, read as the items it gives |
+| ✅ | [unplayable_quest](#unplayable_quest) | 1 | 7s | a quest the game declares but no class implements |
+| ✅ | [who_drops_it](#who_drops_it) | 3 | 15s | following a link backwards, from an item to everything that drops it |
+| ✅ | [what_wants_it](#what_wants_it) | 2 | 9s | the requires / needed_for pair, which the quest overlays feed |
+| ✅ | [narrowed_walk](#narrowed_walk) | 1 | 8s | a link answering with several sorts, narrowed to one of them |
+| ✅ | [shop_lines](#shop_lines) | 4 | 10s | shops from both ends, with price and who stands behind the counter |
+| ✅ | [slayer_chain](#slayer_chain) | 2 | 8s | assigns / assigned_by and satisfied_by, the two slayer links |
+| ✅ | [skilling](#skilling) | 11 | 46s | yields and makes: gathering a resource and turning it into something |
+| ✅ | [ammunition](#ammunition) | 3 | 16s | the uses_ammunition pair, followed both ways between two items |
+| ✅ | [spawns](#spawns) | 4 | 13s | located_in both ways: what lies in a place, and where a thing lies |
+| ✅ | [smithing_bar](#smithing_bar) | 2 | 16s | makes, from one ingredient to everything the game turns it into |
+| ✅ | [reverse_skilling](#reverse_skilling) | 2 | 7s | gathered_from and made_from, the two skilling links read backwards |
+| ✅ | [shop_from_npc](#shop_from_npc) | 3 | 10s | runs_shop and sells, a shop reached from the person behind the counter |
+| ✅ | [master_tasks](#master_tasks) | 7 | 25s | assigns and counts_towards, the slayer links read the other way |
+| ✅ | [search_words](#search_words) | 1 | 7s | full text search over names and descriptions, rather than a lookup |
+| ✅ | [multi_hop](#multi_hop) | 23 | 29s | three links in a row, which no single tool answers |
+| ✅ | [music_chain](#music_chain) | 11 | 18s | a quest, the music it unlocks, and where in the world that music plays |
+| ✅ | [fuzzy_name](#fuzzy_name) | 6 | 23s | a misspelt name settled by asking rather than by guessing |
+| ✅ | [bad_spelling](#bad_spelling) | 5 | 18s | a name too badly spelt to search for, put back to whoever asked |
+| ✅ | [music_name](#music_name) | 1 | 6s | one name held by two sorts of thing, told apart by what the asker said |
+| ✅ | [vague_question](#vague_question) | 15 | 58s | a question too vague to look anything up for, so it must be narrowed |
+| ✅ | [honest_gap](#honest_gap) | 1 | 9s | what a quest gives you, which only a community guide ever wrote down |
 | ✅ | [music_gap](#music_gap) | 2 | 9s | a track unlocked by content this build holds no entity for |
-| ✅ | [filter_by_attribute](#filter_by_attribute) | 3 | 14s | picking things out by a number rather than by name |
-| ✅ | [order_by_attribute](#order_by_attribute) | 3 | 14s | asking for the cheapest or largest of something |
-| ✅ | [music_spread](#music_spread) | 4 | 11s | a number the newest sort of thing records, ordered largest first |
-| ✅ | [price_over_time](#price_over_time) | 2 | 12s | how a price moved, rather than what it is now |
+| ✅ | [filter_by_attribute](#filter_by_attribute) | 3 | 17s | picking things out by a number rather than by name |
+| ✅ | [order_by_attribute](#order_by_attribute) | 13 | 22s | ordering by a number, then pricing the answer over a shop counter |
+| ✅ | [music_spread](#music_spread) | 5 | 15s | a number the newest sort of thing records, ordered largest first |
+| ✅ | [price_over_time](#price_over_time) | 2 | 11s | how a price moved, rather than what it is now |
 
 <sub>✅ showed everything asked of it, ⚠️ fell short of something, ❌ came apart, or said the wiki holds nothing where it does</sub>
 
 ### Tool coverage
 
-**28 of 32** tools the wiki offers were called at least once.
-
-Never called by any probe: `contains`, `find_close_names`, `makes`, `part_of`.
+**32 of 32** tools the wiki offers were called at least once.
 
 ### Turns back to you
 
@@ -72,7 +73,7 @@ Never called by any probe: `contains`, `find_close_names`, `makes`, `part_of`.
 | `ask_for_more` | 7 |
 | `ask_to_choose` | 4 |
 | `ask_to_clarify` | 1 |
-| `ask_to_confirm` | 2 |
+| `ask_to_confirm` | 1 |
 
 ---
 
@@ -80,13 +81,13 @@ Never called by any probe: `contains`, `find_close_names`, `makes`, `part_of`.
 
 *the written surface: what this build is and what sorts it holds*
 
-✅ **passed** in 7s over 2 step(s)
+✅ **passed** in 8s over 2 step(s)
 
 > **Asked** What is this wiki built from, and what sorts of thing does it know about? Give me the data version and the two largest sorts by count.
 
 **What it did**
 
-> *I'll check the build info and the sorts breakdown.*
+> *I'll check the build info and the type counts.*
 
 ```text
 about()
@@ -96,9 +97,21 @@ list_sorts()
 **What it said**
 
 ````markdown
-The wiki is built from the 2009scape game data, data version **2026.08.14.092403** (schema 9, built 2026-08-14, from game commit `91bb6be1`).
+This wiki is built from the **2009scape** game data, data version **2026.08.15.175358** (built 15 August 2026), and its two largest sorts are **items (6,033)** and **NPCs (3,105)**.
 
-It knows about nine sorts of thing: items, NPCs, shops, quests, locations, scenery objects, slayer tasks, house rooms and music tracks. The two largest by count are **scenery objects (9,139)** and **items (8,578)** — with NPCs close behind at 7,995.
+Everything it knows about, by count:
+
+| Sort | Count |
+| --- | --- |
+| Items | 6,033 |
+| NPCs | 3,105 |
+| Scenery objects | 1,848 |
+| Music tracks | 550 |
+| Shops | 233 |
+| Locations | 210 |
+| Quests | 150 |
+| Slayer tasks | 93 |
+| House rooms | 27 |
 ````
 
 **What happened**
@@ -108,6 +121,7 @@ It knows about nine sorts of thing: items, NPCs, shops, quests, locations, scene
 | ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'item' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -117,30 +131,78 @@ It knows about nine sorts of thing: items, NPCs, shops, quests, locations, scene
 
 *listing a whole sort, and construction room attributes*
 
-✅ **passed** in 18s over 5 step(s)
+✅ **passed** in 26s over 6 step(s)
 
 > **Asked** List the construction rooms this game has and tell me which is the most expensive to build, with its cost and the Construction level it needs.
 
 **What it did**
 
-> *I'll look up the construction rooms in the knowledge base.*
+> *I'll look up the construction rooms in the wiki.*
 
 ```text
 list_things(type='room', limit=50)
-compare_by_number(type='room', ordered_by='cost', descending=True, limit=5)
-compare_by_number(type='room', ordered_by='cost', descending=True)
-compare_by_number(type='room', ordered_by='Build cost', descending=True)
-get_thing(name='Treasure room', type='room')
+compare_by_number(type='room', ordered_by='build cost', descending=True, limit=5)
+compare_by_number(type='room', ordered_by='build cost', descending=True)
+```
+
+> ***Treasure room** is the most expensive: **250,000 coins**, requiring **Construction level 75**.*
+>
+> *The game has 27 buildable rooms in total. Here are the ten costliest:*
+>
+> *| Room | Build cost | Construction level |*
+> *| --- | --- | --- |*
+> *| Treasure room | 250,000 | 75 |*
+> *| Oubilette | 150,000 | 65 |*
+> *| Throne room | 150,000 | 60 |*
+> *| Portal chamber | 100,000 | 50 |*
+> *| Formal garden | 75,000 | 55 |*
+> *| Chapel | 50,000 | 45 |*
+> *| Costume room | 50,000 | 42 |*
+> *| Study room | 50,000 | 40 |*
+> *| Combat room | 25,000 | 32 |*
+> *| Games room | 25,000 | 30 |*
+
+> **It asked you** (`ask_for_more`)
+>
+> Shall I list the remaining rooms with their costs and level requirements?
+>
+> - shown 10 of 27
+>
+> **You answered** *the standing answer, unasked*
+>
+> yes, go on
+
+```text
+compare_by_number(type='room', ordered_by='build cost', descending=True, offset=10)
+compare_by_number(type='room', ordered_by='build cost', descending=True, offset=20)
 ```
 
 **What it said**
 
 ````markdown
-The wiki lists **27** construction rooms:
+Here are the remaining 17 rooms:
 
-Parlour, Garden, Kitchen, Dining room, Workshop, Bedroom, Skill hall, Games room, Combat room, Quest hall, Study room, Costume room, Chapel, Portal chamber, Formal garden, Throne room, Oubilette, Dungeon corridor, Dungeon junction, Dungeon stairs, Dungeon pit, Treasure room, Roof 2 exit, Roof 3 exit, Roof 4 exit, Skill hall 2, Quest hall 2.
+| Room | Build cost | Construction level |
+| --- | --- | --- |
+| Quest hall | 25,000 | 35 |
+| Quest hall 2 | 25,000 | 35 |
+| Skill hall | 15,000 | 25 |
+| Bedroom | 10,000 | 20 |
+| Dungeon pit | 10,000 | 70 |
+| Workshop | 10,000 | 15 |
+| Dungeon corridor | 7,500 | 70 |
+| Dungeon junction | 7,500 | 70 |
+| Dungeon stairs | 7,500 | 70 |
+| Dining room | 5,000 | 10 |
+| Kitchen | 5,000 | 5 |
+| Garden | 1,000 | 1 |
+| Parlour | 1,000 | 1 |
+| Skill hall 2 | 0 | 25 |
+| Roof 2 exit | 0 | — |
+| Roof 3 exit | 0 | — |
+| Roof 4 exit | 0 | — |
 
-The most expensive is the **Treasure room** at **250,000 gp**, requiring **Construction level 75** (12 build spots). Next are the Oubilette and Throne room at 150,000 each, then the Portal chamber at 100,000.
+The wiki records no Construction level for the three roof exit rooms.
 ````
 
 **What happened**
@@ -148,8 +210,9 @@ The most expensive is the **Treasure room** at **250,000 gp**, requiring **Const
 |  |  |
 | :-: | --- |
 | ✅ | it read the wiki 5 time(s) |
-| ✅ | it read the wiki 3 different ways |
+| ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Treasure room' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -159,25 +222,32 @@ The most expensive is the **Treasure room** at **250,000 gp**, requiring **Const
 
 *item attributes: market price, price confidence and equipment bonuses*
 
-✅ **passed** in 8s over 2 step(s)
+✅ **passed** in 11s over 2 step(s)
 
 > **Asked** How much is Statius's warhammer worth on the market, how much can I trust that price, and what does it do for my strength?
 
 **What it did**
 
-> *I'll look up the warhammer's details and price history.*
+> *I'll look that up.*
 
 ```text
-get_thing(name="Statius's warhammer", type='item')
+get_thing(name="Statius's warhammer")
 how_the_price_moved(name="Statius's warhammer")
 ```
 
 **What it said**
 
 ````markdown
-Statius's warhammer sits at **6,893,037 gp**, and the wiki rates that price as **"traded"** — genuine market activity, based on 113 snapshots, so it's a figure you can lean on. It has climbed from 6,540,000 on 2024-06-08 to 6,893,037 on 2026-08-01, up 353,037 (+5.4%), ranging between 6,200,000 and 6,973,417 with a median of 6,583,712.
+**Statius's warhammer sits at 6,893,037 gp, on a "traded" price record you can rely on, and gives +114 Strength bonus.**
 
-For strength it gives a **+114 strength bonus**, alongside +123 crush attack (but -4 stab and -4 slash). It needs 78 Attack, swings at 6 ticks, has a special attack, and degrades in combat until it turns to dust.
+- **Market price** — 6,893,037 gp, from 113 readings, confidence rated "traded" (genuine trade activity, not a guess).
+- **Price range on record** — low 6,200,000 gp, high 6,973,417 gp, median 6,583,712 gp.
+- **Trend** — up 353,037 gp (+5.4%) from 6,540,000 gp on 2024-06-08 to 6,893,037 gp on 2026-08-01.
+- **Strength bonus** — +114, alongside +123 Crush attack (but -4 Stab and -4 Slash).
+- **Other stats** — 6 tick attack speed, has a special attack, requires level 78 Attack, and degrades in combat until it turns to dust.
+- **Alchemy** — 180,000 gp high alch, 120,000 gp low alch, shop value 300,000 gp.
+
+Note there are also separate entries for the degraded and corrupt versions of this hammer, which carry their own stats and prices — ask if you want those instead.
 ````
 
 **What happened**
@@ -188,6 +258,7 @@ For strength it gives a **+114 strength bonus**, alongside +123 crush attack (bu
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'traded' |
 | ✅ | the answer carries '114' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -195,9 +266,9 @@ For strength it gives a **+114 strength bonus**, alongside +123 crush attack (bu
 
 ## npc_stats
 
-*npc combat attributes, and a name eighteen things answer to*
+*npc combat attributes, under a name eighteen records used to answer to*
 
-⚠️ **fell short** in 14s over 3 step(s)
+✅ **passed** in 11s over 2 step(s)
 
 > **Asked** How dangerous is a Tormented demon? Give me its combat stats.
 
@@ -205,32 +276,35 @@ For strength it gives a **+114 strength bonus**, alongside +123 crush attack (bu
 
 ```text
 search(words='Tormented demon', type='npc')
-get_thing(name='npc:8349', type='npc')
-get_thing(name='npc:8358', type='npc')
+get_thing(name='Tormented demon', type='npc')
 ```
 
 **What it said**
 
 ````markdown
-The wiki lists 18 Tormented demon NPC IDs, but the ones I checked (8349 and 8358) are identical, so these stats should hold across the set:
+**A Tormented demon is a serious threat: 326 lifepoints, all combat levels at 85, and huge defences (394 slash defence) behind a damage-halving protection prayer.**
 
-- **Lifepoints:** 326; all combat levels 85 (Attack, Strength, Defence, Magic, Ranged); attack speed 6 ticks
-- **Attack bonuses:** Stab 112, Slash 132, Crush 113, Magic 111, Ranged 245
-- **Defence bonuses:** Stab 167, Slash 394, Crush 346, Magic 213, Ranged 349, Summoning 167
-- **Other bonuses:** Strength 65, Prayer 39, Magic damage 65, Ranged strength 58
+- **Lifepoints** — 326
+- **Combat levels** — Attack 85, Strength 85, Defence 85, Magic 85, Ranged 85
+- **Attack speed** — 6 ticks
+- **Attack bonuses** — Stab 112, Slash 132, Crush 113, Magic 111, Ranged 245
+- **Defence bonuses** — Stab 167, Slash 394, Crush 346, Magic 213, Ranged 349, Summoning 167
+- **Other bonuses** — Strength 65, Prayer 39, Magic damage 65, Ranged strength 58
+- **Behaviour** — aggressive, attacks with magic, protects against melee, immune to poison, roams up to 40 tiles, respawns after 100 ticks
+- **Rewards** — 136 Slayer experience per kill, and 85 possible drops
 
-Danger-wise: it's aggressive, immune to poison, roams up to 40 tiles, attacks with magic and uses a melee protection prayer — but it is safespottable. It gives 136 Slayer experience and respawns after 100 ticks, with 33 possible drops recorded.
+The wiki doesn't record a combat level or max hit for it.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 3 time(s) |
+| ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 2 different ways |
-| ❌ | it settled the question itself instead of asking |
 | ✅ | the answer carries '326' |
 | ✅ | the answer carries '85' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -240,71 +314,37 @@ Danger-wise: it's aggressive, immune to poison, roams up to 40 tiles, attacks wi
 
 *scenery as an entity type, with the options the game gives it*
 
-⚠️ **fell short** in 40s over 28 step(s)
+✅ **passed** in 8s over 2 step(s)
 
 > **Asked** What can I do with a Bank booth, and how many are in the world?
 
 **What it did**
 
 ```text
-get_thing(name='Bank booth', type='scenery')
-search(words='Bank booth', type='scenery')
-```
-
-> **It asked you** (`ask_to_confirm`)
->
-> The wiki holds several separate scenery entries all called "Bank booth" (32 matches on that name). Which should I count?
->
-> - proposing: I'll treat "Bank booth" as all of the entries with that name and add up their world counts, rather than reporting just the first one (ID 2213, which has 16 standing in the world and the actions Use, Use-quickly, Collect).
->
-> **You answered** *the probe's own answer*
->
-> whichever has the most placements
-
-```text
-search(words='Bank booth', type='scenery', offset=10)
-search(words='Bank booth', type='scenery', offset=20)
-search(words='Bank booth', type='scenery', offset=30)
-get_thing(name='scenery:14367')
-get_thing(name='scenery:14368')
-get_thing(name='scenery:16700')
-get_thing(name='scenery:22819')
-get_thing(name='scenery:24914')
-get_thing(name='scenery:26972')
-get_thing(name='scenery:29085')
-get_thing(name='scenery:30015')
-get_thing(name='scenery:34752')
-get_thing(name='scenery:35647')
-get_thing(name='scenery:35648')
-get_thing(name='scenery:36262')
-get_thing(name='scenery:11402')
-get_thing(name='scenery:2214')
-get_thing(name='scenery:34205')
-get_thing(name='scenery:3045')
-get_thing(name='scenery:5276')
-get_thing(name='scenery:6084')
-get_thing(name='scenery:10517')
-get_thing(name='scenery:11338')
-get_thing(name='scenery:11758')
-get_thing(name='scenery:36786')
+get_thing(name='Bank booth')
+compare_by_number(type='scenery', named='Bank booth')
 ```
 
 **What it said**
 
 ````markdown
-The Bank booth with the most placements is the one I first looked up, **ID 2213** ("The bank teller will serve you from here"): 16 standing in the world, more than any other of the 23 scenery entries by that name (next highest are 6 each, for IDs 11402 in Varrock, 11758 in Falador/Park, 22819 and 24914 in Canifis).
+**96 bank booths stand in the world**, and you can Use, Use-quickly or Collect at them.
 
-Its actions are **Use, Use-quickly and Collect** — so banking, quick-banking, and collecting from the item collection box. It's not members-only, occupies 1×1 tiles, and appears in 5 locations, including Catherby, Tree Gnome Stronghold and the Fishing Guild.
+- **Use / Use-quickly** — the bank teller serves you from the booth, opening your bank.
+- **Collect** — picks up items waiting for you (the collection service).
+- **Members only** — no; it's a free-to-play object, taking up a single tile.
+- **Where** — recorded in 24 locations, including Varrock, Al Kharid and Canifis.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 27 time(s) |
+| ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 2 different ways |
-| ⚠️ | it asked when it did not have to: ask_to_confirm |
 | ✅ | the answer carries 'Collect' |
+| ✅ | the answer carries '96' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -314,38 +354,68 @@ Its actions are **Use, Use-quickly and Collect** — so banking, quick-banking, 
 
 *quest attributes authored by hand, and what a quest asks you to bring*
 
-✅ **passed** in 10s over 2 step(s)
+✅ **passed** in 21s over 5 step(s)
 
 > **Asked** How hard is Desert Treasure, how long does it take, what series is it part of, which skills does it want, and what must I bring with me?
 
 **What it did**
 
-> *I'll look up the quest details.*
+> *I'll look up the quest.*
 
 ```text
 get_thing(name='Desert Treasure', type='quest')
 requires(name='Desert Treasure')
 ```
 
+> **It asked you** (`ask_for_more`)
+>
+> I've got the quest's difficulty, length, series and skills, plus the first 10 of its 22 listed requirements (items and prerequisite quests). Shall I pull the remaining 12 so I can give you the full bring-with-you list?
+>
+> - shown 10 of 22
+>
+> **You answered** *the standing answer, unasked*
+>
+> yes, go on
+
+```text
+requires(name='Desert Treasure', offset=10)
+requires(name='Desert Treasure', offset=20)
+```
+
 **What it said**
 
 ````markdown
-**Desert Treasure** is rated **master** difficulty, **long** length, worth **3 quest points**, and is members-only. It's part of the **Mahjarrat** series.
+**Desert Treasure is a master-difficulty, long quest in the Mahjarrat series**, worth 3 quest points and members-only.
 
-Skills needed: **Firemaking 50, Magic 50, Slayer 10, Thieving 53**. It also requires six completed quests: The Dig Site, The Tourist Trap, Temple of Ikov, Priest in Peril, Waterfall Quest, and Troll Stronghold.
+**Skills**
+- **Required** — Firemaking 50, Magic 50, Slayer 10, Thieving 53
+- **Recommended** — Prayer 43
 
-On what to bring: the wiki entry lists no required items for this quest — all six of its recorded requirements are the quests above, so I can't tell you an item list from this data.
+**Items to bring** (16 listed)
+- **Pestle and mortar**, **Bones**, **Ashes**, **Charcoal**, **Garlic** — ingredients
+- **Blood rune**, **Molten glass**, **Silver bar**, **Spice**, **Note**
+- **Tinderbox** and **Magic logs** — for the firemaking step
+- **Ice gloves**, **Spiked boots**, **Face mask** — worn gear
+- **Chocolate cake**
+
+**Quests you must finish first** (6)
+- **The Dig Site**, **The Tourist Trap**, **Temple of Ikov**, **Priest in Peril**, **Waterfall Quest**, **Troll Stronghold**
+
+You start by talking to **Eblis** in the Kharidian Desert, and finishing it gives **20,000 Magic XP** plus access to the Ancient Magicks spellbook, the ancient staff from Eblis, a ring of visibility and the Zaros altar under the desert pyramid.
+
+The wiki doesn't record an estimated completion time in minutes — only the "long" length rating.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 2 time(s) |
+| ✅ | it read the wiki 4 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'master' |
 | ✅ | the answer carries 'Mahjarrat' |
 | ✅ | the answer carries 'thieving' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -355,35 +425,37 @@ On what to bring: the wiki entry lists no required items for this quest — all 
 
 *the task entity type and the advice it carries*
 
-✅ **passed** in 9s over 2 step(s)
+✅ **passed** in 11s over 3 step(s)
 
 > **Asked** What Slayer level do I need before I can be sent after Skeletal wyverns, and what does the game warn me about them?
 
 **What it did**
 
-> *I'll look that up.*
-
 ```text
-search(words='Skeletal wyvern')
-get_thing(name='Skeletal wyvern', type='task')
+get_thing(name='Skeletal wyvern')
+search(words='skeletal wyvern')
+get_thing(name='task:75', type='task')
 ```
 
 **What it said**
 
 ````markdown
-You need **72 Slayer** (and combat level 70) to be assigned Skeletal wyverns, and only **Duradel** hands out the task.
+**Slayer level 72** (plus combat level 70) before Skeletal wyverns can be assigned.
 
-The wiki's advice: they're extremely dangerous and hard to hit with arrows, as those slip right through them — to stand a good chance of surviving you'll need some elemental shielding from their icy breath.
+- **The warning** — they're extremely dangerous and hard to hit with arrows, as the arrows slip right through them; to stand a good chance of surviving you'll need elemental shielding from their icy breath.
+- **Shields that count** — Elemental shield, Mind shield or Dragonfire shield.
+- **Assigned by** — Duradel only.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 2 time(s) |
+| ✅ | it read the wiki 3 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries '72' |
 | ✅ | the answer carries 'elemental' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -399,8 +471,6 @@ The wiki's advice: they're extremely dangerous and hard to hit with arrows, as t
 
 **What it did**
 
-> *I'll look up that shop.*
-
 ```text
 get_thing(name="Tzhaar-mej-roh's Rune Store", type='shop')
 ```
@@ -408,7 +478,9 @@ get_thing(name="Tzhaar-mej-roh's Rune Store", type='shop')
 **What it said**
 
 ````markdown
-Tzhaar-mej-roh's Rune Store takes **Tokkul** as its currency. It's not a general store, it doesn't buy alchemy products, it stocks 8 items (fire, water, earth runes among them), and it's staffed by TzHaar-Mej-Roh.
+**Tokkul.**
+
+- **Tzhaar-mej-roh's Rune Store** — trades in Tokkul rather than coins, is not a general store, and does not buy alchemy products. It's run by TzHaar-Mej-Roh and stocks 8 items, including fire, water and earth runes.
 ````
 
 **What happened**
@@ -418,6 +490,7 @@ Tzhaar-mej-roh's Rune Store takes **Tokkul** as its currency. It's not a general
 | ✅ | it read the wiki 1 time(s) |
 | ✅ | it read the wiki 1 different ways |
 | ✅ | the answer carries 'Tokkul' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -425,27 +498,68 @@ Tzhaar-mej-roh's Rune Store takes **Tokkul** as its currency. It's not a general
 
 ## place_hierarchy
 
-*locations, their tiles, and the part_of / contains pair*
+*a place described by what it is and what it sits inside, not by tiles*
 
-✅ **passed** in 7s over 2 step(s)
+✅ **passed** in 7s over 1 step(s)
 
-> **Asked** Where is Draynor Manor on the map, what larger place is it part of, and what does Burthorpe contain?
+> **Asked** Tell me about Draynor Manor: what sort of place is it, and what larger place is it part of?
 
 **What it did**
 
-> *I'll look up each of these.*
+> *I'll look that up.*
 
 ```text
-get_thing(name='Draynor Manor', type='location')
-get_thing(name='Burthorpe', type='location')
+get_thing(name='Draynor Manor')
 ```
 
 **What it said**
 
 ````markdown
-**Draynor Manor** — a building, "the haunted manor north of Draynor Village," centred at x 3108, y 3345, plane 0 (region 12340). It is part of **Draynor Village**.
+**Draynor Manor is a building — the haunted manor north of Draynor Village — and it is part of Draynor Village.**
 
-**Burthorpe** — a town on the edge of the troll lands, centred at x 2895, y 3549, plane 0 (region 11575). It contains one location: the **Heroes' Guild**. (It also has 193 things listed as found there, if you'd like those.)
+- **Kind** — building
+- **Part of** — Draynor Village
+- **Found here** — 109 things are recorded at the manor, including a dead tree, candles and a tree
+````
+
+**What happened**
+
+|  |  |
+| :-: | --- |
+| ✅ | it read the wiki 1 time(s) |
+| ✅ | it read the wiki 1 different ways |
+| ✅ | the answer carries 'Draynor Village' |
+| ✅ | the answer names things rather than numbering them |
+
+<sub>[back to the table](#at-a-glance)</sub>
+
+---
+
+## place_contents
+
+*the part_of / contains pair, a place read from both ends*
+
+✅ **passed** in 7s over 2 step(s)
+
+> **Asked** List every place recorded inside Varrock, the whole list rather than a few examples, and tell me which larger place White Knights' Castle belongs to.
+
+**What it did**
+
+```text
+contains(name='Varrock')
+part_of(name="White Knights' Castle")
+```
+
+**What it said**
+
+````markdown
+**Varrock records two places inside it — Varrock Palace and Varrock Square — and White Knights' Castle is part of Falador.**
+
+- **Varrock Palace** — a building within Varrock
+- **Varrock Square** — an area within Varrock
+- **White Knights' Castle** — belongs to the city of Falador
+
+That is the complete list of two; nothing was left out.
 ````
 
 **What happened**
@@ -453,10 +567,12 @@ get_thing(name='Burthorpe', type='location')
 |  |  |
 | :-: | --- |
 | ✅ | it read the wiki 2 time(s) |
-| ✅ | it read the wiki 1 different ways |
-| ✅ | the answer carries 'Draynor Village' |
-| ✅ | the answer carries "Heroes' Guild" |
-| ✅ | the answer carries '3108' |
+| ✅ | it read the wiki 2 different ways |
+| ✅ | it followed the link this probe is here for: contains |
+| ✅ | it followed the link this probe is here for: part_of |
+| ✅ | the answer carries 'Varrock Square' |
+| ✅ | the answer carries 'Falador' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -466,7 +582,7 @@ get_thing(name='Burthorpe', type='location')
 
 *music as an entity type, with the set and the sentence it carries*
 
-✅ **passed** in 6s over 1 step(s)
+✅ **passed** in 7s over 1 step(s)
 
 > **Asked** Tell me about the music track Adventure: which set is it part of, and how is it unlocked?
 
@@ -481,7 +597,11 @@ get_thing(name='Adventure', type='music')
 **What it said**
 
 ````markdown
-**Adventure** (music track #177) belongs to the **Varrock** music set, and it is unlocked **at Varrock Palace**. It plays in 1 map square, and is recorded as found in the Palace / Varrock Palace locations.
+**Adventure** belongs to the **Varrock** music set, and it unlocks at **Varrock Palace**.
+
+- **Set** — Varrock
+- **Unlocked** — at Varrock Palace
+- **Where it plays** — the Palace and Varrock Palace areas (one map square)
 ````
 
 **What happened**
@@ -491,6 +611,7 @@ get_thing(name='Adventure', type='music')
 | ✅ | it read the wiki 1 time(s) |
 | ✅ | it read the wiki 1 different ways |
 | ✅ | the answer carries 'Varrock Palace' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -500,27 +621,38 @@ get_thing(name='Adventure', type='music')
 
 *located_in with music at one end, from the track and from the place*
 
-✅ **passed** in 11s over 4 step(s)
+✅ **passed** in 13s over 4 step(s)
 
 > **Asked** Where is the track Fanfare heard, and what does Varrock Palace hold?
 
 **What it did**
 
-> *I'll look both up.*
+> *I'll look up both.*
 
 ```text
-search(words='Fanfare', type='music')
-get_thing(name='Varrock Palace', type='location')
-found_in(name='music:72')
+get_thing(name='Fanfare')
+get_thing(name='Varrock Palace')
+found_in(name='Fanfare')
 found_here(name='Varrock Palace')
 ```
 
 **What it said**
 
 ````markdown
-**Fanfare** (music, id 72) is heard in 3 locations: Falador, the Park, and White Knights' Castle. (Note the wiki also lists separate tracks named Fanfare2 and Fanfare3, if you meant one of those.)
+**Fanfare plays in Falador**, and **Varrock Palace holds five quests and one music track**.
 
-**Varrock Palace** — King Roald's palace in northern Varrock (centre x 3213, y 3483, plane 0), part of Varrock — holds 3 things: the music track Adventure, and the quests Shield of Arrav and All Fired Up.
+Fanfare (Falador music set, unlocked at Falador Castle) is heard in:
+- **Falador** — the city
+- **Park** — an area
+- **White Knights' Castle** — a building
+
+Varrock Palace, King Roald's palace in northern Varrock:
+- **Adventure** — music track, part of the Varrock set, unlocked here
+- **Shield of Arrav** — novice quest, medium, 1 quest point, free-to-play
+- **Priest in Peril** — intermediate quest, medium, 1 quest point, members
+- **All Fired Up** — intermediate quest, medium, 1 quest point, members
+- **Garden of Tranquility** — intermediate quest, long, not playable on this server
+- **Defender of Varrock** — master quest, long, members, not playable on this server
 ````
 
 **What happened**
@@ -528,9 +660,10 @@ found_here(name='Varrock Palace')
 |  |  |
 | :-: | --- |
 | ✅ | it read the wiki 4 time(s) |
-| ✅ | it read the wiki 4 different ways |
+| ✅ | it read the wiki 3 different ways |
 | ✅ | the answer carries 'Falador' |
 | ✅ | the answer carries 'Adventure' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -540,13 +673,13 @@ found_here(name='Varrock Palace')
 
 *heard_during and music_heard, the newest link read both ways*
 
-✅ **passed** in 6s over 2 step(s)
+✅ **passed** in 7s over 2 step(s)
 
 > **Asked** Which pieces of music play during Dream Mentor, and which quest is the track Suspicious heard during?
 
 **What it did**
 
-> *I'll look up both parts of this.*
+> *I'll look up both.*
 
 ```text
 music_heard(name='Dream Mentor')
@@ -556,9 +689,16 @@ heard_during(name='Suspicious')
 **What it said**
 
 ````markdown
-Dream Mentor has six tracks in the wiki: **Everlasting, Illusive, Inadequacy, Untouchable, Down and Out,** and **On the Up**.
+**Six tracks play during Dream Mentor, and Suspicious is heard during Monkey Madness.**
 
-The track **Suspicious** is heard during **Monkey Madness** (its only listed quest).
+- **Everlasting** — unlocked during Dream Mentor
+- **Illusive** — unlocked during Dream Mentor
+- **Inadequacy** — unlocked during Dream Mentor
+- **Untouchable** — unlocked during Dream Mentor
+- **Down and Out** — unlocked during Dream Mentor
+- **On the Up** — unlocked during Dream Mentor
+
+Note that the wiki marks Monkey Madness as not playable on this server.
 ````
 
 **What happened**
@@ -569,6 +709,7 @@ The track **Suspicious** is heard during **Monkey Madness** (its only listed que
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Monkey Madness' |
 | ✅ | the answer carries 'Everlasting' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -578,7 +719,7 @@ The track **Suspicious** is heard during **Monkey Madness** (its only listed que
 
 *a drop table too long for one answer, so the reader is asked first*
 
-⚠️ **fell short** in 19s over 5 step(s)
+✅ **passed** in 23s over 7 step(s)
 
 > **Asked** What does the King Black Dragon drop? There are a lot, so show me the first few and check with me before reading the rest.
 
@@ -590,11 +731,26 @@ The track **Suspicious** is heard during **Monkey Madness** (its only listed que
 drops(name='King Black Dragon')
 ```
 
+> *The **King Black Dragon has 53 drops**; here are the first 10.*
+>
+> *| Drop | Chance | Market price |*
+> *| --- | --- | --- |*
+> *| Dragon bones | 1/1 | 2,627 |*
+> *| Black dragonhide | 1/1 | 2,694 |*
+> *| Crimson charm | 1/2 | — (untradeable) |*
+> *| Coins | 1/20 | — |*
+> *| Adamant platebody | 1/20 | 9,688 |*
+> *| Rune longsword | 1/20 | 29,484 |*
+> *| Mithril 2h sword | 1/20 | 3,302 |*
+> *| Adamant 2h sword | 1/20 | 4,235 |*
+> *| Adamant axe | 1/20 | 2,201 |*
+> *| Mithril battleaxe | 1/20 | 1,955 |*
+
 > **It asked you** (`ask_for_more`)
 >
-> Here are the first 10 of the King Black Dragon's 34 drops: Dwarf remains (1/1), Dragon bones (1/1), Black dragonhide (1/1), Crimson charm (1/2), Dwarf remains (1/4), Dwarf remains (1/5), Fire rune (1/20), Air rune (1/20), Coins (1/20), Adamant platebody (1/20). Shall I read on to the remaining 24?
+> That's the first 10 of the King Black Dragon's 53 drops. Shall I read on through the rest?
 >
-> - shown 10 of 34
+> - shown 10 of 53
 >
 > **You answered** *the probe's own answer*
 >
@@ -604,27 +760,163 @@ drops(name='King Black Dragon')
 drops(name='King Black Dragon', offset=10)
 drops(name='King Black Dragon', offset=20)
 drops(name='King Black Dragon', offset=30)
+drops(name='King Black Dragon', offset=40)
+drops(name='King Black Dragon', offset=50)
 ```
 
 **What it said**
 
 ````markdown
-Here are the remaining 24 of the 34 drops:
+Here are the remaining 43 drops, from most to least common.
 
-**1/20:** Rune longsword, Mithril 2h sword, Adamant 2h sword, Adamant axe, Mithril battleaxe, Amulet of strength, Rune bolts
-**Charms:** Gold charm 1/22, Green charm 1/24, Blue charm 1/72
-**1/41:** Shark, Oyster, Iron ore, Death rune, Law rune, Blood rune, Iron arrow, Yew logs, Adamantite bar, Runite limbs
-**Rarer:** RDT Slot 1/102, Granite lobster pouch 1/102, Kbd heads 1/128, Draconic visage 1/5000
+| Drop | Chance | Market price |
+| --- | --- | --- |
+| Amulet of strength | 1/20 | 2,216 |
+| Air rune | 1/20 | 17 |
+| Fire rune | 1/20 | 17 |
+| Rune bolts | 1/20 | 440 |
+| Gold charm | 1/22 | — (untradeable) |
+| Green charm | 1/24 | — (untradeable) |
+| Shark | 1/41 | 555 |
+| Oyster | 1/41 | 220 |
+| Iron ore | 1/41 | 209 |
+| Blood rune | 1/41 | 261 |
+| Iron arrow | 1/41 | 18 |
+| Yew logs | 1/41 | 263 |
+| Adamantite bar | 1/41 | 2,125 |
+| Death rune | 1/41 | 310 |
+| Law rune | 1/41 | 378 |
+| Runite limbs | 1/41 | 14,813 |
+| Blue charm | 1/72 | — (untradeable) |
+| Kbd heads | 1/128 | — (untradeable) |
+| Uncut sapphire | 1/2908 | 673 |
+| Steel arrow | 1/3489 | 75 |
+| Uncut emerald | 1/3489 | 1,153 |
+| Uncut ruby | 1/4361 | 1,377 |
+| Silver ore | 1/4984 | 205 |
+| Tooth half of a key | 1/4984 | 29,676 |
+| Loop half of a key | 1/4984 | 30,699 |
+| Rune sq shield | 1/4984 | 27,875 |
+| Rune 2h sword | 1/4984 | 38,771 |
+| Rune battleaxe | 1/4984 | 31,832 |
+| Chaos talisman | 1/4984 | 1,663 |
+| Nature talisman | 1/4984 | 4,155 |
+| Uncut diamond | 1/4984 | 5,496 |
+| Runite bar | 1/4984 | 11,387 |
+| Draconic visage | 1/5000 | 62,500,000 |
+| Nature rune | 1/5815 | 307 |
+| Adamant javelin | 1/5815 | 102 |
+| Rune arrow | 1/5815 | 205 |
+| Dragonstone | 1/6978 | 60,822 |
+| Rune javelin | 1/8723 | 109 |
+| Rune kiteshield | 1/8723 | 48,214 |
+| Dragon med helm | 1/11630 | 88,118 |
+| Rune spear | 1/34891 | 28,502 |
+| Dragon spear | 1/34891 | 75,190 |
+| Shield left half | 1/34891 | 210,997 |
+
+Dragon bones and black dragonhide are the only guaranteed drops (1/1 each), and the Draconic visage at 1/5000 is by far the most valuable.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 4 time(s) |
+| ✅ | it read the wiki 6 time(s) |
 | ✅ | it read the wiki 1 different ways |
 | ✅ | it turned back to ask: ask_for_more |
-| ⚠️ | the answer never mentions 'Dragon bones' |
+| ✅ | the answer carries 'Dragon bones' |
+| ✅ | the answer names things rather than numbering them |
+
+<sub>[back to the table](#at-a-glance)</sub>
+
+---
+
+## rare_drops
+
+*a roll on a table many monsters share, read as the items it gives*
+
+✅ **passed** in 19s over 7 step(s)
+
+> **Asked** Does the King Black Dragon drop a Draconic visage, and roughly how often? Name two of the rarest things it can drop besides that.
+
+**What it did**
+
+> *I'll look up the King Black Dragon's drop table.*
+
+```text
+get_thing(name='King Black Dragon', type='npc')
+drops(name='King Black Dragon')
+drops(name='King Black Dragon', offset=10)
+drops(name='King Black Dragon', offset=20)
+drops(name='King Black Dragon', offset=30)
+drops(name='King Black Dragon', offset=40)
+drops(name='King Black Dragon', offset=50)
+```
+
+**What it said**
+
+````markdown
+**Yes — the King Black Dragon drops a Draconic visage at 1/5000.**
+
+Two of its rarest other drops, both from the rare drop table at **1/34,891**:
+
+- **Shield left half** — the rarest tier of its table, worth about 210,997 coins
+- **Dragon spear** — same 1/34,891 chance, worth about 75,190 coins
+
+(A Rune spear shares that same 1/34,891 slot, and the next rarest after those is the Dragon med helm at 1/11,630.)
+````
+
+**What happened**
+
+|  |  |
+| :-: | --- |
+| ✅ | it read the wiki 7 time(s) |
+| ✅ | it read the wiki 2 different ways |
+| ✅ | the answer carries 'Draconic visage' |
+| ✅ | the answer names things rather than numbering them |
+
+<sub>[back to the table](#at-a-glance)</sub>
+
+---
+
+## unplayable_quest
+
+*a quest the game declares but no class implements*
+
+✅ **passed** in 7s over 1 step(s)
+
+> **Asked** Is the quest Monkey Madness available in the game?
+
+**What it did**
+
+> *I'll look that up.*
+
+```text
+get_thing(name='Monkey Madness', type='quest')
+```
+
+**What it said**
+
+````markdown
+**No — Monkey Madness is in the wiki but is not playable on this server.**
+
+- **Difficulty** — master, and a very long quest
+- **Members only** — yes
+- **Series** — Gnome
+- **Start point** — King Narnode Shareen, at the Grand Tree
+
+The entry exists (with its music track, *Suspicious*), but it is flagged as not playable in this game.
+````
+
+**What happened**
+
+|  |  |
+| :-: | --- |
+| ✅ | it read the wiki 1 time(s) |
+| ✅ | it read the wiki 1 different ways |
+| ✅ | the answer says the wiki does not hold this |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -634,13 +926,13 @@ Here are the remaining 24 of the 34 drops:
 
 *following a link backwards, from an item to everything that drops it*
 
-✅ **passed** in 16s over 5 step(s)
+✅ **passed** in 15s over 3 step(s)
 
 > **Asked** Which monsters drop Dragon bones?
 
 **What it did**
 
-> *I'll look that up.*
+> *I'll look up what drops Dragon bones.*
 
 ```text
 dropped_by(name='Dragon bones')
@@ -648,9 +940,9 @@ dropped_by(name='Dragon bones')
 
 > **It asked you** (`ask_for_more`)
 >
-> 33 monsters drop Dragon bones. The first 10 are: King Black Dragon (x2 variants), Red dragon, Black dragon, Blue dragon, Green dragon, Bronze dragon, Iron dragon, Steel dragon (x2 variants) — all at a 1/1 drop chance. Shall I list the remaining 23?
+> I've got the first 10 of 13 monsters that drop Dragon bones — shall I pull the remaining 3?
 >
-> - shown 10 of 33
+> - shown 10 of 13
 >
 > **You answered** *the standing answer, unasked*
 >
@@ -658,27 +950,40 @@ dropped_by(name='Dragon bones')
 
 ```text
 dropped_by(name='Dragon bones', offset=10)
-dropped_by(name='Dragon bones', offset=20)
-dropped_by(name='Dragon bones', offset=30)
 ```
 
 **What it said**
 
 ````markdown
-All 33 droppers, grouped by name (many are duplicate NPC variants):
+**13 monsters drop Dragon bones**, ten of them as a guaranteed drop.
 
-- **Always (1/1):** King Black Dragon (2), Red dragon (5), Black dragon (5), Blue dragon (6), Green dragon (5), Bronze dragon, Iron dragon, Steel dragon (2), Brutal green dragon, Mithril dragon
-- **1/20:** Dragon impling (2 variants)
-- **1/128:** Jogre (2 variants)
+| Monster | Drop chance | Combat level | Lifepoints |
+|---|---|---|---|
+| King Black Dragon | 1/1 | 276 | 240 |
+| Black dragon | 1/1 | 227 | 190 |
+| Red dragon | 1/1 | 152 | 140 |
+| Blue dragon | 1/1 | 111 | 105 |
+| Green dragon | 1/1 | 108 | 75 |
+| Brutal green dragon | 1/1 | not recorded | 175 |
+| Mithril dragon | 1/1 | not recorded | 254 |
+| Bronze dragon | 1/1 | not recorded | 122 |
+| Iron dragon | 1/1 | not recorded | 165 |
+| Steel dragon | 1/1 | not recorded | 210 |
+| Chaos Elemental | 1/10 | not recorded | 250 |
+| Dragon impling | 1/20 | not recorded | 10 |
+| Jogre | 1/128 | 57 | 70 |
+
+The wiki lists no combat level for Brutal green, Mithril, Bronze, Iron and Steel dragons, the Chaos Elemental or the Dragon impling.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 4 time(s) |
+| ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 1 different ways |
 | ✅ | the answer carries 'dragon' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -688,21 +993,31 @@ All 33 droppers, grouped by name (many are duplicate NPC variants):
 
 *the requires / needed_for pair, which the quest overlays feed*
 
-✅ **passed** in 8s over 2 step(s)
+✅ **passed** in 9s over 2 step(s)
 
 > **Asked** Which quest wants me to bring an Iron chainbody, and what else does that quest ask for?
 
 **What it did**
 
+> *I'll look that up.*
+
 ```text
-needed_for(name='Iron chainbody')
+needed_for(name='Iron chainbody', type='quest')
 requires(name="Black Knights' Fortress")
 ```
 
 **What it said**
 
 ````markdown
-That's **Black Knights' Fortress**, the only quest listing an Iron chainbody. It asks you to carry three items in all: an Iron chainbody, a Bronze med helm, and a Cabbage.
+**Black Knights' Fortress** is the quest that asks for an Iron chainbody.
+
+Alongside it, the quest requires:
+
+- **Bronze med helm** — worn on the head, market price 37
+- **Cabbage** — market price 61
+- **Iron chainbody** — worn on the chest, market price 254
+
+It's a novice, short quest worth 3 quest points, free-to-play, and playable on this server.
 ````
 
 **What happened**
@@ -712,6 +1027,7 @@ That's **Black Knights' Fortress**, the only quest listing an Iron chainbody. It
 | ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Black Knights' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -721,13 +1037,13 @@ That's **Black Knights' Fortress**, the only quest listing an Iron chainbody. It
 
 *a link answering with several sorts, narrowed to one of them*
 
-✅ **passed** in 5s over 1 step(s)
+✅ **passed** in 8s over 1 step(s)
 
 > **Asked** Animal Magnetism needs other quests finished and items carried. Ignore the quests: which items does it ask me to bring, and how many are there?
 
 **What it did**
 
-> *I'll look up the quest's item requirements.*
+> *I'll look up the quest's requirements.*
 
 ```text
 requires(name='Animal Magnetism', type='item')
@@ -736,7 +1052,20 @@ requires(name='Animal Magnetism', type='item')
 **What it said**
 
 ````markdown
-Animal Magnetism asks you to bring 3 items: a **mithril axe**, a **hammer**, and an **iron bar** — all listed as carried requirements.
+**Seven items to bring, plus one recommended.**
+
+| Item | Kind | Market price |
+|---|---|---|
+| Ghostspeak amulet | Carried | Not tradeable |
+| Mithril axe | Carried | 988 |
+| Holy symbol | Carried | 2,429 |
+| Hard leather | Carried | 634 |
+| Hammer | Carried | 45 |
+| Iron bar | Carried | 465 |
+| Polished buttons | Carried | — |
+| Amulet of glory | Recommended | 65,683 |
+
+The wiki doesn't record a market price for polished buttons.
 ````
 
 **What happened**
@@ -746,6 +1075,7 @@ Animal Magnetism asks you to bring 3 items: a **mithril axe**, a **hammer**, and
 | ✅ | it read the wiki 1 time(s) |
 | ✅ | it read the wiki 1 different ways |
 | ✅ | the answer carries '3' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -755,21 +1085,16 @@ Animal Magnetism asks you to bring 3 items: a **mithril axe**, a **hammer**, and
 
 *shops from both ends, with price and who stands behind the counter*
 
-✅ **passed** in 9s over 4 step(s)
+✅ **passed** in 10s over 4 step(s)
 
 > **Asked** Where can I buy Iron arrowtips and for how much, and who runs the shop you find them in?
 
 **What it did**
 
-> *I'll look up where Iron arrowtips are sold.*
+> *I'll look this up.*
 
 ```text
 sold_in(name='Iron arrowtips')
-```
-
-> *Three shops sell them. Let me find who runs each.*
-
-```text
 staffed_by(name="Dargaud's Bows And Arrows")
 staffed_by(name="Ava's Odds and Ends")
 staffed_by(name='Void Knight Archery Store')
@@ -778,11 +1103,13 @@ staffed_by(name='Void Knight Archery Store')
 **What it said**
 
 ````markdown
-Iron arrowtips are sold in three shops, all at the same price of **26 coins** each:
+**Iron arrowtips cost 26 coins in all three shops that stock them.**
 
-- **Dargaud's Bows And Arrows** — stock 300, run by the **Bow and Arrow salesman**
-- **Ava's Odds and Ends** — stock 30, run by **Ava** (with a **Witch** also staffing it)
-- **Void Knight Archery Store** — stock 100, run by a **Squire**
+| Shop | Price | Stock | Run by |
+|---|---|---|---|
+| Dargaud's Bows And Arrows | 26 coins | 300 | Bow and Arrow salesman |
+| Ava's Odds and Ends | 26 coins | 30 | Ava (with a Witch also staffing it) |
+| Void Knight Archery Store | 26 coins | 100 | Squire |
 ````
 
 **What happened**
@@ -792,6 +1119,7 @@ Iron arrowtips are sold in three shops, all at the same price of **26 coins** ea
 | ✅ | it read the wiki 4 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Ava' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -801,13 +1129,11 @@ Iron arrowtips are sold in three shops, all at the same price of **26 coins** ea
 
 *assigns / assigned_by and satisfied_by, the two slayer links*
 
-✅ **passed** in 7s over 2 step(s)
+✅ **passed** in 8s over 2 step(s)
 
 > **Asked** Which Slayer masters can assign Aberrant spectres, and what creatures count towards a Steel dragons task?
 
 **What it did**
-
-> *I'll look up both of these.*
 
 ```text
 assigned_by(name='Aberrant spectres')
@@ -817,9 +1143,12 @@ satisfied_by(name='Steel dragons')
 **What it said**
 
 ````markdown
-Aberrant spectres can be assigned by three masters: **Duradel** (weight 7), **Vannaka** (weight 8) and **Chaeldar** (weight 8).
+**Three masters assign Aberrant spectres — Duradel, Vannaka and Chaeldar — while a Steel dragons task is satisfied only by Steel dragons.**
 
-A **Steel dragons** task is satisfied by two NPCs, both named **Steel dragon** (ids 1592 and 3590) — no other creatures count towards it.
+- **Duradel** — assigns Aberrant spectres, task weight 7
+- **Vannaka** — assigns Aberrant spectres, task weight 8
+- **Chaeldar** — assigns Aberrant spectres, task weight 8
+- **Steel dragon** — the sole creature counting towards a Steel dragons task; aggressive, 210 lifepoints
 ````
 
 **What happened**
@@ -830,6 +1159,7 @@ A **Steel dragons** task is satisfied by two NPCs, both named **Steel dragon** (
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Vannaka' |
 | ✅ | the answer carries 'Steel dragon' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -839,58 +1169,85 @@ A **Steel dragons** task is satisfied by two NPCs, both named **Steel dragon** (
 
 *yields and makes: gathering a resource and turning it into something*
 
-✅ **passed** in 34s over 10 step(s)
+✅ **passed** in 46s over 11 step(s)
 
-> **Asked** What can I catch at a fishing spot and at what levels, and what do raw shrimps turn into when I cook them?
+> **Asked** How many fishing spots are there in the game, what can I catch at one and at what levels, and what do raw shrimps turn into when cooked?
 
 **What it did**
+
+> *I'll look up fishing spots and raw shrimps.*
 
 ```text
 search(words='fishing spot')
 get_thing(name='Raw shrimps', type='item')
-get_thing(name='npc:234')
-yields(name='npc:234')
-gathered_from(name='Raw shrimps')
-yields(name='npc:316')
-yields(name='npc:309')
-yields(name='npc:312')
-yields(name='npc:313')
+compare_by_number(type='npc', named='Fishing spot')
+compare_by_number(type='scenery', named='Fishing spot')
+yields(name='scenery:8986')
+yields(name='npc:6267')
+get_thing(name='npc:6267')
+makes(name='Raw shrimps')
 ```
 
-> **It asked you** (`ask_to_choose`)
+> **It asked you** (`ask_for_more`)
 >
-> The wiki has 84 separate "Fishing spot" entries, and each type yields a different set of fish — which kind did you mean? (Cooking answer: raw shrimps become Shrimps.)
+> I've listed the 10 lowest-level catches at a fishing spot — want the remaining 14 (higher-level fish like salmon, lobster, shark, etc.)?
 >
-> - Net/bait spot (npc:316) — shrimps lvl 1, sardine lvl 5, herring lvl 10, anchovies lvl 15
-> - Lure/bait river spot (npc:309) — trout lvl 20, pike lvl 25, salmon lvl 30, rainbow fish lvl 38
-> - Cage/harpoon spot (npc:312) — tuna lvl 35, lobster lvl 40, swordfish lvl 50
-> - Big net/harpoon spot (npc:313) — mackerel & seaweed lvl 16, cod lvl 23, bass lvl 46, shark lvl 76
-> - Something else — I'll name the location and you find the spot there
+> - shown 10 of 24
 >
 > **You answered** *the standing answer, unasked*
 >
-> the first one, Net/bait spot (npc:316) — shrimps lvl 1, sardine lvl 5, herring lvl 10, anchovies lvl 15
+> yes, go on
+
+```text
+yields(name='npc:6267', offset=10)
+yields(name='npc:6267', offset=20)
+```
 
 **What it said**
 
 ````markdown
-At that net/bait spot (npc:316) you can catch four things:
+**Fishing spots appear in 157 locations across the game**, and a single spot can yield **24 different catches** from level 1 to level 76; raw shrimps cook into **Shrimps**.
 
-- **Raw shrimps** — level 1, 10 xp, Small fishing net
-- **Raw sardine** — level 5, 20 xp, Fishing rod
-- **Raw herring** — level 10, 30 xp, Fishing rod
-- **Raw anchovies** — level 15, 40 xp, Small fishing net
+| Catch | Fishing level | XP | Tool |
+|---|---|---|---|
+| Raw shrimps | 1 | 10 | Small fishing net |
+| Raw crayfish | 1 | 10 | Crayfish cage |
+| Raw sardine | 5 | 20 | Fishing rod |
+| Raw karambwanji | 5 | 5 | Small fishing net |
+| Raw herring | 10 | 30 | Fishing rod |
+| Raw anchovies | 15 | 40 | Small fishing net |
+| Raw mackerel | 16 | 20 | Big fishing net |
+| Seaweed | 16 | 1 | Big fishing net |
+| Raw trout | 20 | 50 | Fly fishing rod |
+| Raw cod | 23 | 45 | Big fishing net |
+| Raw pike | 25 | 60 | Fishing rod |
+| Slimy eel | 28 | 65 | Fishing rod |
+| Raw salmon | 30 | 70 | Fly fishing rod |
+| Frog spawn | 33 | 75 | Small fishing net |
+| Raw tuna | 35 | 80 | Harpoon |
+| Raw cave eel | 38 | 80 | Fishing rod |
+| Raw rainbow fish | 38 | 80 | Fly fishing rod |
+| Raw lobster | 40 | 90 | Lobster pot |
+| Raw bass | 46 | 100 | Big fishing net |
+| Raw swordfish | 50 | 100 | Harpoon |
+| Raw lava eel | 53 | 60 | Oily fishing rod |
+| Raw monkfish | 62 | 120 | Small fishing net |
+| Raw karambwan | 65 | 105 | Karambwan vessel |
+| Raw shark | 76 | 110 | Harpoon |
 
-Cooking raw shrimps makes **Shrimps**.
+On the cooking: **Shrimps** — cooked at Cooking level 1 for 30 Cooking XP.
+
+Two notes on the count: the fishable spot is a single entry that spawns at 157 recorded locations, and there is separately a "Fishing spot" scenery object (the Net one, 22 standing in the world) which the wiki records no catches for.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 9 time(s) |
-| ✅ | it read the wiki 4 different ways |
+| ✅ | it read the wiki 10 time(s) |
+| ✅ | it read the wiki 5 different ways |
 | ✅ | the answer carries 'Shrimps' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -900,7 +1257,7 @@ Cooking raw shrimps makes **Shrimps**.
 
 *the uses_ammunition pair, followed both ways between two items*
 
-✅ **passed** in 18s over 6 step(s)
+✅ **passed** in 16s over 3 step(s)
 
 > **Asked** What ammunition does a Phoenix crossbow take, and which other weapons fire Bronze bolts?
 
@@ -909,52 +1266,50 @@ Cooking raw shrimps makes **Shrimps**.
 > *I'll look up both parts of this.*
 
 ```text
-get_thing(name='Phoenix crossbow', type='item')
+uses_ammunition(name='Phoenix crossbow')
 used_by(name='Bronze bolts')
-```
-
-> **It asked you** (`ask_to_choose`)
->
-> Three items are named "Phoenix crossbow" in the wiki. Which one do you mean?
->
-> - Phoenix crossbow (item 767) — "Second-rate crossbow, former property of the Phoenix Gang."
-> - Phoenix crossbow (item 11165)
-> - Phoenix crossbow (item 11167)
->
-> **You answered** *the standing answer, unasked*
->
-> the first one, Phoenix crossbow (item 767) — "Second-rate crossbow, former property of the Phoenix Gang."
-
-> **It asked you** (`ask_for_more`)
->
-> 14 weapons fire Bronze bolts; I've read the first 10. Shall I fetch the remaining 4?
->
-> - shown 10 of 14
->
-> **You answered** *the standing answer, unasked*
->
-> yes, go on
-
-```text
-uses_ammunition(name='item:767')
 used_by(name='Bronze bolts', offset=10)
 ```
 
 **What it said**
 
 ````markdown
-The Phoenix crossbow (item 767) takes 6 kinds of ammunition: Bronze bolts, Bronze bolts(p), Bronze bolts(p+), Bronze bolts(p++), Opal bolts and Opal bolts (e).
+**The Phoenix crossbow takes seven kinds of bolt, and ten other weapons fire Bronze bolts.**
 
-Bronze bolts are fired by 14 weapons in total. Besides that Phoenix crossbow, they are: Crossbow (837), Bronze crossbow, Blurite crossbow, Iron crossbow, Steel crossbow, Mith crossbow, Adamant crossbow, Rune crossbow (9185 and 13530), Black crossbow, Dorgeshuun c'bow, and the other two Phoenix crossbows (11165 and 11167).
+Ammunition the Phoenix crossbow accepts:
+
+- **Bronze bolts** — plain, market price 11 gp
+- **Bronze bolts(p)** — poisoned, 3 gp
+- **Bronze bolts(p+)** — 3 gp
+- **Bronze bolts(p++)** — 3 gp
+- **Opal bolts** — 6 gp
+- **Opal bolts (e)** — enchanted, 6 gp
+- **Broad-tipped bolts** — 92 gp
+
+Other weapons that fire Bronze bolts:
+
+| Weapon | Market price | Weight |
+|---|---|---|
+| Crossbow | 369 gp | 8 kg |
+| Bronze crossbow | 126 gp | 4 kg |
+| Blurite crossbow | not traded | 4 kg |
+| Iron crossbow | 209 gp | 4 kg |
+| Steel crossbow | 518 gp | 5 kg |
+| Black crossbow | 800 gp | 5 kg |
+| Mith crossbow | 1,756 gp | 6 kg |
+| Dorgeshuun c'bow | 2,630 gp | 2.2 kg |
+| Adamant crossbow | 4,451 gp | 6 kg |
+| Rune crossbow | 20,029 gp | 6 kg |
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 4 time(s) |
-| ✅ | it read the wiki 3 different ways |
+| ✅ | it read the wiki 3 time(s) |
+| ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'bolts' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -964,34 +1319,32 @@ Bronze bolts are fired by 14 weapons in total. Besides that Phoenix crossbow, th
 
 *located_in both ways: what lies in a place, and where a thing lies*
 
-✅ **passed** in 10s over 4 step(s)
+✅ **passed** in 13s over 4 step(s)
 
 > **Asked** What items lie on the ground in the Clocktower, and whereabouts does a White cog spawn?
 
 **What it did**
 
-> *I'll look up the Clocktower location first.*
-
 ```text
-get_thing(name='Clocktower', type='location')
+search(words='Clocktower')
 get_thing(name='White cog', type='item')
 found_here(name='Clocktower', type='item')
-found_in(name='White cog')
+get_thing(name='Clocktower', type='location')
 ```
 
 **What it said**
 
 ````markdown
-The Clocktower has 6 item spawns on the ground:
+**Six items spawn on the ground in the Clocktower**, including the White cog — though the wiki records only that it spawns in the Clocktower, with no more precise spot than that.
 
-- **White cog** — x 2577, y 9655, plane 0 (the only spawn it has anywhere)
-- **Blue cog** — x 2574, y 9633, plane 0
-- **Red cog** — x 2583, y 9613, plane 0
-- **Rat poison** — x 2564, y 9662, plane 0
-- **Child's blanket** — x 2570, y 9604, plane 0
-- **Purple dye** — x 2563, y 3261, plane 0
+- **White cog** — 1 kg, "a cog from some machinery"
+- **Blue cog** — 1 kg
+- **Red cog** — 1 kg
+- **Rat poison** — 0.1 kg
+- **Child's blanket** — 0.9 kg
+- **Purple dye** — 1 kg equivalent not recorded; tradeable, market price 150
 
-Note the first five sit in the underground dungeon coordinates (y ~9600s), while the purple dye is on the surface.
+The wiki holds no room-by-room or floor detail for where within the Clocktower any of these lie, so the White cog's exact spawn point isn't something it records.
 ````
 
 **What happened**
@@ -1001,6 +1354,69 @@ Note the first five sit in the underground dungeon coordinates (y ~9600s), while
 | ✅ | it read the wiki 4 time(s) |
 | ✅ | it read the wiki 3 different ways |
 | ✅ | the answer carries 'cog' |
+| ✅ | the answer names things rather than numbering them |
+
+<sub>[back to the table](#at-a-glance)</sub>
+
+---
+
+## smithing_bar
+
+*makes, from one ingredient to everything the game turns it into*
+
+✅ **passed** in 16s over 2 step(s)
+
+> **Asked** I have a Bronze bar. What can I smith from it, and what Smithing level does each one need? Give me the cheapest handful.
+
+**What it did**
+
+> *I'll look up what a Bronze bar makes.*
+
+```text
+makes(name='Bronze bar')
+```
+
+> **It asked you** (`ask_to_choose`)
+>
+> The Bronze bar makes 26 different things. By "cheapest handful", which do you mean?
+>
+> - The lowest Smithing level ones (easiest to make)
+> - The lowest market price ones (worth the least)
+>
+> **You answered** *the standing answer, unasked*
+>
+> the first one, The lowest Smithing level ones (easiest to make)
+
+**What it said**
+
+````markdown
+**Bronze dagger and Bronze axe, both at level 1**, are the lowest-requirement things a Bronze bar makes.
+
+| Item | Smithing level | Experience | Market price |
+|---|---|---|---|
+| Bronze dagger | 1 | 12.5 | 94 gp |
+| Bronze axe | 1 | 12.5 | 49 gp |
+| Bronze mace | 2 | 12.5 | not recorded |
+| Bronze med helm | 3 | 12.5 | 37 gp |
+| Bronze bolts (unf) | 3 | 12.5 | 2 gp |
+| Bronze dart tip | 4 | 12.5 | 26 gp |
+| Bronze sword | 4 | 12.5 | 26 gp |
+| Bronze wire | 4 | 12.5 | 285 gp |
+| Bronze nails | 4 | 12.5 | 16 gp |
+| Bronze arrowtips | 5 | 12.5 | 16 gp |
+
+That's the 10 lowest-level of 26 items in total. The wiki holds no market price for the Bronze mace. Say the word if you want the remaining 16.
+````
+
+**What happened**
+
+|  |  |
+| :-: | --- |
+| ✅ | it read the wiki 1 time(s) |
+| ✅ | it read the wiki 1 different ways |
+| ✅ | it followed the link this probe is here for: makes |
+| ✅ | the answer carries 'Bronze dagger' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1010,48 +1426,35 @@ Note the first five sit in the underground dungeon coordinates (y ~9600s), while
 
 *gathered_from and made_from, the two skilling links read backwards*
 
-✅ **passed** in 17s over 4 step(s)
+✅ **passed** in 7s over 2 step(s)
 
 > **Asked** Where do Raw salmon come from, and what are Shrimps made from and with which skill?
 
 **What it did**
-
-> *I'll look up both items.*
 
 ```text
 gathered_from(name='Raw salmon')
 made_from(name='Shrimps')
 ```
 
-> **It asked you** (`ask_for_more`)
->
-> For Raw salmon I've seen 10 of the 16 fishing spots listed, and all 10 so far are identical (Fishing spot NPCs, Fishing level 30, 70 xp, Fly fishing rod). Shall I pull the remaining 6 to check they match?
->
-> - shown 10 of 16
->
-> **You answered** *the standing answer, unasked*
->
-> yes, go on
-
-```text
-gathered_from(name='Raw salmon', offset=10)
-```
-
 **What it said**
 
 ````markdown
-**Raw salmon** comes from 16 sources: 15 Fishing spot NPCs, all requiring Fishing level 30 with a Fly fishing rod for 70 experience, plus a Fish stall (scenery), stolen at Thieving level 42 for 42 experience.
+**Raw salmon come from fly fishing spots and the fish stall; Shrimps are cooked from Raw shrimps using Cooking.**
 
-**Shrimps** are made from Raw shrimps via **Cooking**, level 1, for 30 experience. (Note there are two items named "Raw shrimps" in the data — the cooking entry links to item 317.)
+- **Fishing spot** — Fishing level 30, 70 Fishing XP, needs a Fly fishing rod
+- **Fish stall** — Thieving level 42, 42 Thieving XP (steal-from)
+- **Shrimps** — made from Raw shrimps, Cooking level 1, 30 Cooking XP
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 3 time(s) |
+| ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'cooking' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1061,13 +1464,13 @@ gathered_from(name='Raw salmon', offset=10)
 
 *runs_shop and sells, a shop reached from the person behind the counter*
 
-✅ **passed** in 11s over 3 step(s)
+✅ **passed** in 10s over 3 step(s)
 
 > **Asked** Which shop does Ava run, and what does it stock?
 
 **What it did**
 
-> *I'll look up Ava and the shop she runs.*
+> *I'll look up Ava first.*
 
 ```text
 search(words='Ava', type='npc')
@@ -1078,13 +1481,15 @@ sells(name="Ava's Odds and Ends")
 **What it said**
 
 ````markdown
-Ava runs **Ava's Odds and Ends**, which stocks 5 items:
+Ava runs **Ava's Odds and Ends**, a coin-based specialist shop stocking five items.
 
-- **Feather** — stock 1000, 6 gp
-- **Iron arrow** — stock 40, 20 gp
-- **Steel arrow** — stock 10, 46 gp
-- **Iron arrowtips** — stock 30, 26 gp
-- **Steel arrowtips** — stock 20, 36 gp
+| Item | Stock | Shop price | Market price |
+| --- | --- | --- | --- |
+| Feather | 1000 | 6 | 19 |
+| Iron arrow | 40 | 20 | 18 |
+| Steel arrow | 10 | 46 | 75 |
+| Iron arrowtips | 30 | 26 | 20 |
+| Steel arrowtips | 20 | 36 | 68 |
 ````
 
 **What happened**
@@ -1094,6 +1499,7 @@ Ava runs **Ava's Odds and Ends**, which stocks 5 items:
 | ✅ | it read the wiki 3 time(s) |
 | ✅ | it read the wiki 3 different ways |
 | ✅ | the answer carries 'arrowtips' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1103,25 +1509,22 @@ Ava runs **Ava's Odds and Ends**, which stocks 5 items:
 
 *assigns and counts_towards, the slayer links read the other way*
 
-✅ **passed** in 38s over 10 step(s)
+✅ **passed** in 25s over 7 step(s)
 
 > **Asked** What can Vannaka send me after, and which Slayer tasks does killing a Steel dragon count towards?
 
 **What it did**
 
-> *I'll look up both of these.*
+> *I'll look up both.*
 
 ```text
 assigns(name='Vannaka')
 counts_towards(name='Steel dragon')
-get_thing(name='Vannaka', type='npc')
-get_thing(name='npc:1597', type='npc')
-assigns(name='npc:1597')
 ```
 
 > **It asked you** (`ask_for_more`)
 >
-> Killing a Steel dragon counts towards one Slayer task: Steel dragons. For Vannaka (the Grand Exchange Slayer master, NPC 1597 — a second entry, 1596, only runs the Slayer Equipment shop and has no tasks listed), the wiki lists 43 assignable tasks. The first 10 by weight are: Banshee (6), Crawling hand (6), Crocodiles (6), Earth warriors (6), Green dragons (6), Ankou (7), Blue dragons (7), Brine rats (7), Cave bug (7), Cave crawlers (7). Shall I pull the remaining 33?
+> Vannaka assigns 43 different Slayer tasks — I've read the first 10 so far. Shall I pull the remaining 33 and list them all?
 >
 > - shown 10 of 43
 >
@@ -1130,31 +1533,34 @@ assigns(name='npc:1597')
 > yes, go on
 
 ```text
-assigns(name='npc:1597', offset=10)
-assigns(name='npc:1597', offset=20)
-assigns(name='npc:1597', offset=30)
-assigns(name='npc:1597', offset=40)
+assigns(name='Vannaka', offset=10)
+assigns(name='Vannaka', offset=20)
+assigns(name='Vannaka', offset=30)
+assigns(name='Vannaka', offset=40)
 ```
 
 **What it said**
 
 ````markdown
-**Steel dragon:** killing one counts towards exactly one Slayer task — **Steel dragons**. (Note: Vannaka does *not* assign it.)
+**Vannaka assigns 43 different tasks, and killing a Steel dragon counts only towards the Steel dragons task.**
 
-**Vannaka's 43 tasks**, by assignment weight:
+Steel dragons — needs Slayer level 1 but combat level 85, and Vannaka is not one of the masters who gives it.
 
-- **Weight 6:** Banshee, Crawling hand, Crocodiles, Earth warriors, Green dragons
-- **Weight 7:** Ankou, Blue dragons, Brine rats, Cave bug, Cave crawlers, Cave slimes, Dagannoths, Desert lizards, Elves, Fire giants, Ghouls, Hellhounds, Hill giants, Ice giants, Ice warrior, Kalphites, Kurasks, Lesser demons, Mogres, Moss giants, Ogres, Rock slugs, Trolls, Vampires, Werewolves
-- **Weight 8:** Aberrant spectres, Basilisks, Bloodvelds, Cockatrices, Dust devils, Harpie bug swarms, Infernal mages, Jellies, Jungle horrors, Otherwordly being, Pyrefiends, Shade, Turoths
+Vannaka's 43 tasks, grouped by how often they come up (weight 8 is most likely, 6 least):
+
+- **Weight 8** — Aberrant spectres (Slayer 60, combat 65), Basilisks (40/40), Bloodvelds (50/50), Cockatrices (25/25), Dust devils (65/70), Harpie bug swarms (33/45), Infernal mages (45/40), Jellies (52/57), Jungle horrors (1/65), Otherwordly being (1/40), Pyrefiends (30/25), Shade (1/30), Turoths (55/60)
+- **Weight 7** — Ankou (1/40), Blue dragons (1/65), Brine rats (47/45), Cave bug (7/1), Cave crawlers (10/10), Cave slimes (17/15), Dagannoths (1/75), Desert lizards (22/15), Elves (1/70), Fire giants (1/65), Ghouls (1/25), Hellhounds (1/75), Hill giants (1/25), Ice giants (1/50), Ice warrior (1/45), Kalphites (1/15), Kurasks (70/65), Lesser demons (1/60), Mogres (32/1), Moss giants (1/40), Ogres (1/40), Rock slugs (20/20), Trolls (1/60), Vampires (1/35), Werewolves (1/60)
+- **Weight 6** — Banshee (15/20), Crawling hand (5/1), Crocodiles (1/50), Earth warriors (1/35), Green dragons (1/52)
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 9 time(s) |
-| ✅ | it read the wiki 3 different ways |
+| ✅ | it read the wiki 6 time(s) |
+| ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Steel dragon' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1164,13 +1570,13 @@ assigns(name='npc:1597', offset=40)
 
 *full text search over names and descriptions, rather than a lookup*
 
-✅ **passed** in 9s over 1 step(s)
+✅ **passed** in 7s over 1 step(s)
 
 > **Asked** Search this wiki for anything with 'dragonfire' in it and tell me how many there are.
 
 **What it did**
 
-> *I'll search the wiki for anything with 'dragonfire' in the name.*
+> *I'll search the wiki for anything with "dragonfire" in the name.*
 
 ```text
 search(words='dragonfire')
@@ -1179,7 +1585,11 @@ search(words='dragonfire')
 **What it said**
 
 ````markdown
-The wiki has **2** things with 'dragonfire' in the name, both items and both called **Dragonfire shield** (ids 11283 and 11284), each described as "A heavy shield with a snarling, draconic visage." That's the full list — nothing further to page through.
+**One.**
+
+- **Dragonfire shield** (item) — a heavy shield with a snarling, draconic visage.
+
+That is the only thing in the wiki whose name contains "dragonfire". Note that this search matches names only, so items like anti-dragon shields or dragonfire-related potions that don't carry the word in their name wouldn't show up here.
 ````
 
 **What happened**
@@ -1188,6 +1598,7 @@ The wiki has **2** things with 'dragonfire' in the name, both items and both cal
 | :-: | --- |
 | ✅ | it read the wiki 1 time(s) |
 | ✅ | it read the wiki 1 different ways |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1197,82 +1608,81 @@ The wiki has **2** things with 'dragonfire' in the name, both items and both cal
 
 *three links in a row, which no single tool answers*
 
-✅ **passed** in 35s over 25 step(s)
+✅ **passed** in 29s over 23 step(s)
 
 > **Asked** I want a Slayer task that will earn me dragon bones. Work out which creatures drop them, which of those are a Slayer task, and which master hands that task out.
 
 **What it did**
 
-> *I'll start by finding which NPCs drop dragon bones.*
+> *I'll start by finding which creatures drop dragon bones.*
 
 ```text
 dropped_by(name='Dragon bones')
+dropped_by(name='Dragon bones', offset=10)
 ```
 
-> **It asked you** (`ask_for_more`)
->
-> Dragon bones are dropped by 33 different NPCs — I've seen the first 10 (King Black Dragon, red/black/blue/green/bronze/iron/steel dragons). Shall I pull the remaining 23 droppers before checking which are Slayer-assignable?
->
-> - shown 10 of 33
->
-> **You answered** *the standing answer, unasked*
->
-> yes, go on
+> *Now let me check which of these count towards Slayer tasks.*
 
 ```text
-dropped_by(name='Dragon bones', offset=10)
-dropped_by(name='Dragon bones', offset=20)
-dropped_by(name='Dragon bones', offset=30)
-counts_towards(name='npc:53')
-counts_towards(name='npc:54')
-counts_towards(name='npc:55')
-counts_towards(name='npc:941')
-counts_towards(name='npc:1590')
-counts_towards(name='npc:1591')
-counts_towards(name='npc:1592')
-counts_towards(name='npc:50')
-counts_towards(name='npc:5362')
-counts_towards(name='npc:5363')
-counts_towards(name='npc:113')
-counts_towards(name='npc:6054')
-assigned_by(name='task:68')
-assigned_by(name='task:10')
-assigned_by(name='task:12')
-assigned_by(name='task:41')
-assigned_by(name='task:14')
-assigned_by(name='task:50')
-assigned_by(name='task:81')
-assigned_by(name='task:58')
+counts_towards(name='Blue dragon')
+counts_towards(name='Red dragon')
+counts_towards(name='Black dragon')
+counts_towards(name='Green dragon')
+counts_towards(name='Bronze dragon')
+counts_towards(name='Iron dragon')
+counts_towards(name='Steel dragon')
+counts_towards(name='Mithril dragon')
+counts_towards(name='Brutal green dragon')
+counts_towards(name='King Black Dragon')
+counts_towards(name='Jogre')
+counts_towards(name='Chaos Elemental')
+counts_towards(name='Dragon impling')
+```
+
+> *Now let me find which masters assign each of these tasks.*
+
+```text
+assigned_by(name='Blue dragons')
+assigned_by(name='Red dragons')
+assigned_by(name='Black dragons')
+assigned_by(name='Green dragons')
+assigned_by(name='Bronze dragons')
+assigned_by(name='Iron dragons')
+assigned_by(name='Steel dragons')
+assigned_by(name='Mithril dragons')
 ```
 
 **What it said**
 
 ````markdown
-**Dragon bones droppers (33 NPC entries, 12 distinct):** every dragon type drops them at 1/1 — King Black Dragon, red, black, blue, green, bronze, iron, steel, brutal green and mithril dragons — plus Dragon impling (1/20) and Jogre (1/128).
+**Seven dragon tasks drop dragon bones at a guaranteed 1/1 rate, and Duradel hands out the most of them (four).**
 
-**Which are Slayer tasks, and who assigns them:**
+| Task | Master(s) | Dragon-bone droppers it covers | Combat level needed |
+|---|---|---|---|
+| Green dragons | Vannaka | Green dragon, Brutal green dragon | 52 |
+| Blue dragons | Vannaka, Chaeldar | Blue dragon | 65 |
+| Bronze dragons | Chaeldar | Bronze dragon | 75 |
+| Iron dragons | Chaeldar, Duradel | Iron dragon | 80 |
+| Black dragons | Duradel | Black dragon, King Black Dragon | 80 |
+| Steel dragons | Duradel | Steel dragon | 85 |
+| Mithril dragons | Duradel | Mithril dragon | 60 |
 
-| Task | Assigned by (weight) |
-|---|---|
-| Blue dragons | Vannaka (7), Chaeldar (8) |
-| Green dragons *(incl. brutal green)* | Vannaka (6) |
-| Bronze dragons | Chaeldar (11) |
-| Iron dragons | Chaeldar (12), Duradel (5) |
-| Steel dragons | Duradel (7) |
-| Black dragons *(incl. KBD)* | Duradel (9) |
-| Mithril dragons | Duradel (9) |
-| Red dragons | *no master assigns it in this data* |
+Every one of these drops dragon bones on every kill, and all seven tasks need only **Slayer level 1** — combat level is the only gate.
 
-Dragon implings and Jogres count towards no Slayer task. Best odds: Chaeldar for iron dragons (weight 12) or bronze (11); Duradel for black/mithril (9 each).
+Worth knowing:
+- **Red dragon** drops dragon bones and the "Red dragons" task exists, but no master in the wiki assigns it, so you can't get it as a task.
+- **Jogre** (1/128), **Chaos Elemental** (1/10) and **Dragon impling** (1/20) also drop dragon bones but count towards no Slayer task at all.
+- If you want the assignment most often, Duradel's dragon tasks carry weights of 9 (black), 9 (mithril), 7 (steel) and 5 (iron); Chaeldar's iron dragons is weight 12 and bronze dragons weight 11.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 24 time(s) |
+| ✅ | it read the wiki 23 time(s) |
 | ✅ | it read the wiki 3 different ways |
 | ✅ | the answer carries 'dragon' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1282,13 +1692,11 @@ Dragon implings and Jogres count towards no Slayer task. Best odds: Chaeldar for
 
 *a quest, the music it unlocks, and where in the world that music plays*
 
-✅ **passed** in 16s over 11 step(s)
+✅ **passed** in 18s over 11 step(s)
 
 > **Asked** If I finish The Fremennik Isles, which music does it unlock, and whereabouts in the world do those tracks play?
 
 **What it did**
-
-> *I'll look up the quest and its music.*
 
 ```text
 get_thing(name='The Fremennik Isles', type='quest')
@@ -1307,13 +1715,18 @@ get_thing(name='Ogre the Top', type='music')
 **What it said**
 
 ````markdown
-The Fremennik Isles unlocks six tracks, all listed as unlocked "during Fremennik Isles":
+**Six tracks unlock during The Fremennik Isles**, but the wiki only names a play location for three of them.
 
-- **Island of the Trolls** — plays in the Fremennik Isles
-- **Norse Code** — plays in Jatizso
-- **Volcanic Vikings** — plays in Neitiznot
-- **Major Miner** and **Ogre the Top** (Ogre set) — each recorded as playing in 1 map square, but the wiki doesn't name the location
-- **Jester Minute** — recorded as playing in 0 map squares, i.e. cutscene/quest-only, with no world location
+| Track | Where it plays | Set |
+|---|---|---|
+| Norse Code | Jatizso | Fremennik Isles |
+| Volcanic Vikings | Neitiznot | Fremennik Isles |
+| Island of the Trolls | Fremennik Isles (the Trollweiss/troll island area) | Ogre |
+| Ogre the Top | not named — it covers one map area, but the wiki doesn't say which | Ogre |
+| Major Miner | not named — it covers one map area, but the wiki doesn't say which | — |
+| Jester Minute | nowhere on the map; it's a cutscene/quest-only piece | — |
+
+One caveat: the wiki lists The Fremennik Isles as **not playable on this server**, so the quest can't currently be completed to unlock them.
 ````
 
 **What happened**
@@ -1324,6 +1737,7 @@ The Fremennik Isles unlocks six tracks, all listed as unlocked "during Fremennik
 | ✅ | it read the wiki 3 different ways |
 | ✅ | the answer carries 'Volcanic Vikings' |
 | ✅ | the answer carries 'Neitiznot' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1333,59 +1747,65 @@ The Fremennik Isles unlocks six tracks, all listed as unlocked "during Fremennik
 
 *a misspelt name settled by asking rather than by guessing*
 
-✅ **passed** in 27s over 7 step(s)
+✅ **passed** in 23s over 6 step(s)
 
 > **Asked** tell me about the abysal wipe
 
 **What it did**
 
 ```text
+get_thing(name='abysal wipe')
 search(words='abysal wipe')
-search(words='abyssal whip')
-get_thing(name='item:4151', type='item')
-get_thing(name='item:4178', type='item')
 ```
 
 > **It asked you** (`ask_to_choose`)
 >
-> I read "abysal wipe" as the Abyssal whip — there are two items by that name in the wiki. Which one do you want?
+> Nothing on the wiki answers to "abysal wipe". What sort of thing did you mean, so I can look up the closest real names?
 >
-> - Abyssal whip (item 4151) — the standard one: weapon slot, 70 Attack, special attack, value 120,001, market price 1,121,785
-> - Abyssal whip (item 4178) — a duplicate/no-equip-slot version: value 6, market price 6
+> - An item
+> - An NPC
+> - A piece of scenery
+> - Something else (tell me what)
 >
 > **You answered** *the probe's own answer*
 >
-> item
+> an item, yes
+
+```text
+find_close_names(name='abysal wipe', type='item', limit=6, keep=0.5)
+```
 
 > **It asked you** (`ask_to_choose`)
 >
-> Sorry — both are items, so that doesn't narrow it. Which of the two Abyssal whip entries should I describe?
+> Which of these items did you mean?
 >
-> - The one with ID 4151 (equippable, 70 Attack, special attack, worth ~1.1M)
-> - The one with ID 4178 (value 6 gp)
+> - Abyssal whip
+> - Abyssal head
+> - Abyssal demon
+> - Abyssal book
+> - Abyssal titan pouch
+> - Abyssal charm
 >
 > **You answered** *the probe's own answer*
 >
 > Abyssal whip
 
-> **It asked you** (`ask_to_confirm`)
->
-> Shall I go with the main Abyssal whip (item ID 4151)?
->
-> - proposing: You mean the standard, equippable Abyssal whip (ID 4151) — the one dropped by Abyssal demons and sold in Armour &amp; Supplies — rather than the 6 gp duplicate entry (ID 4178).
->
-> **You answered** *the standing answer, unasked*
->
-> yes, go on
+```text
+get_thing(name='Abyssal whip', type='item')
+```
 
 **What it said**
 
 ````markdown
-The **Abyssal whip** (item 4151) is a slash weapon from the Abyss: weapon slot, 0.45 kg, 4-tick attack speed, with a special attack, requiring **70 Attack**.
+**Abyssal whip** — a slash weapon from the Abyss, needing **level 70 Attack** to wield.
 
-Bonuses are +82 slash attack and +82 strength, with nothing in any other attack, defence or prayer slot. It's tradeable (buy limit 10), value 120,001 gp, high alch 72,001 and low alch 48,000; the market record shows a price of 1,121,785 gp (low 1,121,785, high 1,574,876, median 1,260,973 over 113 snapshots, confidence "traded").
-
-It's dropped by Abyssal demons (2 entries) and sold in the Armour & Supplies shop.
+- **Combat bonuses** — Slash attack +82, Strength +82, nothing else
+- **Speed** — 4 ticks, and it has a special attack
+- **Weight** — 0.45 kg, weapon slot, tradeable and lendable
+- **Value** — 120,001 gp; high alchemy 72,001 gp, low alchemy 48,000 gp
+- **Market price** — 1,121,785 gp (median 1,260,973, ranging 1,121,785–1,574,876 across 113 snapshots)
+- **Buy limit** — 10
+- **Where it comes from** — dropped by the Abyssal demon, and sold in the Armour & Supplies shop
 ````
 
 **What happened**
@@ -1393,9 +1813,79 @@ It's dropped by Abyssal demons (2 entries) and sold in the Armour & Supplies sho
 |  |  |
 | :-: | --- |
 | ✅ | it read the wiki 4 time(s) |
+| ✅ | it read the wiki 3 different ways |
+| ✅ | it turned back to ask: ask_to_choose |
+| ✅ | the answer carries 'Abyssal whip' |
+| ✅ | the answer names things rather than numbering them |
+
+<sub>[back to the table](#at-a-glance)</sub>
+
+---
+
+## bad_spelling
+
+*a name too badly spelt to search for, put back to whoever asked*
+
+✅ **passed** in 18s over 5 step(s)
+
+> **Asked** whats the drangon scimatar worth
+
+**What it did**
+
+```text
+get_thing(name='drangon scimatar')
+```
+
+> **It asked you** (`ask_to_confirm`)
+>
+> Nothing in the wiki answers to "drangon scimatar" — before I look for close names, can you confirm what sort of thing you mean?
+>
+> - proposing: You're after an item (a weapon), and you want its value/price.
+>
+> **You answered** *the probe's own answer*
+>
+> an item, yes
+
+```text
+find_close_names(name='drangon scimatar', type='item', limit=5)
+```
+
+> **It asked you** (`ask_to_choose`)
+>
+> The closest real item name in the wiki is this one — is it the one you mean?
+>
+> - Dragon scimitar
+>
+> **You answered** *the probe's own answer*
+>
+> Dragon scimitar
+
+```text
+get_thing(name='Dragon scimitar', type='item')
+```
+
+**What it said**
+
+````markdown
+**The Dragon scimitar's market price is 108,704 gp.**
+
+- **Market range** — low 105,060, high 108,959, median 105,841 (from 113 snapshots, confidence: traded)
+- **Shop value** — 100,000 gp
+- **High alchemy** — 60,000 gp; **Low alchemy** — 40,000 gp
+- **Buy limit** — 10, and it's tradeable
+- **Sold in** — Armour & Supplies, and Daga's Scimitar Smithy
+````
+
+**What happened**
+
+|  |  |
+| :-: | --- |
+| ✅ | it read the wiki 3 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | it turned back to ask: ask_to_choose, ask_to_confirm |
-| ✅ | the answer carries 'Abyssal whip' |
+| ✅ | it followed the link this probe is here for: find_close_names |
+| ✅ | the answer carries 'Dragon scimitar' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1403,26 +1893,27 @@ It's dropped by Abyssal demons (2 entries) and sold in the Armour & Supplies sho
 
 ## music_name
 
-*one name held by two sorts of thing, settled by asking which was meant*
+*one name held by two sorts of thing, told apart by what the asker said*
 
-⚠️ **fell short** in 7s over 1 step(s)
+✅ **passed** in 6s over 1 step(s)
 
-> **Asked** tell me about Monkey Madness
+> **Asked** Where is the music track Monkey Madness unlocked in the game?
 
 **What it did**
 
 > *I'll look that up.*
 
 ```text
-get_thing(name='Monkey Madness', type='quest')
+get_thing(name='Monkey Madness', type='music')
 ```
 
 **What it said**
 
 ````markdown
-The wiki's entry for **Monkey Madness** (quest #75) is quite thin — it records only that it is **members only**, and that one music track, **"Suspicious"**, is heard during it.
+**On Ape Atoll.**
 
-There are no requirements, rewards, items, NPCs or locations linked to it in this build, so I can't tell you anything further about it from the tools.
+- **Where it plays** — Ape Atoll and Marim, covering two map squares
+- **Music set** — Jungle
 ````
 
 **What happened**
@@ -1431,8 +1922,9 @@ There are no requirements, rewards, items, NPCs or locations linked to it in thi
 | :-: | --- |
 | ✅ | it read the wiki 1 time(s) |
 | ✅ | it read the wiki 1 different ways |
-| ❌ | it settled the question itself instead of asking |
-| ⚠️ | the answer never mentions 'Ape Atoll' |
+| ✅ | the answer carries 'Ape Atoll' |
+| ✅ | the answer carries 'Jungle' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1442,7 +1934,7 @@ There are no requirements, rewards, items, NPCs or locations linked to it in thi
 
 *a question too vague to look anything up for, so it must be narrowed*
 
-✅ **passed** in 45s over 10 step(s)
+✅ **passed** in 58s over 15 step(s)
 
 > **Asked** what is the best weapon?
 
@@ -1450,42 +1942,56 @@ There are no requirements, rewards, items, NPCs or locations linked to it in thi
 
 > **It asked you** (`ask_to_clarify`)
 >
-> "Best weapon" depends on what you're measuring and what you can use — could you narrow it down? For example: which combat style (melee, ranged, magic), which stat you want maximised (e.g. highest strength bonus, highest slash attack, fastest attack speed), and any limits like free-to-play only, a combat/skill level cap, or a budget?
+> "Best" depends on what you're measuring — could you narrow it down? Specifically: (1) which combat style you mean (melee, ranged or magic), and (2) what counts as best for you — highest attack bonus, highest strength/damage bonus, highest price, or something else like a level requirement you need to stay under?
 >
 > **You answered** *the probe's own answer*
 >
 > best for melee, at attack level 70
 
 ```text
-compare_by_number(type='item', holds='attack level requirement', how='equals', number=70)
-compare_by_number(type='item', ordered_by='Strength bonus', holds='Strength bonus', how='at_least', number=70, descending=True, limit=25)
-compare_by_number(type='item', ordered_by='Strength bonus', holds='Strength bonus', how='at_least', number=70, descending=True)
-compare_by_number(type='item', ordered_by='Strength bonus', holds='Strength bonus', how='at_least', number=70, descending=True, offset=10)
+compare_by_number(type='item', holds='attack level requirement', how='at_most', number=70, ordered_by='strength bonus', descending=True)
+compare_by_number(type='item', holds='Level', how='at_most', number=70, ordered_by='Strength bonus', descending=True, limit=15)
+compare_by_number(type='item', holds='Level', how='at_most', number=70, ordered_by='Strength bonus', descending=True)
+compare_by_number(type='item', ordered_by='Strength bonus', descending=True)
 get_thing(name='Abyssal whip', type='item')
+get_thing(name='Zamorakian spear', type='item')
+compare_by_number(type='item', ordered_by='Strength bonus', descending=True, offset=10)
+compare_by_number(type='item', ordered_by='Strength bonus', descending=True, offset=20)
 get_thing(name="Dharok's greataxe", type='item')
+get_thing(name="Statius's warhammer", type='item')
 get_thing(name='Barrelchest anchor', type='item')
-compare_by_number(type='item', ordered_by='Strength bonus', holds='Strength bonus', how='at_least', number=78, descending=True, offset=20)
+get_thing(name='Dragon 2h sword', type='item')
 get_thing(name='Saradomin sword', type='item')
+get_thing(name='Dragon halberd', type='item')
 ```
 
 **What it said**
 
 ````markdown
-At 70 Attack, the wiki's strongest melee options are:
+**Dharok's greataxe** — at Attack 70 nothing you can wield has a bigger strength bonus (105), though it swings slowly at 7 ticks; if you want steady damage rather than big hits, the **Abyssal whip** (82 strength, 4 ticks) is the fastest thing in that bracket.
 
-- **Dharok's greataxe** — Strength 105, Slash 103, but 7-tick speed and two-handed (needs 70 Attack *and* 70 Strength).
-- **Dragon 2h sword** (Str 93) and **Dragon halberd** (Str 89) sit below it, and everything with more Strength (godswords at 132, Vesta's/Statius' gear, Barrelchest anchor) is over the 70 Attack line or not requirement-listed.
-- For actual damage output, **Abyssal whip** (Slash 82, Strength 82, 4 ticks, one-handed, special attack) is the classic 70 Attack pick; the **Saradomin sword** matches its 82/82 at 4 ticks with +2 Prayer, but is two-handed and pricier (market 3,040,793 vs the whip's 1,121,785).
+| Weapon | Strength bonus | Best attack bonus | Attack speed | Requirements |
+|---|---|---|---|---|
+| Dharok's greataxe | 105 | 103 slash | 7 ticks | Attack 70, Strength 70 |
+| Barrelchest anchor | 100 | 92 crush | 6 ticks | none recorded |
+| Dragon 2h sword | 93 | 92 slash | 7 ticks | Attack 60 |
+| Dragon halberd | 89 | 95 slash | 7 ticks | Attack 60, Strength 30 |
+| Abyssal whip | 82 | 82 slash | 4 ticks | Attack 70 |
+| Saradomin sword | 82 | 82 slash | 4 ticks | Attack 70 |
+| Zamorakian spear | 75 | 85 stab | 4 ticks | Attack 70 |
 
-The wiki records no damage-per-second figure, so this comparison is from the listed bonuses and attack speeds only.
+The tier above these is out of reach for you: the godswords need Attack 75, Vesta's longsword and Statius's warhammer need Attack 78.
+
+The wiki records equipment bonuses and speeds, not damage-per-second, so "best" here is by bonus and speed rather than a calculated DPS figure.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 9 time(s) |
+| ✅ | it read the wiki 14 time(s) |
 | ✅ | it turned back to ask: ask_to_clarify |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1493,36 +1999,43 @@ The wiki records no damage-per-second figure, so this comparison is from the lis
 
 ## honest_gap
 
-*a fact this build lacks, which should be said rather than invented*
+*what a quest gives you, which only a community guide ever wrote down*
 
-✅ **passed** in 11s over 2 step(s)
+✅ **passed** in 9s over 1 step(s)
 
 > **Asked** What does completing Desert Treasure reward you with?
 
 **What it did**
 
-> *I'll look up that quest.*
+> *I'll look that up.*
 
 ```text
 get_thing(name='Desert Treasure', type='quest')
-requires(name='Desert Treasure')
 ```
 
 **What it said**
 
 ````markdown
-The wiki entry for Desert Treasure records only **3 quest points** as a reward — it holds no other reward details (no XP, items or unlocks are listed in this build).
+**Completing Desert Treasure gives 3 quest points, 20,000 Magic XP, and unlocks the Ancient Magicks spellbook.**
 
-What it does record is the entry requirements: Firemaking 50, Magic 50, Slayer 10, Thieving 53, plus completion of six quests (The Dig Site, The Tourist Trap, Temple of Ikov, Priest in Peril, Waterfall Quest and Troll Stronghold). It's a master-difficulty, long, members-only quest in the Mahjarrat series.
+- **Experience** — 20,000 Magic XP
+- **Quest points** — 3
+- **Ancient Magicks** — the spellbook is unlocked, and you switch between it and your normal book at the pyramid altar
+- **Ancient staff** — you can buy one from Eblis afterwards
+- **Ring of visibility** — kept as a reward
+- **Zaros altar** — the altar beneath the desert pyramid becomes available
+
+For reference, it's a master-difficulty, long, members-only quest in the Mahjarrat series, started by talking to Eblis in the Kharidian Desert. It needs Firemaking 50, Magic 50, Slayer 10 and Thieving 53, with Prayer 43 recommended.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 2 time(s) |
-| ✅ | it read the wiki 2 different ways |
-| ✅ | the answer says the wiki does not hold this |
+| ✅ | it read the wiki 1 time(s) |
+| ✅ | it read the wiki 1 different ways |
+| ✅ | the answer carries 'Ancient Magicks' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1538,7 +2051,7 @@ What it does record is the entry requirements: Firemaking 50, Magic 50, Slayer 1
 
 **What it did**
 
-> *I'll look up that music track.*
+> *I'll look up the music track Melodrama.*
 
 ```text
 get_thing(name='Melodrama', type='music')
@@ -1548,7 +2061,12 @@ heard_during(name='Melodrama')
 **What it said**
 
 ````markdown
-Melodrama isn't tied to a quest at all — the wiki lists no quests it's heard during. It's unlocked during the Castle Wars minigame, and Castle Wars is the only location it plays in (set: Yanille(?), 1 map square).
+**None — Melodrama isn't tied to a quest at all.**
+
+- **How it unlocks** — during the Castle Wars minigame.
+- **Where it plays** — Castle Wars.
+
+The wiki lists no quest connected to this track, so there's nothing to finish for it.
 ````
 
 **What happened**
@@ -1559,6 +2077,7 @@ Melodrama isn't tied to a quest at all — the wiki lists no quests it's heard d
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Castle Wars' |
 | ✅ | the answer says the wiki does not hold this |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1568,13 +2087,13 @@ Melodrama isn't tied to a quest at all — the wiki lists no quests it's heard d
 
 *picking things out by a number rather than by name*
 
-✅ **passed** in 14s over 3 step(s)
+✅ **passed** in 17s over 3 step(s)
 
 > **Asked** Which weapons give more than 100 strength bonus? Name them and say how much each one gives.
 
 **What it did**
 
-> *I'll look for items with a strength bonus above 100.*
+> *I'll look up items by strength bonus.*
 
 ```text
 compare_by_number(type='item', holds='strength bonus', how='more_than', number=100, descending=True)
@@ -1582,7 +2101,7 @@ compare_by_number(type='item', holds='strength bonus', how='more_than', number=1
 
 > **It asked you** (`ask_for_more`)
 >
-> I've found 18 items with a strength bonus over 100, and I've read the top 10 so far (ranging from 132 down to 105). Shall I pull the remaining 8?
+> I've got the top 10 weapons by strength bonus (Armadyl/Bandos godswords at 132 down to the Dharok's axes at 105) — there are 18 items above 100 in total. Shall I pull the remaining 8?
 >
 > - shown 10 of 18
 >
@@ -1597,13 +2116,17 @@ compare_by_number(type='item', holds='strength bonus', how='more_than', number=1
 **What it said**
 
 ````markdown
-18 items have a strength bonus above 100:
+**18 weapons beat 100 strength bonus, topped by the four godswords at +132.**
 
-- **132** — Armadyl godsword, Bandos godsword, Saradomin godsword, Zamorak godsword
-- **122** — Vesta's spear, Vesta's spear (deg)
-- **118** — Vesta's longsword, Vesta's longsword (deg), Corrupt vesta's longsword, C. vesta's longsword (deg)
-- **114** — Statius's warhammer, Statius' warhammer (deg), Corrupt statius's warhammer
-- **105** — Dharok's greataxe, plus its charged variants (Dharok's axe 100, 75, 50 and 25)
+| Weapon | Strength bonus |
+|---|---|
+| Armadyl, Bandos, Saradomin & Zamorak godswords | 132 |
+| Vesta's spear (also the degraded version) | 122 |
+| Vesta's longsword (also degraded, corrupt and corrupt degraded) | 118 |
+| Statius's warhammer (also degraded and corrupt) | 114 |
+| Dharok's greataxe (also the 100, 75, 50 and 25 charge versions) | 105 |
+
+That's every item above +100 in the weapon slot — the degraded and charge-count variants carry the same bonus as the full versions.
 ````
 
 **What happened**
@@ -1613,6 +2136,7 @@ compare_by_number(type='item', holds='strength bonus', how='more_than', number=1
 | ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 1 different ways |
 | ✅ | the answer carries 'godsword' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1620,39 +2144,64 @@ compare_by_number(type='item', holds='strength bonus', how='more_than', number=1
 
 ## order_by_attribute
 
-*asking for the cheapest or largest of something*
+*ordering by a number, then pricing the answer over a shop counter*
 
-✅ **passed** in 14s over 3 step(s)
+✅ **passed** in 22s over 13 step(s)
 
-> **Asked** What is the cheapest food that restores more than 10 hitpoints, and how much does it restore?
+> **Asked** Which foods restore more than 15 hitpoints? Of those, which is the cheapest to buy over a shop counter, which shop sells it, and what does that shop charge for it?
 
 **What it did**
 
 ```text
-compare_by_number(type='item', holds='hitpoints restored', how='more_than', number=10)
-compare_by_number(type='item', holds='Restores', how='more_than', number=10, ordered_by='Market price', limit=20)
-compare_by_number(type='item', holds='Restores', how='more_than', number=10, ordered_by='Market price')
+compare_by_number(type='item', holds='hitpoints restored', how='more_than', number=15, descending=True)
+compare_by_number(type='item', holds='Restores', how='more_than', number=15, descending=True, limit=50)
+compare_by_number(type='item', holds='Restores', how='more_than', number=15, descending=True)
+sold_in(name='Cooked karambwan')
+sold_in(name='Curry')
+sold_in(name='Manta ray')
+sold_in(name='Monkfish')
+sold_in(name='Mushroom potato')
+sold_in(name='Potato with cheese')
+sold_in(name='Sea turtle')
+sold_in(name='Shark')
+sold_in(name='Stuffed snake')
+sold_in(name='Tuna potato')
 ```
 
 **What it said**
 
 ````markdown
-Four items tie for cheapest, all at a market price of 2 gp:
+**Tuna potato is the cheapest over a counter — 113 coins at Delicious Goods**, and it also heals the most of any food (22).
 
-- **Tangled toads' legs** — restores 15
-- **Worm hole** — restores 12
-- **Cheese+tom batta**, **Fruit batta**, **Vegetable batta** — restore 11 each
+Ten foods restore more than 15 hitpoints:
 
-So the best of the cheapest is Tangled toads' legs at 2 gp for 15 hitpoints. (Next cheapest after those is Egg potato at 13 gp, restoring 11; 37 items in total restore more than 10.)
+| Food | Restores | Cheapest shop price | Shop |
+|---|---|---|---|
+| Tuna potato | 22 | 113 coins | Delicious Goods |
+| Manta ray | 22 | 500 coins | Delicious Goods |
+| Sea turtle | 21 | — | not sold in any shop |
+| Shark | 20 | 300 coins | Keepa Kettilon's store, Delicious Goods |
+| Mushroom potato | 20 | — | not sold in any shop |
+| Stuffed snake | 20 | — | not sold in any shop |
+| Curry | 19 | — | not sold in any shop |
+| Cooked karambwan | 18 | 460 coins | The Shrimp and Parrot, Delicious Goods |
+| Monkfish | 16 | 230 coins | Arnold's Eclectic Supplies, Delicious Goods |
+| Potato with cheese | 16 | 350 coins | Warriors' Guild Food Shop |
+
+The wiki also lists Potato with cheese at The Fairy's Culinary Goods but records no price for it there, so that stock can't be compared.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 3 time(s) |
-| ✅ | it read the wiki 1 different ways |
-| ✅ | the answer says the wiki does not hold this |
+| ✅ | it read the wiki 13 time(s) |
+| ✅ | it read the wiki 2 different ways |
+| ✅ | it followed the link this probe is here for: sold_in |
+| ✅ | the answer carries 'Tuna potato' |
+| ✅ | the answer carries 'Delicious Goods' |
+| ✅ | the answer carries '113' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1662,15 +2211,16 @@ So the best of the cheapest is Tangled toads' legs at 2 gp for 15 hitpoints. (Ne
 
 *a number the newest sort of thing records, ordered largest first*
 
-✅ **passed** in 11s over 4 step(s)
+✅ **passed** in 15s over 5 step(s)
 
 > **Asked** Which music plays across the most map squares in the world, and how many does it play in?
 
 **What it did**
 
 ```text
-compare_by_number(type='music', descending=True)
+compare_by_number(type='music', holds='map squares', descending=True)
 list_sorts()
+compare_by_number(type='music', holds='Map squares it plays in', descending=True, number=1)
 compare_by_number(type='music', ordered_by='Map squares it plays in', descending=True, limit=5)
 compare_by_number(type='music', ordered_by='Map squares it plays in', descending=True)
 ```
@@ -1678,16 +2228,23 @@ compare_by_number(type='music', ordered_by='Map squares it plays in', descending
 **What it said**
 
 ````markdown
-Three tracks tie for the most, each playing in 9 map squares: **Bounty Hunter Level 1**, **Bounty Hunter Level 2**, and **Bounty Hunter Level 3**. Next behind them are Clan Wars (6) and Volcanic Vikings (5).
+**Bounty Hunter Level 1, 2 and 3 — nine map squares each.** Three separate tracks tie for the widest coverage in the wiki.
+
+- **Bounty Hunter Level 1** — 9 map squares, unlocked while playing Bounty Hunter
+- **Bounty Hunter Level 2** — 9 map squares, unlocked while playing Bounty Hunter
+- **Bounty Hunter Level 3** — 9 map squares, unlocked while playing Bounty Hunter
+
+Next widest is **Clan Wars** at 6, then **Volcanic Vikings** at 5.
 ````
 
 **What happened**
 
 |  |  |
 | :-: | --- |
-| ✅ | it read the wiki 4 time(s) |
+| ✅ | it read the wiki 5 time(s) |
 | ✅ | it read the wiki 2 different ways |
 | ✅ | the answer carries 'Bounty Hunter' |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>
 
@@ -1697,7 +2254,7 @@ Three tracks tie for the most, each playing in 9 map squares: **Bounty Hunter Le
 
 *how a price moved, rather than what it is now*
 
-✅ **passed** in 12s over 2 step(s)
+✅ **passed** in 11s over 2 step(s)
 
 > **Asked** Has the Abyssal whip gone up or down over the last year, and by how much?
 
@@ -1713,9 +2270,14 @@ how_the_price_moved(name='Abyssal whip', since='2025-08-01')
 **What it said**
 
 ````markdown
-Down. Over the last year of readings (2025-08-02 to 2026-08-01, 53 readings, marked as genuinely traded), the Abyssal whip fell from 1,253,222 to 1,121,785 gp — a drop of 131,437 gp, or -10.5%. That 1,121,785 is also its low for the period.
+**Down 131,437 coins over the last year — a fall of 10.5%.**
 
-For context, across the whole record (from 2024-06-08) it's down 453,091 gp, or -28.8%, from 1,574,876. Note the data ends 2026-08-01, so "the last year" here means the year up to that date.
+- **Opened** — 1,253,222 coins on 2 August 2025
+- **Closed** — 1,121,785 coins on 1 August 2026
+- **Range over the year** — high of 1,253,222, low of 1,121,785 (it ended at its lowest point)
+- **Readings** — 53 traded price points, so the trend is well supported
+
+For context, over the full record the wiki holds (from June 2024), the whip is down 453,091 coins, or 28.8%.
 ````
 
 **What happened**
@@ -1725,5 +2287,6 @@ For context, across the whole record (from 2024-06-08) it's down 453,091 gp, or 
 | ✅ | it read the wiki 2 time(s) |
 | ✅ | it read the wiki 1 different ways |
 | ✅ | the answer says the wiki does not hold this |
+| ✅ | the answer names things rather than numbering them |
 
 <sub>[back to the table](#at-a-glance)</sub>

@@ -1,10 +1,7 @@
-"""Read which commit of the game's own repositories a staging run is reading, and name
-a vendored directory that has no commit to read.
-"""
+"""Read which commit of the game's own repositories a staging run is reading."""
 
 from __future__ import annotations
 
-import hashlib
 import subprocess
 from pathlib import Path
 from typing import Final
@@ -17,8 +14,6 @@ HEAD: Final = "HEAD"
 DIRTY_MARK: Final = "dirty"
 GIT_TIMEOUT: Final = 30.0
 TOPLEVEL: Final = "--show-toplevel"
-CONTENT_DIGEST: Final = 12
-VCS_DIRECTORY: Final = ".git"
 
 
 def game_version_of(checkout: Path, repo: str) -> GameVersion:
@@ -28,25 +23,6 @@ def game_version_of(checkout: Path, repo: str) -> GameVersion:
     if _git(checkout, "status", "--porcelain"):
         commit = f"{commit}-{DIRTY_MARK}"
     return GameVersion(repo=repo, commit=commit)
-
-
-def vendored_version_of(directory: Path, name: str) -> GameVersion:
-    """Name a vendored directory by what it holds, since it carries no commit."""
-    if not directory.is_dir():
-        raise UpstreamUnreadable(str(directory), "there is nothing vendored here")
-    running = hashlib.sha256()
-    for path in sorted(_vendored_files(directory)):
-        running.update(path.relative_to(directory).as_posix().encode("utf-8"))
-        running.update(path.read_bytes())
-    return GameVersion(repo=name, commit=running.hexdigest()[:CONTENT_DIGEST])
-
-
-def _vendored_files(directory: Path) -> list[Path]:
-    return [
-        path
-        for path in directory.rglob("*")
-        if path.is_file() and VCS_DIRECTORY not in path.relative_to(directory).parts
-    ]
 
 
 def _own_checkout(checkout: Path) -> None:
@@ -127,63 +103,8 @@ def test_a_directory_inside_someone_elses_checkout_is_refused(tmp_path: Path) ->
 
     _repository(tmp_path)
     _commit(tmp_path, "one.json")
-    vendored = tmp_path / "vendored"
-    vendored.mkdir()
-    (vendored / "quest_guides_cooks_assistant.html").write_text(
-        "<p>An opening line.</p>\n", encoding="utf-8"
-    )
+    inside = tmp_path / "inside"
+    inside.mkdir()
     with pytest.raises(UpstreamUnreadable) as caught:
-        game_version_of(vendored, "2009scape-wiki-website")
+        game_version_of(inside, "2009scape")
     assert "not one itself" in str(caught.value)
-
-
-def test_a_vendored_directory_is_named_by_what_it_holds(tmp_path: Path) -> None:
-    vendored = tmp_path / "vendored"
-    vendored.mkdir()
-    (vendored / "quest_guides_cooks_assistant.html").write_text(
-        "<p>An opening line.</p>\n", encoding="utf-8"
-    )
-    version = vendored_version_of(vendored, "2009scape-wiki-website")
-    assert version.repo == "2009scape-wiki-website"
-    assert version.commit is not None
-    assert len(version.commit) == CONTENT_DIGEST
-
-
-def test_an_edit_to_a_vendored_file_changes_the_version(tmp_path: Path) -> None:
-    vendored = tmp_path / "vendored"
-    vendored.mkdir()
-    named = vendored / "quest_guides_cooks_assistant.html"
-    named.write_text("<p>An opening line.</p>\n", encoding="utf-8")
-    before = vendored_version_of(vendored, "wiki-website")
-    named.write_text("<p>Another line.</p>\n", encoding="utf-8")
-    assert vendored_version_of(vendored, "wiki-website") != before
-
-
-def test_a_vendored_directory_reads_the_same_twice(tmp_path: Path) -> None:
-    vendored = tmp_path / "vendored"
-    (vendored / "deep").mkdir(parents=True)
-    (vendored / "one.txt").write_text("one", encoding="utf-8")
-    (vendored / "deep" / "two.txt").write_text("two", encoding="utf-8")
-    assert vendored_version_of(vendored, "pages") == vendored_version_of(
-        vendored, "pages"
-    )
-
-
-def test_a_vendored_directory_that_is_absent_is_refused(tmp_path: Path) -> None:
-    import pytest
-
-    with pytest.raises(UpstreamUnreadable):
-        vendored_version_of(tmp_path / "absent", "pages")
-
-
-def test_a_repository_underneath_a_vendored_directory_is_not_part_of_it(
-    tmp_path: Path,
-) -> None:
-    vendored = tmp_path / "vendored"
-    vendored.mkdir()
-    (vendored / "one.txt").write_text("one", encoding="utf-8")
-    before = vendored_version_of(vendored, "pages")
-    _repository(vendored)
-    _commit(vendored, "two.json")
-    (vendored / "two.json").unlink()
-    assert vendored_version_of(vendored, "pages") == before

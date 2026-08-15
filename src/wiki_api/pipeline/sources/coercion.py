@@ -31,6 +31,8 @@ class SkipReason(StrEnum):
     UNKNOWN_SUBJECT = "unknown_subject"
     OVERRIDDEN = "overridden"
     NO_CHANCE = "no_chance"
+    NO_DROP = "no_drop"
+    RESERVED_SLOT = "reserved_slot"
     ALREADY_STATED = "already_stated"
     NO_PLACE = "no_place"
     UNNAMED = "unnamed"
@@ -47,11 +49,7 @@ class Skipped(BaseModel):
 
 
 def present(value: Any) -> bool:
-    """Say whether a source value carries anything at all.
-
-    The config files write an absent value as an empty string or as the word `null`,
-    and the game's own parsers skip both.
-    """
+    """Say whether a source value carries anything at all."""
     if value is None:
         return False
     if not isinstance(value, str):
@@ -140,11 +138,7 @@ def attributes(
     zero_is_absent: Iterable[str] = (),
     renamed: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Keep the fields the model declares, drop the empty ones, refuse the unknown.
-
-    `renamed` lands a source field under a different attribute key, declared per
-    adapter so no source is renamed behind another one's back.
-    """
+    """Keep the fields the model declares, drop the empty ones, refuse the unknown."""
     held = set(spine)
     skipped = set(ignored)
     known = set(declared)

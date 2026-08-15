@@ -81,7 +81,10 @@ def read_quests(
         skipped=tuple(skipped),
         notes=(
             f"{len(table.constants)} declared, {len(implemented)} implemented",
-            f"{sum(1 for one in entities if one['attributes'])} carry quest points",
+            f"{sum(1 for one in entities if 'quest_points' in one['attributes'])} "
+            f"carry quest points",
+            f"{sum(1 for one in entities if not one['attributes']['playable'])} "
+            f"are declared but no class implements them, so they cannot be played",
             UNWRITTEN_NOTE,
         ),
     )
@@ -97,8 +100,8 @@ def _implementations(staged: StagedSources) -> dict[str, BaseCall]:
 def _attributes(written: BaseCall | None) -> dict[str, Any]:
     """The points a quest awards and the start gates it gives, both stated in code."""
     if written is None:
-        return {}
-    attributes: dict[str, Any] = {}
+        return {"playable": False}
+    attributes: dict[str, Any] = {"playable": True}
     points = written.number(POINTS_POSITION)
     if points is not None and 0 <= points <= MAX_POINTS:
         attributes["quest_points"] = points
@@ -275,7 +278,31 @@ def test_a_quest_nothing_implements_carries_no_points(tmp_path: Any) -> None:
         _allocation(TEST_QUEST=1),
         Overridden.of(),
     )
-    assert outcome.read.document.entities[0].attributes == {}
+    assert outcome.read.document.entities[0].attributes == {"playable": False}
+
+
+def test_a_quest_no_class_implements_says_it_cannot_be_played(tmp_path: Any) -> None:
+    outcome = read_quests(
+        _sources(tmp_path, [("TEST_QUEST", "Test Quest")], calls=[]),
+        _allocation(TEST_QUEST=1),
+        Overridden.of(),
+    )
+    assert outcome.read.document.entities[0].attributes["playable"] is False
+
+
+def test_a_quest_a_class_implements_says_it_can_be_played(tmp_path: Any) -> None:
+    outcome = read_quests(
+        _sources(
+            tmp_path,
+            [("DEATH_PLATEAU", "Death Plateau")],
+            calls=[
+                {"constant": "DEATH_PLATEAU", "numbers": [44, 43, 314, 1], "path": "x"}
+            ],
+        ),
+        _allocation(DEATH_PLATEAU=1),
+        Overridden.of(),
+    )
+    assert outcome.read.document.entities[0].attributes["playable"] is True
 
 
 def test_a_number_no_quest_could_award_is_left_out(tmp_path: Any) -> None:
@@ -290,7 +317,7 @@ def test_a_number_no_quest_could_award_is_left_out(tmp_path: Any) -> None:
         _allocation(DEATH_PLATEAU=1),
         Overridden.of(),
     )
-    assert outcome.read.document.entities[0].attributes == {}
+    assert "quest_points" not in outcome.read.document.entities[0].attributes
 
 
 def test_the_natural_keys_come_back_in_the_order_the_source_declares_them(

@@ -53,6 +53,7 @@ class AttributeValue(BaseModel):
     unit: Unit | None = None
     derived: bool = False
     prominent: bool = False
+    technical: bool = False
     choices: tuple[str, ...] | None = None
 
     @classmethod
@@ -67,6 +68,7 @@ class AttributeValue(BaseModel):
             unit=spec.unit,
             derived=spec.derived,
             prominent=spec.prominent,
+            technical=spec.technical,
             choices=spec.choices,
         )
 
@@ -88,13 +90,16 @@ class Section(BaseModel):
 
 
 class Row(BaseModel):
-    """One entity reached over a relationship, plus what the link itself records."""
+    """One entity reached over a relationship, what the link itself records, and the
+    few values the entity at the far end is worth knowing by.
+    """
 
     model_config = ConfigDict(frozen=True)
 
     link: Link
     type: EntityType
     attributes: tuple[AttributeValue, ...]
+    about: tuple[AttributeValue, ...] = ()
 
 
 class Compared(BaseModel):
@@ -271,14 +276,15 @@ MovementResolution = Found[PriceMovement | None] | Absent
 
 class Named[T](BaseModel):
     """What a name turned out to mean, the entity it was answered about, and what else
-    the words matched.
-    """
+    the words matched."""
 
     model_config = ConfigDict(frozen=True)
 
     resolution: Found[T] | Absent
     subject: Link | None = None
     alternatives: tuple[Link, ...] = ()
+    tied: tuple[Link, ...] = ()
+    namesakes: int = Field(default=0, ge=0)
 
 
 # test cases

@@ -46,6 +46,15 @@ class StagedFileMissing(StagingError):
         self.path = path
 
 
+class SharedTableUnreadable(StagingError):
+    """A shared drop table states something the reader will not guess at."""
+
+    def __init__(self, origin: str, detail: str) -> None:
+        super().__init__(f"cannot read the shared table {origin}: {detail}")
+        self.origin = origin
+        self.detail = detail
+
+
 class ManifestMissing(StagingError):
     """A build was asked to read a staged directory that was never staged."""
 
@@ -77,6 +86,7 @@ def test_every_staging_error_is_a_knowledge_error() -> None:
         UpstreamUnreadable("game_data/2009scape", "not a repository"),
         UnknownCollector("prices", ("configs", "tables")),
         StagedFileMissing("configs/item_configs.json"),
+        SharedTableUnreadable("RDT.xml", "the table states no rows"),
         ManifestMissing("data/source/sources.json"),
         ManifestSchemaMismatch(2, 1),
     )

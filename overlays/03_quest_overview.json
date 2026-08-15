@@ -1,0 +1,3447 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "game_version": "authored",
+  "precedence": 10,
+  "entities": [
+    {
+      "type": "location",
+      "id": 1,
+      "mode": "patch",
+      "description": "The desert town south of Lumbridge.",
+      "source_ref": "authored. kharidian/al_kharid",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 5,
+      "mode": "patch",
+      "description": "The dwarven coal run north of the Fishing Guild.",
+      "source_ref": "authored. kandarin/coal_trucks",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 10,
+      "mode": "patch",
+      "description": "The arena south of Ardougne, run by General Khazard.",
+      "source_ref": "authored. kandarin/fight_arena",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 12,
+      "mode": "patch",
+      "description": "The guild between Taverley and Burthorpe.",
+      "source_ref": "authored. asgarnia/heroes_guild",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 16,
+      "mode": "patch",
+      "description": "The port south of Falador.",
+      "source_ref": "authored. asgarnia/port_sarim",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 17,
+      "mode": "patch",
+      "description": "A village south-west of Falador.",
+      "source_ref": "authored. asgarnia/rimmington",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 19,
+      "mode": "patch",
+      "description": "A town in northern Kandarin.",
+      "source_ref": "authored. kandarin/seers_village",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 44,
+      "mode": "patch",
+      "description": "A town on the edge of the troll lands.",
+      "source_ref": "authored. asgarnia/burthorpe",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 50,
+      "mode": "patch",
+      "description": "The guild south-west of Varrock, for those with quest points.",
+      "source_ref": "authored. misthalin/champions_guild",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 67,
+      "mode": "patch",
+      "description": "The haunted manor north of Draynor Village.",
+      "source_ref": "authored. misthalin/draynor_manor",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 68,
+      "mode": "patch",
+      "description": "A small village west of Lumbridge.",
+      "source_ref": "authored. misthalin/draynor_village",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 72,
+      "mode": "patch",
+      "description": "The eastern half of Ardougne.",
+      "source_ref": "authored. kandarin/east_ardougne",
+      "attributes": {
+        "kind": "city"
+      }
+    },
+    {
+      "type": "location",
+      "id": 78,
+      "mode": "patch",
+      "description": "The white-walled capital of Asgarnia.",
+      "source_ref": "authored. asgarnia/falador",
+      "attributes": {
+        "kind": "city"
+      }
+    },
+    {
+      "type": "location",
+      "id": 80,
+      "mode": "patch",
+      "description": "The hills in the far south of Kandarin.",
+      "source_ref": "authored. kandarin/feldip_hills",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 89,
+      "mode": "patch",
+      "description": "The goblin settlement north of Falador.",
+      "source_ref": "authored. asgarnia/goblin_village",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 104,
+      "mode": "patch",
+      "description": "The elven woods west of the Underground Pass.",
+      "source_ref": "authored. kandarin/isafdar",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 113,
+      "mode": "patch",
+      "description": "The desert south of Al Kharid.",
+      "source_ref": "authored. kharidian/kharidian_desert",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 123,
+      "mode": "patch",
+      "description": "The town every new adventurer starts in.",
+      "source_ref": "authored. misthalin/lumbridge",
+      "attributes": {
+        "kind": "town"
+      }
+    },
+    {
+      "type": "location",
+      "id": 124,
+      "mode": "patch",
+      "description": "The marsh south of Lumbridge, over the river.",
+      "source_ref": "authored. misthalin/lumbridge_swamp",
+      "attributes": {
+        "kind": "area"
+      }
+    },
+    {
+      "type": "location",
+      "id": 182,
+      "mode": "patch",
+      "description": "The druids' village west of Falador.",
+      "source_ref": "authored. asgarnia/taverley",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 191,
+      "mode": "patch",
+      "description": "The gnome settlement south of Ardougne.",
+      "source_ref": "authored. kandarin/tree_gnome_village",
+      "attributes": {
+        "kind": "village"
+      }
+    },
+    {
+      "type": "location",
+      "id": 192,
+      "mode": "patch",
+      "description": "The troll fortress above Death Plateau.",
+      "source_ref": "authored. asgarnia/troll_stronghold",
+      "attributes": {
+        "kind": "dungeon"
+      }
+    },
+    {
+      "type": "location",
+      "id": 196,
+      "mode": "patch",
+      "description": "The capital of Misthalin.",
+      "source_ref": "authored. misthalin/varrock",
+      "attributes": {
+        "kind": "city"
+      }
+    },
+    {
+      "type": "location",
+      "id": 201,
+      "mode": "patch",
+      "description": "The seat of the White Knights, in Falador.",
+      "source_ref": "authored. asgarnia/white_knights_castle",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 205,
+      "mode": "patch",
+      "description": "The tower of the Order of Wizards, south of Draynor.",
+      "source_ref": "authored. misthalin/wizards_tower",
+      "attributes": {
+        "kind": "building"
+      }
+    },
+    {
+      "type": "location",
+      "id": 1002,
+      "name": "Lumbridge Castle",
+      "description": "The Duke of Lumbridge's keep, above the town.",
+      "source_key": "lumbridgecastle",
+      "source_ref": "authored. misthalin/lumbridge_castle; centre from configs/npc_spawns.json#Cook, who stands in the castle kitchen",
+      "attributes": {
+        "kind": "building",
+        "centre": {
+          "x": 3209,
+          "y": 3215,
+          "plane": 0
+        }
+      }
+    },
+    {
+      "type": "location",
+      "id": 1005,
+      "name": "Varrock Palace",
+      "description": "King Roald's palace, in the north of Varrock.",
+      "source_key": "varrockpalace",
+      "source_ref": "authored. misthalin/varrock_palace; centre from cache/maplabels.json#Palace, which is the game's own map label",
+      "attributes": {
+        "kind": "building",
+        "centre": {
+          "x": 3213,
+          "y": 3483,
+          "plane": 0
+        }
+      }
+    },
+    {
+      "type": "location",
+      "id": 1006,
+      "name": "Varrock Square",
+      "description": "The market square at the centre of Varrock.",
+      "source_key": "varrocksquare",
+      "source_ref": "authored. misthalin/varrock_square; centre from configs/npc_spawns.json#Romeo, who stands in the square",
+      "attributes": {
+        "kind": "area",
+        "centre": {
+          "x": 3211,
+          "y": 3425,
+          "plane": 0
+        }
+      }
+    },
+    {
+      "type": "location",
+      "id": 1021,
+      "name": "Uzer",
+      "description": "The ruined city east of the Shantay Pass.",
+      "source_key": "uzer",
+      "source_ref": "authored. kharidian/uzer; centre stated here, no map label names it",
+      "attributes": {
+        "kind": "area",
+        "centre": {
+          "x": 3490,
+          "y": 3090,
+          "plane": 0
+        },
+        "bounds": {
+          "min_x": 3456,
+          "min_y": 3072,
+          "max_x": 3519,
+          "max_y": 3135,
+          "plane": 0
+        },
+        "region_id": 13872
+      }
+    },
+    {
+      "type": "quest",
+      "id": 1,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. Myths of the White Lands, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 2,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:608"
+      },
+      "source_ref": "authored. Black Knights' Fortress, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 3,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null,
+        "start_npc": "npc:278"
+      },
+      "source_ref": "authored. Cook's Assistant, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 4,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:882"
+      },
+      "source_ref": "authored. Demon Slayer, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 5,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null,
+        "start_npc": "npc:284"
+      },
+      "source_ref": "authored. Doric's Quest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 6,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:198"
+      },
+      "source_ref": "authored. Dragon Slayer, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 7,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:285"
+      },
+      "source_ref": "authored. Ernest the Chicken, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 8,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:3391"
+      },
+      "source_ref": "authored. Goblin Diplomacy, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 9,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null,
+        "start_npc": "npc:706"
+      },
+      "source_ref": "authored. Imp Catcher, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 10,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:605"
+      },
+      "source_ref": "authored. The Knight's Sword, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 11,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Pirate",
+        "start_npc": "npc:375"
+      },
+      "source_ref": "authored. Pirate's Treasure, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 12,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:923"
+      },
+      "source_ref": "authored. Prince Ali Rescue, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 13,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:456"
+      },
+      "source_ref": "authored. The Restless Ghost, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 14,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:639"
+      },
+      "source_ref": "authored. Romeo & Juliet, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 15,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:741"
+      },
+      "source_ref": "authored. Rune Mysteries, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 16,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null,
+        "start_npc": "npc:758"
+      },
+      "source_ref": "authored. Sheep Shearer, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 17,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:2660"
+      },
+      "source_ref": "authored. Shield of Arrav, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 18,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:755"
+      },
+      "source_ref": "authored. Vampire Slayer, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 19,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "very_short",
+        "series": null,
+        "start_npc": "npc:307"
+      },
+      "source_ref": "authored. Witch's Potion, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 20,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:5198"
+      },
+      "source_ref": "authored. Animal Magnetism, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 21,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Dwarf",
+        "start_npc": "npc:1836"
+      },
+      "source_ref": "authored. Between a Rock..., rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 22,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Ogre",
+        "start_npc": "npc:1010"
+      },
+      "source_ref": "authored. Big Chompy Bird Hunting, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 23,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Elf",
+        "start_npc": "npc:335"
+      },
+      "source_ref": "authored. Biohazard, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 24,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Pirate",
+        "start_npc": "npc:3155"
+      },
+      "source_ref": "authored. Cabin Fever, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 25,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:223"
+      },
+      "source_ref": "authored. Clock Tower, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 26,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "medium",
+        "series": "Desert",
+        "start_npc": "npc:216"
+      },
+      "source_ref": "authored. Contact!, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 27,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Ogre"
+      },
+      "source_ref": "authored. Zogre Flesh Eaters, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 28,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:1666"
+      },
+      "source_ref": "authored. Creature of Fenkenstrain, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 29,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "very_long",
+        "series": "Myreque",
+        "start_npc": "npc:1569"
+      },
+      "source_ref": "authored. Darkness of Hallowvale, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 30,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Dorgeshuun",
+        "start_npc": "npc:3712"
+      },
+      "source_ref": "authored. Death to the Dorgeshuun, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 31,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Troll",
+        "start_npc": "npc:1060"
+      },
+      "source_ref": "authored. Death Plateau, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 32,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Mahjarrat",
+        "start_npc": "npc:1922"
+      },
+      "source_ref": "authored. Desert Treasure, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 33,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. Devious Minds, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 34,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:618"
+      },
+      "source_ref": "authored. The Dig Site, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 35,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:455"
+      },
+      "source_ref": "authored. Druidic Ritual, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 36,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:208"
+      },
+      "source_ref": "authored. Dwarf Cannon, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 37,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Troll",
+        "start_npc": "npc:1113"
+      },
+      "source_ref": "authored. Eadgar's Ruse, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 38,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:673"
+      },
+      "source_ref": "authored. Eagles' Peak, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 39,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Elemental Workshop"
+      },
+      "source_ref": "authored. Elemental Workshop I, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 40,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Elemental Workshop"
+      },
+      "source_ref": "authored. Elemental Workshop II, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 41,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Mahjarrat",
+        "start_npc": "npc:3143"
+      },
+      "source_ref": "authored. Enakhra's Lament, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 42,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:5049"
+      },
+      "source_ref": "authored. Enlightened Journey, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 43,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Gnome",
+        "start_npc": "npc:171"
+      },
+      "source_ref": "authored. The Eyes of Glouphrie, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 44,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": "Fairy Tale",
+        "start_npc": "npc:3299"
+      },
+      "source_ref": "authored. Fairytale I - Growing Pains, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 45,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Fairy Tale"
+      },
+      "source_ref": "authored. Fairytale II - Cure a Queen, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 46,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:8171"
+      },
+      "source_ref": "authored. Family Crest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 47,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Desert",
+        "start_npc": "npc:1862"
+      },
+      "source_ref": "authored. The Feud, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 48,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:264"
+      },
+      "source_ref": "authored. Fight Arena, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 49,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:3679"
+      },
+      "source_ref": "authored. Fishing Contest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 50,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": "Dwarf",
+        "start_npc": "npc:1842"
+      },
+      "source_ref": "authored. Forgettable Tale..., rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 51,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Fremennik",
+        "start_npc": "npc:1294"
+      },
+      "source_ref": "authored. The Fremennik Trials, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 52,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:304"
+      },
+      "source_ref": "authored. Waterfall Quest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 53,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:2581"
+      },
+      "source_ref": "authored. Garden of Tranquility, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 54,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:780"
+      },
+      "source_ref": "authored. Gertrude's Cat, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 55,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:1683"
+      },
+      "source_ref": "authored. Ghosts Ahoy, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 56,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": "Dwarf"
+      },
+      "source_ref": "authored. The Giant Dwarf, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 57,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Desert",
+        "start_npc": "npc:85"
+      },
+      "source_ref": "authored. The Golem, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 58,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Gnome",
+        "start_npc": "npc:670"
+      },
+      "source_ref": "authored. The Grand Tree, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 59,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:3108"
+      },
+      "source_ref": "authored. The Hand in the Sand, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 60,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:1528"
+      },
+      "source_ref": "authored. Haunted Mine, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 61,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Mahjarrat",
+        "start_npc": "npc:885"
+      },
+      "source_ref": "authored. Hazeel Cult, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 62,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:796"
+      },
+      "source_ref": "authored. Heroes' Quest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 63,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Camelot",
+        "start_npc": "npc:251"
+      },
+      "source_ref": "authored. Holy Grail, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 64,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:1334"
+      },
+      "source_ref": "authored. Horror from the Deep, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 65,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": "Desert"
+      },
+      "source_ref": "authored. Icthlarin's Little Helper, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 66,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Myreque",
+        "start_npc": "npc:1569"
+      },
+      "source_ref": "authored. In Aid of the Myreque, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 67,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Myreque",
+        "start_npc": "npc:1569"
+      },
+      "source_ref": "authored. In Search of the Myreque, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 68,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Karamja",
+        "start_npc": "npc:740"
+      },
+      "source_ref": "authored. Jungle Potion, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 69,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "very_long",
+        "series": null,
+        "start_npc": "npc:400"
+      },
+      "source_ref": "authored. Legend's Quest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 70,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "short",
+        "series": "Fairy Tale"
+      },
+      "source_ref": "authored. Lost City, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 71,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Dorgeshuun",
+        "start_npc": "npc:741"
+      },
+      "source_ref": "authored. The Lost Tribe, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 72,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "very_long",
+        "series": "Fremennik",
+        "start_npc": "npc:4536"
+      },
+      "source_ref": "authored. Lunar Diplomacy, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 73,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:2932"
+      },
+      "source_ref": "authored. Making History, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 74,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Camelot",
+        "start_npc": "npc:251"
+      },
+      "source_ref": "authored. Merlin's Crystal, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 75,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "very_long",
+        "series": "Gnome",
+        "start_npc": "npc:670"
+      },
+      "source_ref": "authored. Monkey Madness, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 76,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:279"
+      },
+      "source_ref": "authored. Monk's Friend, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 77,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Fremennik",
+        "start_npc": "npc:1807"
+      },
+      "source_ref": "authored. Mountain Daughter, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 78,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Elf",
+        "start_npc": "npc:1202"
+      },
+      "source_ref": "authored. Mourning's End Part I, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 79,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "very_long",
+        "series": "Elf",
+        "start_npc": "npc:1202"
+      },
+      "source_ref": "authored. Mourning's End Part II, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 80,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. Murder Mystery, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 81,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Troll",
+        "start_npc": "npc:1151"
+      },
+      "source_ref": "authored. My Arm's Big Adventure, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 82,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Myreque",
+        "start_npc": "npc:1050"
+      },
+      "source_ref": "authored. Nature Spirit, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 83,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:488"
+      },
+      "source_ref": "authored. Observatory Quest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 84,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "very_long",
+        "series": null,
+        "start_npc": "npc:515"
+      },
+      "source_ref": "authored. One Small Favour, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 85,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Elf",
+        "start_npc": "npc:714"
+      },
+      "source_ref": "authored. Plague City, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 86,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Myreque",
+        "start_npc": "npc:647"
+      },
+      "source_ref": "authored. Priest in Peril, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 87,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:3670"
+      },
+      "source_ref": "authored. Rag and Bone Man, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 88,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:2949"
+      },
+      "source_ref": "authored. Ratcatchers, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 89,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "very_long",
+        "series": "Recipe for Disaster",
+        "start_npc": "npc:278"
+      },
+      "source_ref": "authored. Recipe for Disaster, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 90,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": "Temple Knight",
+        "start_npc": "npc:608"
+      },
+      "source_ref": "authored. Recruitment Drive, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 91,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Elf",
+        "start_npc": "npc:364"
+      },
+      "source_ref": "authored. Regicide, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 92,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Elf",
+        "start_npc": "npc:1680"
+      },
+      "source_ref": "authored. Roving Elves, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 93,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Fremennik",
+        "start_npc": "npc:1375"
+      },
+      "source_ref": "authored. Royal Trouble, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 94,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Pirate",
+        "start_npc": "npc:2825"
+      },
+      "source_ref": "authored. Rum Deal, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 95,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:389"
+      },
+      "source_ref": "authored. Scorpion Catcher, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 96,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": "Void Knight",
+        "start_npc": "npc:696"
+      },
+      "source_ref": "authored. Sea Slug, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 97,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Void Knight",
+        "start_npc": "npc:2290"
+      },
+      "source_ref": "authored. The Slug Menace, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 98,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:1054"
+      },
+      "source_ref": "authored. Shades of Mort'ton, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 99,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. Shadow of the Storm, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 100,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:289"
+      },
+      "source_ref": "authored. Sheep Herder, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 101,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Karamja",
+        "start_npc": "npc:500"
+      },
+      "source_ref": "authored. Shilo Village, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 102,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. A Soul's Bane, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 103,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Desert",
+        "start_npc": "npc:3040"
+      },
+      "source_ref": "authored. Spirits of the Elid, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 104,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:3822"
+      },
+      "source_ref": "authored. Swan Song, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 105,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Karamja",
+        "start_npc": "npc:1162"
+      },
+      "source_ref": "authored. Tai Bwo Wannai Trio, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 106,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:2654"
+      },
+      "source_ref": "authored. A Tail of Two Cats, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 107,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:2023"
+      },
+      "source_ref": "authored. Tears Of Guthix, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 108,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:272"
+      },
+      "source_ref": "authored. Temple of Ikov, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 109,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Fremennik",
+        "start_npc": "npc:1375"
+      },
+      "source_ref": "authored. Throne of Miscellania, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 110,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Desert",
+        "start_npc": "npc:835"
+      },
+      "source_ref": "authored. The Tourist Trap, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 111,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. Witch's House, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 112,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Gnome",
+        "start_npc": "npc:469"
+      },
+      "source_ref": "authored. Tree Gnome Village, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 113,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:846"
+      },
+      "source_ref": "authored. Tribal Totem, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 114,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Troll",
+        "start_npc": "npc:1071"
+      },
+      "source_ref": "authored. Troll Romance, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 115,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Troll",
+        "start_npc": "npc:1060"
+      },
+      "source_ref": "authored. Troll Stronghold, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 116,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "very_long",
+        "series": "Elf",
+        "start_npc": "npc:364"
+      },
+      "source_ref": "authored. Underground Pass, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 117,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Temple Knight",
+        "start_npc": "npc:2290"
+      },
+      "source_ref": "authored. Wanted!, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 118,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Ogre",
+        "start_npc": "npc:871"
+      },
+      "source_ref": "authored. Watchtower, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 119,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "long",
+        "series": "Penguin",
+        "start_npc": "npc:1780"
+      },
+      "source_ref": "authored. Cold War, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 120,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Fremennik",
+        "start_npc": "npc:5481"
+      },
+      "source_ref": "authored. The Fremennik Isles, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 121,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:5573"
+      },
+      "source_ref": "authored. Tower of Life, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 122,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Pirate"
+      },
+      "source_ref": "authored. The Great Brain Robbery, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 123,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:5834"
+      },
+      "source_ref": "authored. What Lies Below, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 124,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Fremennik",
+        "start_npc": "npc:1269"
+      },
+      "source_ref": "authored. Olaf's Quest, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 125,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": "Dorgeshuun",
+        "start_npc": "npc:3712"
+      },
+      "source_ref": "authored. Another Slice of H.A.M, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 126,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "medium",
+        "series": "Fremennik",
+        "start_npc": "npc:431"
+      },
+      "source_ref": "authored. Dream Mentor, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 127,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": null,
+        "start_npc": "npc:5987"
+      },
+      "source_ref": "authored. Grim Tales, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 128,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Camelot",
+        "start_npc": "npc:241"
+      },
+      "source_ref": "authored. King's Ransom, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 129,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Gnome"
+      },
+      "source_ref": "authored. The Path of Glouphrie, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 130,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null
+      },
+      "source_ref": "authored. Back to my Roots, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 131,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": "Dorgeshuun",
+        "start_npc": "npc:3712"
+      },
+      "source_ref": "authored. Land of the Goblins, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 132,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Desert",
+        "start_npc": "npc:216"
+      },
+      "source_ref": "authored. Dealing with Scabaras, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 133,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "novice",
+        "length": "short",
+        "series": "Summoning",
+        "start_npc": "npc:6970"
+      },
+      "source_ref": "authored. Wolf Whistle, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 134,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Ogre",
+        "start_npc": "npc:7051"
+      },
+      "source_ref": "authored. As a First Resort..., rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 135,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:3817"
+      },
+      "source_ref": "authored. Catapult Construction, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 136,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Void Knight"
+      },
+      "source_ref": "authored. Kennith's Concerns, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 137,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Myreque",
+        "start_npc": "npc:1047"
+      },
+      "source_ref": "authored. Legacy of Seergaze, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 138,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null
+      },
+      "source_ref": "authored. Perils of Ice Mountain, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 139,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "long",
+        "series": null
+      },
+      "source_ref": "authored. TokTz-Ket-Dill, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 140,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "medium",
+        "series": "Slayer",
+        "start_npc": "npc:7779"
+      },
+      "source_ref": "authored. Smoking Kills, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 141,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Pirate",
+        "start_npc": "npc:3155"
+      },
+      "source_ref": "authored. Rocking Out, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 142,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "experienced",
+        "length": "medium",
+        "series": "Summoning"
+      },
+      "source_ref": "authored. Spirit of Summer, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 143,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:2932"
+      },
+      "source_ref": "authored. Meeting History, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 144,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "medium",
+        "series": null,
+        "start_npc": "npc:4946"
+      },
+      "source_ref": "authored. All Fired Up, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 145,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Summoning"
+      },
+      "source_ref": "authored. Summer's End, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 146,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "master",
+        "length": "long",
+        "series": "Mahjarrat",
+        "start_npc": "npc:647"
+      },
+      "source_ref": "authored. Defender of Varrock, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 147,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null
+      },
+      "source_ref": "authored. Swept Away, rated by hand"
+    },
+    {
+      "type": "quest",
+      "id": 148,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "grandmaster",
+        "length": "very_long",
+        "series": "Mahjarrat",
+        "start_npc": "npc:8336"
+      },
+      "source_ref": "authored. While Guthix Sleeps, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 149,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": "intermediate",
+        "length": "short",
+        "series": null,
+        "start_npc": "npc:1252"
+      },
+      "source_ref": "authored. In Pyre Need, rated by hand; the person it starts with is named here too"
+    },
+    {
+      "type": "quest",
+      "id": 150,
+      "mode": "patch",
+      "attributes": {
+        "difficulty": null,
+        "length": null,
+        "series": null
+      },
+      "source_ref": "authored. Test Quest is a placeholder the quest table declares so the server has something to test against; nobody plays it, so nothing about it is rated"
+    }
+  ],
+  "edges": [
+    {
+      "src": "location:1002",
+      "rel": "part_of",
+      "dst": "location:123",
+      "source_ref": "authored. misthalin/lumbridge_castle"
+    },
+    {
+      "src": "location:1005",
+      "rel": "part_of",
+      "dst": "location:196",
+      "source_ref": "authored. misthalin/varrock_palace"
+    },
+    {
+      "src": "location:1006",
+      "rel": "part_of",
+      "dst": "location:196",
+      "source_ref": "authored. misthalin/varrock_square"
+    },
+    {
+      "src": "location:1021",
+      "rel": "part_of",
+      "dst": "location:113",
+      "source_ref": "authored. kharidian/uzer"
+    },
+    {
+      "src": "location:12",
+      "rel": "part_of",
+      "dst": "location:44",
+      "source_ref": "authored. asgarnia/heroes_guild"
+    },
+    {
+      "src": "location:201",
+      "rel": "part_of",
+      "dst": "location:78",
+      "source_ref": "authored. asgarnia/white_knights_castle"
+    },
+    {
+      "src": "location:67",
+      "rel": "part_of",
+      "dst": "location:68",
+      "source_ref": "authored. misthalin/draynor_manor"
+    },
+    {
+      "src": "quest:1",
+      "rel": "located_in",
+      "dst": "location:193",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Myths of the White Lands starts there"
+    },
+    {
+      "src": "quest:2",
+      "rel": "located_in",
+      "dst": "location:201",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Black Knights' Fortress starts there"
+    },
+    {
+      "src": "quest:3",
+      "rel": "located_in",
+      "dst": "location:1002",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Cook's Assistant starts there"
+    },
+    {
+      "src": "quest:4",
+      "rel": "located_in",
+      "dst": "location:1006",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Demon Slayer starts there"
+    },
+    {
+      "src": "quest:5",
+      "rel": "located_in",
+      "dst": "location:78",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Doric's Quest starts there"
+    },
+    {
+      "src": "quest:6",
+      "rel": "located_in",
+      "dst": "location:50",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Dragon Slayer starts there"
+    },
+    {
+      "src": "quest:7",
+      "rel": "located_in",
+      "dst": "location:67",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Ernest the Chicken starts there"
+    },
+    {
+      "src": "quest:8",
+      "rel": "located_in",
+      "dst": "location:89",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Goblin Diplomacy starts there"
+    },
+    {
+      "src": "quest:9",
+      "rel": "located_in",
+      "dst": "location:205",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Imp Catcher starts there"
+    },
+    {
+      "src": "quest:10",
+      "rel": "located_in",
+      "dst": "location:201",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Knight's Sword starts there"
+    },
+    {
+      "src": "quest:11",
+      "rel": "located_in",
+      "dst": "location:16",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Pirate's Treasure starts there"
+    },
+    {
+      "src": "quest:12",
+      "rel": "located_in",
+      "dst": "location:1",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Prince Ali Rescue starts there"
+    },
+    {
+      "src": "quest:13",
+      "rel": "located_in",
+      "dst": "location:123",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Restless Ghost starts there"
+    },
+    {
+      "src": "quest:14",
+      "rel": "located_in",
+      "dst": "location:1006",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Romeo & Juliet starts there"
+    },
+    {
+      "src": "quest:15",
+      "rel": "located_in",
+      "dst": "location:1002",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Rune Mysteries starts there"
+    },
+    {
+      "src": "quest:16",
+      "rel": "located_in",
+      "dst": "location:123",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Sheep Shearer starts there"
+    },
+    {
+      "src": "quest:17",
+      "rel": "located_in",
+      "dst": "location:1005",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Shield of Arrav starts there"
+    },
+    {
+      "src": "quest:18",
+      "rel": "located_in",
+      "dst": "location:68",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Vampire Slayer starts there"
+    },
+    {
+      "src": "quest:19",
+      "rel": "located_in",
+      "dst": "location:17",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Witch's Potion starts there"
+    },
+    {
+      "src": "quest:20",
+      "rel": "located_in",
+      "dst": "location:67",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Animal Magnetism starts there"
+    },
+    {
+      "src": "quest:21",
+      "rel": "located_in",
+      "dst": "location:70",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Between a Rock... starts there"
+    },
+    {
+      "src": "quest:22",
+      "rel": "located_in",
+      "dst": "location:80",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Big Chompy Bird Hunting starts there"
+    },
+    {
+      "src": "quest:23",
+      "rel": "located_in",
+      "dst": "location:24",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Biohazard starts there"
+    },
+    {
+      "src": "quest:24",
+      "rel": "located_in",
+      "dst": "location:15",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Cabin Fever starts there"
+    },
+    {
+      "src": "quest:25",
+      "rel": "located_in",
+      "dst": "location:53",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Clock Tower starts there"
+    },
+    {
+      "src": "quest:26",
+      "rel": "located_in",
+      "dst": "location:177",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Contact! starts there"
+    },
+    {
+      "src": "quest:27",
+      "rel": "located_in",
+      "dst": "location:107",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Zogre Flesh Eaters starts there"
+    },
+    {
+      "src": "quest:28",
+      "rel": "located_in",
+      "dst": "location:81",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Creature of Fenkenstrain starts there"
+    },
+    {
+      "src": "quest:29",
+      "rel": "located_in",
+      "dst": "location:43",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Darkness of Hallowvale starts there"
+    },
+    {
+      "src": "quest:30",
+      "rel": "located_in",
+      "dst": "location:124",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Death to the Dorgeshuun starts there"
+    },
+    {
+      "src": "quest:31",
+      "rel": "located_in",
+      "dst": "location:44",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Death Plateau starts there"
+    },
+    {
+      "src": "quest:32",
+      "rel": "located_in",
+      "dst": "location:113",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Desert Treasure starts there"
+    },
+    {
+      "src": "quest:33",
+      "rel": "located_in",
+      "dst": "location:135",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Devious Minds starts there"
+    },
+    {
+      "src": "quest:34",
+      "rel": "located_in",
+      "dst": "location:64",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Dig Site starts there"
+    },
+    {
+      "src": "quest:35",
+      "rel": "located_in",
+      "dst": "location:69",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Druidic Ritual starts there"
+    },
+    {
+      "src": "quest:36",
+      "rel": "located_in",
+      "dst": "location:5",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Dwarf Cannon starts there"
+    },
+    {
+      "src": "quest:37",
+      "rel": "located_in",
+      "dst": "location:21",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Eadgar's Ruse starts there"
+    },
+    {
+      "src": "quest:38",
+      "rel": "located_in",
+      "dst": "location:31",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Eagles' Peak starts there"
+    },
+    {
+      "src": "quest:39",
+      "rel": "located_in",
+      "dst": "location:19",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Elemental Workshop I starts there"
+    },
+    {
+      "src": "quest:40",
+      "rel": "located_in",
+      "dst": "location:19",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Elemental Workshop II starts there"
+    },
+    {
+      "src": "quest:41",
+      "rel": "located_in",
+      "dst": "location:113",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Enakhra's Lament starts there"
+    },
+    {
+      "src": "quest:42",
+      "rel": "located_in",
+      "dst": "location:75",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Enlightened Journey starts there"
+    },
+    {
+      "src": "quest:43",
+      "rel": "located_in",
+      "dst": "location:190",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Eyes of Glouphrie starts there"
+    },
+    {
+      "src": "quest:44",
+      "rel": "located_in",
+      "dst": "location:68",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Fairytale I - Growing Pains starts there"
+    },
+    {
+      "src": "quest:46",
+      "rel": "located_in",
+      "dst": "location:196",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Family Crest starts there"
+    },
+    {
+      "src": "quest:47",
+      "rel": "located_in",
+      "dst": "location:158",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Feud starts there"
+    },
+    {
+      "src": "quest:48",
+      "rel": "located_in",
+      "dst": "location:10",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Fight Arena starts there"
+    },
+    {
+      "src": "quest:49",
+      "rel": "located_in",
+      "dst": "location:99",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Fishing Contest starts there"
+    },
+    {
+      "src": "quest:50",
+      "rel": "located_in",
+      "dst": "location:111",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Forgettable Tale... starts there"
+    },
+    {
+      "src": "quest:51",
+      "rel": "located_in",
+      "dst": "location:165",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Fremennik Trials starts there"
+    },
+    {
+      "src": "quest:52",
+      "rel": "located_in",
+      "dst": "location:37",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Waterfall Quest starts there"
+    },
+    {
+      "src": "quest:53",
+      "rel": "located_in",
+      "dst": "location:1005",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Garden of Tranquility starts there"
+    },
+    {
+      "src": "quest:54",
+      "rel": "located_in",
+      "dst": "location:196",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Gertrude's Cat starts there"
+    },
+    {
+      "src": "quest:55",
+      "rel": "located_in",
+      "dst": "location:15",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Ghosts Ahoy starts there"
+    },
+    {
+      "src": "quest:56",
+      "rel": "located_in",
+      "dst": "location:111",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Giant Dwarf starts there"
+    },
+    {
+      "src": "quest:57",
+      "rel": "located_in",
+      "dst": "location:1021",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Golem starts there"
+    },
+    {
+      "src": "quest:58",
+      "rel": "located_in",
+      "dst": "location:93",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Grand Tree starts there"
+    },
+    {
+      "src": "quest:59",
+      "rel": "located_in",
+      "dst": "location:206",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Hand in the Sand starts there"
+    },
+    {
+      "src": "quest:60",
+      "rel": "located_in",
+      "dst": "location:26",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Haunted Mine starts there"
+    },
+    {
+      "src": "quest:61",
+      "rel": "located_in",
+      "dst": "location:72",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Hazeel Cult starts there"
+    },
+    {
+      "src": "quest:62",
+      "rel": "located_in",
+      "dst": "location:12",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Heroes' Quest starts there"
+    },
+    {
+      "src": "quest:63",
+      "rel": "located_in",
+      "dst": "location:4",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Holy Grail starts there"
+    },
+    {
+      "src": "quest:64",
+      "rel": "located_in",
+      "dst": "location:119",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Horror from the Deep starts there"
+    },
+    {
+      "src": "quest:65",
+      "rel": "located_in",
+      "dst": "location:177",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Icthlarin's Little Helper starts there"
+    },
+    {
+      "src": "quest:66",
+      "rel": "located_in",
+      "dst": "location:43",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. In Aid of the Myreque starts there"
+    },
+    {
+      "src": "quest:67",
+      "rel": "located_in",
+      "dst": "location:46",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. In Search of the Myreque starts there"
+    },
+    {
+      "src": "quest:68",
+      "rel": "located_in",
+      "dst": "location:181",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Jungle Potion starts there"
+    },
+    {
+      "src": "quest:69",
+      "rel": "located_in",
+      "dst": "location:118",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Legend's Quest starts there"
+    },
+    {
+      "src": "quest:70",
+      "rel": "located_in",
+      "dst": "location:124",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Lost City starts there"
+    },
+    {
+      "src": "quest:71",
+      "rel": "located_in",
+      "dst": "location:1002",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Lost Tribe starts there"
+    },
+    {
+      "src": "quest:72",
+      "rel": "located_in",
+      "dst": "location:165",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Lunar Diplomacy starts there"
+    },
+    {
+      "src": "quest:73",
+      "rel": "located_in",
+      "dst": "location:149",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Making History starts there"
+    },
+    {
+      "src": "quest:74",
+      "rel": "located_in",
+      "dst": "location:4",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Merlin's Crystal starts there"
+    },
+    {
+      "src": "quest:75",
+      "rel": "located_in",
+      "dst": "location:93",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Monkey Madness starts there"
+    },
+    {
+      "src": "quest:76",
+      "rel": "located_in",
+      "dst": "location:135",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Monk's Friend starts there"
+    },
+    {
+      "src": "quest:77",
+      "rel": "located_in",
+      "dst": "location:140",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Mountain Daughter starts there"
+    },
+    {
+      "src": "quest:78",
+      "rel": "located_in",
+      "dst": "location:121",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Mourning's End Part I starts there"
+    },
+    {
+      "src": "quest:79",
+      "rel": "located_in",
+      "dst": "location:121",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Mourning's End Part II starts there"
+    },
+    {
+      "src": "quest:80",
+      "rel": "located_in",
+      "dst": "location:176",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Murder Mystery starts there"
+    },
+    {
+      "src": "quest:81",
+      "rel": "located_in",
+      "dst": "location:21",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. My Arm's Big Adventure starts there"
+    },
+    {
+      "src": "quest:82",
+      "rel": "located_in",
+      "dst": "location:136",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Nature Spirit starts there"
+    },
+    {
+      "src": "quest:83",
+      "rel": "located_in",
+      "dst": "location:146",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Observatory Quest starts there"
+    },
+    {
+      "src": "quest:84",
+      "rel": "located_in",
+      "dst": "location:174",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. One Small Favour starts there"
+    },
+    {
+      "src": "quest:85",
+      "rel": "located_in",
+      "dst": "location:72",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Plague City starts there"
+    },
+    {
+      "src": "quest:86",
+      "rel": "located_in",
+      "dst": "location:1005",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Priest in Peril starts there"
+    },
+    {
+      "src": "quest:88",
+      "rel": "located_in",
+      "dst": "location:196",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Ratcatchers starts there"
+    },
+    {
+      "src": "quest:89",
+      "rel": "located_in",
+      "dst": "location:1002",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Recipe for Disaster starts there"
+    },
+    {
+      "src": "quest:90",
+      "rel": "located_in",
+      "dst": "location:201",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Recruitment Drive starts there"
+    },
+    {
+      "src": "quest:91",
+      "rel": "located_in",
+      "dst": "location:24",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Regicide starts there"
+    },
+    {
+      "src": "quest:92",
+      "rel": "located_in",
+      "dst": "location:104",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Roving Elves starts there"
+    },
+    {
+      "src": "quest:93",
+      "rel": "located_in",
+      "dst": "location:134",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Royal Trouble starts there"
+    },
+    {
+      "src": "quest:94",
+      "rel": "located_in",
+      "dst": "location:15",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Rum Deal starts there"
+    },
+    {
+      "src": "quest:95",
+      "rel": "located_in",
+      "dst": "location:178",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Scorpion Catcher starts there"
+    },
+    {
+      "src": "quest:96",
+      "rel": "located_in",
+      "dst": "location:203",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Sea Slug starts there"
+    },
+    {
+      "src": "quest:97",
+      "rel": "located_in",
+      "dst": "location:78",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Slug Menace starts there"
+    },
+    {
+      "src": "quest:98",
+      "rel": "located_in",
+      "dst": "location:137",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Shades of Mort'ton starts there"
+    },
+    {
+      "src": "quest:99",
+      "rel": "located_in",
+      "dst": "location:196",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Shadow of the Storm starts there"
+    },
+    {
+      "src": "quest:100",
+      "rel": "located_in",
+      "dst": "location:72",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Sheep Herder starts there"
+    },
+    {
+      "src": "quest:101",
+      "rel": "located_in",
+      "dst": "location:174",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Shilo Village starts there"
+    },
+    {
+      "src": "quest:102",
+      "rel": "located_in",
+      "dst": "location:43",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. A Soul's Bane starts there"
+    },
+    {
+      "src": "quest:103",
+      "rel": "located_in",
+      "dst": "location:143",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Spirits of the Elid starts there"
+    },
+    {
+      "src": "quest:104",
+      "rel": "located_in",
+      "dst": "location:156",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Swan Song starts there"
+    },
+    {
+      "src": "quest:105",
+      "rel": "located_in",
+      "dst": "location:181",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Tai Bwo Wannai Trio starts there"
+    },
+    {
+      "src": "quest:106",
+      "rel": "located_in",
+      "dst": "location:44",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. A Tail of Two Cats starts there"
+    },
+    {
+      "src": "quest:107",
+      "rel": "located_in",
+      "dst": "location:124",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Tears Of Guthix starts there"
+    },
+    {
+      "src": "quest:109",
+      "rel": "located_in",
+      "dst": "location:134",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Throne of Miscellania starts there"
+    },
+    {
+      "src": "quest:110",
+      "rel": "located_in",
+      "dst": "location:173",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Tourist Trap starts there"
+    },
+    {
+      "src": "quest:111",
+      "rel": "located_in",
+      "dst": "location:182",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Witch's House starts there"
+    },
+    {
+      "src": "quest:112",
+      "rel": "located_in",
+      "dst": "location:191",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Tree Gnome Village starts there"
+    },
+    {
+      "src": "quest:113",
+      "rel": "located_in",
+      "dst": "location:42",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Tribal Totem starts there"
+    },
+    {
+      "src": "quest:114",
+      "rel": "located_in",
+      "dst": "location:60",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Troll Romance starts there"
+    },
+    {
+      "src": "quest:115",
+      "rel": "located_in",
+      "dst": "location:44",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Troll Stronghold starts there"
+    },
+    {
+      "src": "quest:116",
+      "rel": "located_in",
+      "dst": "location:24",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Underground Pass starts there"
+    },
+    {
+      "src": "quest:117",
+      "rel": "located_in",
+      "dst": "location:78",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Wanted! starts there"
+    },
+    {
+      "src": "quest:118",
+      "rel": "located_in",
+      "dst": "location:206",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Watchtower starts there"
+    },
+    {
+      "src": "quest:119",
+      "rel": "located_in",
+      "dst": "location:31",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Cold War starts there"
+    },
+    {
+      "src": "quest:120",
+      "rel": "located_in",
+      "dst": "location:165",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Fremennik Isles starts there"
+    },
+    {
+      "src": "quest:121",
+      "rel": "located_in",
+      "dst": "location:188",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Tower of Life starts there"
+    },
+    {
+      "src": "quest:122",
+      "rel": "located_in",
+      "dst": "location:139",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Great Brain Robbery starts there"
+    },
+    {
+      "src": "quest:123",
+      "rel": "located_in",
+      "dst": "location:196",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. What Lies Below starts there"
+    },
+    {
+      "src": "quest:124",
+      "rel": "located_in",
+      "dst": "location:165",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Olaf's Quest starts there"
+    },
+    {
+      "src": "quest:125",
+      "rel": "located_in",
+      "dst": "location:124",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Another Slice of H.A.M starts there"
+    },
+    {
+      "src": "quest:126",
+      "rel": "located_in",
+      "dst": "location:125",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Dream Mentor starts there"
+    },
+    {
+      "src": "quest:127",
+      "rel": "located_in",
+      "dst": "location:182",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Grim Tales starts there"
+    },
+    {
+      "src": "quest:128",
+      "rel": "located_in",
+      "dst": "location:4",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. King's Ransom starts there"
+    },
+    {
+      "src": "quest:129",
+      "rel": "located_in",
+      "dst": "location:190",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. The Path of Glouphrie starts there"
+    },
+    {
+      "src": "quest:131",
+      "rel": "located_in",
+      "dst": "location:124",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Land of the Goblins starts there"
+    },
+    {
+      "src": "quest:132",
+      "rel": "located_in",
+      "dst": "location:177",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Dealing with Scabaras starts there"
+    },
+    {
+      "src": "quest:133",
+      "rel": "located_in",
+      "dst": "location:182",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Wolf Whistle starts there"
+    },
+    {
+      "src": "quest:134",
+      "rel": "located_in",
+      "dst": "location:147",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. As a First Resort... starts there"
+    },
+    {
+      "src": "quest:135",
+      "rel": "located_in",
+      "dst": "location:149",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Catapult Construction starts there"
+    },
+    {
+      "src": "quest:136",
+      "rel": "located_in",
+      "dst": "location:203",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Kennith's Concerns starts there"
+    },
+    {
+      "src": "quest:137",
+      "rel": "located_in",
+      "dst": "location:183",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Legacy of Seergaze starts there"
+    },
+    {
+      "src": "quest:138",
+      "rel": "located_in",
+      "dst": "location:102",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Perils of Ice Mountain starts there"
+    },
+    {
+      "src": "quest:139",
+      "rel": "located_in",
+      "dst": "location:23",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. TokTz-Ket-Dill starts there"
+    },
+    {
+      "src": "quest:140",
+      "rel": "located_in",
+      "dst": "location:158",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Smoking Kills starts there"
+    },
+    {
+      "src": "quest:141",
+      "rel": "located_in",
+      "dst": "location:139",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Rocking Out starts there"
+    },
+    {
+      "src": "quest:142",
+      "rel": "located_in",
+      "dst": "location:156",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Spirit of Summer starts there"
+    },
+    {
+      "src": "quest:143",
+      "rel": "located_in",
+      "dst": "location:149",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Meeting History starts there"
+    },
+    {
+      "src": "quest:144",
+      "rel": "located_in",
+      "dst": "location:1005",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. All Fired Up starts there"
+    },
+    {
+      "src": "quest:145",
+      "rel": "located_in",
+      "dst": "location:156",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Summer's End starts there"
+    },
+    {
+      "src": "quest:146",
+      "rel": "located_in",
+      "dst": "location:1005",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. Defender of Varrock starts there"
+    },
+    {
+      "src": "quest:148",
+      "rel": "located_in",
+      "dst": "location:196",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. While Guthix Sleeps starts there"
+    },
+    {
+      "src": "quest:149",
+      "rel": "located_in",
+      "dst": "location:15",
+      "attributes": {
+        "spawn_kind": "quest_start"
+      },
+      "source_ref": "authored. In Pyre Need starts there"
+    }
+  ]
+}

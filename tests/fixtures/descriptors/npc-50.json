@@ -29,6 +29,7 @@
           "unit": null,
           "derived": false,
           "prominent": true,
+          "technical": false,
           "choices": null
         },
         {
@@ -41,6 +42,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -53,6 +55,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -65,6 +68,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -77,6 +81,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -89,6 +94,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -117,6 +123,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -129,6 +136,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -141,6 +149,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         }
       ]
@@ -162,6 +171,7 @@
           "unit": null,
           "derived": false,
           "prominent": true,
+          "technical": false,
           "choices": null
         },
         {
@@ -174,6 +184,7 @@
           "unit": "tiles",
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -186,6 +197,7 @@
           "unit": "ticks",
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         }
       ]
@@ -207,6 +219,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": [
             "easy",
             "medium",
@@ -252,6 +265,7 @@
                 "unit": null,
                 "derived": true,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -264,6 +278,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -276,6 +291,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -288,6 +304,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "default",
                   "main",
@@ -305,6 +322,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -317,6 +335,48 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "tradeable",
+                "value": true,
+                "label": "Tradeable",
+                "group": "trade",
+                "order": 10,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "market_price",
+                "value": 2479,
+                "label": "Market price",
+                "group": "trade",
+                "order": 37,
+                "format": "gp",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "weight",
+                "value": 1.5,
+                "label": "Weight",
+                "group": "general",
+                "order": 60,
+                "format": "float",
+                "unit": "kg",
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]
@@ -341,6 +401,7 @@
                 "unit": null,
                 "derived": true,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -353,6 +414,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -365,6 +427,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -377,6 +440,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "default",
                   "main",
@@ -394,6 +458,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -406,6 +471,35 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "tradeable",
+                "value": false,
+                "label": "Tradeable",
+                "group": "trade",
+                "order": 10,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "weight",
+                "value": 10.0,
+                "label": "Weight",
+                "group": "general",
+                "order": 60,
+                "format": "float",
+                "unit": "kg",
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]
@@ -413,8 +507,8 @@
           {
             "link": {
               "type": "item",
-              "id": 4588,
-              "slug": "dragon-scimitar-4588",
+              "id": 4587,
+              "slug": "dragon-scimitar",
               "label": "Dragon scimitar",
               "icon_ref": null
             },
@@ -430,6 +524,7 @@
                 "unit": null,
                 "derived": true,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -442,6 +537,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -454,6 +550,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -466,6 +563,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "default",
                   "main",
@@ -483,6 +581,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -495,7 +594,90 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "tradeable",
+                "value": true,
+                "label": "Tradeable",
+                "group": "trade",
+                "order": 10,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "shop_price",
+                "value": 100000,
+                "label": "Shop price",
+                "group": "trade",
+                "order": 30,
+                "format": "gp",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "market_price",
+                "value": 108590,
+                "label": "Market price",
+                "group": "trade",
+                "order": 37,
+                "format": "gp",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "weight",
+                "value": 1.8,
+                "label": "Weight",
+                "group": "general",
+                "order": 60,
+                "format": "float",
+                "unit": "kg",
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "equipment_slot",
+                "value": "weapon",
+                "label": "Equipment slot",
+                "group": "equipment",
+                "order": 90,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "head",
+                  "cape",
+                  "neck",
+                  "weapon",
+                  "chest",
+                  "shield",
+                  "hidden_1",
+                  "legs",
+                  "hidden_2",
+                  "hands",
+                  "feet",
+                  "hidden_3",
+                  "ring",
+                  "ammo"
+                ]
               }
             ]
           }
@@ -546,6 +728,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": true,
                 "choices": null
               },
               {
@@ -558,6 +741,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "npc_spawn",
                   "ground_spawn",
@@ -577,6 +761,43 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "kind",
+                "value": "dungeon",
+                "label": "Kind",
+                "group": "overview",
+                "order": 10,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "city",
+                  "town",
+                  "village",
+                  "building",
+                  "dungeon",
+                  "area",
+                  "island"
+                ]
+              },
+              {
+                "key": "members",
+                "value": true,
+                "label": "Members only",
+                "group": "overview",
+                "order": 50,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]
@@ -613,7 +834,35 @@
               "icon_ref": null
             },
             "type": "task",
-            "attributes": []
+            "attributes": [],
+            "about": [
+              {
+                "key": "slayer_level",
+                "value": 15,
+                "label": "Slayer level",
+                "group": "slayer",
+                "order": 10,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "combat_level",
+                "value": 20,
+                "label": "Combat level needed",
+                "group": "slayer",
+                "order": 20,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              }
+            ]
           }
         ],
         "total": 1,

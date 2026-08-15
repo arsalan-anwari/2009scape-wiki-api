@@ -543,7 +543,7 @@ def test_a_relationship_is_walked_forwards(repository: KnowledgeRepository) -> N
     assert [edge.dst for edge in drops.items] == [
         DRAGON_BONES,
         KBD_HEADS,
-        NOTED_SCIMITAR,
+        SCIMITAR,
     ]
 
 
@@ -563,11 +563,15 @@ def test_a_walk_over_a_key_set_gathers_every_key_into_one_page(
     assert dropped_by.total == 1
 
 
-def test_a_walk_from_one_key_alone_misses_what_the_variant_carries(
+def test_a_walk_from_one_key_alone_misses_what_the_other_carries(
     repository: KnowledgeRepository,
 ) -> None:
-    assert repository.edges_to((SCIMITAR,), rel=RelationshipType.DROPS).total == 0
-    assert repository.edges_to((NOTED_SCIMITAR,), rel=RelationshipType.DROPS).total == 1
+    """The source says this creature drops the written-up form of the scimitar, and
+    the build moves that link onto the scimitar itself, where a reader looks for it.
+    Whichever of the two a walk starts from, it still has to gather the whole set.
+    """
+    assert repository.edges_to((NOTED_SCIMITAR,), rel=RelationshipType.DROPS).total == 0
+    assert repository.edges_to((SCIMITAR,), rel=RelationshipType.DROPS).total == 1
 
 
 def test_a_repeated_key_does_not_double_a_walk(

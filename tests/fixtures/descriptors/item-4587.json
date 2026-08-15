@@ -29,6 +29,7 @@
       "unit": "kg",
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     }
   ],
@@ -50,6 +51,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": [
             "unarmed",
             "staff",
@@ -87,6 +89,7 @@
           "unit": null,
           "derived": false,
           "prominent": true,
+          "technical": false,
           "choices": [
             "head",
             "cape",
@@ -114,6 +117,7 @@
           "unit": "ticks",
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -126,6 +130,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -154,6 +159,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -171,6 +177,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         }
       ]
@@ -192,6 +199,7 @@
           "unit": null,
           "derived": false,
           "prominent": true,
+          "technical": false,
           "choices": null
         },
         {
@@ -204,6 +212,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -216,6 +225,7 @@
           "unit": null,
           "derived": false,
           "prominent": true,
+          "technical": false,
           "choices": null
         },
         {
@@ -228,6 +238,7 @@
           "unit": null,
           "derived": true,
           "prominent": true,
+          "technical": false,
           "choices": null
         },
         {
@@ -240,6 +251,7 @@
           "unit": null,
           "derived": true,
           "prominent": false,
+          "technical": false,
           "choices": [
             "traded",
             "static",
@@ -256,6 +268,7 @@
           "unit": null,
           "derived": true,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -268,6 +281,7 @@
           "unit": null,
           "derived": true,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -280,6 +294,7 @@
           "unit": null,
           "derived": true,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -292,6 +307,7 @@
           "unit": null,
           "derived": true,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -304,6 +320,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         },
         {
@@ -316,6 +333,7 @@
           "unit": null,
           "derived": false,
           "prominent": false,
+          "technical": false,
           "choices": null
         }
       ]
@@ -356,6 +374,7 @@
                 "unit": null,
                 "derived": true,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -368,6 +387,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -380,6 +400,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -392,6 +413,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "default",
                   "main",
@@ -409,6 +431,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -421,6 +444,35 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "lifepoints",
+                "value": 240,
+                "label": "Lifepoints",
+                "group": "combat",
+                "order": 10,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "aggressive",
+                "value": true,
+                "label": "Aggressive",
+                "group": "behaviour",
+                "order": 100,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]

@@ -40,9 +40,19 @@ def rendered(value: AttributeValue, parts: Sequence[AttributeSpec] = ()) -> str:
 def labelled(
     values: Sequence[AttributeValue], declared: Sequence[AttributeSpec] = ()
 ) -> dict[str, str]:
-    """Render several declared values, each under the name the registry gives it."""
+    """Render several declared values, each under the name the registry gives it.
+
+    A value the registry calls technical is left out: a coordinate, a region number or
+    an internal identity is what a map is drawn from, not something a person asked to
+    be told, and every one of them costs a reader words it would rather spend on the
+    answer.
+    """
     parts = _declared_parts(declared)
-    return {value.label: rendered(value, parts.get(value.key, ())) for value in values}
+    return {
+        value.label: rendered(value, parts.get(value.key, ()))
+        for value in values
+        if not value.technical
+    }
 
 
 def _declared_parts(
@@ -60,9 +70,25 @@ def _said(
         return _odds(value)
     if shape is AttributeFormat.REF:
         return _pointed(value)
+    if parts and isinstance(value, list):
+        return _run_of_parts(value, parts)
     if parts and isinstance(value, dict):
         return _named_parts(value, parts)
     return _plain(value)
+
+
+def _run_of_parts(values: Sequence[JsonValue], parts: Sequence[AttributeSpec]) -> str:
+    """Say a run of things whose parts the registry declares, values alone."""
+    return _cut([_unnamed_parts(one, parts) for one in values])
+
+
+def _unnamed_parts(value: JsonValue, parts: Sequence[AttributeSpec]) -> str:
+    if not isinstance(value, dict):
+        return _plain(value)
+    said = " ".join(
+        _plain(value[part.key]) for part in parts if value.get(part.key) is not None
+    )
+    return said[:1].upper() + said[1:] if said else _plain(value)
 
 
 def _named_parts(value: Mapping[str, JsonValue], parts: Sequence[AttributeSpec]) -> str:
@@ -174,16 +200,34 @@ def test_a_run_of_parts_nothing_declares_is_cut_before_it_floods_a_reader() -> N
     assert said.endswith(LEFT_OUT.format(count=MOST_PARTS))
 
 
-def test_a_run_of_values_that_have_parts_keeps_one_apart_from_the_next() -> None:
-    """Two levels of comma read as one list twice as long, which is how four skill
-    levels read as eight.
-    """
-    asked: JsonValue = [
-        {"skill": "magic", "level": 50},
-        {"skill": "slayer", "level": 10},
+def _asked() -> tuple[AttributeValue, tuple[AttributeSpec, ...]]:
+    from wiki_api.domain.attributes import ATTRIBUTE_SPECS
+    from wiki_api.domain.identity import EntityType
+
+    declared = next(
+        spec
+        for spec in ATTRIBUTE_SPECS[EntityType.QUEST]
+        if spec.format is AttributeFormat.SKILLS and spec.fields
+    )
+    held: JsonValue = [
+        {part.key: value for part, value in zip(declared.fields, one, strict=True)}
+        for one in (("magic", 50), ("slayer", 10))
     ]
-    said = rendered(_value(asked, AttributeFormat.SKILLS))
-    assert said == "skill magic, level 50; skill slayer, level 10"
+    return _value(held, AttributeFormat.SKILLS), declared.fields
+
+
+def test_a_run_of_declared_parts_is_said_as_its_values_alone() -> None:
+    """This used to come back as `skill magic, level 50; skill slayer, level 10`,
+    ten words to say what four say.
+    """
+    value, parts = _asked()
+    assert rendered(value, parts) == "Magic 50, Slayer 10"
+
+
+def test_an_entry_shaped_some_other_way_still_says_what_it_holds() -> None:
+    _, parts = _asked()
+    said = rendered(_value(["anything"], AttributeFormat.SKILLS), parts)
+    assert said == "anything"
 
 
 def test_a_run_of_plain_values_still_reads_as_one_list() -> None:
@@ -266,3 +310,28 @@ def test_a_pointer_is_said_as_the_thing_it_points_at() -> None:
 def test_a_pointer_nobody_resolved_still_says_where_it_pointed() -> None:
     pointer: JsonValue = {"type": "item", "id": 303}
     assert rendered(_value(pointer, AttributeFormat.REF)) == "type item, id 303"
+
+
+def test_a_value_that_addresses_the_game_is_never_said_in_words() -> None:
+    """A place used to be answered as `x 3108, y 3345, plane 0, Region 12340`, four
+    numbers nobody asked for and none of which name anywhere.
+    """
+    from wiki_api.core import AttributeValue as Declared
+    from wiki_api.domain.attributes import ATTRIBUTE_SPECS
+    from wiki_api.domain.identity import EntityType
+
+    specs = ATTRIBUTE_SPECS[EntityType.LOCATION]
+    addressing = [spec for spec in specs if spec.technical]
+    assert {spec.key for spec in addressing} == {"centre", "bounds", "region_id"}
+    said = labelled([Declared.of(spec, 1) for spec in specs if spec.display])
+    assert not {spec.label for spec in addressing} & set(said)
+
+
+def test_a_value_that_describes_the_game_is_still_said() -> None:
+    from wiki_api.core import AttributeValue as Declared
+    from wiki_api.domain.attributes import ATTRIBUTE_SPECS
+    from wiki_api.domain.identity import EntityType
+
+    specs = ATTRIBUTE_SPECS[EntityType.LOCATION]
+    said = labelled([Declared.of(spec, 1) for spec in specs if spec.display])
+    assert "Wilderness level" in said

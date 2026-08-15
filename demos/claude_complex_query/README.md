@@ -1,11 +1,11 @@
 # How much can this wiki actually be asked?
 
-Puts thirty-six questions of different shapes to Claude, one per capability rather than
+Puts forty-one questions of different shapes to Claude, one per capability rather than
 one per tool, and counts what came back. The point is not that any single answer is
 right; it is the tally at the end, which says how much of the data model a question can
 reach today and which tools nothing thought to call. It verifies nothing, and it talks
 to a real model on a credential of your own, so every run costs whatever that credential
-is billed at, thirty-six questions at a time.
+is billed at, forty-one questions at a time.
 
 ```bash
 uv run poe demo claude_complex_query --scripted        # the whole sweep, unattended
@@ -13,9 +13,6 @@ uv run poe demo claude_complex_query --list            # what it asks, without a
 uv run poe demo claude_complex_query --only quest_detail --only multi_hop
 uv run poe demo claude_complex_query --scripted --report runs/sweep.md
 ```
-
-Answers from `data`, the real artifact, since the point is breadth and the test fixture
-holds 28 entities.
 
 ## Asking you back
 
@@ -77,18 +74,8 @@ was there before and creating the directory if it has to.
 
 ## Setting up
 
-Same two credentials as the other demonstrations here, and neither is shared between
-them.
-
-**The wiki key**, read straight from the file `poe keys issue` writes, never from a
-`.env`:
-
-```bash
-uv run poe keys init                     # once, if you have not already
-uv run poe keys issue --label demos      # kept in tokens/demos.json
-```
-
-**A `.env` in this folder** (git-ignored) for the Anthropic credential:
+One credential, the same as the other demonstrations here and shared with none of them:
+**a `.env` in this folder** (git-ignored) for the Anthropic credential.
 
 ```
 CLAUDE_CODE_OAUTH_TOKEN=
@@ -97,4 +84,4 @@ CLAUDE_CODE_OAUTH_TOKEN=
 Generate that with `claude setup-token` to bill a Claude subscription, or put an
 `ANTHROPIC_API_KEY=` there instead. This script reaches the api itself and cannot borrow
 whoever `claude` on this machine is signed in as, so one of the two has to be spelt out.
-Any `WIKI_API_` setting in the same file is picked up too.
+Nothing else belongs in that file: the wiki is a process this run starts for itself.

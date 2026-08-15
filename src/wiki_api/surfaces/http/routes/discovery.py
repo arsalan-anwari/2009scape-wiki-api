@@ -24,6 +24,7 @@ from wiki_api.surfaces.http.dependencies import (
     DescendingQuery,
     HoldsQuery,
     LimitQuery,
+    NamedQuery,
     NearLimitsDep,
     NumberQuery,
     OffsetQuery,
@@ -151,6 +152,7 @@ def read_comparison(
     number: NumberQuery = 0.0,
     ordered_by: OrderedByQuery = None,
     descending: DescendingQuery = False,
+    named: NamedQuery = None,
     limit: LimitQuery = DEFAULT_PAGE_SIZE,
     offset: OffsetQuery = 0,
 ) -> Compared:
@@ -167,6 +169,7 @@ def read_comparison(
         number=number,
         ordered_by=ordered_by,
         descending=descending,
+        named=named,
         limit=limit,
         offset=offset,
     )
@@ -296,6 +299,6 @@ def test_comparing_hangs_off_the_type_whose_values_are_compared() -> None:
 def test_a_caller_naming_no_value_at_all_is_refused_rather_than_listed() -> None:
     from typing import get_args
 
-    for alias in (HoldsQuery, OrderedByQuery):
+    for alias in (HoldsQuery, OrderedByQuery, NamedQuery):
         _, declared = get_args(alias)
         assert declared.description

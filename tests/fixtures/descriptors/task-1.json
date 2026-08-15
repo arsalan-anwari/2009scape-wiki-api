@@ -24,6 +24,7 @@
       "unit": null,
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     },
     {
@@ -36,6 +37,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -48,6 +50,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -60,6 +63,7 @@
       "unit": null,
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     },
     {
@@ -72,6 +76,7 @@
       "unit": null,
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     }
   ],
@@ -111,6 +116,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": null
               },
               {
@@ -123,6 +129,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -135,9 +142,11 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               }
-            ]
+            ],
+            "about": []
           }
         ],
         "total": 1,
@@ -171,7 +180,35 @@
               "icon_ref": null
             },
             "type": "npc",
-            "attributes": []
+            "attributes": [],
+            "about": [
+              {
+                "key": "lifepoints",
+                "value": 240,
+                "label": "Lifepoints",
+                "group": "combat",
+                "order": 10,
+                "format": "int",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "aggressive",
+                "value": true,
+                "label": "Aggressive",
+                "group": "behaviour",
+                "order": 100,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              }
+            ]
           }
         ],
         "total": 1,

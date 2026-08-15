@@ -105,7 +105,6 @@ if [[ "$REAL" -eq 1 ]]; then
   fi
 
   step "a number for whatever the sources name but never number" poe allocate-ids --write
-  step "the overlays a person finishes, where none is written yet" poe prefill-overlays
   step "data/source plus overlays plus identity -> $ARTIFACT" poe build-artifact
 fi
 

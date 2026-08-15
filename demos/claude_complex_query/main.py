@@ -7,18 +7,18 @@ from __future__ import annotations
 import argparse
 import asyncio
 import os
+import re
 import sys
 import time
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import anyio
 import httpx
 from anthropic import AsyncAnthropic
 from fastmcp import Client
-from fastmcp.client.transports import StreamableHttpTransport
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai.messages import TextPart, ToolCallPart
@@ -36,6 +36,7 @@ from claude_common import (
     WORKED,
     Wiki,
     dataset,
+    local_data,
     read_env,
     served,
     unready,
@@ -56,22 +57,18 @@ from claude_complex_query.report import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
 
+    from fastmcp.client.transports import StdioTransport
     from pydantic_ai.messages import ModelMessage
     from pydantic_ai.run import AgentRunResult
 
 HERE = Path(__file__).resolve().parent
 MODEL = "claude-opus-5"
 
-FULL_DATA = "data"
-
-REACHING = 300.0
-READING = 900.0
 STALL = 2.0
 THINKING = 120.0
 PATIENCE = 600.0
 REDRAW = 0.5
 
-#: What the api says when it is holding this sweep back rather than refusing it.
 HELD_BACK: frozenset[int] = frozenset({408, 409, 429, 500, 502, 503, 504, 529})
 MOST_WAITS = 6
 FIRST_WAIT = 2.0
@@ -83,9 +80,38 @@ CHOOSE = "ask_to_choose"
 MORE = "ask_for_more"
 ASK_TOOLS = (CLARIFY, CONFIRM, CHOOSE, MORE)
 
+ADDRESSING = re.compile(
+    r"\b(?:item|npc|shop|quest|location|scenery|task|room|music):\d+"
+    r"|\b(?:id|ids|npc|item|track|region|plane)\s*#?\s*\d+"
+    r"|\b[xy]\s+\d{3,}",
+    re.IGNORECASE,
+)
+MOST_ADDRESSING = 4
+
 FALLBACK = "I do not mind, use your judgement and tell me what you chose"
 YES = "yes, go on"
 FIRST = "the first one"
+
+FORMAT = (
+    "Lay every answer out the same way:\n"
+    "\n"
+    "1. Open with one sentence that answers the question outright, in bold where a "
+    "single name or number is the answer. No preamble, and never restate the "
+    "question.\n"
+    "2. Then the detail, in whichever of these the answer actually is:\n"
+    "   - a markdown table when three or more things are being compared on the same "
+    "fields, one row each, the number that was asked about in the first column after "
+    "the name;\n"
+    "   - a bullet list when it is a flat set of things, or one thing with several "
+    "values, each bullet `**name** — the fact`;\n"
+    "   - a plain sentence or two when it is a single fact, with no list at all.\n"
+    "3. Close with one line saying what the wiki does not hold, but only when "
+    "something asked for is missing from it. Nothing was left out, nothing to write.\n"
+    "\n"
+    "Keep it short: the opening sentence plus at most twelve rows or bullets. Give "
+    "the numbers the wiki gave you rather than rounding them away, and write them "
+    "the way a player says them (`1/5000`, `20,000 Magic XP`, `level 72`)."
+)
 
 PROMPT = (
     "Answer using only the 2009scape wiki tools available to you. Never answer from "
@@ -96,14 +122,31 @@ PROMPT = (
     "Four tools reach the person who asked, and they are the only way to get anything "
     f"from them. Use {CLARIFY} when the question is too vague to look anything up "
     f"for. Use {CONFIRM} when you have settled on a reading that could be wrong. Use "
-    f"{CHOOSE} when several things answer to one name, or when a lookup came back "
-    "unknown and you have close names to offer, and never choose between them "
-    f"yourself. Use {MORE} before spending another page on a long answer, saying how "
-    "much you have shown and how much there is.\n"
+    f"{CHOOSE} when several things answer to one name and the wiki records something "
+    "that tells them apart, or when a lookup came back unknown and you have close "
+    f"names to offer, and never choose between them yourself. Use {MORE} before "
+    "spending another page on a long answer, saying how much you have shown and how "
+    "much there is.\n"
     "\n"
     "Answers arrive one page at a time and report a total; read further only with the "
-    "offset the last answer gave you. Keep the final answer to a few sentences, and "
-    "give the numbers the wiki gave you rather than rounding them away."
+    "offset the last answer gave you. A tool that counts is worth more than a tool "
+    "called twenty times: when the question is how many there are, ask for the total "
+    "rather than paging to the end of the list. Look a name up as it was said to "
+    "you: narrowing to one sort of thing before the tools have told you a name "
+    "answers to several is settling a question that was never yours. A name spelt "
+    "wrong is still the name you were given, so look that up rather than the one you "
+    "think was meant, however plain the correction looks. When nothing answers to it, "
+    "settle which sort of thing it is with whoever asked, ask the wiki for the real "
+    "names closest to it, and put those back to them.\n"
+    "\n"
+    "You are writing for a player, not for another program. Never put a ref, an id, a "
+    "map coordinate, a plane, a region or a track number in front of them: they mean "
+    "nothing to a person and they are not what was asked. Two things with one name "
+    "and nothing to tell them apart are one thing as far as the answer goes, so say "
+    "how many of them there are and answer for all of them at once, rather than "
+    "asking which numbered one was meant.\n"
+    "\n"
+    f"{FORMAT}"
 )
 
 
@@ -143,28 +186,9 @@ def parser() -> argparse.ArgumentParser:
     return declared
 
 
-def patiently(
-    headers: dict[str, str] | None = None,
-    timeout: httpx.Timeout | None = None,
-    auth: httpx.Auth | None = None,
-    **rest: Any,
-) -> httpx.AsyncClient:
-    """An http client that waits on the wiki to respond back, not exiting."""
-    rest.pop("follow_redirects", None)
-    return httpx.AsyncClient(
-        headers=headers,
-        auth=auth,
-        timeout=httpx.Timeout(REACHING, read=READING),
-        follow_redirects=True,
-        **rest,
-    )
-
-
-def reaching(wiki: Wiki) -> StreamableHttpTransport:
-    """How a client reaches the running wiki, key and all."""
-    return StreamableHttpTransport(
-        wiki.url, headers=wiki.headers, httpx_client_factory=patiently
-    )
+def reaching(wiki: Wiki) -> StdioTransport:
+    """A wiki of this probe's own, started here and spoken to down a pipe."""
+    return wiki.transport()
 
 
 def backoff(spent: int) -> float:
@@ -361,6 +385,19 @@ def checked(
         else:
             lines.append((MISSED, "it settled the question itself instead of asking"))
 
+    for wanted in probe.calls:
+        if wanted in from_wiki:
+            lines.append(
+                (WORKED, f"it followed the link this probe is here for: {wanted}")
+            )
+        else:
+            lines.append(
+                (
+                    UNSURE,
+                    f"it answered without ever calling {wanted}, which this covers",
+                )
+            )
+
     unwelcome = [tool for tool in asked if tool not in probe.may_ask]
     if unwelcome and not probe.human_turn:
         lines.append(
@@ -384,7 +421,19 @@ def checked(
     elif probe.says_any:
         lines.append((WORKED, "the answer says the wiki does not hold this"))
 
+    lines.append(_addressing(spoke or said))
     return lines
+
+
+def _addressing(said: str) -> tuple[str, str]:
+    """Say whether the answer put the game's own bookkeeping in front of a person."""
+    shown = list(dict.fromkeys(ADDRESSING.findall(said)))
+    if not shown:
+        return (WORKED, "the answer names things rather than numbering them")
+    written = ", ".join(repr(one) for one in shown[:MOST_ADDRESSING])
+    if len(shown) > MOST_ADDRESSING:
+        written = f"{written} and {len(shown) - MOST_ADDRESSING} more"
+    return (MISSED, f"the answer shows what only the game uses: {written}")
 
 
 async def offered_by(wiki: Wiki) -> list[str]:
@@ -520,11 +569,11 @@ def written(where: Path, probes: Sequence[Probe]) -> Document:
 async def _main(
     probes: Sequence[Probe], scripted: bool, screen: Screen, document: Document | None
 ) -> int:
-    with served(data_dir=os.environ["WIKI_API_DATA_DIR"]) as wiki:
+    with served() as wiki:
         offered = await offered_by(wiki)
         opening = [
-            f"  the wiki is answering at {wiki.url}, reading {dataset()}",
-            f"  presenting the key issued to {wiki.kept}, id {wiki.key_id}",
+            f"  the wiki is answering down a pipe as `{wiki.spawned}`, "
+            f"reading {dataset()}",
             f"  it offers {len(offered)} tools, and this sweep puts "
             f"{len(probes)} questions",
         ]
@@ -533,7 +582,7 @@ async def _main(
         if document is not None:
             document.fact("model", f"`{MODEL}`")
             document.fact("dataset", f"`{dataset()}`")
-            document.fact("wiki", f"{len(offered)} tools, keyed to `{wiki.kept}`")
+            document.fact("wiki", f"{len(offered)} tools, started as `{wiki.spawned}`")
             document.fact("probes", str(len(probes)))
             document.fact(
                 "answers", "scripted" if scripted else "typed at the terminal"
@@ -596,7 +645,7 @@ def main() -> None:
 
 
 def _sweep(asked: argparse.Namespace) -> int:
-    os.environ.setdefault("WIKI_API_DATA_DIR", FULL_DATA)
+    local_data()
 
     if asked.list:
         listed()

@@ -30,7 +30,7 @@ CREATE TABLE entity (
     source        TEXT    NOT NULL
         CHECK (source IN
             ('game_config', 'game_code', 'game_cache', 'grand_exchange',
-             'community_wiki', 'overlay', 'fixture')),
+             'overlay', 'fixture')),
     source_file   TEXT,
     source_ref    TEXT,
     source_revision TEXT,
@@ -76,7 +76,7 @@ CREATE TABLE edge (
     source        TEXT    NOT NULL
         CHECK (source IN
             ('game_config', 'game_code', 'game_cache', 'grand_exchange',
-             'community_wiki', 'overlay', 'fixture')),
+             'overlay', 'fixture')),
     source_file   TEXT,
     source_ref    TEXT,
     source_revision TEXT,

@@ -21,6 +21,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -33,6 +34,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -45,6 +47,7 @@
       "unit": null,
       "derived": true,
       "prominent": false,
+      "technical": false,
       "choices": null
     }
   ],
@@ -84,6 +87,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "npc_spawn",
                   "ground_spawn",
@@ -103,7 +107,31 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "kind",
+                "value": "area",
+                "label": "Kind",
+                "group": "overview",
+                "order": 10,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "city",
+                  "town",
+                  "village",
+                  "building",
+                  "dungeon",
+                  "area",
+                  "island"
+                ]
               }
             ]
           }

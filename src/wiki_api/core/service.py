@@ -154,6 +154,8 @@ class KnowledgeService:
                 resolution=named.resolution,
                 subject=named.subject,
                 alternatives=named.alternatives,
+                tied=named.tied,
+                namesakes=named.namesakes,
             )
         return Named[PriceMovement | None](
             resolution=Found(
@@ -161,6 +163,8 @@ class KnowledgeService:
             ),
             subject=named.subject,
             alternatives=named.alternatives,
+            tied=named.tied,
+            namesakes=named.namesakes,
         )
 
     def comparable(self, entity_type: EntityType) -> tuple[Comparable, ...]:
@@ -176,6 +180,7 @@ class KnowledgeService:
         number: float = 0.0,
         ordered_by: str | None = None,
         descending: bool = False,
+        named: str | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> ComparisonResolution:
@@ -190,6 +195,7 @@ class KnowledgeService:
             number=number,
             ordered_by=ordered_by,
             descending=descending,
+            named=named,
             limit=limit,
             offset=offset,
         )
@@ -222,6 +228,8 @@ class KnowledgeService:
                 resolution=named.resolution,
                 subject=named.subject,
                 alternatives=named.alternatives,
+                tied=named.tied,
+                namesakes=named.namesakes,
             )
         return Named[PageDescriptor](
             resolution=Found(
@@ -234,6 +242,8 @@ class KnowledgeService:
             ),
             subject=named.subject,
             alternatives=named.alternatives,
+            tied=named.tied,
+            namesakes=named.namesakes,
         )
 
     def walk_by_name(
@@ -257,6 +267,8 @@ class KnowledgeService:
                 resolution=named.resolution,
                 subject=named.subject,
                 alternatives=named.alternatives,
+                tied=named.tied,
+                namesakes=named.namesakes,
             )
         return Named[Block](
             resolution=Found(
@@ -272,6 +284,8 @@ class KnowledgeService:
             ),
             subject=named.subject,
             alternatives=named.alternatives,
+            tied=named.tied,
+            namesakes=named.namesakes,
         )
 
     def search(

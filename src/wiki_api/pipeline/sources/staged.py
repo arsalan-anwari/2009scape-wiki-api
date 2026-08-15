@@ -17,10 +17,12 @@ from wiki_api.pipeline.staging.declared import (
     DeclaredExtract,
     DeclaredMusic,
     DeclaredScan,
+    DeclaredSharedTable,
     DeclaredTable,
 )
 from wiki_api.pipeline.staging.errors import StagedFileMissing
 from wiki_api.pipeline.staging.manifest import StagingManifest, read_manifest
+from wiki_api.pipeline.staging.shared import SharedTable
 
 UNSTAGED_VERSION: Final = "2009scape@unknown"
 
@@ -68,6 +70,12 @@ class StagedSources:
     def table(self, declared: DeclaredTable) -> EnumTable:
         """Read one staged enum table."""
         return EnumTable.model_validate_json(
+            self.path(declared.staged).read_text(encoding="utf-8")
+        )
+
+    def shared_table(self, declared: DeclaredSharedTable) -> SharedTable:
+        """Read one staged shared drop table."""
+        return SharedTable.model_validate_json(
             self.path(declared.staged).read_text(encoding="utf-8")
         )
 

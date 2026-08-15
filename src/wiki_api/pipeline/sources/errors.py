@@ -72,6 +72,18 @@ class DriftedVocabulary(AdapterError):
         self.found = tuple(found)
 
 
+class UnreadableSlot(AdapterError):
+    """An id a source reserves for something other than an item cannot be resolved."""
+
+    def __init__(self, source: str, symbol: str) -> None:
+        super().__init__(
+            f"{source} reserves {symbol}, which nothing staged declares: "
+            f"stage the constants library and the shared tables first"
+        )
+        self.source = source
+        self.symbol = symbol
+
+
 class UnallocatedIdentity(AdapterError):
     """A source names something the identity file has never given a number to."""
 
@@ -94,6 +106,7 @@ def test_every_adapter_error_is_a_knowledge_error() -> None:
         MalformedSourceValue("shops.json", "1", "stock", "not three numbers"),
         UnallocatedIdentity("quest", "DEATH_PLATEAU"),
         DriftedVocabulary("WeaponInterface.java", ("BOW",), ("CROSSBOW",)),
+        UnreadableSlot("drop_tables.json", "Items.TINDERBOX_31"),
     )
     assert all(isinstance(error, AdapterError) for error in errors)
     assert all(isinstance(error, KnowledgeError) for error in errors)

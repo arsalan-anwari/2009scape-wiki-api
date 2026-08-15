@@ -129,6 +129,18 @@ class ClueLevel(OrdinalEnum):
     UNKNOWN = "unknown"
 
 
+class SharedDropTable(GameEnum):
+    """A weighted table many drop lists roll on, held apart from any one of them."""
+
+    RARE = "rare"
+    GEM = "gem"
+    HERB = "herb"
+    UNCOMMON_SEED = "uncommon_seed"
+    RARE_SEED = "rare_seed"
+    ALLOTMENT_SEED = "allotment_seed"
+    CELE_MINOR = "cele_minor"
+
+
 class QuestDifficulty(GameEnum):
     """How hard a quest is, in a vocabulary of ours rather than the game's."""
 
@@ -264,6 +276,10 @@ class AttributeMeta:
     display: bool = True
     derived: bool = False
     prominent: bool = False
+    #: Whether this value addresses the game rather than describing it.
+    technical: bool = False
+    #:Whether this value is a count of the world that adds up across namesakes.
+    totalled: bool = False
 
 
 class HiddenReason(GameEnum):
@@ -282,7 +298,6 @@ class SourceKind(GameEnum):
     GAME_CODE = "game_code"
     GAME_CACHE = "game_cache"
     GRAND_EXCHANGE = "grand_exchange"
-    COMMUNITY_WIKI = "community_wiki"
     OVERLAY = "overlay"
     FIXTURE = "fixture"
 
@@ -365,16 +380,26 @@ BONUS_WIDTH: Final = 15
 
 def coerce_item_ref(value: Any) -> Any:
     """Accept the bare item id the sources use wherever an item is referenced."""
+    return _coerce_ref(value, EntityType.ITEM)
+
+
+def coerce_npc_ref(value: Any) -> Any:
+    """Accept the bare npc id the sources use wherever a person is referenced."""
+    return _coerce_ref(value, EntityType.NPC)
+
+
+def _coerce_ref(value: Any, sort: EntityType) -> Any:
+    """Read a reference written whichever way its source happened to write it."""
     if isinstance(value, EntityKey | dict | bool):
         return value
     if isinstance(value, int):
-        return EntityKey(type=EntityType.ITEM, id=value)
+        return EntityKey(type=sort, id=value)
     if isinstance(value, str):
         text = value.strip()
         if not text:
             return None
         if text.isdigit():
-            return EntityKey(type=EntityType.ITEM, id=int(text))
+            return EntityKey(type=sort, id=int(text))
         return EntityKey.parse(text)
     return value
 

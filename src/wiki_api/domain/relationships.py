@@ -28,6 +28,7 @@ from wiki_api.domain.vocabulary import (
     AttributeMeta,
     GameEnum,
     RelationshipGroup,
+    SharedDropTable,
     Skill,
     Unit,
     coerce_item_ref,
@@ -84,6 +85,13 @@ class DropEdgeAttributes(BaseModel):
         BeforeValidator(DropTableKind.coerce),
         AttributeMeta("Drop table", AttributeGroup.RATE, 30, AttributeFormat.ENUM),
     ] = DropTableKind.MAIN
+    rolled_on: Annotated[
+        SharedDropTable | None,
+        BeforeValidator(SharedDropTable.coerce),
+        AttributeMeta(
+            "Rolled on", AttributeGroup.RATE, 35, AttributeFormat.ENUM, prominent=True
+        ),
+    ] = None
     min_amount: Annotated[
         int,
         AttributeMeta("Minimum amount", AttributeGroup.AMOUNT, 40, AttributeFormat.INT),
@@ -195,7 +203,12 @@ class LocatedInEdgeAttributes(BaseModel):
     at: Annotated[
         Coordinate | None,
         AttributeMeta(
-            "Position", AttributeGroup.MAP, 10, AttributeFormat.COORD, prominent=True
+            "Position",
+            AttributeGroup.MAP,
+            10,
+            AttributeFormat.COORD,
+            prominent=True,
+            technical=True,
         ),
     ] = None
     spawn_kind: Annotated[
@@ -334,6 +347,7 @@ class RequirementKind(GameEnum):
 
     CARRIED = "carried"
     COMPLETED = "completed"
+    RECOMMENDED = "recommended"
 
 
 class RequiresEdgeAttributes(BaseModel):
@@ -564,7 +578,7 @@ RELATIONSHIP_SPECS: Final[Mapping[RelationshipType, RelationshipSpec]] = {
         RelationshipType.REQUIRES,
         "Requires",
         "Needed for",
-        frozenset({EntityType.QUEST}),
+        frozenset({EntityType.QUEST, EntityType.TASK}),
         frozenset({EntityType.ITEM, EntityType.QUEST}),
         RelationshipGroup.PREREQUISITES,
         100,

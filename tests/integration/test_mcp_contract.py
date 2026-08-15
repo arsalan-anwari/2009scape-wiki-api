@@ -489,7 +489,9 @@ def test_which_of_these_hold_more_than_a_number(mcp_settings: Settings) -> None:
     )
     assert answered["outcome"] == Outcome.FOUND
     assert [found["name"] for found in answered["result"]["found"]] == [SCIMITAR]
-    assert answered["result"]["found"][0]["facts"] == {"Strength bonus": "66"}
+    facts = answered["result"]["found"][0]["facts"]
+    assert facts["Strength bonus"] == "66"
+    assert facts["Equipment slot"] == "weapon"
 
 
 def test_which_of_these_is_the_largest(mcp_settings: Settings) -> None:
@@ -499,7 +501,20 @@ def test_which_of_these_is_the_largest(mcp_settings: Settings) -> None:
         {"type": EntityType.ITEM, "ordered_by": "Weight", "descending": True},
     )
     assert answered["result"]["found"][0]["name"] == "Kbd heads"
-    assert answered["result"]["found"][0]["facts"] == {"Weight": "10 kg"}
+    assert answered["result"]["found"][0]["facts"]["Weight"] == "10 kg"
+
+
+def test_how_many_things_one_name_answers_to_is_one_call(
+    mcp_settings: Settings,
+) -> None:
+    answered = _called(
+        mcp_settings,
+        COMPARE_TOOL,
+        {"type": EntityType.ITEM, "named": SCIMITAR},
+    )
+    assert answered["outcome"] == Outcome.FOUND
+    assert answered["result"]["total"] == 1
+    assert [found["name"] for found in answered["result"]["found"]] == [SCIMITAR]
 
 
 def test_words_no_value_answers_to_are_answered_with_the_ones_that_do(
@@ -569,7 +584,7 @@ def test_a_name_alone_answers_without_anyone_knowing_an_id(
     mcp_settings: Settings,
 ) -> None:
     answered = _called(mcp_settings, "get_thing", {"name": "king black dragon"})
-    assert answered["result"]["id"] == 50
+    assert answered["result"]["ref"] == "npc:50"
 
 
 def test_an_identity_a_caller_already_knows_is_taken_at_its_word(
@@ -606,7 +621,7 @@ def test_a_retired_name_still_reaches_the_thing_it_used_to_mean(
     answered = _called(mcp_settings, "get_thing", {"name": RETIRED_NAME})
     assert answered["outcome"] == Outcome.FOUND
     assert answered["result"]["name"] == SCIMITAR
-    assert answered["result"]["id"] == 4587
+    assert answered["result"]["ref"] == "item:4587"
 
 
 def test_something_withheld_says_so_without_naming_it(mcp_settings: Settings) -> None:
@@ -675,7 +690,7 @@ def test_close_names_carry_nothing_that_could_be_answered_from(
     )
     assert answered["found"]
     for found in answered["found"]:
-        assert set(found) == {"name", "type", "id"}
+        assert set(found) == {"name", "type", "ref"}
 
 
 def test_close_names_cannot_be_asked_for_without_saying_what_sort_of_thing(
@@ -720,8 +735,9 @@ def test_the_same_question_asked_of_both_surfaces_is_answered_the_same_way(
         {"name": "dragon", "type": EntityType.ITEM.value, "keep": 0.1},
     )
     over_http = client.get("/v1/near-names?name=dragon&type=item&keep=0.1").json()
-    assert [found["id"] for found in over_mcp["found"]] == [
-        result["link"]["id"] for result in over_http["items"]
+    assert [found["ref"] for found in over_mcp["found"]] == [
+        f"{result['link']['type']}:{result['link']['id']}"
+        for result in over_http["items"]
     ]
     assert over_mcp["total"] == over_http["total"]
 
@@ -859,8 +875,7 @@ def test_a_thing_and_a_page_agree_on_who_they_describe(
     answered = _called(mcp_settings, "get_thing", {"name": SCIMITAR})
     described = service.get_page(EntityKey(type=EntityType.ITEM, id=4587))
     assert isinstance(described, Found)
-    assert answered["result"]["id"] == described.value.entity.id
-    assert answered["result"]["slug"] == described.value.entity.slug
+    assert answered["result"]["ref"] == str(described.value.entity.key)
 
 
 def test_the_ways_onwards_are_the_blocks_a_page_would_have_shown(

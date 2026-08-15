@@ -26,17 +26,13 @@ from wiki_api.pipeline.staging.declared import (
     DECLARED_CONFIGS,
     DECLARED_CONSTANTS,
     DECLARED_EXTRACTS,
-    DECLARED_PAGES,
     DECLARED_SCANS,
+    DECLARED_SHARED_TABLES,
     DECLARED_TABLES,
     GAME_CHECKOUT,
     GAME_REPO,
     MUSIC_TRACKS,
-    QUEST_PAGES,
-    WIKI_CHECKOUT,
-    WIKI_REPO,
     DeclaredExtract,
-    DeclaredPages,
     DeclaredScan,
 )
 from wiki_api.pipeline.staging.decoding import DecodeOutcome, decode_cache
@@ -49,10 +45,9 @@ from wiki_api.pipeline.staging.manifest import (
     write_manifest,
 )
 from wiki_api.pipeline.staging.prices import TIMEOUT, download_snapshots
-from wiki_api.pipeline.staging.upstream import game_version_of, vendored_version_of
+from wiki_api.pipeline.staging.shared import read_shared_table
+from wiki_api.pipeline.staging.upstream import game_version_of
 from wiki_api.pipeline.tolerance import check_tolerances, undeclared
-from wiki_api.pipeline.wiki import read_page
-from wiki_api.pipeline.wiki.errors import PagesMissing
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -61,22 +56,21 @@ if TYPE_CHECKING:
 
 CONFIGS: Final = "configs"
 TABLES: Final = "tables"
+SHARED: Final = "shared"
 PRICES: Final = "prices"
 CACHE: Final = "cache"
 CONSTANTS: Final = "constants"
 CODE: Final = "code"
-WIKI: Final = "wiki"
 MUSIC: Final = "music"
 CONFIG_VERSION: Final = 1
 TABLE_VERSION: Final = 1
+SHARED_VERSION: Final = 1
 PRICE_VERSION: Final = 1
 CACHE_VERSION: Final = 1
 CONSTANTS_VERSION: Final = 1
 CODE_VERSION: Final = 2
-WIKI_VERSION: Final = 1
 MUSIC_VERSION: Final = 1
 CODE_SUFFIXES: Final = (".kt", ".java")
-PAGE_SUFFIX: Final = ".html"
 PARTIAL_SUFFIX: Final = ".staging"
 JSON_INDENT: Final = 1
 REFUSAL_SAMPLE: Final = 3
@@ -97,10 +91,6 @@ class StagingRun:
     @property
     def constants(self) -> Path:
         return self.game_data / CONSTANTS_CHECKOUT
-
-    @property
-    def pages(self) -> Path:
-        return self.game_data / WIKI_CHECKOUT
 
     def upstream(self, collector: str, relative: str) -> Path:
         return self.under(self.checkout, collector, relative)
@@ -164,6 +154,32 @@ def stage_configs(run: StagingRun, version: GameVersion) -> CollectorReport:
         for declared in DECLARED_CONFIGS
     ]
     return CollectorReport(collector=CONFIGS, files=tuple(staged))
+
+
+def stage_shared_tables(run: StagingRun, version: GameVersion) -> CollectorReport:
+    """Read every shared table a drop list can roll on out of its xml."""
+    staged: list[StagedFile] = []
+    notes: list[str] = []
+    for declared in DECLARED_SHARED_TABLES:
+        source = run.upstream(SHARED, declared.upstream)
+        table = read_shared_table(
+            source.read_text(encoding="utf-8"), declared.name, declared.file
+        )
+        staged.append(
+            _write(
+                run.destination / declared.staged,
+                _as_json(table.model_dump(mode="json")),
+                collector=SHARED,
+                version=SHARED_VERSION,
+                game_version=version,
+                upstream=declared.upstream,
+                relative=declared.staged,
+            )
+        )
+        notes.append(
+            f"{declared.name}: {len(table.rows)} rows weighing {table.total:g}"
+        )
+    return CollectorReport(collector=SHARED, files=tuple(staged), notes=tuple(notes))
 
 
 def stage_tables(run: StagingRun, version: GameVersion) -> CollectorReport:
@@ -284,54 +300,6 @@ def _scan(run: StagingRun, declared: DeclaredScan) -> list[dict[str, Any]]:
     return [found[name] for name in sorted(found)]
 
 
-def stage_wiki(run: StagingRun, version: GameVersion) -> CollectorReport:
-    """Read the saved community pages into headed sections a fact can be checked in."""
-    if not run.pages.is_dir():
-        raise PagesMissing(str(run.pages))
-    staged: list[StagedFile] = []
-    notes: list[str] = []
-    for declared in DECLARED_PAGES:
-        pages = _pages(run, declared)
-        payload = _as_json(
-            {
-                "namespace": declared.namespace,
-                "pages": [page.model_dump(mode="json") for page in pages],
-            }
-        )
-        staged.append(
-            _write(
-                run.destination / declared.staged,
-                payload,
-                collector=WIKI,
-                version=WIKI_VERSION,
-                game_version=_snapshot_version(run),
-                upstream=declared.upstream,
-                relative=declared.staged,
-            )
-        )
-        notes.append(
-            f"{declared.namespace}: {len(pages)} pages, "
-            f"{sum(len(page.sections) for page in pages)} sections"
-        )
-    return CollectorReport(collector=WIKI, files=tuple(staged), notes=tuple(notes))
-
-
-def _pages(run: StagingRun, declared: DeclaredPages) -> list[Any]:
-    read = [
-        read_page(path.read_text(encoding="utf-8", errors="replace"), path.name)
-        for path in sorted(run.pages.glob(f"*{PAGE_SUFFIX}"))
-    ]
-    kept = [page for page in read if page.namespace == declared.namespace]
-    if not kept:
-        raise PagesMissing(str(run.pages / f"{declared.namespace}*{PAGE_SUFFIX}"))
-    return sorted(kept, key=lambda page: page.slug)
-
-
-def _snapshot_version(run: StagingRun) -> GameVersion:
-    """Name the saved pages by what the vendored directory holds."""
-    return vendored_version_of(run.pages, WIKI_REPO)
-
-
 def stage_music(run: StagingRun, version: GameVersion) -> CollectorReport:
     """Read the game's own music track dump."""
     declared = MUSIC_TRACKS
@@ -430,11 +398,11 @@ def _extract_payload(declared: DeclaredExtract, outcome: DecodeOutcome) -> bytes
 
 COLLECTORS: Final[dict[str, Callable[[StagingRun, GameVersion], CollectorReport]]] = {
     CONFIGS: stage_configs,
+    SHARED: stage_shared_tables,
     TABLES: stage_tables,
     CONSTANTS: stage_constants,
     CODE: stage_code,
     CACHE: stage_cache,
-    WIKI: stage_wiki,
     MUSIC: stage_music,
     PRICES: stage_prices,
 }
@@ -569,21 +537,10 @@ def _checkout(tmp_path: Path) -> StagingRun:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(_declaration(table.enum, table.filename), encoding="utf-8")
     _committed(checkout)
-    _saved_pages(tmp_path / "game_data" / WIKI_CHECKOUT)
     return StagingRun(
         game_data=tmp_path / "game_data",
         destination=tmp_path / "data" / "source",
         prices_url="https://example.test/gedata/",
-    )
-
-
-def _saved_pages(pages: Path) -> None:
-    """A vendored directory of saved pages, which is the one staging still reads."""
-    from wiki_api.pipeline.wiki.pages import SAMPLE
-
-    pages.mkdir(parents=True)
-    (pages / f"{QUEST_PAGES.namespace}_cooks_assistant{PAGE_SUFFIX}").write_text(
-        SAMPLE, encoding="utf-8"
     )
 
 
@@ -783,35 +740,6 @@ def test_staging_writes_no_judgement_of_its_own_beside_the_dump(
     dumped = json.loads((run.destination / "music/tracks.json").read_text())
     assert set(dumped) == {"tracks"}
     assert "place" not in dumped["tracks"][0]
-
-
-def test_the_saved_pages_are_named_by_the_directory_they_came_from(
-    tmp_path: Path,
-) -> None:
-    from wiki_api.pipeline.staging.manifest import read_manifest
-
-    run = _checkout(tmp_path)
-    stage(run, only=[WIKI])
-    entry = read_manifest(run.destination).entry(QUEST_PAGES.staged)
-    assert entry.game_version.repo == WIKI_REPO
-    assert entry.collector == WIKI
-
-
-def test_a_vendored_source_is_versioned_by_content_not_by_the_repo_above_it(
-    tmp_path: Path,
-) -> None:
-    from wiki_api.pipeline.staging.manifest import read_manifest
-    from wiki_api.pipeline.wiki.pages import SAMPLE
-
-    run = _checkout(tmp_path)
-    stage(run, only=[WIKI])
-    before = read_manifest(run.destination).entry(QUEST_PAGES.staged).game_version
-    saved = run.pages / f"{QUEST_PAGES.namespace}_cooks_assistant{PAGE_SUFFIX}"
-    saved.write_text(SAMPLE.replace("An opening line.", "Another."), encoding="utf-8")
-    stage(run, only=[WIKI])
-    after = read_manifest(run.destination).entry(QUEST_PAGES.staged).game_version
-    assert after != before
-    assert str(before) != str(_game_version(run))
 
 
 def _game_version(run: StagingRun) -> GameVersion:

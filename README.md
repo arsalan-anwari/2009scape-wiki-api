@@ -79,15 +79,6 @@ own label, format and unit:
           "total": 3, "limit": 1, "next_offset": 1}}
 ```
 
-The rest of the contract, paged the same way:
-
-| path | answers |
-| --- | --- |
-| `/v1/entities/{type}/{slug}` | the whole page in one response: infobox, sections, and a first page of every relationship |
-| `/v1/entities/item/{slug}/prices` | the weekly record, so a chart is one request and no page pays for it. Pages carry a summary instead, and every price says how far to trust itself: `traded`, `static` if it never moved, `untraded` if it never left the floor |
-| `/v1/types/{type}/compare` | a question asked against a whole type: `?holds=Strength bonus&how=more_than&number=100`. Anything not carrying the value is left out of the answer and the total, because it is absent rather than smallest |
-| `/v1/near-names?name=...&type=...` | what a name that answered to nothing might have meant, as names only. The type is required, because `dagon` is a near miss for different things. `WIKI_API_NEAR_FLOOR` sets how close is close enough |
-| `/v1/types` | the attribute keys and labels `compare` accepts |
 
 ## Keys
 
@@ -208,54 +199,11 @@ A token outlives the container, so `container up` again does not invalidate it.
 | `tests` | integration tests and hand-made knowledge fixtures |
 | `demos` | worked examples, one folder each, run with `uv run poe demo <folder>` |
 | `game_data` | the game's own repositories, checked out and never written to |
-| `data/source` | what staging wrote, and what the build reads: `configs`, `tables`, `cache`, `grand-exchange` and the manifest describing them, plus `wiki` and `places` for `prefill-overlays` |
+| `data/source` | what staging wrote, and what the build reads: `configs`, `tables`, `shared`, `cache`, `code`, `constants`, `music`, `grand-exchange` and the manifest describing them |
 | `overlays` | hand-written corrections, merged over the sources at build time |
 | `identity` | the numbers kept for things the sources name but never number |
 
-Each demo needs `poe keys issue --label demos` first, its own `.env`, and an artifact to
-answer from.
-
-## Development
-
-```bash
-uv run poe check                 # lint, types, import boundaries, tests
-uv run poe check-docs            # prose gate over comments, docstrings and README
-uv run poe fix                   # auto-fix formatting and simple lint issues
-uv run poe build-test-artifact   # hand-made data at data/tests, enough to serve
-uv run poe upload-data           # publish a build, if the dataset is yours
-```
-
-Build the artifact yourself only when changing the pipeline. The test build lands in
-`data/tests` so it never overwrites what a deployment serves. Point at it with
-`WIKI_API_DATA_DIR=data/tests`. The test suite mints its own key per run.
-
-### Building from the game's own sources
-
-Staging reads the checked-out game repositories and writes `data/source/`; the build reads
-that directory and the hand-written inputs beside it, and never opens the submodules.
-
-```bash
-uv run poe sync-submodules       # check out the game repositories under game_data/
-uv run poe stage-sources         # copy, extract and fetch into data/source/
-uv run poe allocate-ids --write  # number what the sources name but never number
-uv run poe prefill-overlays      # write the overlays a person finishes by hand
-uv run poe build-artifact        # data/source + overlays + identity -> the artifact
-```
-
-`uv run poe build-artifacts` runs all five in that order, then the test build, so a machine
-with nothing staged ends up with both artifacts, the real one at `data/` and the hand-made
-one at `data/tests/`. It re-runs safely, prefilling no overlay already written and moving
-no checkout already there. `--update` moves the checkouts to their branch heads,
-`--offline` leaves the network alone, `--dry-run` prints the tasks without running any, and
-`--fixture-only` builds just the test artifact, which needs no checkouts. `stage-sources`
-takes `--only` with `configs`, `tables`, `cache`, `places` or `prices`.
-
-Decoding is allowed to fail a little, and never quietly. `pipeline/tolerance.py` names how
-many rows each cache may lose and why, a build over that ceiling stops, and the staging
-report prints what each one used of what it was allowed.
-
-Corrections live in `overlays/` and are reviewed like code, because `data/` is not in
-version control. An overlay that *defines* an entity takes it away from the source
-entirely, which is how a duplicate id upstream gets resolved. `identity/` holds the number
-each quest, slayer task, place and house room keeps across rebuilds; none of them ever
-takes its number from an enum ordinal.
+Each demo needs its own `.env` for an Anthropic credential and a build in `data` to
+answer from. None of them reaches a server: each starts `scape2009-wiki-mcp` itself and
+speaks to it down a pipe, reading `data/knowledge.sqlite3` and nothing else, so there is
+no port to guard and no key to issue for one.

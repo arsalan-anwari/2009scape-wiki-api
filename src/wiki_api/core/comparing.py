@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from wiki_api.core.results import Compared, Found, Row, Uncomparable
-from wiki_api.core.values import compared_values
+from wiki_api.core.values import compared_values, entity_values, prominent_values
 from wiki_api.domain.page import DEFAULT_PAGE_SIZE, Page
 from wiki_api.domain.query import (
     Comparable,
@@ -39,15 +39,13 @@ def compare(
     number: float = 0.0,
     ordered_by: str | None = None,
     descending: bool = False,
+    named: str | None = None,
     limit: int = DEFAULT_PAGE_SIZE,
     offset: int = 0,
 ) -> ComparisonResolution:
-    """Page through the entities of one type whose stored number answers the question.
-
-    Anything not carrying a value being compared or sorted on is left out of the answer
-    and out of the total, because it is not a smaller one.
-    """
-    if holds is None and ordered_by is None:
+    """Page through the entities of one type whose stored number answers
+    the question."""
+    if holds is None and ordered_by is None and named is None:
         return Uncomparable(asked="", offered=_offered(entity_type))
     held = _resolved(entity_type, holds)
     sorted_by = _resolved(entity_type, ordered_by)
@@ -64,7 +62,12 @@ def compare(
         else Ordering(path=sorted_by.path, descending=descending)
     )
     page = repository.list_by_attribute(
-        entity_type, where=where, order=order, limit=limit, offset=offset
+        entity_type,
+        where=where,
+        order=order,
+        named=named,
+        limit=limit,
+        offset=offset,
     )
     shown = tuple(one for one in (held, sorted_by) if one is not None)
     return Found(
@@ -98,6 +101,7 @@ def _row(entity: Entity, shown: Sequence[Comparable]) -> Row:
         link=entity.to_link(),
         type=entity.type,
         attributes=compared_values(entity, shown),
+        about=prominent_values(entity_values(entity)),
     )
 
 
@@ -138,10 +142,11 @@ def _repository() -> tuple[KnowledgeRepository, list[dict[str, object]]]:
             *,
             where: Sequence[Condition] = (),
             order: Ordering | None = None,
+            named: str | None = None,
             limit: int = DEFAULT_PAGE_SIZE,
             offset: int = 0,
         ) -> Page[Thing]:
-            asked.append({"where": list(where), "order": order})
+            asked.append({"where": list(where), "order": order, "named": named})
             return Page[Thing](items=(found,), total=1, limit=limit, offset=offset)
 
     return cast("KnowledgeRepository", Listing()), asked
@@ -220,3 +225,29 @@ def test_a_value_of_another_sort_of_thing_is_not_understood() -> None:
     repository, _ = _repository()
     answered = compare(repository, Sort.QUEST, holds="strength bonus")
     assert isinstance(answered, Uncomparable)
+
+
+def test_a_comparison_can_be_narrowed_to_the_things_one_name_answers_to() -> None:
+    from wiki_api.domain.identity import EntityType as Sort
+
+    repository, asked = _repository()
+    answered = compare(repository, Sort.SCENERY, named="Bank booth")
+    assert isinstance(answered, Found)
+    assert asked == [{"where": [], "order": None, "named": "Bank booth"}]
+
+
+def test_a_name_on_its_own_is_enough_to_ask_a_comparison() -> None:
+    from wiki_api.domain.identity import EntityType as Sort
+
+    repository, _ = _repository()
+    assert isinstance(compare(repository, Sort.SCENERY, named="Bank booth"), Found)
+    assert isinstance(compare(repository, Sort.SCENERY), Uncomparable)
+
+
+def test_a_compared_row_carries_what_the_thing_itself_is_known_by() -> None:
+    from wiki_api.domain.identity import EntityType as Sort
+
+    repository, _ = _repository()
+    answered = compare(repository, Sort.ITEM, holds="market price", number=1.0)
+    assert isinstance(answered, Found)
+    assert answered.value.rows.items[0].about

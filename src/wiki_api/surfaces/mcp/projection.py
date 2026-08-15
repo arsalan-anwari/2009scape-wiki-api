@@ -101,12 +101,33 @@ class Compact(BaseModel):
         return declared
 
 
-class Neighbour(Compact):
-    """One thing an answer names, and the values that came with it."""
+REF_NOTE: Final = (
+    "how to name this exact one back to a tool. It addresses the game, it is not "
+    "something a person asked for: never write it into an answer"
+)
+
+
+def ref_of(link: Link) -> str:
+    """The handle a tool takes to reach exactly this one thing and no namesake."""
+    return str(link.key)
+
+
+class Addressed(Compact):
+    """What a thing is called, and the handle that reaches this exact one.
+
+    `ref` is for calling the next tool with; it is never part of an answer. Anything
+    that sets one namesake apart from another belongs in `facts`, where it can be put
+    to a person in words they recognise.
+    """
 
     name: str
     type: EntityType
-    id: int
+    ref: str = Field(description=REF_NOTE)
+
+
+class Neighbour(Addressed):
+    """One thing an answer names, and the values that came with it."""
+
     facts: dict[str, str] = Field(default_factory=dict)
 
 
@@ -119,18 +140,15 @@ class Reachable(Compact):
     examples: tuple[str, ...] = ()
 
 
-class Thing(Compact):
+class Thing(Addressed):
     """One thing, its values worth knowing, and every way onwards from it as a count
     rather than contents.
     """
 
-    name: str
-    type: EntityType
-    id: int
-    slug: str
     summary: str | None = None
     facts: dict[str, str] = Field(default_factory=dict)
     same_thing_as: str | None = None
+    others_with_this_name: int = Field(default=0, ge=0)
     reachable: tuple[Reachable, ...] = ()
 
 
@@ -146,12 +164,9 @@ class Related(Compact):
     left_out: int = Field(default=0, ge=0)
 
 
-class Candidate(Compact):
+class Candidate(Addressed):
     """One thing a set of words turned up, named well enough to ask about."""
 
-    name: str
-    type: EntityType
-    id: int = Field(ge=0)
     summary: str | None = None
 
 
@@ -243,20 +258,16 @@ def _which_way(change: int) -> str:
     return NOWHERE
 
 
-def thing_of(descriptor: PageDescriptor) -> Thing:
-    """Shrink a whole page to what a reader would use.
-
-    Every value the thing records is written down: a reader that cannot see one asks
-    no follow-up question, it says the wiki does not hold it.
-    """
+def thing_of(descriptor: PageDescriptor, namesakes: int = 0) -> Thing:
+    """Shrink a whole page to what a reader would use."""
     return Thing(
         name=descriptor.entity.label,
         type=descriptor.type,
-        id=descriptor.entity.id,
-        slug=descriptor.entity.slug,
+        ref=ref_of(descriptor.entity),
         summary=descriptor.description,
         facts=labelled(_all_values(descriptor), ATTRIBUTE_SPECS[descriptor.type]),
         same_thing_as=_named(descriptor.canonical),
+        others_with_this_name=namesakes,
         reachable=tuple(_reachable(block) for block in descriptor.blocks),
     )
 
@@ -286,7 +297,7 @@ def matches_of(
             Candidate(
                 name=summary.link.label,
                 type=summary.type,
-                id=summary.link.id,
+                ref=ref_of(summary.link),
                 summary=summary.description,
             )
             for summary in page.items
@@ -336,11 +347,15 @@ def _reachable(block: Block) -> Reachable:
 
 
 def _neighbour(row: Row, declared: Sequence[AttributeSpec] = ()) -> Neighbour:
+    """Write down what the link says and what the thing at the far end is known by,
+    so a reader can rank a page of them without fetching each one.
+    """
     return Neighbour(
         name=row.link.label,
         type=row.type,
-        id=row.link.id,
-        facts=labelled(prominent_values(row.attributes), declared),
+        ref=ref_of(row.link),
+        facts=labelled(prominent_values(row.attributes), declared)
+        | labelled(row.about, ATTRIBUTE_SPECS[row.type]),
     )
 
 
@@ -349,8 +364,8 @@ def _carried(row: Row) -> Neighbour:
     return Neighbour(
         name=row.link.label,
         type=row.type,
-        id=row.link.id,
-        facts=labelled(row.attributes),
+        ref=ref_of(row.link),
+        facts=labelled(row.attributes) | labelled(row.about, ATTRIBUTE_SPECS[row.type]),
     )
 
 
@@ -437,7 +452,7 @@ def _block(total: int = 2) -> Block:
 def test_a_thing_carries_who_it_is_without_carrying_a_page() -> None:
     thing = thing_of(_descriptor())
     assert thing.name == "King Black Dragon"
-    assert thing.id == 50
+    assert thing.ref == "npc:50"
     assert thing.summary is not None
     assert thing.reachable == ()
 
@@ -498,7 +513,9 @@ def test_a_thing_writes_down_every_value_it_records() -> None:
     for entity_type in EntityType:
         descriptor = _recorded(entity_type)
         written = thing_of(descriptor).facts
-        assert set(written) == {value.label for value in _all_values(descriptor)}
+        assert set(written) == {
+            value.label for value in _all_values(descriptor) if not value.technical
+        }
 
 
 def test_a_value_a_reader_could_not_see_before_is_one_a_question_can_reach() -> None:
@@ -507,7 +524,11 @@ def test_a_value_a_reader_could_not_see_before_is_one_a_question_can_reach() -> 
     """
     descriptor = _recorded(EntityType.NPC)
     shown = thing_of(descriptor).facts
-    hidden = [value.label for value in _all_values(descriptor) if not value.prominent]
+    hidden = [
+        value.label
+        for value in _all_values(descriptor)
+        if not value.prominent and not value.technical
+    ]
     assert hidden
     assert set(hidden) <= set(shown)
 
@@ -610,7 +631,7 @@ def test_a_field_with_nothing_in_it_is_never_written_down() -> None:
 def test_a_field_that_answers_survives_being_shrunk() -> None:
     written = thing_of(_descriptor()).model_dump()
     assert written["name"] == "King Black Dragon"
-    assert written["id"] == 50
+    assert written["ref"] == "npc:50"
     assert written["summary"]
 
 
@@ -672,3 +693,25 @@ def test_a_definition_pointed_at_twice_is_folded_in_both_times() -> None:
 def test_a_shrunk_answer_still_reads_back_as_the_shape_it_declares() -> None:
     thing = thing_of(_descriptor().model_copy(update={"blocks": (_block(),)}))
     assert Thing.model_validate(thing.model_dump()) == thing
+
+
+def test_a_thing_is_addressed_by_a_handle_rather_than_a_bare_number() -> None:
+    """A bare `id` read as a fact about the thing, and answers came back saying
+    'NPC 8349' and 'Phoenix crossbow (item:767)'. A ref says what it is for.
+    """
+    thing = thing_of(_descriptor())
+    assert thing.ref == "npc:50"
+    assert "id" not in thing.model_dump()
+
+
+def test_the_handle_a_ref_carries_is_one_a_tool_takes_back() -> None:
+    from wiki_api.domain.identity import EntityKey
+
+    thing = thing_of(_descriptor())
+    assert EntityKey.parse(thing.ref) == EntityKey.parse("npc:50")
+
+
+def test_every_addressed_shape_says_a_ref_is_not_for_answering_with() -> None:
+    for shape in (Thing, Neighbour, Candidate):
+        described = shape.model_json_schema()["properties"]["ref"]["description"]
+        assert "never write it into an answer" in described

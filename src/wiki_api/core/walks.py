@@ -7,7 +7,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final
 
 from wiki_api.core.results import Block, Direction, Row, Walk
-from wiki_api.core.values import edge_values, naming_of
+from wiki_api.core.values import (
+    edge_values,
+    entity_values,
+    naming_of,
+    prominent_values,
+)
 from wiki_api.domain.page import Page
 from wiki_api.domain.relationships import RELATIONSHIP_SPECS
 
@@ -184,6 +189,7 @@ def _rows(
                 link=neighbour.to_link(),
                 type=neighbour.type,
                 attributes=edge_values(edge, naming),
+                about=prominent_values(entity_values(neighbour, naming)),
             )
         )
     return rows

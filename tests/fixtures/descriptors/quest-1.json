@@ -21,6 +21,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": [
         "novice",
         "intermediate",
@@ -40,6 +41,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": [
         "very_short",
         "short",
@@ -58,6 +60,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -70,6 +73,7 @@
       "unit": null,
       "derived": false,
       "prominent": true,
+      "technical": false,
       "choices": null
     },
     {
@@ -82,6 +86,7 @@
       "unit": null,
       "derived": false,
       "prominent": false,
+      "technical": false,
       "choices": null
     }
   ],
@@ -121,7 +126,90 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "tradeable",
+                "value": true,
+                "label": "Tradeable",
+                "group": "trade",
+                "order": 10,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "shop_price",
+                "value": 1900,
+                "label": "Shop price",
+                "group": "trade",
+                "order": 30,
+                "format": "gp",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "market_price",
+                "value": 13797,
+                "label": "Market price",
+                "group": "trade",
+                "order": 37,
+                "format": "gp",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "weight",
+                "value": 0.3,
+                "label": "Weight",
+                "group": "general",
+                "order": 60,
+                "format": "float",
+                "unit": "kg",
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "equipment_slot",
+                "value": "feet",
+                "label": "Equipment slot",
+                "group": "equipment",
+                "order": 90,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "head",
+                  "cape",
+                  "neck",
+                  "weapon",
+                  "chest",
+                  "shield",
+                  "hidden_1",
+                  "legs",
+                  "hidden_2",
+                  "hands",
+                  "feet",
+                  "hidden_3",
+                  "ring",
+                  "ammo"
+                ]
               }
             ]
           }
@@ -168,6 +256,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": [
                   "npc_spawn",
                   "ground_spawn",
@@ -187,6 +276,43 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
+                "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "kind",
+                "value": "town",
+                "label": "Kind",
+                "group": "overview",
+                "order": 10,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "city",
+                  "town",
+                  "village",
+                  "building",
+                  "dungeon",
+                  "area",
+                  "island"
+                ]
+              },
+              {
+                "key": "members",
+                "value": true,
+                "label": "Members only",
+                "group": "overview",
+                "order": 50,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
                 "choices": null
               }
             ]
@@ -234,9 +360,11 @@
                 "unit": null,
                 "derived": false,
                 "prominent": true,
+                "technical": false,
                 "choices": [
                   "carried",
-                  "completed"
+                  "completed",
+                  "recommended"
                 ]
               },
               {
@@ -249,6 +377,7 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
               },
               {
@@ -261,7 +390,90 @@
                 "unit": null,
                 "derived": false,
                 "prominent": false,
+                "technical": false,
                 "choices": null
+              }
+            ],
+            "about": [
+              {
+                "key": "tradeable",
+                "value": true,
+                "label": "Tradeable",
+                "group": "trade",
+                "order": 10,
+                "format": "bool",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "shop_price",
+                "value": 1900,
+                "label": "Shop price",
+                "group": "trade",
+                "order": 30,
+                "format": "gp",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "market_price",
+                "value": 13797,
+                "label": "Market price",
+                "group": "trade",
+                "order": 37,
+                "format": "gp",
+                "unit": null,
+                "derived": true,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "weight",
+                "value": 0.3,
+                "label": "Weight",
+                "group": "general",
+                "order": 60,
+                "format": "float",
+                "unit": "kg",
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              },
+              {
+                "key": "equipment_slot",
+                "value": "feet",
+                "label": "Equipment slot",
+                "group": "equipment",
+                "order": 90,
+                "format": "enum",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": [
+                  "head",
+                  "cape",
+                  "neck",
+                  "weapon",
+                  "chest",
+                  "shield",
+                  "hidden_1",
+                  "legs",
+                  "hidden_2",
+                  "hands",
+                  "feet",
+                  "hidden_3",
+                  "ring",
+                  "ammo"
+                ]
               }
             ]
           }
@@ -297,7 +509,22 @@
               "icon_ref": null
             },
             "type": "music",
-            "attributes": []
+            "attributes": [],
+            "about": [
+              {
+                "key": "unlock_note",
+                "value": "during Death Plateau",
+                "label": "How it is unlocked",
+                "group": "general",
+                "order": 20,
+                "format": "text",
+                "unit": null,
+                "derived": false,
+                "prominent": true,
+                "technical": false,
+                "choices": null
+              }
+            ]
           }
         ],
         "total": 1,

@@ -5,8 +5,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from wiki_api.core import Direction
+from wiki_api.domain.relationships import RELATIONSHIP_SPECS, RelationshipType
+from wiki_api.surfaces.mcp import CLOSE_NAMES_TOOL
+from wiki_api.surfaces.mcp.naming import tool_name
+
+
+def following(rel: RelationshipType, direction: Direction) -> str:
+    """Name the tool that follows one link one way round, off the registry rather than
+    written down here, so a link renamed there is renamed here too.
+    """
+    return tool_name(RELATIONSHIP_SPECS[rel], direction)
+
+
 MORE = "ask_for_more"
 CHOOSE = "ask_to_choose"
+CONFIRM = "ask_to_confirm"
+CLARIFY = "ask_to_clarify"
 DENIALS: tuple[str, ...] = (
     "does not hold",
     "doesn't hold",
@@ -28,6 +43,7 @@ class Probe:
     covers: str
     question: str
     reaches: int = 1
+    calls: tuple[str, ...] = ()
     says: tuple[str, ...] = ()
     says_any: tuple[str, ...] = ()
     never_says: tuple[str, ...] = ()
@@ -36,8 +52,6 @@ class Probe:
     may_ask: tuple[str, ...] = field(default=(MORE,))
 
 
-#: The sweep, in the order it runs. Every entity type and every link this build holds
-#: is reached by at least one of these.
 PROBES: tuple[Probe, ...] = (
     Probe(
         tag="manifest",
@@ -73,21 +87,18 @@ PROBES: tuple[Probe, ...] = (
     Probe(
         tag="npc_stats",
         reaches=1,
-        covers="npc combat attributes, and a name eighteen things answer to",
+        covers="npc combat attributes, under a name eighteen records used to answer to",
         question="How dangerous is a Tormented demon? Give me its combat stats.",
         says=("326", "85"),
         never_says=DENIALS,
-        answers=("the strongest one you have",),
-        human_turn=True,
     ),
     Probe(
         tag="scenery_use",
         reaches=1,
         covers="scenery as an entity type, with the options the game gives it",
         question="What can I do with a Bank booth, and how many are in the world?",
-        says=("Collect",),
-        answers=("whichever has the most placements",),
-        may_ask=(MORE, CHOOSE),
+        says=("Collect", "96"),
+        may_ask=(MORE,),
     ),
     Probe(
         tag="quest_detail",
@@ -120,12 +131,28 @@ PROBES: tuple[Probe, ...] = (
     Probe(
         tag="place_hierarchy",
         reaches=1,
-        covers="locations, their tiles, and the part_of / contains pair",
+        covers="a place described by what it is and what it sits inside, not by tiles",
         question=(
-            "Where is Draynor Manor on the map, what larger place is it part of, and "
-            "what does Burthorpe contain?"
+            "Tell me about Draynor Manor: what sort of place is it, and what larger "
+            "place is it part of?"
         ),
-        says=("Draynor Village", "Heroes' Guild", "3108"),
+        says=("Draynor Village",),
+        never_says=DENIALS,
+    ),
+    Probe(
+        tag="place_contents",
+        reaches=2,
+        covers="the part_of / contains pair, a place read from both ends",
+        question=(
+            "List every place recorded inside Varrock, the whole list rather than a "
+            "few examples, and tell me which larger place White Knights' Castle "
+            "belongs to."
+        ),
+        calls=(
+            following(RelationshipType.PART_OF, Direction.REVERSE),
+            following(RelationshipType.PART_OF, Direction.FORWARD),
+        ),
+        says=("Varrock Square", "Falador"),
         never_says=DENIALS,
     ),
     Probe(
@@ -166,6 +193,25 @@ PROBES: tuple[Probe, ...] = (
         says=("Dragon bones",),
         answers=("yes, show me the rest", "that is enough"),
         human_turn=True,
+    ),
+    Probe(
+        tag="rare_drops",
+        reaches=1,
+        covers="a roll on a table many monsters share, read as the items it gives",
+        question=(
+            "Does the King Black Dragon drop a Draconic visage, and roughly how often? "
+            "Name two of the rarest things it can drop besides that."
+        ),
+        says=("Draconic visage",),
+        never_says=DENIALS,
+    ),
+    Probe(
+        tag="unplayable_quest",
+        reaches=1,
+        covers="a quest the game declares but no class implements",
+        question="Is the quest Monkey Madness available in the game?",
+        says_any=("not implemented", "cannot", "can't", "no"),
+        may_ask=(MORE, CHOOSE),
     ),
     Probe(
         tag="who_drops_it",
@@ -221,11 +267,11 @@ PROBES: tuple[Probe, ...] = (
         reaches=2,
         covers="yields and makes: gathering a resource and turning it into something",
         question=(
-            "What can I catch at a fishing spot and at what levels, and what do raw "
-            "shrimps turn into when I cook them?"
+            "How many fishing spots are there in the game, what can I catch at one "
+            "and at what levels, and what do raw shrimps turn into when cooked?"
         ),
         says=("Shrimps",),
-        may_ask=(MORE, CHOOSE),
+        may_ask=(MORE,),
     ),
     Probe(
         tag="ammunition",
@@ -247,6 +293,18 @@ PROBES: tuple[Probe, ...] = (
             "White cog spawn?"
         ),
         says=("cog",),
+    ),
+    Probe(
+        tag="smithing_bar",
+        reaches=1,
+        covers="makes, from one ingredient to everything the game turns it into",
+        question=(
+            "I have a Bronze bar. What can I smith from it, and what Smithing level "
+            "does each one need? Give me the cheapest handful."
+        ),
+        calls=(following(RelationshipType.MAKES, Direction.FORWARD),),
+        says=("Bronze dagger",),
+        may_ask=(MORE, CONFIRM, CHOOSE),
     ),
     Probe(
         tag="reverse_skilling",
@@ -311,17 +369,28 @@ PROBES: tuple[Probe, ...] = (
         covers="a misspelt name settled by asking rather than by guessing",
         question="tell me about the abysal wipe",
         says=("Abyssal whip",),
-        answers=("item", "Abyssal whip"),
+        answers=("an item, yes", "Abyssal whip"),
         human_turn=True,
+        may_ask=(MORE, CHOOSE, CONFIRM, CLARIFY),
+    ),
+    Probe(
+        tag="bad_spelling",
+        reaches=2,
+        covers="a name too badly spelt to search for, put back to whoever asked",
+        question="whats the drangon scimatar worth",
+        calls=(CLOSE_NAMES_TOOL,),
+        says=("Dragon scimitar",),
+        answers=("an item, yes", "Dragon scimitar"),
+        human_turn=True,
+        may_ask=(MORE, CHOOSE, CONFIRM, CLARIFY),
     ),
     Probe(
         tag="music_name",
         reaches=1,
-        covers="one name held by two sorts of thing, settled by asking which was meant",
-        question="tell me about Monkey Madness",
-        says=("Ape Atoll",),
-        answers=("the music track, not the quest",),
-        human_turn=True,
+        covers="one name held by two sorts of thing, told apart by what the asker said",
+        question="Where is the music track Monkey Madness unlocked in the game?",
+        says=("Ape Atoll", "Jungle"),
+        may_ask=(),
     ),
     Probe(
         tag="vague_question",
@@ -335,9 +404,10 @@ PROBES: tuple[Probe, ...] = (
     Probe(
         tag="honest_gap",
         reaches=1,
-        covers="a fact this build lacks, which should be said rather than invented",
+        covers="what a quest gives you, which only a community guide ever wrote down",
         question="What does completing Desert Treasure reward you with?",
-        says_any=("no", "not", "cannot", "does not", "nothing"),
+        says=("Ancient Magicks",),
+        never_says=DENIALS,
     ),
     Probe(
         tag="music_gap",
@@ -359,13 +429,17 @@ PROBES: tuple[Probe, ...] = (
     ),
     Probe(
         tag="order_by_attribute",
-        reaches=1,
-        covers="asking for the cheapest or largest of something",
+        reaches=2,
+        covers="ordering by a number, then pricing the answer over a shop counter",
         question=(
-            "What is the cheapest food that restores more than 10 hitpoints, and "
-            "how much does it restore?"
+            "Which foods restore more than 15 hitpoints? Of those, which is the "
+            "cheapest to buy over a shop counter, which shop sells it, and what does "
+            "that shop charge for it?"
         ),
-        says_any=("batta", "legs", "hole", "toad"),
+        calls=(following(RelationshipType.SELLS, Direction.REVERSE),),
+        says=("Tuna potato", "Delicious Goods", "113"),
+        never_says=DENIALS,
+        may_ask=(MORE, CHOOSE),
     ),
     Probe(
         tag="music_spread",

@@ -1,747 +1,3940 @@
 {
   "schema": 1,
   "source": "overlay",
-  "source_file": "wiki/quests.json",
   "game_version": "authored",
   "precedence": 10,
   "entities": [
     {
       "type": "quest",
+      "id": 1,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Myths of the White Lands asks for or gives back"
+    },
+    {
+      "type": "quest",
       "id": 2,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "2,500 coins"
+        ]
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#black_knights_fortress says Beginner/Short, which agrees"
+      "source_ref": "authored. Black Knights' Fortress"
     },
     {
       "type": "quest",
       "id": 3,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": "Recipe for Disaster"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "cooking",
+            "experience": 300
+          }
+        ],
+        "unlocks": [
+          "The Lumbridge Castle kitchen range"
+        ]
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#cooks_assistant says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Cook's Assistant"
     },
     {
       "type": "quest",
       "id": 4,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Demon Slayer"
+      "source_ref": "authored. nothing is recorded about what Demon Slayer asks for or gives back"
     },
     {
       "type": "quest",
       "id": 5,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/very_short; no guide states a rating for Doric's Quest"
+      "source_ref": "authored. nothing is recorded about what Doric's Quest asks for or gives back"
     },
     {
       "type": "quest",
       "id": 6,
       "mode": "patch",
       "attributes": {
-        "difficulty": "experienced",
-        "length": "long",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "strength",
+            "experience": 18650
+          },
+          {
+            "skill": "defence",
+            "experience": 18650
+          }
+        ],
+        "unlocks": [
+          "Wearing rune platebodies",
+          "Wearing green d'hide bodies"
+        ]
       },
-      "source_ref": "authored. rated experienced/long; wiki/quests.json#dragon_slayer says Experienced/(none), agreeing on difficulty only"
+      "source_ref": "authored. Dragon Slayer"
     },
     {
       "type": "quest",
       "id": 7,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "300 coins"
+        ]
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#ernest_the_chicken says Beginner/Short, which agrees"
+      "source_ref": "authored. Ernest the Chicken"
     },
     {
       "type": "quest",
       "id": 8,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": "Dorgeshuun"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#goblin_diplomacy says Novice/(none), agreeing on difficulty only"
+      "source_ref": "authored. nothing is recorded about what Goblin Diplomacy asks for or gives back"
     },
     {
       "type": "quest",
       "id": 9,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "magic",
+            "experience": 875
+          }
+        ],
+        "unlocks": [
+          "An amulet of accuracy"
+        ]
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#imp_catcher says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Imp Catcher"
     },
     {
       "type": "quest",
       "id": 10,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "smithing",
+            "experience": 12725
+          }
+        ],
+        "unlocks": [
+          "Smelting blurite ore"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#the_knights_sword says Beginner/Short, agreeing on length only"
+      "source_ref": "authored. The Knight's Sword"
     },
     {
       "type": "quest",
       "id": 11,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": "Pirate"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "Paying the fare on the Port Sarim to Karamja boat",
+          "A treasure chest holding a gold ring, an emerald and 450 coins"
+        ]
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#pirates_treasure says Beginner/Short, which agrees"
+      "source_ref": "authored. Pirate's Treasure"
     },
     {
       "type": "quest",
       "id": 12,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "700 coins",
+          "Free passage through the Al Kharid toll gate",
+          "The Sorceress's Garden thieving minigame"
+        ]
       },
-      "source_ref": "authored. rated novice/medium; wiki/quests.json#prince_ali_rescue says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Prince Ali Rescue"
     },
     {
       "type": "quest",
       "id": 13,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "prayer",
+            "experience": 1125
+          }
+        ],
+        "unlocks": [
+          "A ghostspeak amulet"
+        ]
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#the_restless_ghost says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. The Restless Ghost"
     },
     {
       "type": "quest",
       "id": 14,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#romeo_juliet says Beginner/Short, which agrees"
+      "source_ref": "authored. nothing is recorded about what Romeo & Juliet asks for or gives back"
     },
     {
       "type": "quest",
       "id": 15,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "Mining rune essence",
+          "An air talisman"
+        ]
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#rune_mysteries says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Rune Mysteries"
     },
     {
       "type": "quest",
       "id": 16,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "crafting",
+            "experience": 150
+          }
+        ],
+        "unlocks": [
+          "60 coins"
+        ]
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#sheep_shearer says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Sheep Shearer"
     },
     {
       "type": "quest",
       "id": 17,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "600 coins"
+        ]
       },
-      "source_ref": "authored. rated novice/medium; wiki/quests.json#shield_of_arrav says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Shield of Arrav"
     },
     {
       "type": "quest",
       "id": 18,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "attack",
+            "experience": 4825
+          }
+        ],
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#vampire_slayer says Beginner/Short, which agrees"
+      "source_ref": "authored. Vampire Slayer"
     },
     {
       "type": "quest",
       "id": 19,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "magic",
+            "experience": 325
+          }
+        ],
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#witchs_potion says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Witch's Potion"
     },
     {
       "type": "quest",
       "id": 20,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "crafting",
+            "experience": 1000
+          },
+          {
+            "skill": "fletching",
+            "experience": 1000
+          },
+          {
+            "skill": "slayer",
+            "experience": 1000
+          },
+          {
+            "skill": "woodcutting",
+            "experience": 2500
+          }
+        ],
+        "unlocks": [
+          "Ava's attractor, or her accumulator at 50 Ranged",
+          "Buying Ava's devices from her"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#animal_magnetism says hardmode/a little longer than, which is rejected"
+      "source_ref": "authored. Animal Magnetism"
+    },
+    {
+      "type": "quest",
+      "id": 21,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Between a Rock... asks for or gives back"
     },
     {
       "type": "quest",
       "id": 22,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": "Ogre"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "fletching",
+            "experience": 262
+          },
+          {
+            "skill": "cooking",
+            "experience": 1470
+          },
+          {
+            "skill": "ranged",
+            "experience": 735
+          }
+        ],
+        "unlocks": [
+          "An ogre bow"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#big_chompy_bird_hunting says Beginner/Short, agreeing on length only"
+      "source_ref": "authored. Big Chompy Bird Hunting"
+    },
+    {
+      "type": "quest",
+      "id": 23,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Biohazard asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 24,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Cabin Fever asks for or gives back"
     },
     {
       "type": "quest",
       "id": 25,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "500 coins"
+        ]
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Clock Tower"
+      "source_ref": "authored. Clock Tower"
+    },
+    {
+      "type": "quest",
+      "id": 26,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Contact! asks for or gives back"
     },
     {
       "type": "quest",
       "id": 27,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Ogre"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Zogre Flesh Eaters"
+      "source_ref": "authored. nothing is recorded about what Zogre Flesh Eaters asks for or gives back"
     },
     {
       "type": "quest",
       "id": 28,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "thieving",
+            "experience": 1000
+          }
+        ],
+        "unlocks": [
+          "A ring of charos"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Creature of Fenkenstrain"
+      "source_ref": "authored. Creature of Fenkenstrain"
+    },
+    {
+      "type": "quest",
+      "id": 29,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Darkness of Hallowvale asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 30,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Death to the Dorgeshuun asks for or gives back"
     },
     {
       "type": "quest",
       "id": 31,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": "Troll"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Death Plateau"
+      "source_ref": "authored. nothing is recorded about what Death Plateau asks for or gives back"
     },
     {
       "type": "quest",
       "id": 32,
       "mode": "patch",
       "attributes": {
-        "difficulty": "master",
-        "length": "long",
-        "series": "Mahjarrat"
+        "requirements": [
+          {
+            "skill": "firemaking",
+            "level": 50
+          },
+          {
+            "skill": "magic",
+            "level": 50
+          },
+          {
+            "skill": "slayer",
+            "level": 10
+          },
+          {
+            "skill": "thieving",
+            "level": 53
+          }
+        ],
+        "recommended_skills": [
+          {
+            "skill": "prayer",
+            "level": 43
+          }
+        ],
+        "experience_rewards": [
+          {
+            "skill": "magic",
+            "experience": 20000
+          }
+        ],
+        "unlocks": [
+          "The Ancient Magicks spellbook, switched at the pyramid altar",
+          "Buying an ancient staff from Eblis",
+          "A ring of visibility",
+          "The Zaros altar under the desert pyramid"
+        ]
       },
-      "source_ref": "authored. rated master/long; no guide states a rating for Desert Treasure"
+      "source_ref": "authored. Desert Treasure"
+    },
+    {
+      "type": "quest",
+      "id": 33,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Devious Minds asks for or gives back"
     },
     {
       "type": "quest",
       "id": 34,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": null
+        "requirements": [
+          {
+            "skill": "agility",
+            "level": 10
+          },
+          {
+            "skill": "herblore",
+            "level": 10
+          },
+          {
+            "skill": "thieving",
+            "level": 25
+          }
+        ],
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for The Dig Site"
+      "source_ref": "authored. The Dig Site"
     },
     {
       "type": "quest",
       "id": 35,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "very_short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "herblore",
+            "experience": 250
+          }
+        ],
+        "unlocks": [
+          "The Herblore skill"
+        ]
       },
-      "source_ref": "authored. rated novice/very_short; wiki/quests.json#druidic_ritual says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Druidic Ritual"
     },
     {
       "type": "quest",
       "id": 36,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": "Dwarf"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "crafting",
+            "experience": 750
+          }
+        ],
+        "unlocks": [
+          "Buying and firing a dwarf multicannon",
+          "Making cannonballs"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#dwarf_cannon says Beginner/Short, agreeing on length only"
+      "source_ref": "authored. Dwarf Cannon"
+    },
+    {
+      "type": "quest",
+      "id": 37,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Eadgar's Ruse asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 38,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Eagles' Peak asks for or gives back"
     },
     {
       "type": "quest",
       "id": 39,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": "Elemental Workshop"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "crafting",
+            "experience": 5000
+          },
+          {
+            "skill": "smithing",
+            "experience": 5000
+          }
+        ],
+        "unlocks": [
+          "The Elemental Workshop",
+          "An elemental shield, and making and wielding more"
+        ]
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#elemental_workshop_i says Beginner/Short, which agrees"
+      "source_ref": "authored. Elemental Workshop I"
+    },
+    {
+      "type": "quest",
+      "id": 40,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Elemental Workshop II asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 41,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Enakhra's Lament asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 42,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Enlightened Journey asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 43,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Eyes of Glouphrie asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 44,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Fairytale I - Growing Pains asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 45,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Fairytale II - Cure a Queen asks for or gives back"
     },
     {
       "type": "quest",
       "id": 46,
       "mode": "patch",
       "attributes": {
-        "difficulty": "master",
-        "length": "long",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "Cooking or smithing gauntlets"
+        ]
       },
-      "source_ref": "authored. rated master/long; wiki/quests.json#family_crest says Beginner/Long, agreeing on length only"
+      "source_ref": "authored. Family Crest"
+    },
+    {
+      "type": "quest",
+      "id": 47,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Feud asks for or gives back"
     },
     {
       "type": "quest",
       "id": 48,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Fight Arena"
+      "source_ref": "authored. nothing is recorded about what Fight Arena asks for or gives back"
     },
     {
       "type": "quest",
       "id": 49,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Fishing Contest"
+      "source_ref": "authored. nothing is recorded about what Fishing Contest asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 50,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Forgettable Tale... asks for or gives back"
     },
     {
       "type": "quest",
       "id": 51,
       "mode": "patch",
       "attributes": {
-        "difficulty": "experienced",
-        "length": "long",
-        "series": "Fremennik"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "attack",
+            "experience": 2812
+          },
+          {
+            "skill": "strength",
+            "experience": 2812
+          },
+          {
+            "skill": "defence",
+            "experience": 2812
+          },
+          {
+            "skill": "hitpoints",
+            "experience": 2812
+          },
+          {
+            "skill": "fishing",
+            "experience": 2812
+          },
+          {
+            "skill": "thieving",
+            "experience": 2812
+          },
+          {
+            "skill": "agility",
+            "experience": 2812
+          },
+          {
+            "skill": "crafting",
+            "experience": 2812
+          },
+          {
+            "skill": "fletching",
+            "experience": 2812
+          },
+          {
+            "skill": "woodcutting",
+            "experience": 2812
+          }
+        ],
+        "unlocks": [
+          "An enchanted lyre that teleports to Rellekka",
+          "Asking Askeladden for another pet rock"
+        ]
       },
-      "source_ref": "authored. rated experienced/long; no guide states a rating for The Fremennik Trials"
+      "source_ref": "authored. The Fremennik Trials"
     },
     {
       "type": "quest",
       "id": 52,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Elf"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "attack",
+            "experience": 13750
+          },
+          {
+            "skill": "strength",
+            "experience": 13750
+          }
+        ],
+        "unlocks": [
+          "Two diamonds, two gold bars and forty mithril seeds"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#waterfall says Beginner/Short, which is rejected"
+      "source_ref": "authored. Waterfall Quest"
+    },
+    {
+      "type": "quest",
+      "id": 53,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Garden of Tranquility asks for or gives back"
     },
     {
       "type": "quest",
       "id": 54,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": "Cat"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "cooking",
+            "experience": 1525
+          }
+        ],
+        "unlocks": [
+          "A kitten of your own",
+          "Buying more kittens from Gertrude for 100 coins",
+          "A chocolate cake and a bowl of stew"
+        ]
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#gertrudes_cat says Beginner/Short, which agrees"
+      "source_ref": "authored. Gertrude's Cat"
+    },
+    {
+      "type": "quest",
+      "id": 55,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Ghosts Ahoy asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 56,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Giant Dwarf asks for or gives back"
     },
     {
       "type": "quest",
       "id": 57,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "crafting",
+            "experience": 1000
+          },
+          {
+            "skill": "thieving",
+            "experience": 1000
+          }
+        ],
+        "unlocks": [
+          "The magic carpet from the Shantay Pass to Uzer",
+          "Two cut rubies, emeralds and sapphires"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#the_golem says Beginner/Short, which is rejected"
+      "source_ref": "authored. The Golem"
     },
     {
       "type": "quest",
       "id": 58,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Gnome"
+        "requirements": [
+          {
+            "skill": "agility",
+            "level": 25
+          }
+        ],
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for The Grand Tree"
+      "source_ref": "authored. The Grand Tree"
+    },
+    {
+      "type": "quest",
+      "id": 59,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Hand in the Sand asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 60,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Haunted Mine asks for or gives back"
     },
     {
       "type": "quest",
       "id": 61,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": "Mahjarrat"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Hazeel Cult"
+      "source_ref": "authored. nothing is recorded about what Hazeel Cult asks for or gives back"
     },
     {
       "type": "quest",
       "id": 62,
       "mode": "patch",
       "attributes": {
-        "difficulty": "experienced",
-        "length": "long",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "Membership of the Heroes' Guild"
+        ]
       },
-      "source_ref": "authored. rated experienced/long; wiki/quests.json#heroes_quest says Easy/Long, agreeing on length only"
+      "source_ref": "authored. Heroes' Quest"
+    },
+    {
+      "type": "quest",
+      "id": 63,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Holy Grail asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 64,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Horror from the Deep asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 65,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Icthlarin's Little Helper asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 66,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what In Aid of the Myreque asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 67,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what In Search of the Myreque asks for or gives back"
     },
     {
       "type": "quest",
       "id": 68,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": "Karamja"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "herblore",
+            "experience": 775
+          }
+        ],
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Jungle Potion"
+      "source_ref": "authored. Jungle Potion"
+    },
+    {
+      "type": "quest",
+      "id": 69,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Legend's Quest asks for or gives back"
     },
     {
       "type": "quest",
       "id": 70,
       "mode": "patch",
       "attributes": {
-        "difficulty": "experienced",
-        "length": "short",
-        "series": "Fairytale"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "Zanaris",
+          "Crafting cosmic runes"
+        ]
       },
-      "source_ref": "authored. rated experienced/short; wiki/quests.json#lost_city says Beginner/Short, agreeing on length only"
+      "source_ref": "authored. Lost City"
     },
     {
       "type": "quest",
       "id": 71,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Dorgeshuun"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "mining",
+            "experience": 3000
+          }
+        ],
+        "unlocks": [
+          "The Dorgesh-Kaan mine",
+          "Nardok's bone weapon shop, which sells the Dorgeshuun crossbow",
+          "A ring of life",
+          "The goblin bow and goblin salute emotes"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#the_lost_tribe says Beginner/Short, which is rejected"
+      "source_ref": "authored. The Lost Tribe"
+    },
+    {
+      "type": "quest",
+      "id": 72,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Lunar Diplomacy asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 73,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Making History asks for or gives back"
     },
     {
       "type": "quest",
       "id": 74,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Camelot"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "Excalibur"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#merlins_crystal says short/(none), which is rejected"
+      "source_ref": "authored. Merlin's Crystal"
+    },
+    {
+      "type": "quest",
+      "id": 75,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Monkey Madness asks for or gives back"
     },
     {
       "type": "quest",
       "id": 76,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Monk's Friend"
+      "source_ref": "authored. nothing is recorded about what Monk's Friend asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 77,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Mountain Daughter asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 78,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Mourning's End Part I asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 79,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Mourning's End Part II asks for or gives back"
     },
     {
       "type": "quest",
       "id": 80,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "crafting",
+            "experience": 1406
+          }
+        ],
+        "unlocks": [
+          "2,000 coins"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#murder_mystery says Easy/Short, agreeing on length only"
+      "source_ref": "authored. Murder Mystery"
+    },
+    {
+      "type": "quest",
+      "id": 81,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what My Arm's Big Adventure asks for or gives back"
     },
     {
       "type": "quest",
       "id": 82,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Myreque"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Nature Spirit"
+      "source_ref": "authored. nothing is recorded about what Nature Spirit asks for or gives back"
     },
     {
       "type": "quest",
       "id": 83,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/short; no guide states a rating for Observatory Quest"
+      "source_ref": "authored. nothing is recorded about what Observatory Quest asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 84,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what One Small Favour asks for or gives back"
     },
     {
       "type": "quest",
       "id": 85,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": "Elf"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "mining",
+            "experience": 2425
+          }
+        ],
+        "unlocks": [
+          "The Ardougne Teleport spell"
+        ]
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#plague_city says Beginner/Short, which agrees"
+      "source_ref": "authored. Plague City"
     },
     {
       "type": "quest",
       "id": 86,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "prayer",
+            "experience": 1406
+          }
+        ],
+        "unlocks": [
+          "A wolfbane dagger",
+          "The route east into Morytania"
+        ]
       },
-      "source_ref": "authored. rated novice/short; no guide states a rating for Priest in Peril"
+      "source_ref": "authored. Priest in Peril"
     },
     {
       "type": "quest",
       "id": 87,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "cooking",
+            "experience": 500
+          },
+          {
+            "skill": "prayer",
+            "experience": 500
+          }
+        ],
+        "unlocks": null
       },
-      "source_ref": "authored. rated novice/medium; wiki/quests.json#rag_and_bone_man says Beginner/Short, agreeing on difficulty only"
+      "source_ref": "authored. Rag and Bone Man"
+    },
+    {
+      "type": "quest",
+      "id": 88,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Ratcatchers asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 89,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Recipe for Disaster asks for or gives back"
     },
     {
       "type": "quest",
       "id": 90,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": "Temple Knight"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "prayer",
+            "experience": 1000
+          },
+          {
+            "skill": "herblore",
+            "experience": 1000
+          },
+          {
+            "skill": "agility",
+            "experience": 1000
+          }
+        ],
+        "unlocks": [
+          "An initiate sallet",
+          "A makeover voucher"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#recruitment_drive says Beginner/Short, agreeing on length only"
+      "source_ref": "authored. Recruitment Drive"
+    },
+    {
+      "type": "quest",
+      "id": 91,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Regicide asks for or gives back"
     },
     {
       "type": "quest",
       "id": 92,
       "mode": "patch",
       "attributes": {
-        "difficulty": "experienced",
-        "length": "short",
-        "series": "Elf"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "strength",
+            "experience": 10000
+          }
+        ],
+        "unlocks": [
+          "A part-charged crystal bow or crystal shield",
+          "Paying Ilfeen to recharge crystal equipment"
+        ]
       },
-      "source_ref": "authored. rated experienced/short; no guide states a rating for Roving Elves"
+      "source_ref": "authored. Roving Elves"
+    },
+    {
+      "type": "quest",
+      "id": 93,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Royal Trouble asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 94,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Rum Deal asks for or gives back"
     },
     {
       "type": "quest",
       "id": 95,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": [
+          {
+            "skill": "prayer",
+            "level": 31
+          }
+        ],
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/short; no guide states a rating for Scorpion Catcher"
+      "source_ref": "authored. Scorpion Catcher"
     },
     {
       "type": "quest",
       "id": 96,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": "Sea Slug"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/short; no guide states a rating for Sea Slug"
+      "source_ref": "authored. nothing is recorded about what Sea Slug asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 97,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Slug Menace asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 98,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Shades of Mort'ton asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 99,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Shadow of the Storm asks for or gives back"
     },
     {
       "type": "quest",
       "id": 100,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "3,000 coins, and 100 more towards the protective clothing"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; no guide states a rating for Sheep Herder"
+      "source_ref": "authored. Sheep Herder"
+    },
+    {
+      "type": "quest",
+      "id": 101,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Shilo Village asks for or gives back"
     },
     {
       "type": "quest",
       "id": 102,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for A Soul's Bane"
+      "source_ref": "authored. nothing is recorded about what A Soul's Bane asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 103,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Spirits of the Elid asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 104,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Swan Song asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 105,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Tai Bwo Wannai Trio asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 106,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what A Tail of Two Cats asks for or gives back"
     },
     {
       "type": "quest",
       "id": 107,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "very_short",
-        "series": null
+        "requirements": [
+          {
+            "skill": "crafting",
+            "level": 20
+          },
+          {
+            "skill": "firemaking",
+            "level": 49
+          },
+          {
+            "skill": "mining",
+            "level": 20
+          }
+        ],
+        "recommended_skills": [
+          {
+            "skill": "crafting",
+            "level": 49
+          },
+          {
+            "skill": "smithing",
+            "level": 49
+          }
+        ],
+        "experience_rewards": [
+          {
+            "skill": "crafting",
+            "experience": 1000
+          }
+        ],
+        "unlocks": [
+          "Drinking from the Tears of Guthix once a week"
+        ]
       },
-      "source_ref": "authored. rated intermediate/very_short; no guide states a rating for Tears of Guthix"
+      "source_ref": "authored. Tears Of Guthix"
     },
     {
       "type": "quest",
       "id": 108,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Mahjarrat"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for Temple of Ikov"
+      "source_ref": "authored. nothing is recorded about what Temple of Ikov asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 109,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Throne of Miscellania asks for or gives back"
     },
     {
       "type": "quest",
       "id": 110,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Desert"
+        "requirements": [
+          {
+            "skill": "fletching",
+            "level": 10
+          },
+          {
+            "skill": "smithing",
+            "level": 20
+          }
+        ],
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "4,650 experience in two of fletching, agility, smithing or thieving",
+          "Making throwing darts, and six bronze ones to start with",
+          "The desert mining camp, which holds mithril and adamantite",
+          "A wrought iron key"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; no guide states a rating for The Tourist Trap"
+      "source_ref": "authored. The Tourist Trap"
     },
     {
       "type": "quest",
       "id": 111,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/short; no guide states a rating for Witch's House"
+      "source_ref": "authored. nothing is recorded about what Witch's House asks for or gives back"
     },
     {
       "type": "quest",
       "id": 112,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "medium",
-        "series": "Gnome"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "attack",
+            "experience": 11450
+          }
+        ],
+        "unlocks": [
+          "Travelling by spirit tree",
+          "A gnome amulet"
+        ]
       },
-      "source_ref": "authored. rated intermediate/medium; wiki/quests.json#tree_gnome_village says Beginner/Short, which is rejected"
+      "source_ref": "authored. Tree Gnome Village"
     },
     {
       "type": "quest",
       "id": 113,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated intermediate/short; no guide states a rating for Tribal Totem"
+      "source_ref": "authored. nothing is recorded about what Tribal Totem asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 114,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Troll Romance asks for or gives back"
     },
     {
       "type": "quest",
       "id": 115,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": "Troll"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": [
+          "Two antique lamps, each worth 10,000 experience"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#troll_stronghold says Beginner/Short, agreeing on length only"
+      "source_ref": "authored. Troll Stronghold"
+    },
+    {
+      "type": "quest",
+      "id": 116,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Underground Pass asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 117,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Wanted! asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 118,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Watchtower asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 119,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Cold War asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 120,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Fremennik Isles asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 121,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Tower of Life asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 122,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Great Brain Robbery asks for or gives back"
     },
     {
       "type": "quest",
       "id": 123,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "runecrafting",
+            "experience": 8000
+          },
+          {
+            "skill": "defence",
+            "experience": 2000
+          }
+        ],
+        "unlocks": [
+          "A beacon ring",
+          "A shortcut to the Chaos altar",
+          "Five kudos from the Varrock Museum"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#what_lies_below says Beginner/Short, agreeing on length only"
+      "source_ref": "authored. What Lies Below"
+    },
+    {
+      "type": "quest",
+      "id": 124,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Olaf's Quest asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 125,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Another Slice of H.A.M asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 126,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Dream Mentor asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 127,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Grim Tales asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 128,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what King's Ransom asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 129,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what The Path of Glouphrie asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 130,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Back to my Roots asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 131,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Land of the Goblins asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 132,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Dealing with Scabaras asks for or gives back"
     },
     {
       "type": "quest",
       "id": 133,
       "mode": "patch",
       "attributes": {
-        "difficulty": "novice",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "summoning",
+            "experience": 276
+          }
+        ],
+        "unlocks": [
+          "The Summoning skill",
+          "275 gold charms"
+        ]
       },
-      "source_ref": "authored. rated novice/short; wiki/quests.json#wolf_whistle says Novice/(none), agreeing on difficulty only"
+      "source_ref": "authored. Wolf Whistle"
+    },
+    {
+      "type": "quest",
+      "id": 134,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what As a First Resort... asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 135,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Catapult Construction asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 136,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Kennith's Concerns asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 137,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Legacy of Seergaze asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 138,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Perils of Ice Mountain asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 139,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what TokTz-Ket-Dill asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 140,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Smoking Kills asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 141,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Rocking Out asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 142,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Spirit of Summer asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 143,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Meeting History asks for or gives back"
     },
     {
       "type": "quest",
       "id": 144,
       "mode": "patch",
       "attributes": {
-        "difficulty": "intermediate",
-        "length": "short",
-        "series": null
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": [
+          {
+            "skill": "firemaking",
+            "experience": 5500
+          }
+        ],
+        "unlocks": [
+          "The All Fired Up minigame",
+          "20,000 coins"
+        ]
       },
-      "source_ref": "authored. rated intermediate/short; wiki/quests.json#all_fired_up says Intermediate/(none), agreeing on difficulty only"
+      "source_ref": "authored. All Fired Up"
+    },
+    {
+      "type": "quest",
+      "id": 145,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Summer's End asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 146,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Defender of Varrock asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 147,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Swept Away asks for or gives back"
     },
     {
       "type": "quest",
       "id": 148,
       "mode": "patch",
       "attributes": {
-        "difficulty": "grandmaster",
-        "length": "very_long",
-        "series": "Mahjarrat"
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
       },
-      "source_ref": "authored. rated grandmaster/very_long; no guide states a rating for While Guthix Sleeps"
+      "source_ref": "authored. nothing is recorded about what While Guthix Sleeps asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 149,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what In Pyre Need asks for or gives back"
+    },
+    {
+      "type": "quest",
+      "id": 150,
+      "mode": "patch",
+      "attributes": {
+        "requirements": null,
+        "recommended_skills": null,
+        "experience_rewards": null,
+        "unlocks": null
+      },
+      "source_ref": "authored. nothing is recorded about what Test Quest asks for or gives back"
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "src": "quest:144",
+      "rel": "requires",
+      "dst": "item:590",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. all_fired_up"
+    },
+    {
+      "src": "quest:144",
+      "rel": "requires",
+      "dst": "item:1511",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. all_fired_up"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:1355",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:2351",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:2347",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:1718",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:1743",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:10496",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:552",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:20",
+      "rel": "requires",
+      "dst": "item:1704",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. animal_magnetism"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:1355",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:314",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:2347",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:2859",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:1965",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:1982",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:1957",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:1942",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:2128",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:22",
+      "rel": "requires",
+      "dst": "item:1573",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. big_chompy_bird_hunting"
+    },
+    {
+      "src": "quest:2",
+      "rel": "requires",
+      "dst": "item:1101",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. black_knights_fortress"
+    },
+    {
+      "src": "quest:2",
+      "rel": "requires",
+      "dst": "item:1139",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. black_knights_fortress"
+    },
+    {
+      "src": "quest:2",
+      "rel": "requires",
+      "dst": "item:1965",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. black_knights_fortress"
+    },
+    {
+      "src": "quest:3",
+      "rel": "requires",
+      "dst": "item:1927",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. cooks_assistant"
+    },
+    {
+      "src": "quest:3",
+      "rel": "requires",
+      "dst": "item:1933",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. cooks_assistant"
+    },
+    {
+      "src": "quest:3",
+      "rel": "requires",
+      "dst": "item:3727",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. cooks_assistant"
+    },
+    {
+      "src": "quest:3",
+      "rel": "requires",
+      "dst": "item:1931",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. cooks_assistant"
+    },
+    {
+      "src": "quest:3",
+      "rel": "requires",
+      "dst": "item:1944",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. cooks_assistant"
+    },
+    {
+      "src": "quest:31",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. death_plateau"
+    },
+    {
+      "src": "quest:31",
+      "rel": "requires",
+      "dst": "item:2351",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. death_plateau"
+    },
+    {
+      "src": "quest:31",
+      "rel": "requires",
+      "dst": "item:1905",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. death_plateau"
+    },
+    {
+      "src": "quest:31",
+      "rel": "requires",
+      "dst": "item:2028",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. death_plateau"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:592",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:526",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:565",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:973",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:1775",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:1513",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:1897",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:3107",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:1550",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:2355",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:2007",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:233",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:4164",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:590",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:1580",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:32",
+      "rel": "requires",
+      "dst": "item:4597",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. desert_treasure"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:1540",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:2347",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:301",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:1542",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:960",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:950",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:1539",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:1791",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:1907",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:6",
+      "rel": "requires",
+      "dst": "item:556",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dragon_slayer"
+    },
+    {
+      "src": "quest:35",
+      "rel": "requires",
+      "dst": "item:2136",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. druidic_ritual"
+    },
+    {
+      "src": "quest:35",
+      "rel": "requires",
+      "dst": "item:2138",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. druidic_ritual"
+    },
+    {
+      "src": "quest:35",
+      "rel": "requires",
+      "dst": "item:2132",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. druidic_ritual"
+    },
+    {
+      "src": "quest:35",
+      "rel": "requires",
+      "dst": "item:2134",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. druidic_ritual"
+    },
+    {
+      "src": "quest:36",
+      "rel": "requires",
+      "dst": "item:2347",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. dwarf_cannon"
+    },
+    {
+      "src": "quest:36",
+      "rel": "requires",
+      "dst": "item:11126",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. dwarf_cannon"
+    },
+    {
+      "src": "quest:39",
+      "rel": "requires",
+      "dst": "item:1267",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. elemental_workshop_i"
+    },
+    {
+      "src": "quest:39",
+      "rel": "requires",
+      "dst": "item:1741",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. elemental_workshop_i"
+    },
+    {
+      "src": "quest:39",
+      "rel": "requires",
+      "dst": "item:2347",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. elemental_workshop_i"
+    },
+    {
+      "src": "quest:39",
+      "rel": "requires",
+      "dst": "item:453",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. elemental_workshop_i"
+    },
+    {
+      "src": "quest:39",
+      "rel": "requires",
+      "dst": "item:946",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. elemental_workshop_i"
+    },
+    {
+      "src": "quest:39",
+      "rel": "requires",
+      "dst": "item:1733",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. elemental_workshop_i"
+    },
+    {
+      "src": "quest:39",
+      "rel": "requires",
+      "dst": "item:1734",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. elemental_workshop_i"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:2136",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:1267",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:1470",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:233",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:229",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:562",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:1592",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:46",
+      "rel": "requires",
+      "dst": "item:1597",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. family_crest"
+    },
+    {
+      "src": "quest:48",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. fight_arena"
+    },
+    {
+      "src": "quest:49",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. fishing_contest"
+    },
+    {
+      "src": "quest:49",
+      "rel": "requires",
+      "dst": "item:1550",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. fishing_contest"
+    },
+    {
+      "src": "quest:49",
+      "rel": "requires",
+      "dst": "item:307",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. fishing_contest"
+    },
+    {
+      "src": "quest:49",
+      "rel": "requires",
+      "dst": "item:952",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. fishing_contest"
+    },
+    {
+      "src": "quest:54",
+      "rel": "requires",
+      "dst": "item:327",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. gertrudes_cat"
+    },
+    {
+      "src": "quest:54",
+      "rel": "requires",
+      "dst": "item:1927",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. gertrudes_cat"
+    },
+    {
+      "src": "quest:54",
+      "rel": "requires",
+      "dst": "item:1573",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. gertrudes_cat"
+    },
+    {
+      "src": "quest:54",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. gertrudes_cat"
+    },
+    {
+      "src": "quest:8",
+      "rel": "requires",
+      "dst": "item:1769",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. goblin_diplomacy"
+    },
+    {
+      "src": "quest:8",
+      "rel": "requires",
+      "dst": "item:1767",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. goblin_diplomacy"
+    },
+    {
+      "src": "quest:8",
+      "rel": "requires",
+      "dst": "item:1951",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. goblin_diplomacy"
+    },
+    {
+      "src": "quest:58",
+      "rel": "requires",
+      "dst": "item:8011",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. grand_tree"
+    },
+    {
+      "src": "quest:9",
+      "rel": "requires",
+      "dst": "item:1474",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. imp_catcher"
+    },
+    {
+      "src": "quest:9",
+      "rel": "requires",
+      "dst": "item:1472",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. imp_catcher"
+    },
+    {
+      "src": "quest:9",
+      "rel": "requires",
+      "dst": "item:1470",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. imp_catcher"
+    },
+    {
+      "src": "quest:9",
+      "rel": "requires",
+      "dst": "item:1476",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. imp_catcher"
+    },
+    {
+      "src": "quest:70",
+      "rel": "requires",
+      "dst": "item:1355",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. lost_city"
+    },
+    {
+      "src": "quest:70",
+      "rel": "requires",
+      "dst": "item:946",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. lost_city"
+    },
+    {
+      "src": "quest:74",
+      "rel": "requires",
+      "dst": "item:590",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. merlins_crystal"
+    },
+    {
+      "src": "quest:74",
+      "rel": "requires",
+      "dst": "item:1925",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. merlins_crystal"
+    },
+    {
+      "src": "quest:74",
+      "rel": "requires",
+      "dst": "item:2309",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. merlins_crystal"
+    },
+    {
+      "src": "quest:74",
+      "rel": "requires",
+      "dst": "item:30",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. merlins_crystal"
+    },
+    {
+      "src": "quest:74",
+      "rel": "requires",
+      "dst": "item:530",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. merlins_crystal"
+    },
+    {
+      "src": "quest:80",
+      "rel": "requires",
+      "dst": "item:1931",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. murder_mystery"
+    },
+    {
+      "src": "quest:11",
+      "rel": "requires",
+      "dst": "item:1005",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. pirates_treasure"
+    },
+    {
+      "src": "quest:11",
+      "rel": "requires",
+      "dst": "item:952",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. pirates_treasure"
+    },
+    {
+      "src": "quest:11",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. pirates_treasure"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:954",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:1925",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:952",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:1927",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:233",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:2126",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:1975",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:85",
+      "rel": "requires",
+      "dst": "item:231",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. plague_city"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:592",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1761",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1759",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1917",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1765",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1929",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1933",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:2349",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:954",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1937",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1951",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1013",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:12",
+      "rel": "requires",
+      "dst": "item:1704",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. prince_ali_rescue"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:954",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:590",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:1511",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:1931",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:7810",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:36",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:4544",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:87",
+      "rel": "requires",
+      "dst": "item:617",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. rag_and_bone_man"
+    },
+    {
+      "src": "quest:14",
+      "rel": "requires",
+      "dst": "item:753",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. romeo_juliet"
+    },
+    {
+      "src": "quest:92",
+      "rel": "requires",
+      "dst": "quest:52",
+      "attributes": {
+        "kind": "completed"
+      },
+      "source_ref": "authored. roving_elves"
+    },
+    {
+      "src": "quest:92",
+      "rel": "requires",
+      "dst": "quest:91",
+      "attributes": {
+        "kind": "completed"
+      },
+      "source_ref": "authored. roving_elves"
+    },
+    {
+      "src": "quest:95",
+      "rel": "requires",
+      "dst": "item:1590",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. scorpion_catcher"
+    },
+    {
+      "src": "quest:95",
+      "rel": "requires",
+      "dst": "item:8011",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. scorpion_catcher"
+    },
+    {
+      "src": "quest:95",
+      "rel": "requires",
+      "dst": "item:11126",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. scorpion_catcher"
+    },
+    {
+      "src": "quest:95",
+      "rel": "requires",
+      "dst": "item:1704",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. scorpion_catcher"
+    },
+    {
+      "src": "quest:107",
+      "rel": "requires",
+      "dst": "item:4700",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. tears_of_guthix"
+    },
+    {
+      "src": "quest:107",
+      "rel": "requires",
+      "dst": "item:954",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. tears_of_guthix"
+    },
+    {
+      "src": "quest:107",
+      "rel": "requires",
+      "dst": "item:1755",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. tears_of_guthix"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:712",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:1625",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:229",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:704",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:590",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:670",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:669",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:677",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:34",
+      "rel": "requires",
+      "dst": "item:676",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_dig_site"
+    },
+    {
+      "src": "quest:57",
+      "rel": "requires",
+      "dst": "item:2347",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_golem"
+    },
+    {
+      "src": "quest:57",
+      "rel": "requires",
+      "dst": "item:229",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_golem"
+    },
+    {
+      "src": "quest:57",
+      "rel": "requires",
+      "dst": "item:233",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_golem"
+    },
+    {
+      "src": "quest:57",
+      "rel": "requires",
+      "dst": "item:970",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_golem"
+    },
+    {
+      "src": "quest:57",
+      "rel": "requires",
+      "dst": "item:1761",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_golem"
+    },
+    {
+      "src": "quest:57",
+      "rel": "requires",
+      "dst": "item:1755",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_golem"
+    },
+    {
+      "src": "quest:57",
+      "rel": "requires",
+      "dst": "item:9085",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_golem"
+    },
+    {
+      "src": "quest:10",
+      "rel": "requires",
+      "dst": "item:2325",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_knights_sword"
+    },
+    {
+      "src": "quest:10",
+      "rel": "requires",
+      "dst": "item:2351",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_knights_sword"
+    },
+    {
+      "src": "quest:10",
+      "rel": "requires",
+      "dst": "item:1267",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_knights_sword"
+    },
+    {
+      "src": "quest:71",
+      "rel": "requires",
+      "dst": "item:36",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_lost_tribe"
+    },
+    {
+      "src": "quest:71",
+      "rel": "requires",
+      "dst": "item:8987",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_lost_tribe"
+    },
+    {
+      "src": "quest:71",
+      "rel": "requires",
+      "dst": "item:590",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_lost_tribe"
+    },
+    {
+      "src": "quest:110",
+      "rel": "requires",
+      "dst": "item:1837",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_tourist_trap"
+    },
+    {
+      "src": "quest:110",
+      "rel": "requires",
+      "dst": "item:1833",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_tourist_trap"
+    },
+    {
+      "src": "quest:110",
+      "rel": "requires",
+      "dst": "item:1835",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. the_tourist_trap"
+    },
+    {
+      "src": "quest:112",
+      "rel": "requires",
+      "dst": "item:1511",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. tree_gnome_village"
+    },
+    {
+      "src": "quest:18",
+      "rel": "requires",
+      "dst": "item:2347",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. vampire_slayer"
+    },
+    {
+      "src": "quest:18",
+      "rel": "requires",
+      "dst": "item:1550",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. vampire_slayer"
+    },
+    {
+      "src": "quest:18",
+      "rel": "requires",
+      "dst": "item:1549",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. vampire_slayer"
+    },
+    {
+      "src": "quest:52",
+      "rel": "requires",
+      "dst": "item:954",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. waterfall"
+    },
+    {
+      "src": "quest:52",
+      "rel": "requires",
+      "dst": "item:556",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. waterfall"
+    },
+    {
+      "src": "quest:52",
+      "rel": "requires",
+      "dst": "item:557",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. waterfall"
+    },
+    {
+      "src": "quest:52",
+      "rel": "requires",
+      "dst": "item:555",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. waterfall"
+    },
+    {
+      "src": "quest:123",
+      "rel": "requires",
+      "dst": "item:562",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. what_lies_below"
+    },
+    {
+      "src": "quest:123",
+      "rel": "requires",
+      "dst": "item:1923",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. what_lies_below"
+    },
+    {
+      "src": "quest:111",
+      "rel": "requires",
+      "dst": "item:1985",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. witchs_house"
+    },
+    {
+      "src": "quest:111",
+      "rel": "requires",
+      "dst": "item:1059",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. witchs_house"
+    },
+    {
+      "src": "quest:19",
+      "rel": "requires",
+      "dst": "item:1957",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. witchs_potion"
+    },
+    {
+      "src": "quest:19",
+      "rel": "requires",
+      "dst": "item:221",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. witchs_potion"
+    },
+    {
+      "src": "quest:19",
+      "rel": "requires",
+      "dst": "item:2146",
+      "attributes": {
+        "kind": "carried"
+      },
+      "source_ref": "authored. witchs_potion"
+    }
+  ]
 }

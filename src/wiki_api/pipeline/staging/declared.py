@@ -11,18 +11,17 @@ GAME_CHECKOUT: Final = "2009scape"
 CONSTANTS_REPO: Final = "rs09-constants-library"
 CONSTANTS_CHECKOUT: Final = "rs09-constants-library"
 CONSTANTS_ROOT: Final = "src/main/kotlin/org/rs09/consts"
-WIKI_REPO: Final = "2009scape-wiki-website"
-WIKI_CHECKOUT: Final = "2009scape-wiki-website"
 CONFIG_ROOT: Final = "Server/data/configs"
+SHARED_TABLE_ROOT: Final = "Server/data/configs/shared_tables"
 CODE_ROOT: Final = "Server/src/main"
 CACHE_ROOT: Final = "Server/data/cache"
 DUMP_ROOT: Final = "dumps/530"
 CONFIGS_DIRECTORY: Final = "configs"
 TABLES_DIRECTORY: Final = "tables"
+SHARED_TABLES_DIRECTORY: Final = "shared"
 CACHE_DIRECTORY: Final = "cache"
 CONSTANTS_DIRECTORY: Final = "constants"
 CODE_DIRECTORY: Final = "code"
-WIKI_DIRECTORY: Final = "wiki"
 MUSIC_DIRECTORY: Final = "music"
 
 
@@ -40,6 +39,23 @@ class DeclaredConfig(BaseModel):
     @property
     def staged(self) -> str:
         return f"{CONFIGS_DIRECTORY}/{self.name}"
+
+
+class DeclaredSharedTable(BaseModel):
+    """One weighted table many drop lists roll on, kept as xml beside the configs."""
+
+    model_config = ConfigDict(frozen=True)
+
+    name: str = Field(min_length=1)
+    file: str = Field(min_length=1)
+
+    @property
+    def upstream(self) -> str:
+        return f"{SHARED_TABLE_ROOT}/{self.file}"
+
+    @property
+    def staged(self) -> str:
+        return f"{SHARED_TABLES_DIRECTORY}/{self.name}.json"
 
 
 class DeclaredTable(BaseModel):
@@ -125,27 +141,6 @@ class DeclaredScan(BaseModel):
         return f"{self.base}.java"
 
 
-class DeclaredPages(BaseModel):
-    """One namespace of saved community wiki pages staging reads into sections."""
-
-    model_config = ConfigDict(frozen=True)
-
-    name: str = Field(min_length=1)
-    namespace: str = Field(min_length=1)
-
-    @property
-    def upstream(self) -> str:
-        return WIKI_CHECKOUT
-
-    @property
-    def staged(self) -> str:
-        return f"{WIKI_DIRECTORY}/{self.name}.json"
-
-    @property
-    def filename(self) -> str:
-        return f"{self.namespace}"
-
-
 class DeclaredMusic(BaseModel):
     """The dump saying where each music track unlocks, in a sentence a person wrote."""
 
@@ -184,6 +179,16 @@ DECLARED_CONFIGS: Final[tuple[DeclaredConfig, ...]] = (
     DeclaredConfig(name="xteas.json"),
 )
 
+DECLARED_SHARED_TABLES: Final[tuple[DeclaredSharedTable, ...]] = (
+    DeclaredSharedTable(name="rare", file="RDT.xml"),
+    DeclaredSharedTable(name="gem", file="GDT.xml"),
+    DeclaredSharedTable(name="herb", file="HDT.xml"),
+    DeclaredSharedTable(name="uncommon_seed", file="USDT.xml"),
+    DeclaredSharedTable(name="rare_seed", file="RSDT.xml"),
+    DeclaredSharedTable(name="allotment_seed", file="ASDT.xml"),
+    DeclaredSharedTable(name="cele_minor", file="CELEDT.xml"),
+)
+
 ITEM_EXTRACT: Final = DeclaredExtract(name="items", index=19)
 SCENERY_EXTRACT: Final = DeclaredExtract(name="scenery", index=16)
 NPC_EXTRACT: Final = DeclaredExtract(name="npcs", index=18)
@@ -211,10 +216,6 @@ QUEST_SCAN: Final = DeclaredScan(
 )
 
 DECLARED_SCANS: Final[tuple[DeclaredScan, ...]] = (QUEST_SCAN,)
-
-QUEST_PAGES: Final = DeclaredPages(name="quests", namespace="quest_guides")
-
-DECLARED_PAGES: Final[tuple[DeclaredPages, ...]] = (QUEST_PAGES,)
 
 MUSIC_TRACKS: Final = DeclaredMusic(
     name="tracks",
@@ -273,6 +274,26 @@ def test_a_declared_config_knows_both_ends_of_the_copy() -> None:
     declared = DeclaredConfig(name="item_configs.json")
     assert declared.upstream == "Server/data/configs/item_configs.json"
     assert declared.staged == "configs/item_configs.json"
+
+
+def test_a_declared_shared_table_lands_under_the_name_a_roll_calls_it() -> None:
+    declared = DeclaredSharedTable(name="rare", file="RDT.xml")
+    assert declared.upstream == "Server/data/configs/shared_tables/RDT.xml"
+    assert declared.staged == "shared/rare.json"
+
+
+def test_every_shared_table_the_game_ships_is_declared_once() -> None:
+    names = [one.name for one in DECLARED_SHARED_TABLES]
+    assert len(names) == len(set(names))
+    assert "rare" in names
+
+
+def test_the_shared_tables_staged_are_the_ones_a_drop_may_name() -> None:
+    from wiki_api.domain.vocabulary import SharedDropTable
+
+    assert {one.name for one in DECLARED_SHARED_TABLES} == {
+        member.value for member in SharedDropTable
+    }
 
 
 def test_a_declared_table_lands_under_its_enum_name() -> None:

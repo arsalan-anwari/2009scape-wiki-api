@@ -54,6 +54,7 @@ class KnowledgeRepository(Protocol):
         *,
         where: Sequence[Condition] = (),
         order: Ordering | None = None,
+        named: str | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Entity]: ...

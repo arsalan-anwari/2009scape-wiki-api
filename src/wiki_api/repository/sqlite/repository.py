@@ -131,6 +131,7 @@ class SqliteKnowledgeRepository:
         *,
         where: Sequence[Condition] = (),
         order: Ordering | None = None,
+        named: str | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> Page[Entity]:
@@ -140,6 +141,7 @@ class SqliteKnowledgeRepository:
             "conditions": _as_json_conditions(where),
             "order_path": _json_path(order.path) if order else None,
             "descending": bool(order and order.descending),
+            "named": named,
         }
         rows = self._all(
             queries.SELECT_ENTITIES_BY_ATTRIBUTE,

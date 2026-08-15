@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "source": "overlay",
+  "source_file": "content/global/skill/slayer",
+  "game_version": "authored",
+  "precedence": 10,
+  "entities": [],
+  "edges": [
+    {
+      "src": "task:75",
+      "rel": "requires",
+      "dst": "item:2890",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. DragonfireSwingHandler.adjustBattleState caps the icy breath at 10. Also see rswiki: https://runescape.wiki/w/Skeletal_Wyvern?oldid=802756"
+    },
+    {
+      "src": "task:75",
+      "rel": "requires",
+      "dst": "item:9731",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. DragonfireSwingHandler.adjustBattleState caps the icy breath at 10. Also see rswiki: https://runescape.wiki/w/Skeletal_Wyvern?oldid=802756"
+    },
+    {
+      "src": "task:75",
+      "rel": "requires",
+      "dst": "item:11283",
+      "attributes": {
+        "kind": "recommended"
+      },
+      "source_ref": "authored. DragonfireSwingHandler.visualizeImpact absorbs the breath outright for item 11283. Also see rswiki: https://runescape.wiki/w/Skeletal_Wyvern?oldid=802756"
+    }
+  ]
+}

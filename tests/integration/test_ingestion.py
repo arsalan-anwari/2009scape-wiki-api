@@ -10,6 +10,7 @@ from tests.sources import staged_from
 from wiki_api.core.results import Direction, Found
 from wiki_api.core.service import KnowledgeService
 from wiki_api.domain.attributes import ItemAttributes, NpcAttributes
+from wiki_api.domain.entity import VariantKind
 from wiki_api.domain.identity import EntityKey, EntityType
 from wiki_api.domain.relationships import RelationshipType
 from wiki_api.pipeline.artifact.errors import UnknownEntity, VariantChain
@@ -368,7 +369,7 @@ def test_a_build_with_no_staged_cache_still_produces_an_artifact(
     try:
         note = repository.get_entity(EntityKey(type=EntityType.ITEM, id=4588))
         assert note is not None
-        assert note.canonical_id is None
+        assert note.variant_kind is not VariantKind.NOTED
     finally:
         repository.close()
     assert manifest.schema_version >= 5

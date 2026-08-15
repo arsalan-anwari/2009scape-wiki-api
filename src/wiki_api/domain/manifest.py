@@ -8,7 +8,7 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 from wiki_api.domain.provenance import GameVersion
 
-SCHEMA_VERSION: Final = 9
+SCHEMA_VERSION: Final = 10
 
 
 class Manifest(BaseModel):

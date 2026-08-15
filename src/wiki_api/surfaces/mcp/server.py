@@ -69,7 +69,16 @@ INSTRUCTIONS: Final = (
     "count says it is worth it. A name that answers to nothing may simply be "
     "misspelt; the closest real names can be looked up once the sort of thing is "
     "known, but which of them was meant is for whoever asked to say, never for you "
-    "to decide."
+    "to decide.\n"
+    "\n"
+    "Every answer carries a `ref` such as `item:4587`. It is how you name one exact "
+    "thing back to a tool, and it is the game's own bookkeeping: a person reading "
+    "your answer has never seen one and cannot do anything with one. Never write a "
+    "ref, a bare id, a map coordinate or a region number into what you say, and "
+    "never set two things apart by their numbers. Tell them apart by what the wiki "
+    "records about each instead, or ask which one was meant. If nothing in the "
+    "answer distinguishes them, they are the same thing to whoever asked, so say "
+    "how many there are and answer for all of them at once."
 )
 
 SEARCH_DESCRIPTION: Final = (
@@ -99,7 +108,8 @@ SORTS_DESCRIPTION: Final = (
 COMPARE_DESCRIPTION: Final = (
     "Go through one sort of thing by a number it records rather than by its name: "
     "everything above or below a threshold, ordered largest or smallest first. Use "
-    "this for a question about how much or how many, where no one thing is named. "
+    "this for a question about how much or how many, and for how many things one "
+    "name answers to, which the reply totals rather than making you fetch each. "
     "Say which number you mean in ordinary words; if none of them matches, the "
     "answer lists every number that sort of thing records, so ask again with one of "
     "those rather than guessing."
@@ -212,6 +222,16 @@ OrderedByArg = Annotated[
 ]
 DescendingArg = Annotated[
     bool, Field(description="Sort from the largest down rather than upwards.")
+]
+NamedArg = Annotated[
+    str | None,
+    Field(
+        description=(
+            "Keep only the ones called exactly this. Many things in the game share "
+            "one name, so this answers how many of them there are and what each one "
+            "records, in a single call rather than one per id."
+        )
+    ),
 ]
 SinceArg = Annotated[
     str | None,
@@ -348,6 +368,7 @@ def _offer_asking(
         number: NumberArg = 0.0,
         ordered_by: OrderedByArg = None,
         descending: DescendingArg = False,
+        named: NamedArg = None,
         offset: OffsetArg = 0,
     ) -> Answer[Ranking]:
         service = _service(provider, settings)
@@ -359,6 +380,7 @@ def _offer_asking(
                 number=number,
                 ordered_by=ordered_by,
                 descending=descending,
+                named=named,
                 limit=settings.mcp_rows,
                 offset=offset,
             ),
@@ -620,3 +642,12 @@ def test_a_container_is_answered_somewhere_a_client_can_reach(
     main()
     assert started["transport"] == "http"
     assert started["port"] == 9100
+
+
+def test_the_words_read_first_say_a_ref_is_for_calling_with_not_for_saying() -> None:
+    assert "Never write a ref" in INSTRUCTIONS
+    assert "map coordinate" in INSTRUCTIONS
+
+
+def test_the_words_read_first_say_what_to_do_with_things_nothing_tells_apart() -> None:
+    assert "the same thing to whoever asked" in INSTRUCTIONS
