@@ -36,62 +36,56 @@ stops the serving half from importing the build.
 Layers
 ------
 
-``domain``
-    The knowledge model and nothing else. Imports no transport, storage or ingestion
-    library, so the same model serves the offline build and a running server.
-
-``repository``
-    One read protocol, ``KnowledgeRepository``, and two implementations: SQLite over the
-    built artifact with FTS5, and in memory for tests and small tools.
-
-``core``
-    The query logic both surfaces share. Resolve, walk, search, compare, price history,
-    and describing a page as data. It answers found, moved, hidden or missing rather
-    than raising.
-
-``surfaces``
-    Two ways of asking the core the same questions. Neither holds query logic; they
-    shape what the core hands back.
-
-``access``
-    Issuing keys, checking tokens, per caller shares, shut-out addresses. A leaf: it
-    knows nothing about the game or how it is served.
-
-``pipeline``
-    The offline build. See :doc:`pipeline`.
-
-``config`` and ``serve``
-    One settings model, and the entry point deciding which surfaces this process runs.
+=======================  ==========================================================
+``domain``               The knowledge model and nothing else. No transport,
+                         storage or ingestion library, so the same model serves
+                         the offline build and a running server.
+``repository``           One read protocol, ``KnowledgeRepository``, two
+                         implementations: SQLite with FTS5, and in memory.
+``core``                 The query logic both surfaces share: resolve, walk,
+                         search, compare, prices, describing a page as data. It
+                         answers found, moved, hidden or missing, never raises.
+``surfaces``             Two ways of asking the core the same questions. They
+                         shape answers; they hold no query logic.
+``access``               Issuing keys, checking tokens, caller shares, bans. A
+                         leaf: knows nothing about the game or how it is served.
+``pipeline``             The offline build. See :doc:`pipeline`.
+``config``, ``serve``    One settings model, and which surfaces this process runs.
+``cli``, ``dataset``     The four commands, and fetching a published build.
+                         Nothing that serves may import either, so a surface a
+                         client spawned cannot reach the network on its way up.
+=======================  ==========================================================
 
 What holds them apart
 ---------------------
-
-Six import contracts are declared in ``pyproject.toml`` and checked by import-linter as
-part of ``poe check``.
 
 1. ``surfaces`` may import ``core``, then ``repository``, then ``domain``. Never back.
 2. Runtime never imports the offline pipeline.
 3. ``core`` and ``surfaces`` cannot import a concrete repository, only the protocol.
 4. ``access`` imports nothing else in the project, not even ``config``.
 5. Nothing that serves requests can import ``access.issuing`` or ``access.cli``.
-6. ``domain`` cannot import fastapi, fastmcp, starlette, sqlite3, httpx or lxml.
+6. Nothing that serves requests can import ``dataset``.
+7. ``domain`` cannot import fastapi, fastmcp, starlette, sqlite3, httpx or lxml.
 
-``uv run poe imports`` is the fastest way to find out whether a new module belongs where
-you put it.
 
-Two properties
---------------
+Three properties
+----------------
 
 **A build is immutable.** The artifact is opened read only. Every response repeats which
 build answered it, and a pinned answer can be cached forever.
 
 **A build can be replaced without stopping.** ``repository.provider`` holds what a
-surface is reading; swapping it hands the old one back rather than closing it, because
-requests in flight are still reading from it.
+surface reads; swapping it hands the old one back rather than closing it, because
+requests in flight still read from it. 
+
+**A process serving both runs one worker.** The tools keep a session per client in
+memory, so a second worker would answer half a client's requests from a process that
+never saw it. Rate shares are counted per process for the same reason, so two replicas
+mean two shares.
 
 Reading the code
 ----------------
 
-Most modules carry a one-line docstring saying what they are for, and test cases live in
-the same file as the code they cover, below a ``# test cases`` marker. Integration
-tests, which cross module boundaries, live in ``tests/integration``.
+Most modules carry a one-line docstring. Test cases live in the same file as the code
+they cover, below a ``# test cases`` marker; integration tests live in
+``tests/integration``.

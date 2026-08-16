@@ -1,84 +1,98 @@
 Installing
 ==========
 
-Only the PyPI package needs Python. The container and the system packages carry the
-dataset, so an offline machine answers everything.
+Five ways in. Each is complete on its own: dataset, settings file, keys, commands.
 
 .. list-table::
    :header-rows: 1
-   :widths: 30 70
+   :widths: 26 42 32
 
    * - you want
-     - do this
+     - install with
+     - dataset
    * - a Python environment
      - ``uv tool install scape2009-wiki-api``
+     - ``scape2009-wiki-data pull``
    * - a container
      - ``docker run -p 8000:8000 arsalananwari/2009scape-wiki-api``
+     - in the image
    * - Debian, Ubuntu
      - ``sudo apt install ./scape2009-wiki-api_*_amd64.deb``
+     - in the package
    * - Fedora, RHEL
      - ``sudo dnf install ./scape2009-wiki-api-*.x86_64.rpm``
+     - in the package
    * - Arch
      - ``sudo pacman -U scape2009-wiki-api-*-x86_64.pkg.tar.zst``
+     - in the package
    * - to work on it
-     - clone the repository, see :doc:`contributing`
+     - clone it, see :doc:`contributing`
+     - ``uv run poe download-data``
 
-Packages are on the `releases page
-<https://github.com/arsalan-anwari/2009scape-wiki-api/releases>`_ and run on Debian 12,
+Packages and the image file are on the `releases page
+<https://github.com/arsalan-anwari/2009scape-wiki-api/releases>`_. They run on Debian 12,
 Ubuntu 22.04, RHEL 9 and newer.
 
-From PyPI
+The four commands
+-----------------
+
+=========  ===============================================================
+``serve``  the HTTP contract, the tools, or both, as the settings ask
+``mcp``    the tools alone, over stdio or HTTP
+``keys``   make an issuer key, issue a token, withdraw one
+``data``   fetch the published dataset, or say where one is looked for
+=========  ===============================================================
+
+PyPI and system packages put each on the PATH as ``scape2009-wiki-serve``,
+``-mcp``, ``-keys``, ``-data``. The container and the frozen build take the name as an
+argument: ``scape2009-wiki-api data pull``. see :doc:`configuration`.
+
+PyPI
+----
+
+.. code-block:: bash
+
+   uv tool install scape2009-wiki-api
+   scape2009-wiki-data pull      # into ~/.local/share/scape2009-wiki-api
+   scape2009-wiki-data where     # which build is there
+
+``pull`` writes to ``WIKI_API_DATA_DIR``. ``--artifact-only`` skips the staged sources.
+Extras: ``pipeline`` for the offline build, ``demos`` for the Claude agent SDK. Neither
+is needed to serve.
+
+Container
 ---------
 
-Requires Python 3.12. The package does not carry the dataset, so the first run fetches
-it from Hugging Face into ``WIKI_API_DATA_DIR``. Three commands are installed:
+Dataset at ``/data``, keys and ``deploy.json`` at ``/config``.
 
-``scape2009-wiki-serve``
-    Serve HTTP, MCP, or both, depending on ``WIKI_API_SURFACES``.
+.. code-block:: bash
 
-``scape2009-wiki-mcp``
-    The MCP tools alone, over stdio. This is what an MCP client spawns.
+   docker run --rm -v ./config:/config arsalananwari/2009scape-wiki-api keys init
+   docker run -p 8000:8000 -v ./config:/config arsalananwari/2009scape-wiki-api
 
-``scape2009-wiki-keys``
-    Make the issuer key and issue tokens. See :doc:`access`.
+The entrypoint is the dispatcher and the default command is ``serve``. Mount over
+``/data`` to serve a different build.
 
-Two extras exist: ``pipeline`` adds what the offline build needs, ``demos`` adds the
-Claude agent SDK. Neither is needed to serve a built dataset.
-
-As a container
+System package
 --------------
 
-The published image carries the dataset at ``/data``, so it serves with nothing
-mounted. Keys and ``deploy.json`` are read from ``/config``.
-
 .. code-block:: bash
 
-   docker run -p 8000:8000 -v ./run/config:/config \
-     arsalananwari/2009scape-wiki-api:1.0.0
-
-Copy ``deploy.example.json`` rather than passing a dozen environment variables. Mounting
-over ``/data`` is how a newer image serves an older build.
-
-As a system package
--------------------
-
-.. code-block:: bash
-
-   sudo apt install ./scape2009-wiki-api_1.0.0_amd64.deb
+   sudo apt install ./scape2009-wiki-api_1.1.0_amd64.deb
    sudo scape2009-wiki-keys init
    sudo scape2009-wiki-keys issue --label me
    sudo systemctl enable --now scape2009-wiki-api
 
-The unit ships stopped on purpose: a deployment answers only key holders, and there is
-no key until you make one. Nothing on the machine needs Python, uv or a network.
+Settings are at ``/etc/scape2009-wiki-api/deploy.json``.  
+Use ``scape2009-wiki-data pull`` to replace the installed dataset with a newer one.
 
-From a checkout
----------------
+Checkout
+--------
 
 .. code-block:: bash
 
    git clone https://github.com/arsalan-anwari/2009scape-wiki-api
-   cd 2009scape-wiki-api
-   uv sync --all-extras
+   cd 2009scape-wiki-api && uv sync --all-extras
 
-Requires `uv <https://docs.astral.sh/uv/>`_. Carry on to :doc:`getting-started`.
+A checkout keeps its dataset in ``data/``, not the shared directory. 
+Carry on to :doc:`getting-started`.

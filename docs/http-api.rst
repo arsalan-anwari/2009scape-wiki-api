@@ -1,11 +1,11 @@
 The HTTP contract
 =================
 
-A versioned FastAPI surface at ``/v1``. It returns render-ready JSON: every value
-carries its own label, format and unit, so a front end never hard-codes a field name.
+A versioned FastAPI surface at ``/v1``, returning render-ready JSON: every value carries
+its own label, format and unit, so a front end never hard-codes a field name.
 
-The OpenAPI document is at ``/openapi.json`` and the interactive contract at ``/docs``.
-Both are covered by a contract test, so they do not drift.
+OpenAPI at ``/openapi.json``, the interactive contract at ``/docs``. Both are covered by
+a contract test, so they do not drift.
 
 Routes
 ------
@@ -42,32 +42,24 @@ null when there is nothing more.
 Pages
 -----
 
-An entity page comes back as a descriptor: identity, one line of description, an
-infobox, the body split into sections, and one block per relationship the entity
-actually has. Each block holds a label, the first page of rows, and the walk that
-produced it.
+An entity page is a descriptor: identity, one line of description, an infobox, the body
+in sections, and one block per relationship the entity actually has. Each block holds a
+label, the first page of rows, and the walk that produced it.
 
 A value pointing at another entity comes back as a whole link with type, id, slug and
-label. Links never carry a URL, because the front end owns its own routing.
+label. Links carry no URL: the front end owns its routing.
 
 Absence
 -------
 
 A reference that does not resolve is an answer, not an exception.
 
-found
-    The body.
-
-moved
-    ``308`` to where the entity answers now, pointing at the same resource that was
-    asked for. Asking for a tooltip redirects to a tooltip.
-
-hidden
-    ``404`` with code ``not_published``. It is in this build and deliberately not
-    served.
-
-missing
-    ``404`` with code ``not_found``, carrying ``near_names_url``.
+===========  ==================================================================
+found        The body.
+moved        ``308`` to where it answers now, at the same resource asked for.
+hidden       ``404`` ``not_published``. In this build, deliberately not served.
+missing      ``404`` ``not_found``, carrying ``near_names_url``.
+===========  ==================================================================
 
 Errors
 ------

@@ -93,6 +93,12 @@ asked "the dataset came with it" "$dataset" "yes"
 id scape2009-wiki >/dev/null 2>&1 && account=yes || account=no
 asked "the service account was made" "$account" "yes"
 
+scape2009-wiki-data where >/dev/null 2>&1 && found=yes || found=no
+asked "the dataset is where the settings look for it" "$found" "yes"
+
+scape2009-wiki-api >/dev/null 2>&1 && dispatched=yes || dispatched=no
+asked "one executable answers to every command name" "$dispatched" "yes"
+
 answer=$({
   printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"check","version":"1"}}}'
   sleep 3

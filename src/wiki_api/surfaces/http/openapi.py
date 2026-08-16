@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from starlette.routing import BaseRoute
 
 TITLE: Final = "2009scape Wiki API"
-VERSION: Final = "1.0.0"
+VERSION: Final = "1.1.0"
 KNOWN_VALUES: Final = "x-known-values"
 SECURITY_SCHEME: Final = "issued_key"
 UNGUARDED_PATHS: Final = frozenset({"/health"})
@@ -143,10 +143,7 @@ def build(app: FastAPI, *, guarded: bool = False) -> dict[str, Any]:
 
 
 def _guarded(document: dict[str, Any]) -> None:
-    """Declare that this deployment answers holders of an issued key.
-
-    Said once here because the key is checked in one middleware, not route by route.
-    """
+    """Declare that this deployment answers holders of an issued key."""
     components = document.setdefault("components", {})
     components.setdefault("securitySchemes", {})[SECURITY_SCHEME] = {
         "type": "http",

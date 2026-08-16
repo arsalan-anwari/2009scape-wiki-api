@@ -12,9 +12,9 @@
 [![Arch](https://img.shields.io/badge/pkg.tar.zst-x86__64-1793D1?logo=archlinux&logoColor=white)](https://github.com/arsalan-anwari/2009scape-wiki-api/releases/latest)
 [![Dataset](https://img.shields.io/badge/dataset-Hugging%20Face-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/arsalan-anwari/2009scape-wiki-api-data)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-222222?logo=github&logoColor=white)](https://arsalan-anwari.github.io/2009scape-wiki-api/)
-[![FAST API docs](https://img.shields.io/badge/docs-OpenAPI-6BA539?logo=openapiinitiative&logoColor=white)](docs/http-api.rst)
-[![MCP](https://img.shields.io/badge/MCP-server-000000?logo=modelcontextprotocol&logoColor=white)](docs/mcp.rst)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![FAST API docs](https://img.shields.io/badge/docs-OpenAPI-6BA539?logo=openapiinitiative&logoColor=white)](https://arsalan-anwari.github.io/2009scape-wiki-api/http-api.html)
+[![MCP](https://img.shields.io/badge/MCP-server-000000?logo=modelcontextprotocol&logoColor=white)](https://arsalan-anwari.github.io/2009scape-wiki-api/mcp.html)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/arsalan-anwari/2009scape-wiki-api/blob/main/LICENSE)
 
 Turns the raw 2009scape game sources (items, NPCs, shops, drop tables, quests, locations)
 into one immutable SQLite artifact, served two ways: a **FastAPI** contract for a wiki
@@ -50,41 +50,33 @@ docker run -p 8000:8000 arsalananwari/2009scape-wiki-api  # a container
 ```
 
 Debian, Fedora and Arch packages are on the
-[releases page](https://github.com/arsalan-anwari/2009scape-wiki-api/releases); they carry
-the dataset, so an offline machine answers everything. See [install](docs/install.rst).
+[releases page](https://github.com/arsalan-anwari/2009scape-wiki-api/releases). Each way
+in is complete on its own: dataset, settings file, keys and the commands to manage them.
+See [install](https://arsalan-anwari.github.io/2009scape-wiki-api/install.html).
 
 ## Getting started
 
-Requires [uv](https://docs.astral.sh/uv/).
-
 ```bash
-uv sync --all-extras
-uv run poe download-data          # the published dataset into data/
-uv run poe keys init              # the key this deployment answers, once
-uv run poe keys issue --label me  # one token, saved under tokens/me.json
-uv run poe serve                  # HTTP on :8000, contract at /docs
+scape2009-wiki-data pull              # the published dataset, once
+scape2009-wiki-keys init              # the key this deployment answers, once
+scape2009-wiki-keys issue --label me  # one token, saved under tokens/me.json
+scape2009-wiki-serve                  # HTTP on :8000, contract at /docs
 
 TOKEN=$(jq -r .access_token ~/.config/scape2009-wiki-api/tokens/me.json)
 curl -H "authorization: Bearer $TOKEN" \
   http://localhost:8000/v1/entities/item/dragon-scimitar
 ```
 
-Both surfaces refuse to start without a dataset and an issuer key, naming which is
-missing. `WIKI_API_AUTH_MODE=off` answers everyone instead.
-
-This repository carries a `.mcp.json`, so running `claude` here offers the MCP server.
-
 ## Documentation
 
-`uv run poe docs` builds the full documentation into `docs/out`, or read the sources:
+The full documentation is at
+[arsalan-anwari.github.io/2009scape-wiki-api](https://arsalan-anwari.github.io/2009scape-wiki-api/).
 
 | read | for |
 | --- | --- |
-| [install](docs/install.rst), [getting started](docs/getting-started.rst) | packages, containers, first questions |
-| [configuration](docs/configuration.rst), [access](docs/access.rst) | settings, `deploy.json`, keys, tokens, bans |
-| [http-api](docs/http-api.rst), [mcp](docs/mcp.rst), [demos](docs/demos.rst) | the two surfaces, and worked examples |
-| [architecture](docs/architecture.rst), [data model](docs/data-model.rst), [pipeline](docs/pipeline.rst) | layers, entities, how a build is made |
-| [extending](docs/extending.rst), [contributing](docs/contributing.rst) | adding a sort, a relationship, a release |
+| [install](https://arsalan-anwari.github.io/2009scape-wiki-api/install.html), [getting started](https://arsalan-anwari.github.io/2009scape-wiki-api/getting-started.html) | packages, containers, first questions |
+| [configuration](https://arsalan-anwari.github.io/2009scape-wiki-api/configuration.html), [access](https://arsalan-anwari.github.io/2009scape-wiki-api/access.html) | settings, `deploy.json`, keys, tokens, bans |
+| [http-api](https://arsalan-anwari.github.io/2009scape-wiki-api/http-api.html), [mcp](https://arsalan-anwari.github.io/2009scape-wiki-api/mcp.html), [demos](https://arsalan-anwari.github.io/2009scape-wiki-api/demos.html) | the two surfaces, and worked examples |
+| [architecture](https://arsalan-anwari.github.io/2009scape-wiki-api/architecture.html), [data model](https://arsalan-anwari.github.io/2009scape-wiki-api/data-model.html), [pipeline](https://arsalan-anwari.github.io/2009scape-wiki-api/pipeline.html) | layers, entities, how a build is made |
+| [extending](https://arsalan-anwari.github.io/2009scape-wiki-api/extending.html), [contributing](https://arsalan-anwari.github.io/2009scape-wiki-api/contributing.html) | adding a sort, a relationship, a release |
 
-Versions are decided in [`CHANGELOG.md`](CHANGELOG.md) alone; see
-[contributing](docs/contributing.rst) for how a release is cut.

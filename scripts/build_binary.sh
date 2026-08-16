@@ -187,6 +187,8 @@ cp -a "$FROZEN/$NAME" "$STAGE/usr/lib/$NAME"
 install -m 0755 packaging/linux/scape2009-wiki-serve "$STAGE/usr/bin/"
 install -m 0755 packaging/linux/scape2009-wiki-mcp "$STAGE/usr/bin/"
 install -m 0755 packaging/linux/scape2009-wiki-keys "$STAGE/usr/bin/"
+install -m 0755 packaging/linux/scape2009-wiki-data "$STAGE/usr/bin/"
+install -m 0755 packaging/linux/scape2009-wiki-api "$STAGE/usr/bin/"
 
 NOTE="$STAGE/usr/share/$NAME/DATASET"
 if [[ "$WITH_DATA" -eq 1 ]]; then

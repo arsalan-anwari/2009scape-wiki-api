@@ -265,11 +265,7 @@ LimitArg = Annotated[
 def create_server(
     settings: Settings | None = None, *, mounted: bool = False
 ) -> FastMCP:
-    """Build the MCP server over the artifact the settings point at.
-
-    `mounted` leaves out this server's own guard, because the application it hangs
-    inside has already checked the caller.
-    """
+    """Build the MCP server over the artifact the settings point at."""
     chosen = settings if settings is not None else get_settings()
     provider = RepositoryProvider.open(chosen.artifact_path)
     server: FastMCP = FastMCP(
@@ -282,14 +278,18 @@ def create_server(
     return server
 
 
-def main() -> None:
-    """Run the server over whichever transport the settings ask for."""
-    settings = get_settings()
+def serve_tools(settings: Settings) -> None:
+    """Run the server over whichever transport these settings ask for."""
     server = create_server(settings)
     if settings.mcp_transport == "stdio":
         server.run(transport="stdio")
         return
     server.run(transport="http", host=settings.mcp_host, port=settings.mcp_port)
+
+
+def main() -> None:
+    """Run the server over whichever transport the settings ask for."""
+    serve_tools(get_settings())
 
 
 def _service(provider: RepositoryProvider, settings: Settings) -> KnowledgeService:

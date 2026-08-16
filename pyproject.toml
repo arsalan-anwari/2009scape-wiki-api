@@ -1,6 +1,6 @@
 [project]
 name = "scape2009-wiki-api"
-version = "1.0.0"
+version = "1.1.0"
 description = "Derived-data pipeline turning 2009scape game sources into a queryable knowledge base, exposed over HTTP-JSON and MCP."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -30,9 +30,11 @@ demos = [
 ]
 
 [project.scripts]
-scape2009-wiki-mcp = "wiki_api.surfaces.mcp.server:main"
-scape2009-wiki-serve = "wiki_api.serve:main"
-scape2009-wiki-keys = "wiki_api.access.cli:main"
+scape2009-wiki-api = "wiki_api.cli:main"
+scape2009-wiki-mcp = "wiki_api.cli:tools"
+scape2009-wiki-serve = "wiki_api.cli:serve"
+scape2009-wiki-keys = "wiki_api.cli:keys"
+scape2009-wiki-data = "wiki_api.cli:data"
 
 [project.urls]
 Repository = "https://github.com/arsalan-anwari/2009scape-wiki-api"
@@ -161,6 +163,17 @@ source_modules = [
 forbidden_modules = ["wiki_api.access.issuing", "wiki_api.access.cli"]
 
 [[tool.importlinter.contracts]]
+name = "Nothing that serves requests fetches a dataset"
+type = "forbidden"
+source_modules = [
+    "wiki_api.surfaces",
+    "wiki_api.core",
+    "wiki_api.repository",
+    "wiki_api.domain",
+]
+forbidden_modules = ["wiki_api.dataset"]
+
+[[tool.importlinter.contracts]]
 name = "Domain is pure: no transport, storage, or ingestion libraries"
 type = "forbidden"
 source_modules = ["wiki_api.domain"]
@@ -173,6 +186,9 @@ forbidden_modules = [
     "httpx2",
     "lxml",
 ]
+
+[tool.poe]
+env = { WIKI_API_DATA_DIR = "data" }
 
 [tool.poe.tasks]
 lint = "ruff check ."
@@ -199,9 +215,10 @@ allocate-ids = { script = "wiki_api.pipeline.allocate:main" }
 build-artifact = { script = "wiki_api.pipeline.artifact.cli:main" }
 build-test-artifact = { script = "tests.artifact:main" }
 serve = "uvicorn wiki_api.surfaces.http.app:create_app --factory --reload"
-mcp = { script = "wiki_api.surfaces.mcp.server:main" }
-serve-all = { script = "wiki_api.serve:main" }
-keys = { script = "wiki_api.access.cli:main" }
+mcp = { script = "wiki_api.cli:tools" }
+serve-all = { script = "wiki_api.cli:serve" }
+keys = { script = "wiki_api.cli:keys" }
+data = { script = "wiki_api.cli:data" }
 demo = "python demos/run_demo.py"
 fix = ["lint-fix", "format"]
 check = ["lint", "format-check", "typecheck", "imports", "test"]

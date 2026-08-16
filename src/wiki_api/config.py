@@ -22,7 +22,12 @@ from wiki_api.access.limits import (
     REFUSAL_WINDOW,
     TRACKED_CALLERS,
 )
-from wiki_api.access.paths import config_dir, deploy_path, issuer_public_path
+from wiki_api.access.paths import (
+    APPLICATION,
+    config_dir,
+    deploy_path,
+    issuer_public_path,
+)
 from wiki_api.core import BLOCK_PAGE_SIZE
 from wiki_api.domain.page import MAX_PAGE_SIZE
 from wiki_api.domain.search import (
@@ -33,11 +38,14 @@ from wiki_api.domain.search import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     import pytest
 
 ANY_ORIGIN = "*"
 ANY_KEY = "WIKI_API_AUTH_PUBLIC_KEY"
 DEPLOYMENT_FILE_VARIABLE = "WIKI_API_CONFIG_FILE"
+XDG_DATA_VARIABLE = "XDG_DATA_HOME"
 PRICES_DIRNAME: Final = "grand-exchange"
 
 
@@ -47,6 +55,15 @@ def deployment_file() -> Path:
     """
     named = os.environ.get(DEPLOYMENT_FILE_VARIABLE)
     return Path(named) if named else deploy_path(config_dir())
+
+
+def default_data_dir(environ: Mapping[str, str] | None = None) -> Path:
+    """Name where a dataset lives when no deployment says otherwise."""
+    read = environ if environ is not None else os.environ
+    shared = read.get(XDG_DATA_VARIABLE)
+    if shared:
+        return Path(shared) / APPLICATION
+    return Path.home() / ".local" / "share" / APPLICATION
 
 
 class Settings(BaseSettings):
@@ -70,11 +87,7 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        """Order where a setting may come from, strongest first.
-
-        The deployment file ranks last, so an environment variable overrides any line
-        of it without the file being edited.
-        """
+        """Order where a setting may come from, strongest first."""
         return (
             init_settings,
             env_settings,
@@ -85,7 +98,7 @@ class Settings(BaseSettings):
 
     hf_repo_id: str = "arsalan-anwari/2009scape-wiki-api-data"
     hf_revision: str = "main"
-    data_dir: Path = Path("data")
+    data_dir: Path = Field(default_factory=default_data_dir)
     artifact_filename: str = "knowledge.sqlite3"
     staged_dirname: str = "source"
     prices_dirname: str = PRICES_DIRNAME
@@ -137,11 +150,13 @@ class Settings(BaseSettings):
         return self.auth_mode != "off"
 
     @property
-    def issuer_public_file(self) -> Path | None:
-        """Find the key where `poe keys init` leaves it, when nobody named one.
+    def checks_nobody(self) -> bool:
+        """Say whether this deployment installs no guard at all."""
+        return self.surfaces == "mcp" and self.mcp_transport == "stdio"
 
-        Never consulted by a deployment that names its own key.
-        """
+    @property
+    def issuer_public_file(self) -> Path | None:
+        """Find the key where `poe keys init` leaves it, when nobody named one."""
         found = issuer_public_path(config_dir())
         return found if found.is_file() else None
 
@@ -149,17 +164,16 @@ class Settings(BaseSettings):
     def _answerable(self) -> Settings:
         """Refuse to start when a key is demanded but none is configured, or demanded
         alongside `cors_origins=["*"]`.
-
-        A browser cannot keep a key secret, so that pairing means the key is public.
         """
-        if not self.guarded:
+        if not self.guarded or self.checks_nobody:
             return self
         named = self.auth_public_key or self.auth_public_key_file is not None
         if not named and self.issuer_public_file is None:
             raise ValueError(
                 "answering only key holders needs an issuer public key to check them "
-                f"against: run `uv run poe keys init`, or set {ANY_KEY} to a key you "
-                "already have, or set WIKI_API_AUTH_MODE=off to answer everyone"
+                "against: run `scape2009-wiki-keys init` (`uv run poe keys init` in a "
+                f"checkout), or set {ANY_KEY} to a key you already have, or set "
+                "WIKI_API_AUTH_MODE=off to answer everyone"
             )
         if ANY_ORIGIN in self.cors_origins:
             raise ValueError(
@@ -174,6 +188,11 @@ def get_settings() -> Settings:
     return Settings()
 
 
+def settings_for_a_command() -> Settings:
+    """Read the settings for a command that answers nobody."""
+    return Settings(auth_mode="off")
+
+
 # test cases
 
 
@@ -183,7 +202,27 @@ def test_settings_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = Settings()
     assert settings.hf_repo_id == "arsalan-anwari/2009scape-wiki-api-data"
     assert settings.hf_revision == "main"
-    assert settings.data_dir == Path("data")
+    assert settings.data_dir == default_data_dir()
+
+
+def test_a_dataset_is_looked_for_in_the_same_place_wherever_it_is_run_from(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An installed command is spawned from whatever directory its client stood in."""
+    monkeypatch.delenv("WIKI_API_DATA_DIR", raising=False)
+    assert Settings().data_dir.is_absolute()
+
+
+def test_the_desktop_convention_names_where_a_dataset_lives() -> None:
+    assert default_data_dir({XDG_DATA_VARIABLE: "/home/who/.local/share"}) == Path(
+        f"/home/who/.local/share/{APPLICATION}"
+    )
+
+
+def test_a_dataset_lands_in_the_same_place_on_every_platform() -> None:
+    resolved = default_data_dir({})
+    assert resolved.parts[-3:] == (".local", "share", APPLICATION)
+    assert resolved.is_absolute()
 
 
 def test_settings_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -389,6 +428,48 @@ def test_answering_only_key_holders_needs_a_key_to_check_them_with(
     monkeypatch.delenv("WIKI_API_AUTH_PUBLIC_KEY", raising=False)
     with testing.raises(ValueError):
         Settings()
+
+
+def test_the_tools_over_stdio_are_never_asked_for_a_key(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """`surfaces.mcp.guarding.keys_for` installs nothing over stdio, so demanding a
+    key to start would refuse the commonest install for a check that never runs.
+    """
+    monkeypatch.setenv("WIKI_API_CONFIG_DIR", str(tmp_path / "nothing"))
+    monkeypatch.delenv("WIKI_API_AUTH_PUBLIC_KEY", raising=False)
+    monkeypatch.setenv("WIKI_API_SURFACES", "mcp")
+    monkeypatch.setenv("WIKI_API_MCP_TRANSPORT", "stdio")
+    settings = Settings()
+    assert settings.checks_nobody is True
+    assert settings.guarded is True
+
+
+def test_the_tools_over_a_port_are_asked_for_one(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import pytest as testing
+
+    monkeypatch.setenv("WIKI_API_CONFIG_DIR", str(tmp_path / "nothing"))
+    monkeypatch.delenv("WIKI_API_AUTH_PUBLIC_KEY", raising=False)
+    monkeypatch.setenv("WIKI_API_SURFACES", "mcp")
+    monkeypatch.setenv("WIKI_API_MCP_TRANSPORT", "http")
+    with testing.raises(ValueError):
+        Settings()
+
+
+def test_the_command_a_key_is_made_with_is_one_the_reader_has(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Every channel but a checkout reaches this message, and none of them has poe."""
+    import pytest as testing
+
+    monkeypatch.setenv("WIKI_API_CONFIG_DIR", str(tmp_path / "nothing"))
+    monkeypatch.delenv("WIKI_API_AUTH_PUBLIC_KEY", raising=False)
+    monkeypatch.delenv("WIKI_API_SURFACES", raising=False)
+    with testing.raises(ValueError) as raised:
+        Settings()
+    assert "scape2009-wiki-keys init" in str(raised.value)
 
 
 def test_the_key_made_here_is_the_one_used_when_nobody_names_another(

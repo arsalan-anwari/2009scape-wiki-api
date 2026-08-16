@@ -1,16 +1,23 @@
 Configuration
 =============
 
-Every setting lives on ``wiki_api.config.Settings`` and takes a ``WIKI_API_`` prefixed
-environment variable, so ``http_port`` is ``WIKI_API_HTTP_PORT``.
+Every setting is a field of ``wiki_api.config.Settings`` and a ``WIKI_API_`` prefixed
+environment variable (Example: ``http_port`` is ``WIKI_API_HTTP_PORT``). 
 
-Settings are read from four places, first one wins: arguments passed to ``Settings``,
-environment variables, a ``.env`` file, then ``deploy.json``. The deployment file ranks
-last, so an image can ship a complete one and still have a line overridden at run time.
+Read from four places, first ``Settings`` arguments, then local environment ``.env``
+finally config file ``deploy.json``. 
 
-``deploy.json`` sits beside the keys, or wherever ``WIKI_API_CONFIG_FILE`` names. In the
-published image that is ``/config/deploy.json``. Copy ``deploy.example.json`` to start
-from a complete one.
+``deploy.json`` sits beside the keys, or wherever ``WIKI_API_CONFIG_FILE`` names. Copy
+``deploy.example.json`` for a complete one. Each install puts both somewhere already:
+
+=====================  ==========================================  ==========================================
+installed as           ``deploy.json``                             ``data_dir``
+=====================  ==========================================  ==========================================
+PyPI                   ``~/.config/scape2009-wiki-api/``           ``~/.local/share/scape2009-wiki-api``
+a container            ``/config/`` (mount it)                     ``/data`` (in the image)
+a system package       ``/etc/scape2009-wiki-api/`` (shipped)      ``/usr/share/scape2009-wiki-api``
+a checkout             ``~/.config/scape2009-wiki-api/``           ``data/``
+=====================  ==========================================  ==========================================
 
 Data
 ----
@@ -18,10 +25,10 @@ Data
 =========================  ===========================================  ==============================================
 setting                    default                                      what it does
 =========================  ===========================================  ==============================================
-``data_dir``               ``data``                                     Where the artifact and staged sources live.
+``data_dir``               ``~/.local/share/scape2009-wiki-api``        Where the artifact and staged sources live.
 ``artifact_filename``      ``knowledge.sqlite3``                        The file a surface opens.
 ``staged_dirname``         ``source``                                   The staged sources, under ``data_dir``.
-``hf_repo_id``             ``arsalan-anwari/2009scape-wiki-api-data``    Which published dataset to fetch.
+``hf_repo_id``             ``arsalan-anwari/2009scape-wiki-api-data``    Which published dataset ``data pull`` fetches.
 ``hf_revision``            ``main``                                     Which build of it. A commit pins an older one.
 ``game_data_dir``          ``game_data``                                The game repositories, build time only.
 ``overlay_dir``            ``overlays``                                 Hand corrections, build time only.
@@ -43,9 +50,11 @@ setting                    default            what it does
 ``cors_origins``           none               Origins the browser contract answers.
 =========================  =================  =============================================
 
-Serving ``both`` mounts the MCP tools inside the HTTP application at ``/mcp``, so there
-is one port, one health check and one guard. That process runs a single worker: the
-tools keep a session per client in memory.
+``both`` mounts the tools inside the HTTP application at ``/mcp``: one port, one health
+check, one guard, one worker. The ``mcp`` command sets ``surfaces`` itself.
+
+The tools over stdio install no guard, and are the only case that starts without a key.
+See :doc:`access`.
 
 Answer sizes
 ------------
@@ -82,4 +91,5 @@ setting                     default            what it does
 ``trusted_proxies``         none               Whose forwarded-for header is believed.
 ==========================  =================  ================================================
 
-Rates are counted per process, so two replicas mean two shares. See :doc:`access`.
+See :doc:`access` for what these mean in practice, and :doc:`architecture` for why a
+process serving both runs a single worker.

@@ -1,28 +1,29 @@
 The MCP server
 ==============
 
-The same knowledge, asked the way a model asks. Every tool takes a name rather than a
-number, answers are far smaller than the HTTP ones, and an answer that cannot be given
-says what to do instead of failing. Built with `FastMCP <https://gofastmcp.com/>`_, and
-read only.
+The same knowledge, asked the way a model asks. Tools take names, not numbers. Answers
+are far smaller than the HTTP ones, and one that cannot be given says what to do instead
+of failing. See :doc:`demos` for worked examples.
 
 Connecting
 ----------
 
-Over stdio, which is what a local client spawns:
+Over stdio, which is what a local client spawns, and which asks for no key:
 
 .. code-block:: json
 
-   {"mcpServers": {"2009scape-wiki": {"type": "stdio", "command": "uv",
-     "args": ["run", "--directory", "/path/to/2009scape-wiki-api", "--quiet",
-              "scape2009-wiki-mcp"]}}}
+   {"mcpServers": {"2009scape-wiki": {"type": "stdio",
+     "command": "scape2009-wiki-mcp"}}}
 
-Over HTTP against a running container, behind the same token as the wiki contract:
+Over HTTP, behind the same token as the wiki contract:
 
 .. code-block:: bash
 
-   claude mcp add --transport http 2009scape-wiki-docker http://127.0.0.1:8000/mcp/ \
-     --header "authorization: Bearer $(uv run poe container token)"
+   claude mcp add --transport http 2009scape-wiki http://127.0.0.1:8000/mcp/ \
+     --header "authorization: Bearer $TOKEN"
+
+:doc:`getting-started` has the ``command`` and ``args`` for every other way of
+installing it, and both transports in full.
 
 Tools
 -----
@@ -42,33 +43,25 @@ tool                       what it answers
 ``about``                  Which build is being answered from.
 =========================  ==================================================================
 
-The rest are generated. For every relationship the build holds, one tool per direction,
-named from the registry's own label: ``drops`` and ``dropped_by``, ``sells`` and
-``sold_in``, and so on. A relationship declared later turns up as two new tools without
-anybody writing them, and one this build holds no edges for is not offered at all. That
-gives 32 tools on a current build.
+The rest are generated: one tool per relationship per direction, named from the
+registry's own labels (``drops`` and ``dropped_by``, ``sells`` and ``sold_in``). A
+relationship declared later becomes two new tools with nobody writing them; one with no
+edges in this build is not offered. 32 tools on a current build.
 
-``get_thing`` is the tool to call first: its counts name the tool that reads each one.
+Call ``get_thing`` first. Its counts name the tool that reads each one.
 
 Answers
 -------
 
 Every answer is wrapped in an outcome, so a model never reads an exception.
 
-``found``
-    ``result`` holds the answer.
-
-``renamed``
-    That name is retired. The note gives the one to ask with.
-
-``withheld``
-    In this build, but not published.
-
-``unknown``
-    Nothing answers to that name. The note explains how to settle it.
-
-``ambiguous``
-    Several sorts answer to that name, and which was meant is for whoever asked to say.
+===============  ==================================================================
+``found``        ``result`` holds the answer.
+``renamed``      That name is retired. The note gives the one to ask with.
+``withheld``     In this build, but not published.
+``unknown``      Nothing answers to that name. The note says how to settle it.
+``ambiguous``    Several sorts answer to it; which was meant is for whoever asked.
+===============  ==================================================================
 
 Answers are paged, report the total, and declare a result-size ceiling, so a long drop
 table cannot swallow a context window.
@@ -77,14 +70,14 @@ Two rules the server states up front
 ------------------------------------
 
 **A ref is for calling with, not for saying.** Every answer carries a ``ref`` such as
-``item:4587``. It is how a model names one exact thing back to a tool. A person reading
-the answer has never seen one, so refs, bare ids, coordinates and region numbers never
-belong in what the model says.
+``item:4587``, which is how a model names one exact thing back to a tool. A person
+reading the answer has never seen one, so refs, ids, coordinates and region numbers
+never belong in what the model says.
 
 **A misspelling is not the model's to settle.** ``find_close_names`` answers with names
-and identities alone, on purpose: it exists to be shown to a person, not chosen from.
-The same goes for things sharing a name. If nothing in the answer tells two things
-apart, they are the same thing to whoever asked.
+and identities alone: it exists to be shown to a person, not chosen from. Same for
+things sharing a name. If nothing in the answer tells two apart, they are the same thing
+to whoever asked.
 
 .. code-block:: json
 
@@ -93,5 +86,3 @@ apart, they are the same thing to whoever asked.
                "neighbours": [{"name": "King Black Dragon", "type": "npc", "id": 50,
                                "facts": {"Chance": "1/512"}}]}}
 
-A drop rate comes back as ``1/512`` because the edge kept the weight and the
-denominator. See :doc:`demos` for worked examples.

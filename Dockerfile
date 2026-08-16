@@ -72,4 +72,5 @@ VOLUME ["/config"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD ["python", "-c", "import urllib.request,os,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:' + os.environ.get('WIKI_API_HTTP_PORT', '8000') + '/health', timeout=4).status == 200 else 1)"]
 
-ENTRYPOINT ["scape2009-wiki-serve"]
+ENTRYPOINT ["scape2009-wiki-api"]
+CMD ["serve"]

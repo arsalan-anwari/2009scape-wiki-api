@@ -1,18 +1,18 @@
 2009scape wiki API
 ==================
 
-Reads the 2009scape game sources and turns them into one immutable SQLite artifact,
-served two ways from the same process: a versioned FastAPI contract for a wiki front
-end, and an MCP server for Claude and other agents.
+Turns the 2009scape game sources into one immutable SQLite artifact, served two ways
+from the same process: a versioned FastAPI contract for a wiki front end, and an MCP
+server for Claude and other agents.
 
-Nothing is written by hand except a small set of overlay corrections. Every fact traces
-back to the game file it came from, and the same inputs produce the same bytes.
+Nothing is hand-written but a small set of overlay corrections. Every fact traces back
+to the game file it came from, and the same inputs produce the same bytes.
 
 What a build holds
 ------------------
 
-Around 20,000 entities, 83,000 relationships, and two years of weekly Grand Exchange
-prices. It is published to Hugging Face, never committed to the repository.
+Around 20,000 entities, 83,000 relationships and two years of weekly Grand Exchange
+prices, published to Hugging Face and never committed here.
 
 ==================  ======
 sort                count
@@ -31,8 +31,8 @@ construction rooms      27
 The two surfaces
 ----------------
 
-HTTP returns everything a renderer needs. Each value carries its own label, format and
-unit, so a front end can draw a page for a type it has never heard of.
+HTTP returns everything a renderer needs. Each value carries its label, format and unit,
+so a front end can draw a page for a type it has never heard of.
 
 .. code-block:: json
 
