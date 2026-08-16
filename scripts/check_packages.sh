@@ -5,9 +5,10 @@
 # machine: the packages are only ever installed inside a container that is thrown away.
 #
 # Usage:
-#   scripts/check_packages.sh          all three
-#   scripts/check_packages.sh deb      one of deb, rpm, arch
-#   scripts/check_packages.sh --keep   leave the containers running to look at
+#   scripts/check_packages.sh              all three
+#   scripts/check_packages.sh deb          one of deb, rpm, arch
+#   scripts/check_packages.sh --keep       leave the containers running to look at
+#   scripts/check_packages.sh --version X  a build other than the one this tree names
 #
 
 set -uo pipefail
@@ -19,12 +20,24 @@ DIST="$REPO_ROOT/dist"
 KEEP=0
 WANTED=()
 
+# Which build to ask about. dist/ keeps every version ever built, so a check that took
+# whichever package a glob named first would quietly ask an old release the questions
+# meant for this one.
+VERSION="$(awk '/^\[/ { section = $0 }
+                section == "[project]" && /^version *=/ { gsub(/[" ]/, "", $3); print $3; exit }' \
+           "$REPO_ROOT/pyproject.toml")"
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     deb|rpm|arch) WANTED+=("$1") ;;
     --keep) KEEP=1 ;;
+    --version)
+      VERSION="${2:-}"
+      [[ -n "$VERSION" ]] || { echo "check_packages: --version needs a version" >&2; exit 2; }
+      shift
+      ;;
     -h|--help)
-      sed -n '3,21p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      sed -n '3,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)
@@ -59,9 +72,9 @@ image_for() {
 
 package_for() {
   case "$1" in
-    deb) compgen -G "$DIST/scape2009-wiki-api_*_amd64.deb" | head -1 ;;
-    rpm) compgen -G "$DIST/scape2009-wiki-api-*.x86_64.rpm" | head -1 ;;
-    arch) compgen -G "$DIST/scape2009-wiki-api-*-x86_64.pkg.tar.zst" | head -1 ;;
+    deb) compgen -G "$DIST/scape2009-wiki-api_${VERSION}-*_amd64.deb" | tail -1 ;;
+    rpm) compgen -G "$DIST/scape2009-wiki-api-${VERSION}-*.x86_64.rpm" | tail -1 ;;
+    arch) compgen -G "$DIST/scape2009-wiki-api-${VERSION}-*-x86_64.pkg.tar.zst" | tail -1 ;;
   esac
 }
 
@@ -144,7 +157,7 @@ for target in "${WANTED[@]}"; do
   package="$(package_for "$target")"
   if [[ -z "$package" ]]; then
     printf '== %s\n' "$target"
-    say "no package built for this. Run scripts/build_binary.sh first"
+    say "no $VERSION package built for this. Run scripts/build_binary.sh first"
     overall=1
     continue
   fi

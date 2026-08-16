@@ -187,9 +187,15 @@ build() {
   fi
 
   step "a checksum for everything this release hands out"
-  ( cd "$DIST" && rm -f SHA256SUMS \
-    && sha256sum $(cd "$DIST" && ls -1 *.deb *.rpm *.pkg.tar.zst *.tar.gz 2>/dev/null || true) >SHA256SUMS 2>/dev/null || true )
-  [[ -s "$DIST/SHA256SUMS" ]] && sed 's/^/  /' "$DIST/SHA256SUMS"
+  # Only this version's assets. dist/ keeps every build ever made, and a checksum file
+  # naming files the release does not hand out is worse than no checksum file.
+  rm -f "$DIST/SHA256SUMS"
+  local shipping=()
+  mapfile -t shipping < <(assets_present "$version")
+  if [[ ${#shipping[@]} -gt 0 ]]; then
+    ( cd "$DIST" && sha256sum "${shipping[@]##*/}" >SHA256SUMS )
+    sed 's/^/  /' "$DIST/SHA256SUMS"
+  fi
 
   printf '\n'
   say "built for $version. Nothing has been pushed"
@@ -535,7 +541,7 @@ verify() {
   fi
   if [[ "$WANT_PACKAGES" -eq 1 ]]; then
     step "the packages, each in its own distribution"
-    bash scripts/check_packages.sh || failed=1
+    bash scripts/check_packages.sh --version "$version" || failed=1
   fi
 
   printf '\n'
