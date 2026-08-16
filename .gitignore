@@ -31,3 +31,9 @@ htmlcov/
 .pytest_cache/
 .ruff_cache/
 .venv/
+
+# Ignore the release scripts build: frozen executables, packages, images and wheels.
+dist/
+
+# Ignore the documentation site build: HTML, LaTeX, and Sphinx output.
+docs/out/

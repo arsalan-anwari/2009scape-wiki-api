@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Make the issuer key this machine's service answers, and hand out tokens signed by it.
+
+: "${WIKI_API_CONFIG_DIR:=/etc/scape2009-wiki-api}"
+export WIKI_API_CONFIG_DIR
+
+exec /usr/lib/scape2009-wiki-api/scape2009-wiki-api keys "$@"

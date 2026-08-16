@@ -1,0 +1,8 @@
+{%- extends "!layout.html" %}
+
+{#- Sphinx joins the page title and the site title with an em dash. Use a plain
+    pipe instead, and drop the suffix on pages whose title already is the site
+    title (the landing page and anything else named after it). #}
+{%- block htmltitle %}
+    <title>{{ title|striptags|e }}{% if docstitle and title|striptags|e != docstitle|e %} | {{ docstitle|e }}{% endif %}</title>
+{%- endblock %}

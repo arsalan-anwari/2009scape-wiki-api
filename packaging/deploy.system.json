@@ -1,0 +1,18 @@
+{
+  "surfaces": "both",
+  "http_host": "127.0.0.1",
+  "http_port": 8000,
+  "data_dir": "/usr/share/scape2009-wiki-api",
+  "artifact_filename": "knowledge.sqlite3",
+  "auth_mode": "required",
+  "auth_public_key_file": "/etc/scape2009-wiki-api/issuer.pub",
+  "auth_revoked_file": "/etc/scape2009-wiki-api/revoked.json",
+  "ban_file": "/var/lib/scape2009-wiki-api/banned.json",
+  "cors_origins": [],
+  "rate_per_second": 10.0,
+  "rate_burst": 60,
+  "max_refusals": 10,
+  "refusal_window": 60.0,
+  "ban_seconds": 900.0,
+  "trusted_proxies": []
+}

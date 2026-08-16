@@ -5,3 +5,5 @@
 !LICENSE
 !src
 src/**/__pycache__
+# Read only by the dataset-embedded stage, which is built only when it is selected.
+!data/knowledge.sqlite3

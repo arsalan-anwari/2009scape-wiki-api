@@ -1,8 +1,4 @@
-"""Check what a deployment is handed against what `Settings` will accept.
-
-The Dockerfile, compose.yaml and deploy.example.json are read by docker rather than
-imported, so a renamed field would leave all three naming nothing.
-"""
+"""Check what a deployment is handed against what `Settings` will accept."""
 
 from __future__ import annotations
 
@@ -20,8 +16,6 @@ COMPOSE = ROOT / "compose.yaml"
 IMAGE = ROOT / "Dockerfile"
 PREFIX = "WIKI_API_"
 NAMED = re.compile(rf"{PREFIX}[A-Z0-9_]+")
-# Settings names no directory, so these two are read by wiki_api.access.paths rather
-# than by the model, and are as real as any field.
 OUTSIDE = {"WIKI_API_CONFIG_DIR", "WIKI_API_CONFIG_FILE"}
 
 
@@ -41,11 +35,7 @@ def test_the_example_deployment_is_written_in_lines_the_service_reads() -> None:
 
 
 def test_the_example_deployment_would_start() -> None:
-    """Its values validate, not just its keys.
-
-    Read as a document rather than through the settings sources, so this says what the
-    file itself holds and never what the machine running the suite happens to export.
-    """
+    """Its values validate, not just its keys."""
     written = json.loads(EXAMPLE.read_text(encoding="utf-8"))
     settings = Settings.model_validate(written)
     assert settings.surfaces == "both"
@@ -61,13 +51,32 @@ def test_the_example_deployment_keeps_no_secret() -> None:
 
 
 def test_the_example_deployment_reads_what_the_image_mounts() -> None:
-    """The paths it names are the ones the image declares as volumes."""
+    """The paths it names are the ones the image writes and reads."""
     written = json.loads(EXAMPLE.read_text(encoding="utf-8"))
     declared = IMAGE.read_text(encoding="utf-8")
-    assert 'VOLUME ["/data", "/config"]' in declared
+    assert 'VOLUME ["/config"]' in declared
     assert written["data_dir"] == "/data"
     for named in ("auth_public_key_file", "auth_revoked_file"):
         assert written[named].startswith("/config/")
+
+
+def test_the_dataset_directory_is_never_declared_a_volume() -> None:
+    """A build with the dataset in it fills /data, and a declared volume would copy all
+    of it again on every start."""
+    declared = IMAGE.read_text(encoding="utf-8")
+    assert "/data" not in declared.split("VOLUME")[1].splitlines()[0]
+    assert "COPY --from=dataset" in declared
+
+
+def test_the_image_can_be_built_with_the_dataset_or_without_it() -> None:
+    """Both stages the DATASET argument selects exist, or one of the two ways of
+    building it names a stage that is not there.
+    """
+    declared = IMAGE.read_text(encoding="utf-8")
+    assert "ARG DATASET=none" in declared
+    for stage in ("dataset-none", "dataset-embedded"):
+        assert f"AS {stage}" in declared
+    assert "FROM dataset-${DATASET} AS dataset" in declared
 
 
 @pytest.mark.parametrize("path", [COMPOSE, IMAGE], ids=lambda path: path.name)
@@ -90,11 +99,7 @@ def test_the_image_and_the_example_agree_on_where_things_live() -> None:
 
 
 def test_compose_reads_the_directories_the_preparation_fills() -> None:
-    """`poe container prepare` writes these two, and compose mounts those two.
-
-    Written down here because the two live in different files and nothing else would
-    notice them drifting apart until a first start served an empty directory.
-    """
+    """`poe container prepare` writes these two, and compose mounts those two."""
     written = COMPOSE.read_text(encoding="utf-8")
     assert "./run/data:/data:ro" in written
     assert "./run/config:/config" in written

@@ -1,6 +1,6 @@
 [project]
 name = "scape2009-wiki-api"
-version = "0.0.0"
+version = "1.0.0"
 description = "Derived-data pipeline turning 2009scape game sources into a queryable knowledge base, exposed over HTTP-JSON and MCP."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -38,6 +38,13 @@ scape2009-wiki-keys = "wiki_api.access.cli:main"
 Repository = "https://github.com/arsalan-anwari/2009scape-wiki-api"
 
 [dependency-groups]
+release = [
+    "pyinstaller>=6.19.0",
+]
+docs = [
+    "sphinx>=8.2.3",
+    "sphinx-2009scape-theme>=1.0.1",
+]
 dev = [
     "ruff>=0.16.0",
     "mypy>=2.3.0",
@@ -176,8 +183,13 @@ typecheck = "mypy"
 imports = "lint-imports"
 test = "pytest"
 check-docs = "bash scripts/check_docs.sh"
+docs = "bash scripts/build_docs.sh"
+deploy-docs = "bash scripts/release.sh docs"
 container = "bash scripts/container.sh"
 build-artifacts = "bash scripts/build_artifacts.sh"
+build-binary = "bash scripts/build_binary.sh"
+check-packages = "bash scripts/check_packages.sh"
+release = "bash scripts/release.sh"
 sync-submodules = "bash scripts/sync_submodules.sh"
 upload-data = "bash scripts/upload_data.sh"
 download-data = "bash scripts/download_data.sh"

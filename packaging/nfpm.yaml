@@ -1,0 +1,87 @@
+# What a .deb, an .rpm and an Arch package hold. One description, three packagers.
+#
+# The version is written here by scripts/release.sh from CHANGELOG.md, and the files
+# named below are staged into dist/stage by scripts/build_binary.sh. Neither is built
+# by hand.
+
+name: scape2009-wiki-api
+version: "1.0.0"
+release: "1"
+arch: amd64
+platform: linux
+maintainer: Arsalan Anwari <arsalan@anwari.nl>
+description: |
+  Queryable knowledge base built from the 2009scape game sources.
+  Serves one immutable SQLite build two ways: an HTTP-JSON contract for a wiki front
+  end, and an MCP server so agents can ask about items, NPCs, shops, quests, scenery
+  and Grand Exchange prices. The dataset ships inside the package, so a machine with
+  no network answers the same questions as one with.
+vendor: Arsalan Anwari
+homepage: https://github.com/arsalan-anwari/2009scape-wiki-api
+license: Apache-2.0
+section: net
+priority: optional
+
+contents:
+  - src: ./dist/stage/usr/lib/scape2009-wiki-api
+    dst: /usr/lib/scape2009-wiki-api
+
+  - src: ./dist/stage/usr/bin/scape2009-wiki-serve
+    dst: /usr/bin/scape2009-wiki-serve
+    file_info:
+      mode: 0755
+  - src: ./dist/stage/usr/bin/scape2009-wiki-mcp
+    dst: /usr/bin/scape2009-wiki-mcp
+    file_info:
+      mode: 0755
+  - src: ./dist/stage/usr/bin/scape2009-wiki-keys
+    dst: /usr/bin/scape2009-wiki-keys
+    file_info:
+      mode: 0755
+
+  # The dataset, and a note beside it saying which build it is. Both are staged, so a
+  # package built with no dataset still matches this and simply carries the note.
+  - src: ./dist/stage/usr/share/scape2009-wiki-api/*
+    dst: /usr/share/scape2009-wiki-api/
+
+  - src: ./packaging/systemd/scape2009-wiki-api.service
+    dst: /usr/lib/systemd/system/scape2009-wiki-api.service
+
+  - src: ./packaging/deploy.system.json
+    dst: /etc/scape2009-wiki-api/deploy.json
+    type: config|noreplace
+    file_info:
+      mode: 0644
+
+  - src: ./LICENSE
+    dst: /usr/share/doc/scape2009-wiki-api/LICENSE
+  - src: ./README.md
+    dst: /usr/share/doc/scape2009-wiki-api/README.md
+  - src: ./CHANGELOG.md
+    dst: /usr/share/doc/scape2009-wiki-api/CHANGELOG.md
+
+  # Written by the service, never shipped with anything in it.
+  - dst: /var/lib/scape2009-wiki-api
+    type: dir
+    file_info:
+      mode: 0750
+      owner: scape2009-wiki
+      group: scape2009-wiki
+
+scripts:
+  preinstall: ./packaging/scripts/preinstall.sh
+  postinstall: ./packaging/scripts/postinstall.sh
+  preremove: ./packaging/scripts/preremove.sh
+
+deb:
+  fields:
+    Bugs: https://github.com/arsalan-anwari/2009scape-wiki-api/issues
+  compression: zstd
+
+rpm:
+  group: Applications/Internet
+  compression: zstd
+
+archlinux:
+  pkgbase: scape2009-wiki-api
+  packager: Arsalan Anwari <arsalan@anwari.nl>
