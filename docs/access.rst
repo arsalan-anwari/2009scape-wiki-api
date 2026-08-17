@@ -17,7 +17,7 @@ uv tool
 .. code-block:: bash
 
    scape2009-wiki-keys init                     # the key this deployment answers, once
-   scape2009-wiki-keys issue --label the-wiki   # one token, kept in tokens/the-wiki.json
+   scape2009-wiki-keys issue --label <label>   # one token, kept in tokens/<label>.json
    scape2009-wiki-keys revoke --kid <key id>    # stop answering that one
    scape2009-wiki-keys show                     # the public key, and what is withdrawn
    scape2009-wiki-keys banned                   # which addresses are being refused
@@ -31,7 +31,7 @@ As root, because the keys belong to ``/etc`` rather than to you.
 .. code-block:: bash
 
    sudo scape2009-wiki-keys init
-   sudo scape2009-wiki-keys issue --label the-wiki
+   sudo scape2009-wiki-keys issue --label <label>
    sudo scape2009-wiki-keys revoke --kid <key id>
    sudo scape2009-wiki-keys show
    sudo scape2009-wiki-keys banned
@@ -48,7 +48,7 @@ See :doc:`deployment` for how to make one.
    docker run --rm -v wiki-config:/config arsalananwari/2009scape-wiki-api \
      keys init
    docker run --rm -v wiki-config:/config arsalananwari/2009scape-wiki-api \
-     keys issue --label the-wiki
+     keys issue --label <label>
    docker run --rm -v wiki-config:/config arsalananwari/2009scape-wiki-api \
      keys revoke --kid <key id>
    docker run --rm -v wiki-config:/config arsalananwari/2009scape-wiki-api \
@@ -64,7 +64,7 @@ Checkout
 .. code-block:: bash
 
    uv run poe keys init
-   uv run poe keys issue --label the-wiki
+   uv run poe keys issue --label <label>
    uv run poe keys revoke --kid <key id>
    uv run poe keys show
    uv run poe keys banned

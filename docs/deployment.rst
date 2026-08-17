@@ -29,7 +29,7 @@ uv tool
 
    # 3. the key this deployment answers, and one token to call it with
    scape2009-wiki-keys init
-   scape2009-wiki-keys issue --label me
+   scape2009-wiki-keys issue --label <label>
 
    # 4. start it
    scape2009-wiki-serve
@@ -38,7 +38,7 @@ Ask it something, in another terminal:
 
 .. code-block:: bash
 
-   TOKEN=$(jq -r .access_token ~/.config/scape2009-wiki-api/tokens/me.json)
+   TOKEN=$(jq -r .access_token ~/.config/scape2009-wiki-api/tokens/<label>.json)
    curl -H "authorization: Bearer $TOKEN" \
      http://127.0.0.1:8000/v1/entities/item/dragon-scimitar
 
@@ -69,7 +69,7 @@ The dataset, a service account and a systemd unit all come with the package.
 
    # 3. the key and a token, as root: they belong to /etc, not to you
    sudo scape2009-wiki-keys init
-   sudo scape2009-wiki-keys issue --label me
+   sudo scape2009-wiki-keys issue --label <label>
 
    # 4. start it
    sudo systemctl enable --now scape2009-wiki-api
@@ -78,7 +78,7 @@ Ask it something:
 
 .. code-block:: bash
 
-   TOKEN=$(sudo jq -r .access_token /etc/scape2009-wiki-api/tokens/me.json)
+   TOKEN=$(sudo jq -r .access_token /etc/scape2009-wiki-api/tokens/<label>.json)
    curl -H "authorization: Bearer $TOKEN" \
      http://127.0.0.1:8000/v1/entities/item/dragon-scimitar
 
@@ -108,7 +108,7 @@ Container
    # 3. the key and a token. Copy the token from what this prints
    docker run --rm -v wiki-config:/config arsalananwari/2009scape-wiki-api keys init
    docker run --rm -v wiki-config:/config arsalananwari/2009scape-wiki-api \
-     keys issue --label me
+     keys issue --label <label>
 
    # 4. start it
    docker run -d -p 8000:8000 -v wiki-config:/config \
@@ -198,7 +198,7 @@ Checkout
 
    # 3. the key and a token
    uv run poe keys init
-   uv run poe keys issue --label me
+   uv run poe keys issue --label <label>
 
    # 4. start it
    uv run poe serve-all
@@ -207,7 +207,7 @@ Ask it something:
 
 .. code-block:: bash
 
-   TOKEN=$(jq -r .access_token ~/.config/scape2009-wiki-api/tokens/me.json)
+   TOKEN=$(jq -r .access_token ~/.config/scape2009-wiki-api/tokens/<label>.json)
    curl -H "authorization: Bearer $TOKEN" \
      http://127.0.0.1:8000/v1/entities/item/dragon-scimitar
 
