@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Deployment | 2009scape wiki API</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=2a9e1395" />
+    <link rel="stylesheet" type="text/css" href="_static/css/fonts.css?v=c970c89a" />
+    <link rel="stylesheet" type="text/css" href="_static/css/2009scape.css?v=378b80f8" />
+    <link rel="stylesheet" type="text/css" href="_static/css/layout.css?v=cd81ca58" />
+    <link rel="stylesheet" type="text/css" href="_static/css/content.css?v=3145d598" />
+    <script src="_static/documentation_options.js?v=d727d969"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="_static/js/2009scape.js?v=37174350"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Configuration" href="configuration.html" />
+    <link rel="prev" title="Installing" href="install.html" />
+   
+  </head>
+<body class="rs-body"
+      data-rs-scanlines="true"
+      data-rs-pixelated-images="false"
+      data-rs-search-shortcut="true">
+<a class="rs-skip-link" href="#rs-main">Skip to content</a>
+<header class="rs-header">
+  <div class="rs-header__inner">
+    <div class="rs-header__left">
+      <button class="rs-toggle" type="button" data-rs-toggle="sidebar"
+              aria-controls="rs-sidebar" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M1 3h14v2H1zM1 7h14v2H1zM1 11h14v2H1z"/>
+        </svg>
+      </button>
+
+      <a class="rs-brand" href="index.html">
+        <span class="rs-brand__text">2009scape wiki API</span>
+      </a>
+      <span class="rs-brand__subtitle">game sources as one queryable artifact</span>
+    </div>
+
+    <div class="rs-header__right">
+      <nav class="rs-header__nav" aria-label="Site links">
+        <a href="install.html">Install</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="extending.html">Extending</a>
+        <a href="genindex.html">Index</a>
+        <a href="search.html">Search</a>
+      </nav>
+      <a class="rs-icon-link" href="https://github.com/arsalan-anwari/2009scape-wiki-api" rel="noopener noreferrer"
+         target="_blank" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.6 0 0 3.6 0 8c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-1-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.5 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.3.6.8.6 1.6v2.3c0 .2.1.5.6.4A8 8 0 0 0 8 0Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+<div class="rs-page">
+  <div class="rs-sidebar-backdrop"></div>
+  <aside class="rs-sidebar" id="rs-sidebar" role="navigation" aria-label="Main navigation">
+<div class="rs-sidebar__section rs-sidebar__brand">
+  <a class="rs-brand" href="index.html">
+    <span class="rs-brand__text">2009scape wiki API</span>
+  </a>
+  <p class="rs-brand__subtitle">game sources as one queryable artifact</p>
+</div>
+<search class="rs-search rs-sidebar__section" role="search">
+  <form action="search.html" method="get">
+    <label class="rs-visually-hidden" for="rs-search-input">Search</label>
+    <input id="rs-search-input" type="text" name="q" placeholder="Search docs"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <button class="rs-btn" type="submit">Go</button>
+  </form>
+</search><nav class="rs-sidebar__section" data-rs-globaltoc
+     data-rs-collapse="false"
+     aria-label="Documentation">
+  <p class="rs-sidebar__heading">Documentation</p>
+  <p class="caption" role="heading"><span class="caption-text">Using it</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#surfaces">Surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#answer-sizes">Answer sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#the-guard">The guard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Keys and access</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="access.html#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#files">Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#before-relying-on-it">Before relying on it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#over-stdio-no-key">Over stdio, no key</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The surfaces</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="http-api.html">The HTTP contract</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#routes">Routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#paging">Paging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#pages">Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#absence">Absence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#errors">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#caching">Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">The MCP server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#tools">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#answers">Answers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#two-rules-the-server-states-up-front">Two rules the server states up front</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos.html">Demonstrations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#setting-one-up">Setting one up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#example-output">Example output</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#what-holds-them-apart">What holds them apart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#three-properties">Three properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#reading-the-code">Reading the code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">The knowledge model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#entities">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-attribute-registry">The attribute registry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#relationships">Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#variants-and-totals">Variants and totals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#prices">Prices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-manifest">The manifest</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">The build pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#staging">1. Staging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#numbering">2. Numbering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#adapters">3. Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#merge-and-write">4. Merge and write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#commands">Commands</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Working on it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Extending it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-attribute">Adding an attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-relationship">Adding a relationship</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-entity-type">Adding an entity type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-source">Adding a source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#writing-an-overlay">Writing an overlay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-storage-backend">Adding a storage backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-http-route">Adding an HTTP route</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-mcp-tool">Adding an MCP tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#before-opening-a-pull-request">Before opening a pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#the-gate">The gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#where-tests-live">Where tests live</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#how-prose-is-checked">How prose is checked</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#making-a-change">Making a change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#releasing">Releasing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Where things live</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#this-project">This project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#where-the-data-comes-from">Where the data comes from</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#built-on">Built on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#licence">Licence</a></li>
+</ul>
+</li>
+</ul>
+
+</nav>
+  </aside>
+
+  <main class="rs-main" id="rs-main">
+    <article class="rs-content" role="main">
+<nav aria-label="Breadcrumbs">
+  <ol class="rs-breadcrumbs">
+    <li><a href="index.html">wiki API</a></li>
+    <li><span class="rs-breadcrumbs__current">Deployment</span></li>
+  </ol>
+</nav>
+      <section id="deployment">
+<h1>Deployment<a class="headerlink" href="#deployment" title="Link to this heading">¶</a></h1>
+<p>Find how you installed it below and follow that section alone.</p>
+<p>All four end in the same place. The contract and the tools on <code class="docutils literal notranslate"><span class="pre">:8000</span></code>, answering key
+holders and nobody else, tools at <code class="docutils literal notranslate"><span class="pre">/mcp/</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>installed as</p></th>
+<th class="head"><p>config</p></th>
+<th class="head"><p>dataset</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uv tool</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.config/scape2009-wiki-api</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.local/share/scape2009-wiki-api</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>system package</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/etc/scape2009-wiki-api</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/usr/share/scape2009-wiki-api</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>container</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/config</span></code> (a volume)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/data</span></code> (in the image)</p></td>
+</tr>
+<tr class="row-odd"><td><p>checkout</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.config/scape2009-wiki-api</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data/</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="uv-tool">
+<h2>uv tool<a class="headerlink" href="#uv-tool" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. install</span>
+uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>scape2009-wiki-api
+
+<span class="c1"># 2. the dataset, once</span>
+scape2009-wiki-data<span class="w"> </span>pull
+scape2009-wiki-data<span class="w"> </span>where
+
+<span class="c1"># 3. the key this deployment answers, and one token to call it with</span>
+scape2009-wiki-keys<span class="w"> </span>init
+scape2009-wiki-keys<span class="w"> </span>issue<span class="w"> </span>--label<span class="w"> </span>&lt;label&gt;
+
+<span class="c1"># 4. start it</span>
+scape2009-wiki-serve
+</pre></div>
+</div>
+<p>Ask it something, in another terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>jq<span class="w"> </span>-r<span class="w"> </span>.access_token<span class="w"> </span>~/.config/scape2009-wiki-api/tokens/&lt;label&gt;.json<span class="k">)</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>http://127.0.0.1:8000/v1/entities/item/dragon-scimitar
+</pre></div>
+</div>
+<p>Connect an MCP client:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># over http, behind the same token as the contract</span>
+claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>http<span class="w"> </span>2009scape-wiki<span class="w"> </span>http://127.0.0.1:8000/mcp/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--header<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
+
+<span class="c1"># or over stdio, spawned by the client: no key, no port, nothing running</span>
+claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>stdio<span class="w"> </span>2009scape-wiki<span class="w"> </span>--<span class="w"> </span>scape2009-wiki-mcp
+</pre></div>
+</div>
+</section>
+<section id="system-package">
+<h2>System package<a class="headerlink" href="#system-package" title="Link to this heading">¶</a></h2>
+<p>The dataset, a service account and a systemd unit all come with the package.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. install</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>./scape2009-wiki-api-1.1.1-1.x86_64.rpm<span class="w">            </span><span class="c1"># Fedora, RHEL</span>
+<span class="c1"># sudo apt install ./scape2009-wiki-api_1.1.1-1_amd64.deb           # Debian, Ubuntu</span>
+<span class="c1"># sudo pacman -U scape2009-wiki-api-1.1.1-1-x86_64.pkg.tar.zst      # Arch</span>
+
+<span class="c1"># 2. the dataset is already in /usr/share/scape2009-wiki-api</span>
+
+<span class="c1"># 3. the key and a token, as root: they belong to /etc, not to you</span>
+sudo<span class="w"> </span>scape2009-wiki-keys<span class="w"> </span>init
+sudo<span class="w"> </span>scape2009-wiki-keys<span class="w"> </span>issue<span class="w"> </span>--label<span class="w"> </span>&lt;label&gt;
+
+<span class="c1"># 4. start it</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>scape2009-wiki-api
+</pre></div>
+</div>
+<p>Ask it something:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.access_token<span class="w"> </span>/etc/scape2009-wiki-api/tokens/&lt;label&gt;.json<span class="k">)</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>http://127.0.0.1:8000/v1/entities/item/dragon-scimitar
+</pre></div>
+</div>
+<p>Connect an MCP client:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>http<span class="w"> </span>2009scape-wiki<span class="w"> </span>http://127.0.0.1:8000/mcp/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--header<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
+
+claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>stdio<span class="w"> </span>2009scape-wiki<span class="w"> </span>--<span class="w"> </span>scape2009-wiki-mcp
+</pre></div>
+</div>
+<p>Settings are <code class="docutils literal notranslate"><span class="pre">/etc/scape2009-wiki-api/deploy.json</span></code>, read by the service account rather
+than by you. <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">scape2009-wiki-data</span> <span class="pre">pull</span></code> replaces the installed dataset with a
+newer one.</p>
+</section>
+<section id="container">
+<h2>Container<a class="headerlink" href="#container" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. a volume for the key and the addresses the guard refuses</span>
+docker<span class="w"> </span>volume<span class="w"> </span>create<span class="w"> </span>wiki-config
+
+<span class="c1"># 2. the dataset is already in the image, at /data</span>
+
+<span class="c1"># 3. the key and a token. Copy the token from what this prints</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>wiki-config:/config<span class="w"> </span>arsalananwari/2009scape-wiki-api<span class="w"> </span>keys<span class="w"> </span>init
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>wiki-config:/config<span class="w"> </span>arsalananwari/2009scape-wiki-api<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>keys<span class="w"> </span>issue<span class="w"> </span>--label<span class="w"> </span>&lt;label&gt;
+
+<span class="c1"># 4. start it</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>-v<span class="w"> </span>wiki-config:/config<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>arsalananwari/2009scape-wiki-api
+</pre></div>
+</div>
+<p>Ask it something:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TOKEN</span><span class="o">=</span>&lt;the<span class="w"> </span>token<span class="w"> </span>step<span class="w"> </span><span class="m">3</span><span class="w"> </span>printed&gt;
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>http://127.0.0.1:8000/v1/entities/item/dragon-scimitar
+</pre></div>
+</div>
+<p>Connect an MCP client:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>http<span class="w"> </span>2009scape-wiki<span class="w"> </span>http://127.0.0.1:8000/mcp/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--header<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
+
+<span class="c1"># or over stdio, one container per client, no key and no port</span>
+claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>stdio<span class="w"> </span>2009scape-wiki<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker<span class="w"> </span>run<span class="w"> </span>-i<span class="w"> </span>--rm<span class="w"> </span>arsalananwari/2009scape-wiki-api<span class="w"> </span>mcp
+</pre></div>
+</div>
+<section id="keeping-the-signing-key-out-of-the-container">
+<h3>Keeping the signing key out of the container<a class="headerlink" href="#keeping-the-signing-key-out-of-the-container" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">keys</span> <span class="pre">init</span></code> in the container leaves the signing key in the volume. Fine on one
+machine, wrong for a real deployment.</p>
+<p>Use the Python package or Repo tools to make the keyon the system and pass the
+public key into the container using <code class="docutils literal notranslate"><span class="pre">WIKI_API_AUTH_PUBLIC_KEY</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scape2009-wiki-keys<span class="w"> </span>init<span class="w"> </span><span class="c1"># using python tools, or uv run poe keys init</span>
+scape2009-wiki-keys<span class="w"> </span>issue<span class="w"> </span>--label<span class="w"> </span>the-wiki
+
+docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s2">&quot;WIKI_API_AUTH_PUBLIC_KEY=</span><span class="k">$(</span>cat<span class="w"> </span>~/.config/scape2009-wiki-api/issuer.pub<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>arsalananwari/2009scape-wiki-api
+</pre></div>
+</div>
+</section>
+<section id="persistent-bans-and-revocations">
+<h3>Persistent bans and revocations<a class="headerlink" href="#persistent-bans-and-revocations" title="Link to this heading">¶</a></h3>
+<p>Bans are then written inside the container and forgotten when it goes. Give it an empty
+<code class="docutils literal notranslate"><span class="pre">/config</span></code> volume to keep them, and no key goes in it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>volume<span class="w"> </span>create<span class="w"> </span>wiki-state
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>wiki<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s2">&quot;WIKI_API_AUTH_PUBLIC_KEY=</span><span class="k">$(</span>cat<span class="w"> </span>~/.config/scape2009-wiki-api/issuer.pub<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>wiki-state:/config<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>arsalananwari/2009scape-wiki-api
+</pre></div>
+</div>
+<p>Mount it at <code class="docutils literal notranslate"><span class="pre">/config</span></code> as that one exists in the image already, owned by the user
+it runs as.</p>
+</section>
+<section id="serving-a-different-build-or-answering-everyone">
+<h3>Serving a different build, or answering everyone<a class="headerlink" href="#serving-a-different-build-or-answering-everyone" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># a dataset of your own over the one in the image</span>
+docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>-v<span class="w"> </span>wiki-config:/config<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>./data:/data:ro,z<span class="w"> </span>arsalananwari/2009scape-wiki-api
+
+<span class="c1"># no key asked of anyone: a local front end, never anything reachable</span>
+docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">WIKI_API_AUTH_MODE</span><span class="o">=</span>off<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;WIKI_API_CORS_ORIGINS=[&quot;*&quot;]&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>arsalananwari/2009scape-wiki-api
+</pre></div>
+</div>
+</section>
+</section>
+<section id="checkout">
+<h2>Checkout<a class="headerlink" href="#checkout" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. install</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/arsalan-anwari/2009scape-wiki-api
+<span class="nb">cd</span><span class="w"> </span>2009scape-wiki-api<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>sync<span class="w"> </span>--all-extras
+
+<span class="c1"># 2. the dataset, into data/</span>
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>download-data
+
+<span class="c1"># 3. the key and a token</span>
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>keys<span class="w"> </span>init
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>keys<span class="w"> </span>issue<span class="w"> </span>--label<span class="w"> </span>&lt;label&gt;
+
+<span class="c1"># 4. start it</span>
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>serve-all
+</pre></div>
+</div>
+<p>Ask it something:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>jq<span class="w"> </span>-r<span class="w"> </span>.access_token<span class="w"> </span>~/.config/scape2009-wiki-api/tokens/&lt;label&gt;.json<span class="k">)</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>http://127.0.0.1:8000/v1/entities/item/dragon-scimitar
+</pre></div>
+</div>
+<p>Connect an MCP client:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>http<span class="w"> </span>2009scape-wiki<span class="w"> </span>http://127.0.0.1:8000/mcp/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--header<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
+
+claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>stdio<span class="w"> </span>2009scape-wiki<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>uv<span class="w"> </span>run<span class="w"> </span>--directory<span class="w"> </span>/path/to/repo<span class="w"> </span>--quiet<span class="w"> </span>scape2009-wiki-mcp
+</pre></div>
+</div>
+</section>
+</section>
+
+<div class="rs-page-meta">
+  <a href="https://github.com/arsalan-anwari/2009scape-wiki-api/blob/main/docs/deployment.rst" rel="nofollow noopener" target="_blank">Edit this page</a>
+</div>
+<nav class="rs-page-nav" aria-label="Page navigation">
+  <a class="rs-page-nav__link rs-page-nav__link--prev" href="install.html" rel="prev">
+    <span class="rs-page-nav__label">« Previous</span>
+    <span class="rs-page-nav__title">Installing</span>
+  </a>
+  <a class="rs-page-nav__link rs-page-nav__link--next" href="configuration.html" rel="next">
+    <span class="rs-page-nav__label">Next »</span>
+    <span class="rs-page-nav__title">Configuration</span>
+  </a>
+</nav>
+    </article>
+  </main>
+  <aside class="rs-toc" aria-label="On this page">
+    <p class="rs-toc__title">On this page</p>
+    <ul>
+<li><a class="reference internal" href="#">Deployment</a><ul>
+<li><a class="reference internal" href="#uv-tool">uv tool</a></li>
+<li><a class="reference internal" href="#system-package">System package</a></li>
+<li><a class="reference internal" href="#container">Container</a><ul>
+<li><a class="reference internal" href="#keeping-the-signing-key-out-of-the-container">Keeping the signing key out of the container</a></li>
+<li><a class="reference internal" href="#persistent-bans-and-revocations">Persistent bans and revocations</a></li>
+<li><a class="reference internal" href="#serving-a-different-build-or-answering-everyone">Serving a different build, or answering everyone</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#checkout">Checkout</a></li>
+</ul>
+</li>
+</ul>
+
+  </aside>
+</div><footer class="rs-footer" role="contentinfo">
+  <div class="rs-footer__inner">
+    <div class="rs-footer__meta">
+      &#169; Copyright 2026, Arsalan Anwari.
+    </div>
+
+    <div class="rs-footer__built">
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+      Theme
+      <a href="https://github.com/arsalan-anwari/2009scape-sphinx-theme">2009scape</a>.
+    </div>
+    <p class="rs-footer__note">Apache-2.0. Not affiliated with Jagex. 2009scape game data belongs to the 2009scape project.</p>
+  </div>
+</footer>
+<button class="rs-btn-stone rs-back-to-top" type="button" aria-label="Back to top">
+  ▲ Top
+</button>
+  </body>
+</html>

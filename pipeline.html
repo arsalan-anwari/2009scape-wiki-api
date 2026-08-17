@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The build pipeline | 2009scape wiki API</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=2a9e1395" />
+    <link rel="stylesheet" type="text/css" href="_static/css/fonts.css?v=c970c89a" />
+    <link rel="stylesheet" type="text/css" href="_static/css/2009scape.css?v=378b80f8" />
+    <link rel="stylesheet" type="text/css" href="_static/css/layout.css?v=cd81ca58" />
+    <link rel="stylesheet" type="text/css" href="_static/css/content.css?v=3145d598" />
+    <script src="_static/documentation_options.js?v=d727d969"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="_static/js/2009scape.js?v=37174350"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Extending it" href="extending.html" />
+    <link rel="prev" title="The knowledge model" href="data-model.html" />
+   
+  </head>
+<body class="rs-body"
+      data-rs-scanlines="true"
+      data-rs-pixelated-images="false"
+      data-rs-search-shortcut="true">
+<a class="rs-skip-link" href="#rs-main">Skip to content</a>
+<header class="rs-header">
+  <div class="rs-header__inner">
+    <div class="rs-header__left">
+      <button class="rs-toggle" type="button" data-rs-toggle="sidebar"
+              aria-controls="rs-sidebar" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M1 3h14v2H1zM1 7h14v2H1zM1 11h14v2H1z"/>
+        </svg>
+      </button>
+
+      <a class="rs-brand" href="index.html">
+        <span class="rs-brand__text">2009scape wiki API</span>
+      </a>
+      <span class="rs-brand__subtitle">game sources as one queryable artifact</span>
+    </div>
+
+    <div class="rs-header__right">
+      <nav class="rs-header__nav" aria-label="Site links">
+        <a href="install.html">Install</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="extending.html">Extending</a>
+        <a href="genindex.html">Index</a>
+        <a href="search.html">Search</a>
+      </nav>
+      <a class="rs-icon-link" href="https://github.com/arsalan-anwari/2009scape-wiki-api" rel="noopener noreferrer"
+         target="_blank" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.6 0 0 3.6 0 8c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-1-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.5 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.3.6.8.6 1.6v2.3c0 .2.1.5.6.4A8 8 0 0 0 8 0Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+<div class="rs-page">
+  <div class="rs-sidebar-backdrop"></div>
+  <aside class="rs-sidebar" id="rs-sidebar" role="navigation" aria-label="Main navigation">
+<div class="rs-sidebar__section rs-sidebar__brand">
+  <a class="rs-brand" href="index.html">
+    <span class="rs-brand__text">2009scape wiki API</span>
+  </a>
+  <p class="rs-brand__subtitle">game sources as one queryable artifact</p>
+</div>
+<search class="rs-search rs-sidebar__section" role="search">
+  <form action="search.html" method="get">
+    <label class="rs-visually-hidden" for="rs-search-input">Search</label>
+    <input id="rs-search-input" type="text" name="q" placeholder="Search docs"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <button class="rs-btn" type="submit">Go</button>
+  </form>
+</search><nav class="rs-sidebar__section" data-rs-globaltoc
+     data-rs-collapse="false"
+     aria-label="Documentation">
+  <p class="rs-sidebar__heading">Documentation</p>
+  <p class="caption" role="heading"><span class="caption-text">Using it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#surfaces">Surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#answer-sizes">Answer sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#the-guard">The guard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Keys and access</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="access.html#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#files">Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#before-relying-on-it">Before relying on it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#over-stdio-no-key">Over stdio, no key</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The surfaces</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="http-api.html">The HTTP contract</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#routes">Routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#paging">Paging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#pages">Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#absence">Absence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#errors">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#caching">Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">The MCP server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#tools">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#answers">Answers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#two-rules-the-server-states-up-front">Two rules the server states up front</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos.html">Demonstrations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#setting-one-up">Setting one up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#example-output">Example output</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#what-holds-them-apart">What holds them apart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#three-properties">Three properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#reading-the-code">Reading the code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">The knowledge model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#entities">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-attribute-registry">The attribute registry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#relationships">Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#variants-and-totals">Variants and totals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#prices">Prices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-manifest">The manifest</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The build pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#staging">1. Staging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#numbering">2. Numbering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adapters">3. Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#merge-and-write">4. Merge and write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Working on it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Extending it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-attribute">Adding an attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-relationship">Adding a relationship</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-entity-type">Adding an entity type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-source">Adding a source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#writing-an-overlay">Writing an overlay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-storage-backend">Adding a storage backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-http-route">Adding an HTTP route</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-mcp-tool">Adding an MCP tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#before-opening-a-pull-request">Before opening a pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#the-gate">The gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#where-tests-live">Where tests live</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#how-prose-is-checked">How prose is checked</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#making-a-change">Making a change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#releasing">Releasing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Where things live</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#this-project">This project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#where-the-data-comes-from">Where the data comes from</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#built-on">Built on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#licence">Licence</a></li>
+</ul>
+</li>
+</ul>
+
+</nav>
+  </aside>
+
+  <main class="rs-main" id="rs-main">
+    <article class="rs-content" role="main">
+<nav aria-label="Breadcrumbs">
+  <ol class="rs-breadcrumbs">
+    <li><a href="index.html">wiki API</a></li>
+    <li><span class="rs-breadcrumbs__current">The build pipeline</span></li>
+  </ol>
+</nav>
+      <section id="the-build-pipeline">
+<h1>The build pipeline<a class="headerlink" href="#the-build-pipeline" title="Link to this heading">¶</a></h1>
+<p>The build pipeline reads the game repositories, decodes the client cache, applies overlays,
+and writes the SQLite artifact that the server serves.</p>
+<section id="staging">
+<h2>1. Staging<a class="headerlink" href="#staging" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">poe</span> <span class="pre">stage-sources</span></code></p>
+<p>The game repositories are git submodules under <code class="docutils literal notranslate"><span class="pre">game_data/</span></code>, never written to. Staging
+copies out of them into <code class="docutils literal notranslate"><span class="pre">data/source</span></code>, the only directory the build reads. Everything
+needing a network, a checkout or a decoder happens here, so the build itself is pure.</p>
+<p>Four kinds of sources:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>Config files</p></td>
+<td><p>JSON and XML shipped beside the game server, copied
+unchanged: item, npc and shop configs, drop tables, and the
+shared tables many drop lists roll on.</p></td>
+</tr>
+<tr class="row-even"><td><p>Declared tables</p></td>
+<td><p>Facts the game states only in code. <code class="docutils literal notranslate"><span class="pre">pipeline/enums</span></code> reads
+a Kotlin or Java enum as a table with named columns, with its
+own lexer, so it reads the declaration rather than running
+anything. Also named id constants and quest requirements.</p></td>
+</tr>
+<tr class="row-odd"><td><p>The game cache</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pipeline/cache</span></code> decodes the client cache against the
+game’s own definition classes: items from index 19, npcs 18,
+scenery 16, landscape 5, world map labels 23. Map containers
+are decrypted with the game’s XTEA keys. The gazetteer comes
+from here.</p></td>
+</tr>
+<tr class="row-even"><td><p>Prices</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">poe</span> <span class="pre">fetch-ge</span></code>, weekly snapshots from the 2009scape
+CDN.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Staging records what it read and from which commit, so a later build reports drift.</p>
+</section>
+<section id="numbering">
+<h2>2. Numbering<a class="headerlink" href="#numbering" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">poe</span> <span class="pre">allocate-ids</span> <span class="pre">--write</span></code></p>
+<p>The sources name quests, slayer tasks, locations and rooms but never number them. Each
+gets a file under <code class="docutils literal notranslate"><span class="pre">identity/</span></code> mapping a stable natural key to a number, so links
+survive a change in source order. Reading is the default; new numbers need <code class="docutils literal notranslate"><span class="pre">--write</span></code>,
+so the change lands in a diff a reviewer sees.</p>
+</section>
+<section id="adapters">
+<h2>3. Adapters<a class="headerlink" href="#adapters" title="Link to this heading">¶</a></h2>
+<p>One adapter per source in <code class="docutils literal notranslate"><span class="pre">pipeline/sources</span></code>, turning staged records into entities and
+edges, run in dependency order.</p>
+<p>A record an adapter cannot read is counted, not dropped. <code class="docutils literal notranslate"><span class="pre">pipeline/tolerance.py</span></code>
+declares how much of each source may go unread and why; a build leaving more than that
+fails. The registry also names tables nothing reads yet, and tables nothing reads
+because the artifact already holds what they say.</p>
+</section>
+<section id="merge-and-write">
+<h2>4. Merge and write<a class="headerlink" href="#merge-and-write" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span> <span class="pre">poe</span> <span class="pre">build-artifact</span></code></p>
+<p>Adapter output and overlay documents merge into one in-memory snapshot, hashed, then
+written to SQLite with the SQL kept in files. The artifact holds entities, edges,
+aliases, prices, an FTS5 index and a manifest.</p>
+<section id="overlays">
+<h3>Overlays<a class="headerlink" href="#overlays" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">overlays/</span></code> holds hand-written JSON corrections, merged over the sources at build
+time: where a fact the game states nowhere gets stated, and a plainly wrong record gets
+fixed.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;overlay&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;precedence&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;game_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2009scape@2419bdb&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;item&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">14422</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sacred clay pouch (class 1)&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;tradeable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">},</span>
+<span class="w">               </span><span class="nt">&quot;expects&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;USDT Slot&quot;</span><span class="p">}}]}</span>
+</pre></div>
+</div>
+<p>Precedence, highest winning: <code class="docutils literal notranslate"><span class="pre">DECLARED</span></code> (0) from the game’s declarations, <code class="docutils literal notranslate"><span class="pre">DECODED</span></code>
+(1) from the cache, <code class="docutils literal notranslate"><span class="pre">PROPOSED</span></code> (5), <code class="docutils literal notranslate"><span class="pre">AUTHORED</span></code> (10) by hand. Two documents writing
+one fact at the same precedence fail the build rather than one silently winning.</p>
+<p>An entry is a <code class="docutils literal notranslate"><span class="pre">define</span></code> for an entity that did not exist, or a <code class="docutils literal notranslate"><span class="pre">patch</span></code> for one that
+did. <code class="docutils literal notranslate"><span class="pre">expects</span></code> states what the correction believes the source still says, so the build
+reports it once upstream is fixed. A correction cannot outlive its problem.</p>
+</section>
+<section id="the-report">
+<h3>The report<a class="headerlink" href="#the-report" title="Link to this heading">¶</a></h3>
+<p>A build reports entity and edge counts, overlays applied and expectations met, which
+sources drifted, which tables are unread, and how close each tolerance came to its
+ceiling.</p>
+</section>
+</section>
+<section id="commands">
+<h2>Commands<a class="headerlink" href="#commands" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>build-artifacts<span class="w">             </span><span class="c1"># the real artifact and the test fixture</span>
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>build-artifacts<span class="w"> </span>--offline<span class="w">   </span><span class="c1"># no checkout, no prices, no network</span>
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>build-artifacts<span class="w"> </span>--fixture-only
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>upload-data<span class="w">                 </span><span class="c1"># publish it to Hugging Face</span>
+uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>download-data<span class="w">               </span><span class="c1"># fetch the published one back</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+<div class="rs-page-meta">
+  <a href="https://github.com/arsalan-anwari/2009scape-wiki-api/blob/main/docs/pipeline.rst" rel="nofollow noopener" target="_blank">Edit this page</a>
+</div>
+<nav class="rs-page-nav" aria-label="Page navigation">
+  <a class="rs-page-nav__link rs-page-nav__link--prev" href="data-model.html" rel="prev">
+    <span class="rs-page-nav__label">« Previous</span>
+    <span class="rs-page-nav__title">The knowledge model</span>
+  </a>
+  <a class="rs-page-nav__link rs-page-nav__link--next" href="extending.html" rel="next">
+    <span class="rs-page-nav__label">Next »</span>
+    <span class="rs-page-nav__title">Extending it</span>
+  </a>
+</nav>
+    </article>
+  </main>
+  <aside class="rs-toc" aria-label="On this page">
+    <p class="rs-toc__title">On this page</p>
+    <ul>
+<li><a class="reference internal" href="#">The build pipeline</a><ul>
+<li><a class="reference internal" href="#staging">1. Staging</a></li>
+<li><a class="reference internal" href="#numbering">2. Numbering</a></li>
+<li><a class="reference internal" href="#adapters">3. Adapters</a></li>
+<li><a class="reference internal" href="#merge-and-write">4. Merge and write</a><ul>
+<li><a class="reference internal" href="#overlays">Overlays</a></li>
+<li><a class="reference internal" href="#the-report">The report</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#commands">Commands</a></li>
+</ul>
+</li>
+</ul>
+
+  </aside>
+</div><footer class="rs-footer" role="contentinfo">
+  <div class="rs-footer__inner">
+    <div class="rs-footer__meta">
+      &#169; Copyright 2026, Arsalan Anwari.
+    </div>
+
+    <div class="rs-footer__built">
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+      Theme
+      <a href="https://github.com/arsalan-anwari/2009scape-sphinx-theme">2009scape</a>.
+    </div>
+    <p class="rs-footer__note">Apache-2.0. Not affiliated with Jagex. 2009scape game data belongs to the 2009scape project.</p>
+  </div>
+</footer>
+<button class="rs-btn-stone rs-back-to-top" type="button" aria-label="Back to top">
+  ▲ Top
+</button>
+  </body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The knowledge model | 2009scape wiki API</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=2a9e1395" />
+    <link rel="stylesheet" type="text/css" href="_static/css/fonts.css?v=c970c89a" />
+    <link rel="stylesheet" type="text/css" href="_static/css/2009scape.css?v=378b80f8" />
+    <link rel="stylesheet" type="text/css" href="_static/css/layout.css?v=cd81ca58" />
+    <link rel="stylesheet" type="text/css" href="_static/css/content.css?v=3145d598" />
+    <script src="_static/documentation_options.js?v=d727d969"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="_static/js/2009scape.js?v=37174350"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The build pipeline" href="pipeline.html" />
+    <link rel="prev" title="Architecture" href="architecture.html" />
+   
+  </head>
+<body class="rs-body"
+      data-rs-scanlines="true"
+      data-rs-pixelated-images="false"
+      data-rs-search-shortcut="true">
+<a class="rs-skip-link" href="#rs-main">Skip to content</a>
+<header class="rs-header">
+  <div class="rs-header__inner">
+    <div class="rs-header__left">
+      <button class="rs-toggle" type="button" data-rs-toggle="sidebar"
+              aria-controls="rs-sidebar" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M1 3h14v2H1zM1 7h14v2H1zM1 11h14v2H1z"/>
+        </svg>
+      </button>
+
+      <a class="rs-brand" href="index.html">
+        <span class="rs-brand__text">2009scape wiki API</span>
+      </a>
+      <span class="rs-brand__subtitle">game sources as one queryable artifact</span>
+    </div>
+
+    <div class="rs-header__right">
+      <nav class="rs-header__nav" aria-label="Site links">
+        <a href="install.html">Install</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="extending.html">Extending</a>
+        <a href="genindex.html">Index</a>
+        <a href="search.html">Search</a>
+      </nav>
+      <a class="rs-icon-link" href="https://github.com/arsalan-anwari/2009scape-wiki-api" rel="noopener noreferrer"
+         target="_blank" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.6 0 0 3.6 0 8c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-1-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.5 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.3.6.8.6 1.6v2.3c0 .2.1.5.6.4A8 8 0 0 0 8 0Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+<div class="rs-page">
+  <div class="rs-sidebar-backdrop"></div>
+  <aside class="rs-sidebar" id="rs-sidebar" role="navigation" aria-label="Main navigation">
+<div class="rs-sidebar__section rs-sidebar__brand">
+  <a class="rs-brand" href="index.html">
+    <span class="rs-brand__text">2009scape wiki API</span>
+  </a>
+  <p class="rs-brand__subtitle">game sources as one queryable artifact</p>
+</div>
+<search class="rs-search rs-sidebar__section" role="search">
+  <form action="search.html" method="get">
+    <label class="rs-visually-hidden" for="rs-search-input">Search</label>
+    <input id="rs-search-input" type="text" name="q" placeholder="Search docs"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <button class="rs-btn" type="submit">Go</button>
+  </form>
+</search><nav class="rs-sidebar__section" data-rs-globaltoc
+     data-rs-collapse="false"
+     aria-label="Documentation">
+  <p class="rs-sidebar__heading">Documentation</p>
+  <p class="caption" role="heading"><span class="caption-text">Using it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#surfaces">Surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#answer-sizes">Answer sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#the-guard">The guard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Keys and access</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="access.html#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#files">Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#before-relying-on-it">Before relying on it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#over-stdio-no-key">Over stdio, no key</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The surfaces</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="http-api.html">The HTTP contract</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#routes">Routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#paging">Paging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#pages">Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#absence">Absence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#errors">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#caching">Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">The MCP server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#tools">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#answers">Answers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#two-rules-the-server-states-up-front">Two rules the server states up front</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos.html">Demonstrations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#setting-one-up">Setting one up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#example-output">Example output</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#what-holds-them-apart">What holds them apart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#three-properties">Three properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#reading-the-code">Reading the code</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The knowledge model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#entities">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-attribute-registry">The attribute registry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#relationships">Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variants-and-totals">Variants and totals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prices">Prices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-manifest">The manifest</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">The build pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#staging">1. Staging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#numbering">2. Numbering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#adapters">3. Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#merge-and-write">4. Merge and write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#commands">Commands</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Working on it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Extending it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-attribute">Adding an attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-relationship">Adding a relationship</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-entity-type">Adding an entity type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-source">Adding a source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#writing-an-overlay">Writing an overlay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-storage-backend">Adding a storage backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-http-route">Adding an HTTP route</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-mcp-tool">Adding an MCP tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#before-opening-a-pull-request">Before opening a pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#the-gate">The gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#where-tests-live">Where tests live</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#how-prose-is-checked">How prose is checked</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#making-a-change">Making a change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#releasing">Releasing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Where things live</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#this-project">This project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#where-the-data-comes-from">Where the data comes from</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#built-on">Built on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#licence">Licence</a></li>
+</ul>
+</li>
+</ul>
+
+</nav>
+  </aside>
+
+  <main class="rs-main" id="rs-main">
+    <article class="rs-content" role="main">
+<nav aria-label="Breadcrumbs">
+  <ol class="rs-breadcrumbs">
+    <li><a href="index.html">wiki API</a></li>
+    <li><span class="rs-breadcrumbs__current">The knowledge model</span></li>
+  </ol>
+</nav>
+      <section id="the-knowledge-model">
+<h1>The knowledge model<a class="headerlink" href="#the-knowledge-model" title="Link to this heading">¶</a></h1>
+<p>Everything served is an entity, a typed link between two entities, or a price series. No
+second shape, which is what lets one front end draw a page for a type it has never heard
+of. The model is <code class="docutils literal notranslate"><span class="pre">wiki_api.domain</span></code> and imports nothing but pydantic.</p>
+<section id="entities">
+<h2>Entities<a class="headerlink" href="#entities" title="Link to this heading">¶</a></h2>
+<p>Nine types: <code class="docutils literal notranslate"><span class="pre">item</span></code>, <code class="docutils literal notranslate"><span class="pre">npc</span></code>, <code class="docutils literal notranslate"><span class="pre">shop</span></code>, <code class="docutils literal notranslate"><span class="pre">quest</span></code>, <code class="docutils literal notranslate"><span class="pre">location</span></code>, <code class="docutils literal notranslate"><span class="pre">scenery</span></code>, <code class="docutils literal notranslate"><span class="pre">task</span></code>,
+<code class="docutils literal notranslate"><span class="pre">room</span></code>, <code class="docutils literal notranslate"><span class="pre">music</span></code>.</p>
+<p>Identified by type and an id unique within it as a slug <code class="docutils literal notranslate"><span class="pre">item:4587</span></code>.</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slug</span></code></p></td>
+<td><p>Readable, unique per type, derived so links do not rot. On a
+collision the lowest id keeps the bare slug.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">attributes</span></code></p></td>
+<td><p>A model decided by the entity type. An item cannot carry npc
+attributes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">provenance</span></code></p></td>
+<td><p>Source kind, game commit, optionally file and record. Kinds:
+<code class="docutils literal notranslate"><span class="pre">game_config</span></code>, <code class="docutils literal notranslate"><span class="pre">game_code</span></code>, <code class="docutils literal notranslate"><span class="pre">game_cache</span></code>,
+<code class="docutils literal notranslate"><span class="pre">grand_exchange</span></code>, <code class="docutils literal notranslate"><span class="pre">overlay</span></code>, <code class="docutils literal notranslate"><span class="pre">fixture</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">canonical_id</span></code>,</p></td>
+<td><p>Set together on a duplicate: noted, bound, placeholder or plain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">variant_kind</span></code></p></td>
+<td><p>A variant is never searchable and points at what it duplicates.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">visibility</span></code>,</p></td>
+<td><p>A hidden entity stays in the build, is not served, and says why:</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hidden_reason</span></code></p></td>
+<td><p>unnamed, suppressed, duplicate or placeholder.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">source_key</span></code></p></td>
+<td><p>For things the game names but never numbers, so an allocated id
+survives a rebuild.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="the-attribute-registry">
+<h2>The attribute registry<a class="headerlink" href="#the-attribute-registry" title="Link to this heading">¶</a></h2>
+<p>Every attribute field is annotated with what it means and how to show it. A field that
+forgets raises at import.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ge_buy_limit</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+    <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">AttributeMeta</span><span class="p">(</span><span class="s2">&quot;Buy limit&quot;</span><span class="p">,</span> <span class="n">AttributeGroup</span><span class="o">.</span><span class="n">TRADE</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">AttributeFormat</span><span class="o">.</span><span class="n">INT</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>The registry records <code class="docutils literal notranslate"><span class="pre">label</span></code>, <code class="docutils literal notranslate"><span class="pre">group</span></code>, <code class="docutils literal notranslate"><span class="pre">order</span></code>, <code class="docutils literal notranslate"><span class="pre">format</span></code> and <code class="docutils literal notranslate"><span class="pre">unit</span></code>, plus
+flags: <code class="docutils literal notranslate"><span class="pre">display</span></code>, <code class="docutils literal notranslate"><span class="pre">derived</span></code> (worked out rather than read), <code class="docutils literal notranslate"><span class="pre">prominent</span></code> (in the
+overview box), <code class="docutils literal notranslate"><span class="pre">technical</span></code> (visible, not for a model to repeat), <code class="docutils literal notranslate"><span class="pre">totalled</span></code>,
+<code class="docutils literal notranslate"><span class="pre">choices</span></code> (off the enum behind the field) and <code class="docutils literal notranslate"><span class="pre">fields</span></code> (the parts of a packed value,
+each addressable).</p>
+<p>Two things follow: a front end never hard-codes a field name, because <code class="docutils literal notranslate"><span class="pre">/v1/types</span></code>
+hands it the whole registry; and a value pointing at another entity comes back as a
+whole link rather than a bare id.</p>
+</section>
+<section id="relationships">
+<h2>Relationships<a class="headerlink" href="#relationships" title="Link to this heading">¶</a></h2>
+<p>Thirteen are declared, each with a label both ways round and the types it may join.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>relationship</p></th>
+<th class="head"><p>forward</p></th>
+<th class="head"><p>inverse</p></th>
+<th class="head"><p>from</p></th>
+<th class="head"><p>to</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">drops</span></code></p></td>
+<td><p>Drops</p></td>
+<td><p>Dropped by</p></td>
+<td><p>npc</p></td>
+<td><p>item</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sells</span></code></p></td>
+<td><p>Sells</p></td>
+<td><p>Sold in</p></td>
+<td><p>shop</p></td>
+<td><p>item</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">staffed_by</span></code></p></td>
+<td><p>Staffed by</p></td>
+<td><p>Runs shop</p></td>
+<td><p>shop</p></td>
+<td><p>npc</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rewards</span></code></p></td>
+<td><p>Rewards</p></td>
+<td><p>Reward from</p></td>
+<td><p>quest</p></td>
+<td><p>item</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">uses_ammunition</span></code></p></td>
+<td><p>Uses ammunition</p></td>
+<td><p>Used by</p></td>
+<td><p>item</p></td>
+<td><p>item</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">located_in</span></code></p></td>
+<td><p>Found in</p></td>
+<td><p>Found here</p></td>
+<td><p>npc, shop, item, quest, scenery, music</p></td>
+<td><p>location</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">part_of</span></code></p></td>
+<td><p>Part of</p></td>
+<td><p>Contains</p></td>
+<td><p>location</p></td>
+<td><p>location</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yields</span></code></p></td>
+<td><p>Yields</p></td>
+<td><p>Gathered from</p></td>
+<td><p>scenery, npc</p></td>
+<td><p>item</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">makes</span></code></p></td>
+<td><p>Makes</p></td>
+<td><p>Made from</p></td>
+<td><p>item</p></td>
+<td><p>item</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">requires</span></code></p></td>
+<td><p>Requires</p></td>
+<td><p>Needed for</p></td>
+<td><p>quest, task</p></td>
+<td><p>item, quest</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">assigns</span></code></p></td>
+<td><p>Assigns</p></td>
+<td><p>Assigned by</p></td>
+<td><p>npc</p></td>
+<td><p>task</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">satisfied_by</span></code></p></td>
+<td><p>Satisfied by</p></td>
+<td><p>Counts towards</p></td>
+<td><p>task</p></td>
+<td><p>npc</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">heard_during</span></code></p></td>
+<td><p>Heard during</p></td>
+<td><p>Music heard</p></td>
+<td><p>music</p></td>
+<td><p>quest</p></td>
+</tr>
+</tbody>
+</table>
+<p>Edges are validated against that table: a <code class="docutils literal notranslate"><span class="pre">drops</span></code> edge starting at an item is refused,
+as is one carrying the wrong attribute model.</p>
+<p>Some links are the whole fact; <code class="docutils literal notranslate"><span class="pre">staffed_by</span></code> records nothing beyond somebody running
+the shop. Others carry data. A drop keeps <code class="docutils literal notranslate"><span class="pre">weight</span></code> and <code class="docutils literal notranslate"><span class="pre">denominator</span></code> rather than a
+rate, so a reader is shown an exact <code class="docutils literal notranslate"><span class="pre">1/512</span></code>.</p>
+<p>Two edges can join the same pair and still be different facts. Rather than a counter, an
+edge is keyed by its own attributes: a placement by its tile, a drop by which table it
+rolls on, a requirement by its kind. Reordering a source cannot move an edge onto a
+different key.</p>
+</section>
+<section id="variants-and-totals">
+<h2>Variants and totals<a class="headerlink" href="#variants-and-totals" title="Link to this heading">¶</a></h2>
+<p>The game numbers a noted item separately from the item it notes. Two pages would split
+every answer, so a variant points at its canonical entity and stays out of search. Walks
+travel over an entity and all its variants at once, which is why a walk total can be
+trusted.</p>
+</section>
+<section id="prices">
+<h2>Prices<a class="headerlink" href="#prices" title="Link to this heading">¶</a></h2>
+<p>A weekly series per item over roughly two years, carrying a confidence judged by how the
+record itself moved: <code class="docutils literal notranslate"><span class="pre">traded</span></code> (genuine activity), <code class="docutils literal notranslate"><span class="pre">static</span></code> (never moved) or
+<code class="docutils literal notranslate"><span class="pre">untraded</span></code> (nothing usable).</p>
+</section>
+<section id="the-manifest">
+<h2>The manifest<a class="headerlink" href="#the-manifest" title="Link to this heading">¶</a></h2>
+<p>Every artifact says what it is. <code class="docutils literal notranslate"><span class="pre">data_version</span></code> names the build, and is what
+<code class="docutils literal notranslate"><span class="pre">X-Data-Version</span></code> reports and <code class="docutils literal notranslate"><span class="pre">?v=</span></code> pins to. <code class="docutils literal notranslate"><span class="pre">schema_version</span></code> is the layout; a
+surface refuses one it does not know. <code class="docutils literal notranslate"><span class="pre">content_hash</span></code> covers the whole snapshot, which
+is how determinism is tested. <code class="docutils literal notranslate"><span class="pre">built_at</span></code> and <code class="docutils literal notranslate"><span class="pre">game_version</span></code> say when it was written
+and from which commit.</p>
+</section>
+</section>
+
+<div class="rs-page-meta">
+  <a href="https://github.com/arsalan-anwari/2009scape-wiki-api/blob/main/docs/data-model.rst" rel="nofollow noopener" target="_blank">Edit this page</a>
+</div>
+<nav class="rs-page-nav" aria-label="Page navigation">
+  <a class="rs-page-nav__link rs-page-nav__link--prev" href="architecture.html" rel="prev">
+    <span class="rs-page-nav__label">« Previous</span>
+    <span class="rs-page-nav__title">Architecture</span>
+  </a>
+  <a class="rs-page-nav__link rs-page-nav__link--next" href="pipeline.html" rel="next">
+    <span class="rs-page-nav__label">Next »</span>
+    <span class="rs-page-nav__title">The build pipeline</span>
+  </a>
+</nav>
+    </article>
+  </main>
+  <aside class="rs-toc" aria-label="On this page">
+    <p class="rs-toc__title">On this page</p>
+    <ul>
+<li><a class="reference internal" href="#">The knowledge model</a><ul>
+<li><a class="reference internal" href="#entities">Entities</a></li>
+<li><a class="reference internal" href="#the-attribute-registry">The attribute registry</a></li>
+<li><a class="reference internal" href="#relationships">Relationships</a></li>
+<li><a class="reference internal" href="#variants-and-totals">Variants and totals</a></li>
+<li><a class="reference internal" href="#prices">Prices</a></li>
+<li><a class="reference internal" href="#the-manifest">The manifest</a></li>
+</ul>
+</li>
+</ul>
+
+  </aside>
+</div><footer class="rs-footer" role="contentinfo">
+  <div class="rs-footer__inner">
+    <div class="rs-footer__meta">
+      &#169; Copyright 2026, Arsalan Anwari.
+    </div>
+
+    <div class="rs-footer__built">
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+      Theme
+      <a href="https://github.com/arsalan-anwari/2009scape-sphinx-theme">2009scape</a>.
+    </div>
+    <p class="rs-footer__note">Apache-2.0. Not affiliated with Jagex. 2009scape game data belongs to the 2009scape project.</p>
+  </div>
+</footer>
+<button class="rs-btn-stone rs-back-to-top" type="button" aria-label="Back to top">
+  ▲ Top
+</button>
+  </body>
+</html>

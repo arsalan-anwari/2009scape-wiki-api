@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The MCP server | 2009scape wiki API</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=2a9e1395" />
+    <link rel="stylesheet" type="text/css" href="_static/css/fonts.css?v=c970c89a" />
+    <link rel="stylesheet" type="text/css" href="_static/css/2009scape.css?v=378b80f8" />
+    <link rel="stylesheet" type="text/css" href="_static/css/layout.css?v=cd81ca58" />
+    <link rel="stylesheet" type="text/css" href="_static/css/content.css?v=3145d598" />
+    <script src="_static/documentation_options.js?v=d727d969"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="_static/js/2009scape.js?v=37174350"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Demonstrations" href="demos.html" />
+    <link rel="prev" title="The HTTP contract" href="http-api.html" />
+   
+  </head>
+<body class="rs-body"
+      data-rs-scanlines="true"
+      data-rs-pixelated-images="false"
+      data-rs-search-shortcut="true">
+<a class="rs-skip-link" href="#rs-main">Skip to content</a>
+<header class="rs-header">
+  <div class="rs-header__inner">
+    <div class="rs-header__left">
+      <button class="rs-toggle" type="button" data-rs-toggle="sidebar"
+              aria-controls="rs-sidebar" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M1 3h14v2H1zM1 7h14v2H1zM1 11h14v2H1z"/>
+        </svg>
+      </button>
+
+      <a class="rs-brand" href="index.html">
+        <span class="rs-brand__text">2009scape wiki API</span>
+      </a>
+      <span class="rs-brand__subtitle">game sources as one queryable artifact</span>
+    </div>
+
+    <div class="rs-header__right">
+      <nav class="rs-header__nav" aria-label="Site links">
+        <a href="install.html">Install</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="extending.html">Extending</a>
+        <a href="genindex.html">Index</a>
+        <a href="search.html">Search</a>
+      </nav>
+      <a class="rs-icon-link" href="https://github.com/arsalan-anwari/2009scape-wiki-api" rel="noopener noreferrer"
+         target="_blank" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.6 0 0 3.6 0 8c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-1-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.5 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.3.6.8.6 1.6v2.3c0 .2.1.5.6.4A8 8 0 0 0 8 0Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+<div class="rs-page">
+  <div class="rs-sidebar-backdrop"></div>
+  <aside class="rs-sidebar" id="rs-sidebar" role="navigation" aria-label="Main navigation">
+<div class="rs-sidebar__section rs-sidebar__brand">
+  <a class="rs-brand" href="index.html">
+    <span class="rs-brand__text">2009scape wiki API</span>
+  </a>
+  <p class="rs-brand__subtitle">game sources as one queryable artifact</p>
+</div>
+<search class="rs-search rs-sidebar__section" role="search">
+  <form action="search.html" method="get">
+    <label class="rs-visually-hidden" for="rs-search-input">Search</label>
+    <input id="rs-search-input" type="text" name="q" placeholder="Search docs"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <button class="rs-btn" type="submit">Go</button>
+  </form>
+</search><nav class="rs-sidebar__section" data-rs-globaltoc
+     data-rs-collapse="false"
+     aria-label="Documentation">
+  <p class="rs-sidebar__heading">Documentation</p>
+  <p class="caption" role="heading"><span class="caption-text">Using it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#surfaces">Surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#answer-sizes">Answer sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#the-guard">The guard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Keys and access</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="access.html#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#files">Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#before-relying-on-it">Before relying on it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#over-stdio-no-key">Over stdio, no key</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The surfaces</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="http-api.html">The HTTP contract</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#routes">Routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#paging">Paging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#pages">Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#absence">Absence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#errors">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#caching">Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The MCP server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tools">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#answers">Answers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#two-rules-the-server-states-up-front">Two rules the server states up front</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos.html">Demonstrations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#setting-one-up">Setting one up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#example-output">Example output</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#what-holds-them-apart">What holds them apart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#three-properties">Three properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#reading-the-code">Reading the code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">The knowledge model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#entities">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-attribute-registry">The attribute registry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#relationships">Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#variants-and-totals">Variants and totals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#prices">Prices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-manifest">The manifest</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">The build pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#staging">1. Staging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#numbering">2. Numbering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#adapters">3. Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#merge-and-write">4. Merge and write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#commands">Commands</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Working on it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">Extending it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-attribute">Adding an attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-relationship">Adding a relationship</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-entity-type">Adding an entity type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-source">Adding a source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#writing-an-overlay">Writing an overlay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-a-storage-backend">Adding a storage backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-http-route">Adding an HTTP route</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#adding-an-mcp-tool">Adding an MCP tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#before-opening-a-pull-request">Before opening a pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#the-gate">The gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#where-tests-live">Where tests live</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#how-prose-is-checked">How prose is checked</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#making-a-change">Making a change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#releasing">Releasing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Where things live</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#this-project">This project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#where-the-data-comes-from">Where the data comes from</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#built-on">Built on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#licence">Licence</a></li>
+</ul>
+</li>
+</ul>
+
+</nav>
+  </aside>
+
+  <main class="rs-main" id="rs-main">
+    <article class="rs-content" role="main">
+<nav aria-label="Breadcrumbs">
+  <ol class="rs-breadcrumbs">
+    <li><a href="index.html">wiki API</a></li>
+    <li><span class="rs-breadcrumbs__current">The MCP server</span></li>
+  </ol>
+</nav>
+      <section id="the-mcp-server">
+<h1>The MCP server<a class="headerlink" href="#the-mcp-server" title="Link to this heading">¶</a></h1>
+<p>The same knowledge, asked the way a model asks. Tools take names, not numbers. Answers
+are far smaller than the HTTP ones, and one that cannot be given says what to do instead
+of failing. See <a class="reference internal" href="demos.html"><span class="doc">Demonstrations</span></a> for worked examples.</p>
+<section id="connecting">
+<h2>Connecting<a class="headerlink" href="#connecting" title="Link to this heading">¶</a></h2>
+<p>Over stdio, which is what a local client spawns, and which asks for no key:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;2009scape-wiki&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;stdio&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scape2009-wiki-mcp&quot;</span><span class="p">}}}</span>
+</pre></div>
+</div>
+<p>Over HTTP, behind the same token as the wiki contract:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>http<span class="w"> </span>2009scape-wiki<span class="w"> </span>http://127.0.0.1:8000/mcp/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--header<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="deployment.html"><span class="doc">Deployment</span></a> has the <code class="docutils literal notranslate"><span class="pre">command</span></code> and <code class="docutils literal notranslate"><span class="pre">args</span></code> for every other way of
+installing it, and both transports in full.</p>
+</section>
+<section id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Link to this heading">¶</a></h2>
+<p>Eight are written by hand:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>tool</p></th>
+<th class="head"><p>what it answers</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_thing</span></code></p></td>
+<td><p>One thing by name, and a count of everything it is joined to.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">search</span></code></p></td>
+<td><p>Find things by words from their name.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list_things</span></code></p></td>
+<td><p>Everything of one sort, a page at a time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list_sorts</span></code></p></td>
+<td><p>The sorts this build knows about, and how many of each.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">compare_by_number</span></code></p></td>
+<td><p>One sort by a number it records, above or below a threshold.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">how_the_price_moved</span></code></p></td>
+<td><p>Which way one thing’s worth has gone, and by how far.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">find_close_names</span></code></p></td>
+<td><p>Given a name that answered to nothing, the closest real names.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">about</span></code></p></td>
+<td><p>Which build is being answered from.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The rest are generated: one tool per relationship per direction, named from the
+registry’s own labels (<code class="docutils literal notranslate"><span class="pre">drops</span></code> and <code class="docutils literal notranslate"><span class="pre">dropped_by</span></code>, <code class="docutils literal notranslate"><span class="pre">sells</span></code> and <code class="docutils literal notranslate"><span class="pre">sold_in</span></code>). A
+relationship declared later becomes two new tools with nobody writing them; one with no
+edges in this build is not offered. 32 tools on a current build.</p>
+<p>Call <code class="docutils literal notranslate"><span class="pre">get_thing</span></code> first. Its counts name the tool that reads each one.</p>
+</section>
+<section id="answers">
+<h2>Answers<a class="headerlink" href="#answers" title="Link to this heading">¶</a></h2>
+<p>Every answer is wrapped in an outcome, so a model never reads an exception.</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">found</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">result</span></code> holds the answer.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">renamed</span></code></p></td>
+<td><p>That name is retired. The note gives the one to ask with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">withheld</span></code></p></td>
+<td><p>In this build, but not published.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
+<td><p>Nothing answers to that name. The note says how to settle it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ambiguous</span></code></p></td>
+<td><p>Several sorts answer to it; which was meant is for whoever asked.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Answers are paged, report the total, and declare a result-size ceiling, so a long drop
+table cannot swallow a context window.</p>
+</section>
+<section id="two-rules-the-server-states-up-front">
+<h2>Two rules the server states up front<a class="headerlink" href="#two-rules-the-server-states-up-front" title="Link to this heading">¶</a></h2>
+<p><strong>A ref is for calling with, not for saying.</strong> Every answer carries a <code class="docutils literal notranslate"><span class="pre">ref</span></code> such as
+<code class="docutils literal notranslate"><span class="pre">item:4587</span></code>, which is how a model names one exact thing back to a tool. A person
+reading the answer has never seen one, so refs, ids, coordinates and region numbers
+never belong in what the model says.</p>
+<p><strong>A misspelling is not the model’s to settle.</strong> <code class="docutils literal notranslate"><span class="pre">find_close_names</span></code> answers with names
+and identities alone: it exists to be shown to a person, not chosen from. Same for
+things sharing a name. If nothing in the answer tells two apart, they are the same thing
+to whoever asked.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;outcome&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;found&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;of&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dragon scimitar&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dropped by&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;neighbours&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;King Black Dragon&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;npc&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
+<span class="w">                            </span><span class="nt">&quot;facts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;Chance&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1/512&quot;</span><span class="p">}}]}}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+<div class="rs-page-meta">
+  <a href="https://github.com/arsalan-anwari/2009scape-wiki-api/blob/main/docs/mcp.rst" rel="nofollow noopener" target="_blank">Edit this page</a>
+</div>
+<nav class="rs-page-nav" aria-label="Page navigation">
+  <a class="rs-page-nav__link rs-page-nav__link--prev" href="http-api.html" rel="prev">
+    <span class="rs-page-nav__label">« Previous</span>
+    <span class="rs-page-nav__title">The HTTP contract</span>
+  </a>
+  <a class="rs-page-nav__link rs-page-nav__link--next" href="demos.html" rel="next">
+    <span class="rs-page-nav__label">Next »</span>
+    <span class="rs-page-nav__title">Demonstrations</span>
+  </a>
+</nav>
+    </article>
+  </main>
+  <aside class="rs-toc" aria-label="On this page">
+    <p class="rs-toc__title">On this page</p>
+    <ul>
+<li><a class="reference internal" href="#">The MCP server</a><ul>
+<li><a class="reference internal" href="#connecting">Connecting</a></li>
+<li><a class="reference internal" href="#tools">Tools</a></li>
+<li><a class="reference internal" href="#answers">Answers</a></li>
+<li><a class="reference internal" href="#two-rules-the-server-states-up-front">Two rules the server states up front</a></li>
+</ul>
+</li>
+</ul>
+
+  </aside>
+</div><footer class="rs-footer" role="contentinfo">
+  <div class="rs-footer__inner">
+    <div class="rs-footer__meta">
+      &#169; Copyright 2026, Arsalan Anwari.
+    </div>
+
+    <div class="rs-footer__built">
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+      Theme
+      <a href="https://github.com/arsalan-anwari/2009scape-sphinx-theme">2009scape</a>.
+    </div>
+    <p class="rs-footer__note">Apache-2.0. Not affiliated with Jagex. 2009scape game data belongs to the 2009scape project.</p>
+  </div>
+</footer>
+<button class="rs-btn-stone rs-back-to-top" type="button" aria-label="Back to top">
+  ▲ Top
+</button>
+  </body>
+</html>

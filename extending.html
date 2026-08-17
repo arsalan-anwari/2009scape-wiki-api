@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Extending it | 2009scape wiki API</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=2a9e1395" />
+    <link rel="stylesheet" type="text/css" href="_static/css/fonts.css?v=c970c89a" />
+    <link rel="stylesheet" type="text/css" href="_static/css/2009scape.css?v=378b80f8" />
+    <link rel="stylesheet" type="text/css" href="_static/css/layout.css?v=cd81ca58" />
+    <link rel="stylesheet" type="text/css" href="_static/css/content.css?v=3145d598" />
+    <script src="_static/documentation_options.js?v=d727d969"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="_static/js/2009scape.js?v=37174350"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Contributing" href="contributing.html" />
+    <link rel="prev" title="The build pipeline" href="pipeline.html" />
+   
+  </head>
+<body class="rs-body"
+      data-rs-scanlines="true"
+      data-rs-pixelated-images="false"
+      data-rs-search-shortcut="true">
+<a class="rs-skip-link" href="#rs-main">Skip to content</a>
+<header class="rs-header">
+  <div class="rs-header__inner">
+    <div class="rs-header__left">
+      <button class="rs-toggle" type="button" data-rs-toggle="sidebar"
+              aria-controls="rs-sidebar" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M1 3h14v2H1zM1 7h14v2H1zM1 11h14v2H1z"/>
+        </svg>
+      </button>
+
+      <a class="rs-brand" href="index.html">
+        <span class="rs-brand__text">2009scape wiki API</span>
+      </a>
+      <span class="rs-brand__subtitle">game sources as one queryable artifact</span>
+    </div>
+
+    <div class="rs-header__right">
+      <nav class="rs-header__nav" aria-label="Site links">
+        <a href="install.html">Install</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="#">Extending</a>
+        <a href="genindex.html">Index</a>
+        <a href="search.html">Search</a>
+      </nav>
+      <a class="rs-icon-link" href="https://github.com/arsalan-anwari/2009scape-wiki-api" rel="noopener noreferrer"
+         target="_blank" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.6 0 0 3.6 0 8c0 3.5 2.3 6.5 5.5 7.6.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-1-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.5 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.3.6.8.6 1.6v2.3c0 .2.1.5.6.4A8 8 0 0 0 8 0Z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+<div class="rs-page">
+  <div class="rs-sidebar-backdrop"></div>
+  <aside class="rs-sidebar" id="rs-sidebar" role="navigation" aria-label="Main navigation">
+<div class="rs-sidebar__section rs-sidebar__brand">
+  <a class="rs-brand" href="index.html">
+    <span class="rs-brand__text">2009scape wiki API</span>
+  </a>
+  <p class="rs-brand__subtitle">game sources as one queryable artifact</p>
+</div>
+<search class="rs-search rs-sidebar__section" role="search">
+  <form action="search.html" method="get">
+    <label class="rs-visually-hidden" for="rs-search-input">Search</label>
+    <input id="rs-search-input" type="text" name="q" placeholder="Search docs"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    <button class="rs-btn" type="submit">Go</button>
+  </form>
+</search><nav class="rs-sidebar__section" data-rs-globaltoc
+     data-rs-collapse="false"
+     aria-label="Documentation">
+  <p class="rs-sidebar__heading">Documentation</p>
+  <p class="caption" role="heading"><span class="caption-text">Using it</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#uv-tool">uv tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#system-package">System package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#container">Container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#checkout">Checkout</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#surfaces">Surfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#answer-sizes">Answer sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#the-guard">The guard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="access.html">Keys and access</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="access.html#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#files">Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#before-relying-on-it">Before relying on it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="access.html#over-stdio-no-key">Over stdio, no key</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The surfaces</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="http-api.html">The HTTP contract</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#routes">Routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#paging">Paging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#pages">Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#absence">Absence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#errors">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="http-api.html#caching">Caching</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">The MCP server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#tools">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#answers">Answers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#two-rules-the-server-states-up-front">Two rules the server states up front</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="demos.html">Demonstrations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#setting-one-up">Setting one up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="demos.html#example-output">Example output</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">How it works</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#what-holds-them-apart">What holds them apart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#three-properties">Three properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#reading-the-code">Reading the code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">The knowledge model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#entities">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-attribute-registry">The attribute registry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#relationships">Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#variants-and-totals">Variants and totals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#prices">Prices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#the-manifest">The manifest</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">The build pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#staging">1. Staging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#numbering">2. Numbering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#adapters">3. Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#merge-and-write">4. Merge and write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#commands">Commands</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Working on it</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Extending it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#adding-an-attribute">Adding an attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-a-relationship">Adding a relationship</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-an-entity-type">Adding an entity type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-a-source">Adding a source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-an-overlay">Writing an overlay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-a-storage-backend">Adding a storage backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-an-http-route">Adding an HTTP route</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-an-mcp-tool">Adding an MCP tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#before-opening-a-pull-request">Before opening a pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#the-gate">The gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#where-tests-live">Where tests live</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#how-prose-is-checked">How prose is checked</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#making-a-change">Making a change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#releasing">Releasing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Where things live</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#this-project">This project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#where-the-data-comes-from">Where the data comes from</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#built-on">Built on</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources.html#licence">Licence</a></li>
+</ul>
+</li>
+</ul>
+
+</nav>
+  </aside>
+
+  <main class="rs-main" id="rs-main">
+    <article class="rs-content" role="main">
+<nav aria-label="Breadcrumbs">
+  <ol class="rs-breadcrumbs">
+    <li><a href="index.html">wiki API</a></li>
+    <li><span class="rs-breadcrumbs__current">Extending it</span></li>
+  </ol>
+</nav>
+      <section id="extending-it">
+<h1>Extending it<a class="headerlink" href="#extending-it" title="Link to this heading">¶</a></h1>
+<p>Most extensions are a declaration, not a feature. The registries in <code class="docutils literal notranslate"><span class="pre">wiki_api.domain</span></code>
+are read by the pipeline, the repository, the core and both surfaces, so declaring
+something once makes it turn up everywhere.</p>
+<section id="adding-an-attribute">
+<h2>Adding an attribute<a class="headerlink" href="#adding-an-attribute" title="Link to this heading">¶</a></h2>
+<p>Add a field to that type’s model in <code class="docutils literal notranslate"><span class="pre">domain/attributes.py</span></code>, annotated with an
+<code class="docutils literal notranslate"><span class="pre">AttributeMeta</span></code>. A field without one raises at import.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">poison_damage</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+    <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">AttributeMeta</span><span class="p">(</span><span class="s2">&quot;Poison damage&quot;</span><span class="p">,</span> <span class="n">AttributeGroup</span><span class="o">.</span><span class="n">COMBAT</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="n">AttributeFormat</span><span class="o">.</span><span class="n">INT</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>A value worked out rather than read is a computed field with <code class="docutils literal notranslate"><span class="pre">derived=True</span></code>. That is
+how a drop chance is served without any source stating one.</p>
+</section>
+<section id="adding-a-relationship">
+<h2>Adding a relationship<a class="headerlink" href="#adding-a-relationship" title="Link to this heading">¶</a></h2>
+<p>Three places in <code class="docutils literal notranslate"><span class="pre">domain/relationships.py</span></code>:</p>
+<ol class="arabic simple">
+<li><p>A member on <code class="docutils literal notranslate"><span class="pre">RelationshipType</span></code>.</p></li>
+<li><p>An edge attribute model and an entry in <code class="docutils literal notranslate"><span class="pre">EDGE_ATTRIBUTE_MODELS</span></code>. Empty if the link
+is the whole fact.</p></li>
+<li><p>An entry in <code class="docutils literal notranslate"><span class="pre">RELATIONSHIP_SPECS</span></code>: a label each way round, the types each end may
+hold, a group and an order.</p></li>
+</ol>
+<p>If two edges can join the same pair and still be different facts, teach
+<code class="docutils literal notranslate"><span class="pre">discriminator_of</span></code> what tells them apart, keyed on the edge’s attributes rather than a
+counter.</p>
+</section>
+<section id="adding-an-entity-type">
+<h2>Adding an entity type<a class="headerlink" href="#adding-an-entity-type" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>A member on <code class="docutils literal notranslate"><span class="pre">EntityType</span></code> in <code class="docutils literal notranslate"><span class="pre">domain/identity.py</span></code>.</p></li>
+<li><p>An attribute model, and an entry in <code class="docutils literal notranslate"><span class="pre">ATTRIBUTE_MODELS</span></code>.</p></li>
+<li><p>An entry in <code class="docutils literal notranslate"><span class="pre">ENTITY_TYPE_META</span></code> in <code class="docutils literal notranslate"><span class="pre">domain/presentation.py</span></code>.</p></li>
+<li><p>Whichever relationships may join it, in <code class="docutils literal notranslate"><span class="pre">RELATIONSHIP_SPECS</span></code>.</p></li>
+<li><p>An adapter producing entities of that type.</p></li>
+<li><p>If the source names them but never numbers them, an entry in <code class="docutils literal notranslate"><span class="pre">NUMBERED</span></code> in
+<code class="docutils literal notranslate"><span class="pre">pipeline/allocate.py</span></code> and an identity file.</p></li>
+</ol>
+</section>
+<section id="adding-a-source">
+<h2>Adding a source<a class="headerlink" href="#adding-a-source" title="Link to this heading">¶</a></h2>
+<p>An adapter lives in <code class="docutils literal notranslate"><span class="pre">pipeline/sources/</span></code>, reads only from <code class="docutils literal notranslate"><span class="pre">StagedSources</span></code>, and
+returns a <code class="docutils literal notranslate"><span class="pre">SourceOutcome</span></code>: what it produced, plus what it could not read and why.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">read_things</span><span class="p">(</span><span class="n">staged</span><span class="p">:</span> <span class="n">StagedSources</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SourceOutcome</span><span class="p">:</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>Register it in <code class="docutils literal notranslate"><span class="pre">pipeline/sources/registry.py</span></code> in dependency order and add any declared
+table it reads to <code class="docutils literal notranslate"><span class="pre">READ_TABLES</span></code>, or the build keeps reporting that table as unread. If
+it cannot read every record, declare a tolerance in <code class="docutils literal notranslate"><span class="pre">pipeline/tolerance.py</span></code>. A source
+not staged yet goes in <code class="docutils literal notranslate"><span class="pre">pipeline/staging/declared.py</span></code> first; staging reads only what
+is declared there.</p>
+</section>
+<section id="writing-an-overlay">
+<h2>Writing an overlay<a class="headerlink" href="#writing-an-overlay" title="Link to this heading">¶</a></h2>
+<p>For when the game states something nowhere, or states it wrong. Document shape is in
+<a class="reference internal" href="pipeline.html"><span class="doc">The build pipeline</span></a>. Three things to get right:</p>
+<ul class="simple">
+<li><p><strong>Precedence.</strong> Hand-written is <code class="docutils literal notranslate"><span class="pre">10</span></code>. Two documents writing one fact at the same
+precedence fail the build.</p></li>
+<li><p><strong>Define or patch.</strong> A <code class="docutils literal notranslate"><span class="pre">define</span></code> states an entity that did not exist; a <code class="docutils literal notranslate"><span class="pre">patch</span></code>
+corrects one that did, and only a patch may decline to state a name.</p></li>
+<li><p><strong>expects.</strong> What the correction believes the source still says, so the build reports
+it once that changes.</p></li>
+</ul>
+</section>
+<section id="adding-a-storage-backend">
+<h2>Adding a storage backend<a class="headerlink" href="#adding-a-storage-backend" title="Link to this heading">¶</a></h2>
+<p>Implement <code class="docutils literal notranslate"><span class="pre">KnowledgeRepository</span></code> from <code class="docutils literal notranslate"><span class="pre">repository/protocol.py</span></code> and add it to
+<code class="docutils literal notranslate"><span class="pre">repository/factory.py</span></code>, the only module allowed to name a concrete implementation.
+The protocol is read only, every listing is paged, and a walk takes a set of keys so
+variants travel with the canonical entity.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tests/integration/test_repository_conformance.py</span></code> runs one suite against every
+backend, so a new one is covered already. SQLite SQL lives in
+<code class="docutils literal notranslate"><span class="pre">repository/sqlite/sql/</span></code> as files;
+add one and add it to <code class="docutils literal notranslate"><span class="pre">queries.py</span></code> so it can be loaded by name.</p>
+</section>
+<section id="adding-an-http-route">
+<h2>Adding an HTTP route<a class="headerlink" href="#adding-an-http-route" title="Link to this heading">¶</a></h2>
+<p>In <code class="docutils literal notranslate"><span class="pre">surfaces/http/routes/</span></code>:
+- <code class="docutils literal notranslate"><span class="pre">entities</span></code> for something you can name
+- <code class="docutils literal notranslate"><span class="pre">discovery</span></code> for finding something you cannot
+- <code class="docutils literal notranslate"><span class="pre">meta</span></code> for facts about the process.</p>
+<p>A route reads the reference, asks the core one question, and hands a non-answer
+to <code class="docutils literal notranslate"><span class="pre">absence.delivered</span></code>. Query logic belongs in <code class="docutils literal notranslate"><span class="pre">core</span></code>, never here.</p>
+<p>Build paths with <code class="docutils literal notranslate"><span class="pre">surfaces/http/addressing.py</span></code> so a redirect points at the resource
+asked for. A new route needs a summary and a response description: the OpenAPI document
+is covered by a contract test.</p>
+</section>
+<section id="adding-an-mcp-tool">
+<h2>Adding an MCP tool<a class="headerlink" href="#adding-an-mcp-tool" title="Link to this heading">¶</a></h2>
+<p>Most should not be written. If the question is “follow this link”, declare the
+relationship and the tool generates itself.</p>
+<p>Write one only for what no link can answer. Name it in <code class="docutils literal notranslate"><span class="pre">WRITTEN_TOOLS</span></code> in
+<code class="docutils literal notranslate"><span class="pre">surfaces/mcp/naming.py</span></code>, and describe when to reach for it rather than what it
+returns. Keep answers small; <code class="docutils literal notranslate"><span class="pre">surfaces/mcp/projection.py</span></code> exists to shrink what the
+core hands back.</p>
+</section>
+<section id="before-opening-a-pull-request">
+<h2>Before opening a pull request<a class="headerlink" href="#before-opening-a-pull-request" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>poe<span class="w"> </span>check
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="contributing.html"><span class="doc">Contributing</span></a> for what that expects.</p>
+</section>
+</section>
+
+<div class="rs-page-meta">
+  <a href="https://github.com/arsalan-anwari/2009scape-wiki-api/blob/main/docs/extending.rst" rel="nofollow noopener" target="_blank">Edit this page</a>
+</div>
+<nav class="rs-page-nav" aria-label="Page navigation">
+  <a class="rs-page-nav__link rs-page-nav__link--prev" href="pipeline.html" rel="prev">
+    <span class="rs-page-nav__label">« Previous</span>
+    <span class="rs-page-nav__title">The build pipeline</span>
+  </a>
+  <a class="rs-page-nav__link rs-page-nav__link--next" href="contributing.html" rel="next">
+    <span class="rs-page-nav__label">Next »</span>
+    <span class="rs-page-nav__title">Contributing</span>
+  </a>
+</nav>
+    </article>
+  </main>
+  <aside class="rs-toc" aria-label="On this page">
+    <p class="rs-toc__title">On this page</p>
+    <ul>
+<li><a class="reference internal" href="#">Extending it</a><ul>
+<li><a class="reference internal" href="#adding-an-attribute">Adding an attribute</a></li>
+<li><a class="reference internal" href="#adding-a-relationship">Adding a relationship</a></li>
+<li><a class="reference internal" href="#adding-an-entity-type">Adding an entity type</a></li>
+<li><a class="reference internal" href="#adding-a-source">Adding a source</a></li>
+<li><a class="reference internal" href="#writing-an-overlay">Writing an overlay</a></li>
+<li><a class="reference internal" href="#adding-a-storage-backend">Adding a storage backend</a></li>
+<li><a class="reference internal" href="#adding-an-http-route">Adding an HTTP route</a></li>
+<li><a class="reference internal" href="#adding-an-mcp-tool">Adding an MCP tool</a></li>
+<li><a class="reference internal" href="#before-opening-a-pull-request">Before opening a pull request</a></li>
+</ul>
+</li>
+</ul>
+
+  </aside>
+</div><footer class="rs-footer" role="contentinfo">
+  <div class="rs-footer__inner">
+    <div class="rs-footer__meta">
+      &#169; Copyright 2026, Arsalan Anwari.
+    </div>
+
+    <div class="rs-footer__built">
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+      Theme
+      <a href="https://github.com/arsalan-anwari/2009scape-sphinx-theme">2009scape</a>.
+    </div>
+    <p class="rs-footer__note">Apache-2.0. Not affiliated with Jagex. 2009scape game data belongs to the 2009scape project.</p>
+  </div>
+</footer>
+<button class="rs-btn-stone rs-back-to-top" type="button" aria-label="Back to top">
+  ▲ Top
+</button>
+  </body>
+</html>

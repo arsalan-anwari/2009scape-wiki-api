@@ -1,0 +1,11 @@
+The RuneScape fonts in this directory come from the RuneStar/fonts project:
+
+    https://github.com/RuneStar/fonts
+
+They are released under CC0-1.0 (public domain dedication):
+
+    https://creativecommons.org/publicdomain/zero/1.0/
+
+They are bundled with the 2009scape Sphinx theme so documentation builds do not
+depend on a font CDN. The theme itself is MIT licensed; see the LICENSE file at
+the root of the repository.
