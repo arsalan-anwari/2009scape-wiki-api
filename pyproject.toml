@@ -1,6 +1,6 @@
 [project]
 name = "scape2009-wiki-api"
-version = "1.1.0"
+version = "1.1.1"
 description = "Derived-data pipeline turning 2009scape game sources into a queryable knowledge base, exposed over HTTP-JSON and MCP."
 readme = "README.md"
 requires-python = ">=3.12"

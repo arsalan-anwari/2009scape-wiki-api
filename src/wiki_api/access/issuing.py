@@ -67,16 +67,14 @@ class Issuer:
 
 
 def create_issuer(directory: Path) -> Issuer:
-    """Make the one key this administrator issues from.
-
-    Raises `IssuerExists` rather than overwriting one, which would refuse every token
-    already issued from it.
-    """
+    """Make the one key this administrator issues from."""
     key_path = issuer_key_path(directory)
     if key_path.exists():
         raise IssuerExists(f"there is already an issuer key in {directory}")
+    ours = not directory.is_dir()
     directory.mkdir(parents=True, exist_ok=True)
-    _restrict(directory, DIRECTORY_MODE)
+    if ours:
+        _restrict(directory, DIRECTORY_MODE)
     private_key = Ed25519PrivateKey.generate()
     key_path.write_bytes(
         private_key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
@@ -103,10 +101,7 @@ def load_issuer(directory: Path) -> Issuer:
 
 
 def issue(issuer: Issuer, label: str) -> tuple[str, str]:
-    """Mint one token for one client, returning it with the key id that withdraws it.
-
-    Writes nothing down; `write_token` keeps the copy.
-    """
+    """Mint one token for one client, returning it with the key id that withdraws it."""
     said = label.strip()
     if not said:
         raise AccessMisconfigured("a token needs a label saying who it is for")
@@ -118,11 +113,7 @@ def issue(issuer: Issuer, label: str) -> tuple[str, str]:
 
 
 def write_token(directory: Path, label: str, token: str, kid: str) -> Path:
-    """Keep this token as OAuth 2.0 bearer json, where its holder can read it.
-
-    Filed under `label`, so issuing for the same label again replaces the copy rather
-    than leaving two with no way to tell which is live.
-    """
+    """Keep this token as OAuth 2.0 bearer json, where its holder can read it."""
     path = token_path(directory, label)
     tokens_dir(directory).mkdir(parents=True, exist_ok=True)
     _restrict(tokens_dir(directory), DIRECTORY_MODE)
@@ -182,6 +173,29 @@ def test_an_existing_issuer_is_never_stood_on(tmp_path: Path) -> None:
     create_issuer(tmp_path / "keys")
     with pytest.raises(IssuerExists):
         create_issuer(tmp_path / "keys")
+
+
+def test_a_directory_this_made_is_closed_to_its_owner(tmp_path: Path) -> None:
+    import stat
+
+    issuer = create_issuer(tmp_path / "keys")
+    assert stat.S_IMODE(issuer.directory.stat().st_mode) == DIRECTORY_MODE
+
+
+def test_a_directory_that_was_already_here_is_left_as_its_owner_made_it(
+    tmp_path: Path,
+) -> None:
+    """A system package ships its config directory readable by the account the service
+    runs as. Making a key in it must not shut that account out.
+    """
+    import stat
+
+    shipped = tmp_path / "etc"
+    shipped.mkdir(mode=0o755)
+    issuer = create_issuer(shipped)
+    assert stat.S_IMODE(shipped.stat().st_mode) == 0o755
+    kept = issuer_key_path(issuer.directory)
+    assert stat.S_IMODE(kept.stat().st_mode) == PRIVATE_MODE
 
 
 def test_a_key_made_here_is_the_key_read_back(tmp_path: Path) -> None:

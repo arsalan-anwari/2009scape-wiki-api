@@ -15,7 +15,7 @@ copyright = "2026, Arsalan Anwari"
 try:
     release = installed_version("scape2009-wiki-api")
 except PackageNotFoundError:
-    release = "1.1.0"
+    release = "1.1.1"
 version = release
 
 extensions: list[str] = []

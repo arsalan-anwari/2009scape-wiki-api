@@ -56,7 +56,7 @@ says what it left out.
    :caption: Using it
 
    install
-   getting-started
+   deployment
    configuration
    access
 

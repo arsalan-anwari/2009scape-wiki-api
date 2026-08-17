@@ -117,7 +117,7 @@ class Settings(BaseSettings):
     mcp_transport: Literal["stdio", "http"] = "stdio"
     mcp_host: str = "127.0.0.1"
     mcp_port: int = Field(default=8009, ge=1, le=65535)
-    surfaces: Literal["http", "mcp", "both"] = "http"
+    surfaces: Literal["http", "mcp", "both"] = "both"
     http_host: str = "127.0.0.1"
     http_port: int = Field(default=8000, ge=1, le=65535)
     auth_mode: Literal["off", "required"] = "required"
@@ -560,13 +560,16 @@ def test_no_proxy_is_believed_about_who_a_caller_is_by_default(
     assert Settings().trusted_proxies == ()
 
 
-def test_which_surfaces_are_served_is_chosen_rather_than_assumed(
+def test_everything_this_serves_is_served_unless_one_surface_is_asked_for(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Both surfaces, out of the box, however this was installed. Wanting only one of
+    them is the unusual case, and the one that has to be said out loud.
+    """
     monkeypatch.delenv("WIKI_API_SURFACES", raising=False)
-    assert Settings().surfaces == "http"
-    monkeypatch.setenv("WIKI_API_SURFACES", "both")
     assert Settings().surfaces == "both"
+    monkeypatch.setenv("WIKI_API_SURFACES", "http")
+    assert Settings().surfaces == "http"
 
 
 def test_a_surface_nobody_serves_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -604,7 +607,7 @@ def test_no_deployment_file_is_no_reason_to_fail(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setenv(DEPLOYMENT_FILE_VARIABLE, str(tmp_path / "absent.json"))
-    assert Settings().surfaces == "http"
+    assert Settings().surfaces == "both"
 
 
 def test_where_the_deployment_file_lives_is_never_hardcoded(

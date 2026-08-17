@@ -2,7 +2,6 @@
 
 [![PyPI](https://img.shields.io/pypi/v/scape2009-wiki-api?logo=pypi&logoColor=white)](https://pypi.org/project/scape2009-wiki-api/)
 [![Downloads](https://img.shields.io/pypi/dm/scape2009-wiki-api?logo=pypi&logoColor=white&label=downloads)](https://pypistats.org/packages/scape2009-wiki-api)
-[![Python](https://img.shields.io/pypi/pyversions/scape2009-wiki-api?logo=python&logoColor=white)](https://pypi.org/project/scape2009-wiki-api/)
 [![Docker](https://img.shields.io/docker/v/arsalananwari/2009scape-wiki-api?logo=docker&logoColor=white&label=docker)](https://hub.docker.com/r/arsalananwari/2009scape-wiki-api)
 [![Image size](https://img.shields.io/docker/image-size/arsalananwari/2009scape-wiki-api/latest?logo=docker&logoColor=white&label=image)](https://hub.docker.com/r/arsalananwari/2009scape-wiki-api)
 [![CI](https://github.com/arsalan-anwari/2009scape-wiki-api/actions/workflows/ci.yml/badge.svg)](https://github.com/arsalan-anwari/2009scape-wiki-api/actions/workflows/ci.yml)
@@ -44,28 +43,12 @@ never in this repository.
 
 ## Installing
 
-```bash
-uv tool install scape2009-wiki-api                        # a Python environment
-docker run -p 8000:8000 arsalananwari/2009scape-wiki-api  # a container
-```
-
 Debian, Fedora and Arch packages are on the
 [releases page](https://github.com/arsalan-anwari/2009scape-wiki-api/releases). Each way
 in is complete on its own: dataset, settings file, keys and the commands to manage them.
-See [install](https://arsalan-anwari.github.io/2009scape-wiki-api/install.html).
 
-## Getting started
-
-```bash
-scape2009-wiki-data pull              # the published dataset, once
-scape2009-wiki-keys init              # the key this deployment answers, once
-scape2009-wiki-keys issue --label me  # one token, saved under tokens/me.json
-scape2009-wiki-serve                  # HTTP on :8000, contract at /docs
-
-TOKEN=$(jq -r .access_token ~/.config/scape2009-wiki-api/tokens/me.json)
-curl -H "authorization: Bearer $TOKEN" \
-  http://localhost:8000/v1/entities/item/dragon-scimitar
-```
+See [install](https://arsalan-anwari.github.io/2009scape-wiki-api/install.html). For 
+install guide per method
 
 ## Documentation
 
@@ -74,7 +57,7 @@ The full documentation is at
 
 | read | for |
 | --- | --- |
-| [install](https://arsalan-anwari.github.io/2009scape-wiki-api/install.html), [getting started](https://arsalan-anwari.github.io/2009scape-wiki-api/getting-started.html) | packages, containers, first questions |
+| [install](https://arsalan-anwari.github.io/2009scape-wiki-api/install.html), [deployment](https://arsalan-anwari.github.io/2009scape-wiki-api/deployment.html) | packages, containers, first questions |
 | [configuration](https://arsalan-anwari.github.io/2009scape-wiki-api/configuration.html), [access](https://arsalan-anwari.github.io/2009scape-wiki-api/access.html) | settings, `deploy.json`, keys, tokens, bans |
 | [http-api](https://arsalan-anwari.github.io/2009scape-wiki-api/http-api.html), [mcp](https://arsalan-anwari.github.io/2009scape-wiki-api/mcp.html), [demos](https://arsalan-anwari.github.io/2009scape-wiki-api/demos.html) | the two surfaces, and worked examples |
 | [architecture](https://arsalan-anwari.github.io/2009scape-wiki-api/architecture.html), [data model](https://arsalan-anwari.github.io/2009scape-wiki-api/data-model.html), [pipeline](https://arsalan-anwari.github.io/2009scape-wiki-api/pipeline.html) | layers, entities, how a build is made |

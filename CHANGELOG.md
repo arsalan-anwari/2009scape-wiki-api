@@ -8,6 +8,22 @@ The top heading carrying a version number is the version being released.
 `scripts/release.sh` reads it from here and writes it into every file that names one, so
 this file is the only place a version is decided.
 
+## [1.1.1] - 2026-08-17
+
+Better defaults and using docker volumes instead of binds for stability with SELinux.
+
+### Changed
+
+- **`WIKI_API_SURFACES` defaults to `both`** now instead of relying on user env flags.
+- **Using docker volumes** instead of manually binding directories as SELinux does 
+not play nice with them on some systems. 
+- **Removed install guide** from main `README.md` and centralized multiple install
+and setup guides per method in the docs.
+- **Removed duplicated and repeated information** in docs to make changes to install
+and setup easier to document in the future. 
+
+[1.1.1]: https://github.com/arsalan-anwari/2009scape-wiki-api/releases/tag/v1.2.0
+
 ## [1.1.0] - 2026-08-16
 
 Every way of installing this is now complete on its own.

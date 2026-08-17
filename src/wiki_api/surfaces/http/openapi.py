@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from starlette.routing import BaseRoute
 
 TITLE: Final = "2009scape Wiki API"
-VERSION: Final = "1.1.0"
+VERSION: Final = "1.1.1"
 KNOWN_VALUES: Final = "x-known-values"
 SECURITY_SCHEME: Final = "issued_key"
 UNGUARDED_PATHS: Final = frozenset({"/health"})

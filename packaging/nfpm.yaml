@@ -1,7 +1,7 @@
 # What a .deb, an .rpm and an Arch package hold. One description, three packagers.
 
 name: scape2009-wiki-api
-version: "1.1.0"
+version: "1.1.1"
 release: "1"
 arch: amd64
 platform: linux

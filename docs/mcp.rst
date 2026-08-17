@@ -22,7 +22,7 @@ Over HTTP, behind the same token as the wiki contract:
    claude mcp add --transport http 2009scape-wiki http://127.0.0.1:8000/mcp/ \
      --header "authorization: Bearer $TOKEN"
 
-:doc:`getting-started` has the ``command`` and ``args`` for every other way of
+:doc:`deployment` has the ``command`` and ``args`` for every other way of
 installing it, and both transports in full.
 
 Tools

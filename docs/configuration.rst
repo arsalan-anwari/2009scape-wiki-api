@@ -15,7 +15,7 @@ installed as           ``deploy.json``                             ``data_dir``
 =====================  ==========================================  ==========================================
 PyPI                   ``~/.config/scape2009-wiki-api/``           ``~/.local/share/scape2009-wiki-api``
 a container            ``/config/`` (mount it)                     ``/data`` (in the image)
-a system package       ``/etc/scape2009-wiki-api/`` (shipped)      ``/usr/share/scape2009-wiki-api``
+a system package       ``/etc/scape2009-wiki-api/``                ``/usr/share/scape2009-wiki-api``
 a checkout             ``~/.config/scape2009-wiki-api/``           ``data/``
 =====================  ==========================================  ==========================================
 
@@ -28,7 +28,7 @@ setting                    default                                      what it 
 ``data_dir``               ``~/.local/share/scape2009-wiki-api``        Where the artifact and staged sources live.
 ``artifact_filename``      ``knowledge.sqlite3``                        The file a surface opens.
 ``staged_dirname``         ``source``                                   The staged sources, under ``data_dir``.
-``hf_repo_id``             ``arsalan-anwari/2009scape-wiki-api-data``    Which published dataset ``data pull`` fetches.
+``hf_repo_id``             ``arsalan-anwari/2009scape-wiki-api-data``   Which published dataset ``data pull`` fetches.
 ``hf_revision``            ``main``                                     Which build of it. A commit pins an older one.
 ``game_data_dir``          ``game_data``                                The game repositories, build time only.
 ``overlay_dir``            ``overlays``                                 Hand corrections, build time only.
@@ -41,7 +41,7 @@ Surfaces
 =========================  =================  =============================================
 setting                    default            what it does
 =========================  =================  =============================================
-``surfaces``               ``http``           One of ``http``, ``mcp``, ``both``.
+``surfaces``               ``both``           One of ``http``, ``mcp``, ``both``.
 ``http_host``              ``127.0.0.1``      Set to ``0.0.0.0`` inside a container.
 ``http_port``              ``8000``
 ``mcp_transport``          ``stdio``          ``http`` when no client spawns the process.
@@ -49,9 +49,6 @@ setting                    default            what it does
 ``mcp_port``               ``8009``           Read only when the transport is ``http``.
 ``cors_origins``           none               Origins the browser contract answers.
 =========================  =================  =============================================
-
-``both`` mounts the tools inside the HTTP application at ``/mcp``: one port, one health
-check, one guard, one worker. The ``mcp`` command sets ``surfaces`` itself.
 
 The tools over stdio install no guard, and are the only case that starts without a key.
 See :doc:`access`.

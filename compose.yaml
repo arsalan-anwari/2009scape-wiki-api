@@ -5,15 +5,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Everything here overrides the same line in /config/deploy.json.
-      WIKI_API_SURFACES: both
-      # Answering only key holders is the default and needs nothing set here: the
-      # key is read from /config/issuer.pub, which is what `poe keys init` writes.
       WIKI_API_CORS_ORIGINS: '["https://wiki.example.test"]'
       # WIKI_API_AUTH_MODE: "off"   # answer everyone instead, key or no key
     volumes:
       - ./run/data:/data:ro,z
-      # The public half of your issuer key, and the addresses the guard is refusing,
-      # which the image writes as a user of its own rather than as you.
       - ./run/config:/config:z
     restart: unless-stopped

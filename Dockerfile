@@ -12,7 +12,6 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /app
 
-# The lockfile alone first, so a change to the source does not reinstall the world.
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
