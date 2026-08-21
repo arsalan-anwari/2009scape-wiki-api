@@ -1,7 +1,9 @@
 # 2009scape-wiki-api
 
 [![PyPI](https://img.shields.io/pypi/v/scape2009-wiki-api?logo=pypi&logoColor=white)](https://pypi.org/project/scape2009-wiki-api/)
-[![Downloads](https://img.shields.io/pypi/dm/scape2009-wiki-api?logo=pypi&logoColor=white&label=downloads)](https://pypistats.org/packages/scape2009-wiki-api)
+[![PyPi Downloads](https://img.shields.io/pypi/dm/scape2009-wiki-api?logo=pypi&logoColor=white&label=downloads)](https://pypistats.org/packages/scape2009-wiki-api)
+![Docker Pulls](https://img.shields.io/docker/pulls/arsalananwari/2009scape-wiki-api)
+![GitHub all releases](https://img.shields.io/github/downloads/arsalan-anwari/2009scape-wiki-api/total)
 [![Docker](https://img.shields.io/docker/v/arsalananwari/2009scape-wiki-api?logo=docker&logoColor=white&label=docker)](https://hub.docker.com/r/arsalananwari/2009scape-wiki-api)
 [![Image size](https://img.shields.io/docker/image-size/arsalananwari/2009scape-wiki-api/latest?logo=docker&logoColor=white&label=image)](https://hub.docker.com/r/arsalananwari/2009scape-wiki-api)
 [![CI](https://github.com/arsalan-anwari/2009scape-wiki-api/actions/workflows/ci.yml/badge.svg)](https://github.com/arsalan-anwari/2009scape-wiki-api/actions/workflows/ci.yml)
