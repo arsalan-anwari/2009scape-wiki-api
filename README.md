@@ -4,6 +4,7 @@
 [![PyPi Downloads](https://img.shields.io/pypi/dm/scape2009-wiki-api?logo=pypi&logoColor=white&label=downloads)](https://pypistats.org/packages/scape2009-wiki-api)
 ![Docker Pulls](https://img.shields.io/docker/pulls/arsalananwari/2009scape-wiki-api)
 ![GitHub all releases](https://img.shields.io/github/downloads/arsalan-anwari/2009scape-wiki-api/total)
+![HF Downloads](https://img.shields.io/badge/dynamic/json?url=https://huggingface.co/api/datasets/arsalan-anwari/2009scape-wiki-api-data&query=downloads&label=downloads&color=blue&logo=huggingface)
 [![Docker](https://img.shields.io/docker/v/arsalananwari/2009scape-wiki-api?logo=docker&logoColor=white&label=docker)](https://hub.docker.com/r/arsalananwari/2009scape-wiki-api)
 [![Image size](https://img.shields.io/docker/image-size/arsalananwari/2009scape-wiki-api/latest?logo=docker&logoColor=white&label=image)](https://hub.docker.com/r/arsalananwari/2009scape-wiki-api)
 [![CI](https://github.com/arsalan-anwari/2009scape-wiki-api/actions/workflows/ci.yml/badge.svg)](https://github.com/arsalan-anwari/2009scape-wiki-api/actions/workflows/ci.yml)
